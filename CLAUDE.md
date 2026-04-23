@@ -1,4 +1,4 @@
-# [project-name] — instrukcje dla Claude
+# sailing-architects — instrukcje dla Claude
 
 > **Na początku każdej sesji przeczytaj `AGENTS.md`** — zawiera stack projektu, decyzje architektoniczne i konwencje. Bez tego możesz naruszyć ustalone wzorce.
 

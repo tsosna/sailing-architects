@@ -1,6 +1,6 @@
-# SvelteKit Starter
+# sailing-architects
 
-Opinionated SvelteKit template with Convex, Wuchale i18n, Stripe, and Tailwind CSS v4.
+SvelteKit + Convex + Wuchale + Stripe + Tailwind CSS v4.
 
 ## Stack
 

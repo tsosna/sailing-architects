@@ -1,6 +1,6 @@
-# AI Handoff — [project-name]
+# AI Handoff — sailing-architects
 
-> Ostatnia aktualizacja: [data]
+> Ostatnia aktualizacja: 2026-04-23
 
 ---
 

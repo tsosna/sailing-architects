@@ -1,4 +1,4 @@
-# AGENTS.md — [project-name]
+# AGENTS.md — sailing-architects
 
 ## Package Manager & Commands
 
