@@ -24,6 +24,8 @@ vite.config.ts.timestamp-*
 
 # Convex generated
 .convex/
+convex/_generated/
+src/convex/_generated/
 
 # Claude Code — local machine settings (contain absolute paths)
 .claude/settings.json

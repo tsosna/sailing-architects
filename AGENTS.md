@@ -24,10 +24,86 @@
 |---|---|
 | Framework | SvelteKit 2 + Svelte 5 (runes) |
 | Backend / DB | Convex (`convex` + `convex-svelte`) |
+| Auth | Clerk (`@clerk/clerk-js` + `svelte-clerk`) |
 | Styling | Tailwind CSS v4 (CSS-first) |
 | i18n | Wuchale (`wuchale` + `@wuchale/svelte`) |
 | Payments | Stripe (`stripe` server + `@stripe/stripe-js` client) |
 | Deploy | Vercel (`@sveltejs/adapter-vercel`) |
+
+---
+
+## Design — Sailing Architects Visual Identity
+
+Pełna specyfikacja: `docs/design/design_handoff_sailing_architects/README.md`
+Interaktywny prototyp: `docs/design/design_handoff_sailing_architects/Sailing Architects.html`
+
+### Paleta kolorów
+| Token | Hex | Użycie |
+|---|---|---|
+| `--color-navy` | `#0d1b2e` | Główne tło, hero, footer |
+| `--color-navy-mid` | `#0f1f35` | Sekcje naprzemienne (trasa, cennik) |
+| `--color-navy-light` | `#162840` | Sekcje jasniejsze |
+| `--color-navy-deep` | `#07111e` | Footer bottom bar |
+| `--color-brass` | `#c4923a` | Akcent — CTA, highlights, aktywne stany |
+| `--color-brass-light` | `#d4aa5a` | Hover brass |
+| `--color-warm-white` | `#f5f0e8` | Tekst główny |
+| `--color-cream` | `#ede5d8` | Tekst drugorzędny |
+| `--color-muted` | `rgba(245,240,232,0.45)` | Tekst wyciszony |
+
+### Typografia
+- **Nagłówki:** Playfair Display (serif) — weights 400/600, italic variant
+- **UI/body:** DM Sans (sans-serif) — weights 300/400/500/600/700
+- H1: `clamp(40px, 6vw, 76px)`, lineHeight 1.05
+- Google Fonts import jest w `src/app.css`
+
+### Spacing / Layout
+- `max-width: 1100px` (centred)
+- Section padding: `96px 40px`
+- Nav height: `64px` fixed
+- **border-radius: 0px wszędzie** (sharp, architectural)
+- Separator trick: `gap: 1px` na `rgba(196,146,58,0.1)` bg + child bg = optyczny border
+
+### Tonal layering (bez linii działowych)
+- Sekcja główna: `#0d1b2e` (hero, jacht, kajuty, FAQ, footer)
+- Sekcja naprzemiennia: `#0f1f35` (trasa, cennik)
+
+### Stany interaktywne koja (BoatPlan SVG)
+```
+available: fill rgba(245,240,232,0.12), stroke #c4923a 0.8px
+hovered:   fill rgba(196,146,58,0.22), stroke #c4923a
+selected:  fill rgba(196,146,58,0.85), stroke #c4923a 1.5px
+taken:     fill rgba(13,27,46,0.55),   stroke #3a4a5c + przekreślenie
+```
+
+---
+
+## Auth — Clerk
+
+- Pakiet: `svelte-clerk` (SvelteKit adapter) + `@clerk/clerk-js`
+- `PUBLIC_CLERK_PUBLISHABLE_KEY` — `$env/static/public`
+- `CLERK_SECRET_KEY` — `$env/static/private`
+- `ClerkProvider` w root `+layout.svelte`
+- Guard na `/dashboard`: `+layout.server.ts` sprawdza `auth().userId`
+- Guard na `/book/crew` i dalej: wymaga zalogowania
+- Clerk user ID (`userId`) jest kluczem w tabelach Convex: `bookings`, `crewProfiles`
+- **NIE implementuj własnej auth** — Clerk obsługuje sesje, tokeny, GDPR
+
+---
+
+## Routing (SvelteKit + Wuchale)
+
+```
+src/routes/
+├── [[lang]]/                     ← Wuchale i18n wrapper (PL/EN)
+│   ├── +layout.svelte            ← ClerkProvider + setupConvex + Nav + Footer
+│   ├── +page.svelte              ← Landing page
+│   ├── book/
+│   │   ├── +page.svelte          ← Booking flow (5 kroków, wymaga Clerk)
+│   │   └── +layout.server.ts     ← guard: redirect jeśli !userId
+│   └── dashboard/
+│       ├── +page.svelte          ← Panel użytkownika
+│       └── +layout.server.ts     ← guard: redirect jeśli !userId
+```
 
 ---
 

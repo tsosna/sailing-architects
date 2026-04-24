@@ -1,27 +1,44 @@
 @import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
 @theme {
-	/* Brand colors */
-	--color-primary: oklch(0.45 0.15 250);
-	--color-primary-container: oklch(0.65 0.12 250);
-	--color-on-primary: oklch(1 0 0);
+	/* Navy palette */
+	--color-navy:        #0d1b2e;
+	--color-navy-mid:    #0f1f35;
+	--color-navy-light:  #162840;
+	--color-navy-deep:   #07111e;
 
-	/* Surface hierarchy (tonal layering — no borders between sections) */
-	--color-surface: oklch(0.98 0 0);
-	--color-surface-low: oklch(0.95 0 0);
-	--color-surface-lowest: oklch(1 0 0);
+	/* Brass accent */
+	--color-brass:       #c4923a;
+	--color-brass-light: #d4aa5a;
+	--color-brass-dim:   rgba(196, 146, 58, 0.25);
+	--color-brass-sep:   rgba(196, 146, 58, 0.1);
 
 	/* Text */
-	--color-on-background: oklch(0.15 0 0);
-	--color-on-surface: oklch(0.2 0 0);
-	--color-on-surface-muted: oklch(0.45 0 0);
+	--color-warm-white:  #f5f0e8;
+	--color-cream:       #ede5d8;
+	--color-muted:       rgba(245, 240, 232, 0.45);
 
-	/* Status */
-	--color-error: oklch(0.55 0.22 25);
-	--color-success: oklch(0.5 0.18 145);
+	/* Semantic aliases */
+	--color-primary:         #c4923a;
+	--color-surface:         #0d1b2e;
+	--color-surface-low:     #0f1f35;
+	--color-surface-high:    #162840;
+	--color-on-background:   #f5f0e8;
+	--color-on-surface:      #f5f0e8;
+	--color-on-surface-muted: rgba(245, 240, 232, 0.45);
+
+	/* Typography */
+	--font-serif: 'Playfair Display', Georgia, serif;
+	--font-sans:  'DM Sans', system-ui, sans-serif;
 }
 
 :root {
-	background-color: var(--color-surface);
-	color: var(--color-on-background);
+	font-family: var(--font-sans);
+	background-color: var(--color-navy);
+	color: var(--color-warm-white);
+}
+
+h1, h2, h3, h4 {
+	font-family: var(--font-serif);
 }
