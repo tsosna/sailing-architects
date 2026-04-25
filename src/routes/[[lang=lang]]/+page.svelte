@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { resolve } from '$app/paths'
+	import { CabinsSection } from '$components/cabins-section'
+	import { FaqSection } from '$components/faq-section'
+	import { PricingSection } from '$components/pricing-section'
 	import { RouteSection } from '$components/route-section'
+	import { SiteFooter } from '$components/site-footer'
 	import { VesselSection } from '$components/vessel-section'
 
 	const stats = [
@@ -62,6 +66,10 @@
 
 <VesselSection />
 <RouteSection />
+<CabinsSection />
+<PricingSection />
+<FaqSection />
+<SiteFooter />
 
 <style>
 	.hero {

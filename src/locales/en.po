@@ -40,6 +40,7 @@ msgid "Zobacz trasę"
 msgstr ""
 
 #: src/lib/components/site-nav/site-nav.svelte
+#: src/lib/components/vessel-section/vessel-section.svelte
 msgid "Jacht"
 msgstr ""
 
@@ -47,22 +48,30 @@ msgstr ""
 msgid "Trasa"
 msgstr ""
 
+#: src/lib/components/boat-plan/boat-plan.svelte
 #: src/lib/components/site-nav/site-nav.svelte
+#: src/lib/components/vessel-section/vessel-section.svelte
 msgid "Kajuty"
 msgstr ""
 
+#: src/lib/components/pricing-section/pricing-section.svelte
 #: src/lib/components/site-nav/site-nav.svelte
 msgid "Cennik"
 msgstr ""
 
+#: src/lib/components/boat-plan/boat-plan.svelte
+#: src/lib/components/route-section/route-section.svelte
+#: src/lib/components/site-footer/site-footer.svelte
 #: src/lib/components/site-nav/site-nav.svelte
 msgid "DM Sans, sans-serif"
 msgstr ""
 
+#: src/lib/components/site-footer/site-footer.svelte
 #: src/lib/components/site-nav/site-nav.svelte
 msgid "SA"
 msgstr ""
 
+#: src/lib/components/site-footer/site-footer.svelte
 #: src/lib/components/site-nav/site-nav.svelte
 msgid "Sailing Architects"
 msgstr ""
@@ -73,4 +82,424 @@ msgstr ""
 
 #: src/lib/components/site-nav/site-nav.svelte
 msgid "Rezerwuj"
+msgstr ""
+
+#: src/lib/components/cabins-section/cabins-section.svelte
+msgid "Plan kajutowy"
+msgstr ""
+
+#: src/lib/components/cabins-section/cabins-section.svelte
+msgid "Wybierz swoją koję"
+msgstr ""
+
+#: src/lib/components/cabins-section/cabins-section.svelte
+msgid "Kliknij koję na planie lub użyj listy. Szary oznacza zajęte, mosiądz — dostępne, złoty — wybrane."
+msgstr ""
+
+#: src/lib/components/cabins-section/cabins-section.svelte
+msgid "Wybierz etap rejsu"
+msgstr ""
+
+#. 0: seg.price.toLocaleString('pl-PL')
+#. 0: priceFormatted
+#: src/lib/components/cabins-section/cabins-section.svelte
+#: src/lib/components/route-section/route-section.svelte
+msgid "{0} zł"
+msgstr ""
+
+#: src/lib/components/cabins-section/cabins-section.svelte
+msgid "Wybrano"
+msgstr ""
+
+#. 0: selectedBerth; 1: cabin.label; 2: segment.name
+#: src/lib/components/cabins-section/cabins-section.svelte
+msgid "Koja {0} · {1} · {2}"
+msgstr ""
+
+#: src/lib/components/cabins-section/cabins-section.svelte
+msgid "Rezerwuj →"
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+#: src/lib/components/route-section/route-section.svelte
+msgid "Enter"
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "Dostępna koja"
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "Wybrana koja"
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "Zajęta koja"
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+#: src/lib/components/boat-plan/boat-plan.svelte
+#: src/lib/components/boat-plan/boat-plan.svelte
+#: src/lib/components/boat-plan/boat-plan.svelte
+#: src/lib/components/boat-plan/boat-plan.svelte
+#: src/lib/components/boat-plan/boat-plan.svelte
+#: src/lib/components/boat-plan/boat-plan.svelte
+#: src/lib/components/boat-plan/boat-plan.svelte
+#: src/lib/components/boat-plan/boat-plan.svelte
+#: src/lib/components/boat-plan/boat-plan.svelte
+#: src/lib/components/boat-plan/boat-plan.svelte
+#: src/lib/components/boat-plan/boat-plan.svelte
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "DM Sans"
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "DZIÓB"
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "A"
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "SALON"
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "NAV"
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "D"
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "E"
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "B"
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "C"
+msgstr ""
+
+#. 0: berth.id; 1: state === 'taken' ? 'zajęta' \\: state === 'selected' ? 'wybrana' \\: 'dostępna'
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "Koja {0} — {1}"
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "ZEJŚCIE"
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "N"
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "≈ 8m"
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "JEANNEAU SO 519"
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "rzut poziomy / plan kojowy"
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "Legenda"
+msgstr ""
+
+#. 0: b
+#. 0: selectedBerth
+#: src/lib/components/boat-plan/boat-plan.svelte
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "Koja {0}"
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "Wybrana"
+msgstr ""
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Czy muszę mieć patent żeglarski?"
+msgstr ""
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Nie. Nie wymagamy patentu. Doświadczenie mile widziane, ale przyjmujemy osoby bez doświadczenia — pod warunkiem chęci do nauki i pracy w załodze."
+msgstr ""
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Ile osób jest na jachcie?"
+msgstr ""
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Maksymalnie 10 uczestników + skipper. Każdy ma własną koje w jednej z 5 kajut. Wszystkie kajuty są dwuosobowe."
+msgstr ""
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Jak wygląda życie na pokładzie?"
+msgstr ""
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Wachty nawigacyjne, wspólne gotowanie, zwiedzanie portów. Atmosfera jest luźna, ale wszyscy aktywnie uczestniczą w rejsie."
+msgstr ""
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Co wziąć na rejs?"
+msgstr ""
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Prześlemy pełną listę po rezerwacji. Podstawy: odzież sportowa, kurtka przeciwdeszczowa, obuwie z białą podeszwą, dokumenty tożsamości."
+msgstr ""
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Jaka jest polityka anulacji?"
+msgstr ""
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Do 60 dni przed rejsem — pełny zwrot. 30–60 dni — 50% zwrotu. Poniżej 30 dni — brak zwrotu (można wskazać zastępstwo)."
+msgstr ""
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Jak skontaktować się z organizatorem?"
+msgstr ""
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Michał: +48 601 671 182 · sailingarchitects@gmail.com. Odpowiadamy w ciągu 24h."
+msgstr ""
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "FAQ"
+msgstr ""
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Pytania i odpowiedzi"
+msgstr ""
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Koja na jachcie"
+msgstr ""
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Skipper + doświadczona załoga"
+msgstr ""
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Wachty nawigacyjne"
+msgstr ""
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Wspólne gotowanie na pokładzie"
+msgstr ""
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Sprzęt bezpieczeństwa"
+msgstr ""
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Dojazd do mariny"
+msgstr ""
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Opłaty portowe i paliwo (~150–200 EUR/os)"
+msgstr ""
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Ubezpieczenie turystyczne (~250 zł/os)"
+msgstr ""
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Napoje i wycieczki lądowe"
+msgstr ""
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Wybierz swój etap"
+msgstr ""
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Ostatnie miejsca"
+msgstr ""
+
+#. 0: String(i + 1).padStart(2, '0')
+#. 0: port.label
+#. 0: stage.num
+#: src/lib/components/pricing-section/pricing-section.svelte
+#: src/lib/components/route-section/route-section.svelte
+#: src/lib/components/route-section/route-section.svelte
+msgid "Etap {0}"
+msgstr ""
+
+#. 0: seg.dates; 1: seg.days
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "{0} · {1} dni"
+msgstr ""
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "zł"
+msgstr ""
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "za osobę · 1 koja"
+msgstr ""
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Zarezerwuj"
+msgstr ""
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Cena zawiera"
+msgstr ""
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Cena nie zawiera"
+msgstr ""
+
+#: src/lib/components/route-section/route-section.svelte
+#: src/lib/components/route-section/route-section.svelte
+msgid "Palma de Mallorca"
+msgstr ""
+
+#: src/lib/components/route-section/route-section.svelte
+#: src/lib/components/route-section/route-section.svelte
+#: src/lib/components/route-section/route-section.svelte
+msgid "Gibraltar"
+msgstr ""
+
+#: src/lib/components/route-section/route-section.svelte
+msgid "Start wyprawy. Żegluga wzdłuż wschodniego wybrzeża Hiszpanii, przez Cieśninę Gibraltarską — jedną z najważniejszych morskich bram świata."
+msgstr ""
+
+#: src/lib/components/route-section/route-section.svelte
+#: src/lib/components/route-section/route-section.svelte
+#: src/lib/components/route-section/route-section.svelte
+msgid "Madera"
+msgstr ""
+
+#: src/lib/components/route-section/route-section.svelte
+msgid "Kurs na południe-zachód. Pierwsze etapy oceaniczne. Madera — zielona perła Atlantyku, wulkaniczne klify, tarasowe winnice, historyczne Funchal."
+msgstr ""
+
+#: src/lib/components/route-section/route-section.svelte
+#: src/lib/components/route-section/route-section.svelte
+#: src/lib/components/route-section/route-section.svelte
+msgid "Teneryfa"
+msgstr ""
+
+#: src/lib/components/route-section/route-section.svelte
+msgid "Wyspy Kanaryjskie. Teneryfa oferuje majestatyczny wulkan Teide, turkusowe plaże i doskonałą kuchnię — idealny odpoczynek przed ostatnim etapem."
+msgstr ""
+
+#: src/lib/components/route-section/route-section.svelte
+#: src/lib/components/route-section/route-section.svelte
+msgid "Cabo Verde"
+msgstr ""
+
+#: src/lib/components/route-section/route-section.svelte
+msgid "Finał — prawdziwy ocean. Pasaty, wieloryby i delfiny. Cabo Verde to esencja egzotyki: afrykańskie rytmy, oceaniczna przestrzeń, wulkaniczne krajobrazy."
+msgstr ""
+
+#: src/lib/components/route-section/route-section.svelte
+msgid "Trasa rejsu"
+msgstr ""
+
+#: src/lib/components/route-section/route-section.svelte
+msgid "Cztery etapy przez Atlantyk"
+msgstr ""
+
+#: src/lib/components/route-section/route-section.svelte
+msgid "mapa poglądowa"
+msgstr ""
+
+#: src/lib/components/route-section/route-section.svelte
+msgid "OCEAN ATLANTYCKI"
+msgstr ""
+
+#: src/lib/components/route-section/route-section.svelte
+msgid "Wybierz etap"
+msgstr ""
+
+#: src/lib/components/route-section/route-section.svelte
+msgid "Termin"
+msgstr ""
+
+#: src/lib/components/route-section/route-section.svelte
+msgid "Dni"
+msgstr ""
+
+#: src/lib/components/route-section/route-section.svelte
+msgid "Cena"
+msgstr ""
+
+#: src/lib/components/site-footer/site-footer.svelte
+msgid "Boutique sailing trips. Łączymy pasję żeglowania z odkrywaniem świata."
+msgstr ""
+
+#: src/lib/components/site-footer/site-footer.svelte
+msgid "sailingarchitects@gmail.com"
+msgstr ""
+
+#: src/lib/components/site-footer/site-footer.svelte
+msgid "Zarezerwuj koję →"
+msgstr ""
+
+#: src/lib/components/site-footer/site-footer.svelte
+msgid "© 2026 Sailing Architects."
+msgstr ""
+
+#: src/lib/components/site-footer/site-footer.svelte
+msgid "SvelteKit + Convex + Stripe + Clerk"
+msgstr ""
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Model"
+msgstr ""
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Jeanneau Sun Odyssey 519"
+msgstr ""
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Rok produkcji"
+msgstr ""
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Długość"
+msgstr ""
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Szerokość"
+msgstr ""
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Silnik"
+msgstr ""
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Volvo Penta 55 KM"
+msgstr ""
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Żagiel główny"
+msgstr ""
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Lazy bag + furling"
+msgstr ""
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Elektronika"
+msgstr ""
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Ploter, AIS, VHF, automat"
+msgstr ""
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Nowoczesny, wygodny jacht oceaniczny zaprojektowany z myślą o długich rejsach. Pięć niezależnych kajut dwuosobowych zapewnia prywatność i komfort na każdym etapie podróży."
 msgstr ""
