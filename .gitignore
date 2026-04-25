@@ -27,6 +27,9 @@ vite.config.ts.timestamp-*
 convex/_generated/
 src/convex/_generated/
 
+# Wuchale compiled output
+src/locales/.wuchale/
+
 # Claude Code — local machine settings (contain absolute paths)
 .claude/settings.json
 .claude/settings.local.json
