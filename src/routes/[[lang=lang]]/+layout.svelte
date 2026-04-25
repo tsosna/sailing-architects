@@ -1,7 +1,9 @@
 <script lang="ts">
-    import type { LayoutProps } from './$types';
+	import { SiteNav } from '$components/site-nav'
+	import type { LayoutProps } from './$types'
 
-    let { data, children }: LayoutProps = $props();
+	let { children }: LayoutProps = $props()
 </script>
 
+<SiteNav />
 {@render children()}

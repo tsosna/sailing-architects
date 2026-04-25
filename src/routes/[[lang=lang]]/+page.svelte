@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths'
-	import { SiteNav } from '$components/site-nav'
+	import { RouteSection } from '$components/route-section'
+	import { VesselSection } from '$components/vessel-section'
 
 	const stats = [
 		['4', 'etapy'],
@@ -9,8 +10,6 @@
 		['41 dni', 'łącznie']
 	] as const
 </script>
-
-<SiteNav />
 
 <section class="hero">
 	<div class="hero__bg" aria-hidden="true">
@@ -60,6 +59,9 @@
 		</div>
 	</div>
 </section>
+
+<VesselSection />
+<RouteSection />
 
 <style>
 	.hero {
