@@ -10,3 +10,67 @@ msgstr ""
 #: src/routes/[[lang=lang]]/[[lang=lang]]/+page.svelte
 msgid "[project-name]"
 msgstr "[project-name]"
+
+#: src/routes/[[lang=lang]]/+page.svelte
+msgid "łącznie"
+msgstr "łącznie"
+
+#: src/routes/[[lang=lang]]/+page.svelte
+msgid "Jesień 2026"
+msgstr "Jesień 2026"
+
+#: src/routes/[[lang=lang]]/+page.svelte
+msgid "Sail<0/><1>Adventure</1>"
+msgstr "Sail<0/><1>Adventure</1>"
+
+#: src/routes/[[lang=lang]]/+page.svelte
+msgid "Palma de Mallorca → Cabo Verde"
+msgstr "Palma de Mallorca → Cabo Verde"
+
+#: src/routes/[[lang=lang]]/+page.svelte
+msgid "Cztery etapy przez Atlantyk. Jacht Jeanneau Sun Odyssey 519. Październik–Listopad 2026. Wybierz swoją koję i dołącz do załogi."
+msgstr "Cztery etapy przez Atlantyk. Jacht Jeanneau Sun Odyssey 519. Październik–Listopad 2026. Wybierz swoją koję i dołącz do załogi."
+
+#: src/routes/[[lang=lang]]/+page.svelte
+msgid "Wybierz koję"
+msgstr "Wybierz koję"
+
+#: src/routes/[[lang=lang]]/+page.svelte
+msgid "Zobacz trasę"
+msgstr "Zobacz trasę"
+
+#: src/lib/components/site-nav/site-nav.svelte
+msgid "Jacht"
+msgstr "Jacht"
+
+#: src/lib/components/site-nav/site-nav.svelte
+msgid "Trasa"
+msgstr "Trasa"
+
+#: src/lib/components/site-nav/site-nav.svelte
+msgid "Kajuty"
+msgstr "Kajuty"
+
+#: src/lib/components/site-nav/site-nav.svelte
+msgid "Cennik"
+msgstr "Cennik"
+
+#: src/lib/components/site-nav/site-nav.svelte
+msgid "DM Sans, sans-serif"
+msgstr "DM Sans, sans-serif"
+
+#: src/lib/components/site-nav/site-nav.svelte
+msgid "SA"
+msgstr "SA"
+
+#: src/lib/components/site-nav/site-nav.svelte
+msgid "Sailing Architects"
+msgstr "Sailing Architects"
+
+#: src/lib/components/site-nav/site-nav.svelte
+msgid "Panel"
+msgstr "Panel"
+
+#: src/lib/components/site-nav/site-nav.svelte
+msgid "Rezerwuj"
+msgstr "Rezerwuj"
