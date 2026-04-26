@@ -49,7 +49,11 @@
 					onclick={() => toggle(i)}
 				>
 					<span class="faq__q">{q}</span>
-					<span class="faq__icon" class:faq__icon--open={open === i} aria-hidden="true">+</span>
+					<span
+						class="faq__icon"
+						class:faq__icon--open={open === i}
+						aria-hidden="true">+</span
+					>
 				</button>
 				{#if open === i}
 					<div id={`faq-${i}`} class="faq__answer">

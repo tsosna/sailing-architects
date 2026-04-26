@@ -1,24 +1,36 @@
 <script lang="ts">
 	import { cabins, findCabinByBerth } from '$lib/data/cabins'
 
-	type BerthState = 'available' | 'hovered' | 'selected' | 'taken'
+	type BerthStatus = 'taken' | 'captain' | 'complimentary'
+	type BerthState =
+		| 'available'
+		| 'hovered'
+		| 'selected'
+		| 'taken'
+		| 'captain'
+		| 'complimentary'
 
 	type Props = {
 		selectedBerth: string | null
 		onSelectBerth: (id: string | null) => void
-		takenBerths?: ReadonlySet<string>
+		berthStatuses?: ReadonlyMap<string, BerthStatus>
 	}
 
 	let {
 		selectedBerth,
 		onSelectBerth,
-		takenBerths = new Set(['A2', 'C1', 'D2'])
+		berthStatuses = new Map<string, BerthStatus>([
+			['A2', 'taken'],
+			['C1', 'captain'],
+			['D2', 'taken']
+		])
 	}: Props = $props()
 
 	let hovered = $state<string | null>(null)
 
 	function berthState(id: string): BerthState {
-		if (takenBerths.has(id)) return 'taken'
+		const status = berthStatuses.get(id)
+		if (status) return status
 		if (selectedBerth === id) return 'selected'
 		if (hovered === id) return 'hovered'
 		return 'available'
@@ -28,6 +40,10 @@
 		switch (berthState(id)) {
 			case 'taken':
 				return 'rgba(13,27,46,0.55)'
+			case 'captain':
+				return 'rgba(8,18,36,0.92)'
+			case 'complimentary':
+				return 'rgba(196,146,58,0.06)'
 			case 'selected':
 				return 'rgba(196,146,58,0.85)'
 			case 'hovered':
@@ -38,7 +54,16 @@
 	}
 
 	function berthStroke(id: string): string {
-		return berthState(id) === 'taken' ? '#3a4a5c' : '#c4923a'
+		switch (berthState(id)) {
+			case 'taken':
+				return '#3a4a5c'
+			case 'captain':
+				return 'rgba(196,146,58,0.5)'
+			case 'complimentary':
+				return 'rgba(196,146,58,0.35)'
+			default:
+				return '#c4923a'
+		}
 	}
 
 	function berthLabelColor(id: string): string {
@@ -47,13 +72,17 @@
 				return '#fff'
 			case 'taken':
 				return '#3a4a5c'
+			case 'captain':
+				return 'rgba(196,146,58,0.5)'
+			case 'complimentary':
+				return 'rgba(196,146,58,0.4)'
 			default:
 				return '#c4923a'
 		}
 	}
 
 	function handleBerth(id: string) {
-		if (takenBerths.has(id)) return
+		if (berthStatuses.has(id)) return
 		onSelectBerth(selectedBerth === id ? null : id)
 	}
 
@@ -64,207 +93,394 @@
 		}
 	}
 
+	// Berth rectangles computed from design SVG (viewBox 0 0 420 1080)
+	// Forward section (A = port, B = starboard): 4 berths side-by-side pairs
+	// Middle section (E): bunk-bed cabin, E1 lower / E2 upper
+	// Aft section (C = port, D = starboard): 4 berths in two pairs
 	const berthSlots = [
-		{ id: 'A1', x: 22, y: 125, w: 68, h: 38 },
-		{ id: 'A2', x: 110, y: 125, w: 68, h: 38 },
-		{ id: 'D1', x: 12, y: 318, w: 82, h: 32 },
-		{ id: 'D2', x: 12, y: 355, w: 82, h: 32 },
-		{ id: 'E1', x: 106, y: 318, w: 82, h: 32 },
-		{ id: 'E2', x: 106, y: 355, w: 82, h: 32 },
-		{ id: 'B1', x: 12, y: 418, w: 82, h: 30 },
-		{ id: 'B2', x: 12, y: 452, w: 82, h: 28 },
-		{ id: 'C1', x: 106, y: 418, w: 82, h: 30 },
-		{ id: 'C2', x: 106, y: 452, w: 82, h: 28 }
-	] as const
-
-	const forwardCorners = [
-		[22, 125],
-		[90, 125],
-		[110, 125],
-		[178, 125],
-		[22, 163],
-		[90, 163],
-		[110, 163],
-		[178, 163]
+		{ id: 'A1', x: 80, y: 126, w: 59, h: 138 },
+		{ id: 'A2', x: 147, y: 126, w: 59, h: 138 },
+		{ id: 'B1', x: 214, y: 126, w: 59, h: 138 },
+		{ id: 'B2', x: 281, y: 126, w: 59, h: 138 },
+		{ id: 'E1', x: 228, y: 587, w: 68, h: 172 },
+		{ id: 'E2', x: 322, y: 585, w: 66, h: 174 },
+		{ id: 'C1', x: 59, y: 798, w: 69, h: 150 },
+		{ id: 'C2', x: 137, y: 798, w: 69, h: 150 },
+		{ id: 'D1', x: 214, y: 798, w: 69, h: 150 },
+		{ id: 'D2', x: 292, y: 798, w: 69, h: 150 }
 	] as const
 
 	const legend = [
-		{ fill: 'rgba(245,240,232,0.12)', stroke: '#c4923a', label: 'Dostępna koja' },
-		{ fill: 'rgba(196,146,58,0.85)', stroke: '#c4923a', label: 'Wybrana koja' },
-		{ fill: 'rgba(13,27,46,0.55)', stroke: '#3a4a5c', label: 'Zajęta koja' }
+		{ fill: 'rgba(245,240,232,0.12)', stroke: '#c4923a', label: 'Dostępna' },
+		{ fill: 'rgba(196,146,58,0.85)', stroke: '#c4923a', label: 'Wybrana' },
+		{ fill: 'rgba(13,27,46,0.55)', stroke: '#3a4a5c', label: 'Zajęta' },
+		{
+			fill: 'rgba(8,18,36,0.92)',
+			stroke: 'rgba(196,146,58,0.5)',
+			label: 'Kapitan ⚓'
+		},
+		{
+			fill: 'rgba(196,146,58,0.06)',
+			stroke: 'rgba(196,146,58,0.35)',
+			label: 'Bezpłatna'
+		}
 	]
 
-	const selectedCabin = $derived(selectedBerth ? findCabinByBerth(selectedBerth) : undefined)
+	const selectedCabin = $derived(
+		selectedBerth ? findCabinByBerth(selectedBerth) : undefined
+	)
 </script>
 
 <div class="boat">
 	<div class="boat__svg-wrap">
 		<svg
-			viewBox="0 0 200 520"
-			width="200"
-			height="520"
+			viewBox="0 0 420 1080"
+			width="210"
+			height="540"
 			class="boat__svg"
 			xmlns="http://www.w3.org/2000/svg"
 		>
-			<defs>
-				<pattern id="boat-grid" patternUnits="userSpaceOnUse" width="10" height="10">
-					<path
-						d="M 10 0 L 0 0 0 10"
-						fill="none"
-						stroke="rgba(196,146,58,0.07)"
-						stroke-width="0.5"
-					/>
-				</pattern>
-			</defs>
-			<rect width="200" height="520" fill="url(#boat-grid)" />
-
+			<!-- Hull outline (all coords at 2× design scale) -->
 			<path
-				d="M 100 8 C 140 18, 186 80, 192 170 L 192 370 C 192 430, 168 470, 140 488 L 60 488 C 32 470, 8 430, 8 370 L 8 170 C 14 80, 60 18, 100 8 Z"
-				fill="none"
+				d="M210,20 C290,40 384,164 392,350 L392,756 C392,876 340,956 280,992 L140,992 C80,956 28,876 28,756 L28,350 C36,164 130,40 210,20Z"
+				fill="rgba(13,27,46,0.55)"
 				stroke="#c4923a"
-				stroke-width="1.5"
+				stroke-width="3"
 			/>
 
+			<!-- Centreline (dashed) -->
 			<line
-				x1="100"
-				y1="8"
-				x2="100"
-				y2="488"
+				x1="210"
+				y1="20"
+				x2="210"
+				y2="992"
+				stroke="rgba(196,146,58,0.18)"
+				stroke-width="1"
+				stroke-dasharray="8 6"
+			/>
+
+			<!-- ── BOW ── -->
+			<text
+				x="210"
+				y="56"
+				text-anchor="middle"
+				font-size="11"
+				font-family="DM Sans"
+				fill="rgba(196,146,58,0.6)"
+				letter-spacing="4">DZIÓB</text
+			>
+
+			<!-- Forward cabin: shared outer border -->
+			<rect
+				x="76"
+				y="124"
+				width="268"
+				height="144"
+				fill="rgba(245,240,232,0.04)"
+				stroke="rgba(196,146,58,0.22)"
+				stroke-width="1.2"
+			/>
+
+			<!-- Forward cabin: inner centreline divider -->
+			<line
+				x1="210"
+				y1="124"
+				x2="210"
+				y2="268"
+				stroke="rgba(196,146,58,0.22)"
+				stroke-width="1"
+				stroke-dasharray="4 4"
+			/>
+
+			<!-- Forward section labels -->
+			<text
+				x="138"
+				y="112"
+				text-anchor="middle"
+				font-size="13"
+				font-family="DM Sans"
+				font-weight="700"
+				fill="rgba(196,146,58,0.6)">A</text
+			>
+			<text
+				x="282"
+				y="112"
+				text-anchor="middle"
+				font-size="13"
+				font-family="DM Sans"
+				font-weight="700"
+				fill="rgba(196,146,58,0.6)">B</text
+			>
+
+			<!-- Separator: forward cabin → salon -->
+			<line
+				x1="52"
+				y1="280"
+				x2="368"
+				y2="280"
+				stroke="#c4923a"
+				stroke-width="1.6"
+			/>
+
+			<!-- ── SALON ── -->
+			<text
+				x="210"
+				y="316"
+				text-anchor="middle"
+				font-size="11"
+				font-family="DM Sans"
+				fill="rgba(196,146,58,0.32)"
+				letter-spacing="4">SALON</text
+			>
+
+			<!-- Salon settees (port + starboard) -->
+			<rect
+				x="32"
+				y="320"
+				width="84"
+				height="104"
+				fill="none"
+				stroke="rgba(196,146,58,0.14)"
+				stroke-width="1.2"
+			/>
+			<rect
+				x="304"
+				y="320"
+				width="84"
+				height="104"
+				fill="none"
+				stroke="rgba(196,146,58,0.14)"
+				stroke-width="1.2"
+			/>
+			<!-- Salon table -->
+			<rect
+				x="144"
+				y="332"
+				width="132"
+				height="80"
+				fill="none"
 				stroke="rgba(196,146,58,0.2)"
-				stroke-width="0.5"
-				stroke-dasharray="4 3"
+				stroke-width="1.2"
 			/>
 
-			<line x1="20" y1="175" x2="180" y2="175" stroke="#c4923a" stroke-width="0.8" />
-			<text
-				x="100"
-				y="22"
-				text-anchor="middle"
-				font-size="6"
-				font-family="DM Sans"
-				fill="rgba(196,146,58,0.7)"
-				letter-spacing="2">DZIÓB</text>
-			<text
-				x="100"
-				y="108"
-				text-anchor="middle"
-				font-size="7.5"
-				font-family="DM Sans"
-				fill="rgba(196,146,58,0.5)"
-				font-weight="700"
-				letter-spacing="1">A</text>
-
-			{#each forwardCorners as [cx, cy] (`${cx}-${cy}`)}
-				<circle {cx} {cy} r="1.5" fill="#c4923a" opacity="0.6" />
-			{/each}
-
-			<line x1="8" y1="295" x2="192" y2="295" stroke="#c4923a" stroke-width="0.8" />
-			<text
-				x="100"
-				y="237"
-				text-anchor="middle"
-				font-size="6"
-				font-family="DM Sans"
-				fill="rgba(196,146,58,0.4)"
-				letter-spacing="2">SALON</text>
+			<!-- NAV station -->
 			<rect
-				x="72"
-				y="208"
-				width="56"
-				height="30"
-				fill="none"
-				stroke="rgba(196,146,58,0.25)"
-				stroke-width="0.7"
-			/>
-			<rect
-				x="20"
-				y="200"
-				width="45"
+				x="304"
+				y="330"
+				width="84"
 				height="44"
 				fill="none"
-				stroke="rgba(196,146,58,0.18)"
-				stroke-width="0.7"
+				stroke="rgba(196,146,58,0.12)"
+				stroke-width="1"
 			/>
+			<text
+				x="346"
+				y="356"
+				text-anchor="middle"
+				font-size="9"
+				font-family="DM Sans"
+				fill="rgba(196,146,58,0.28)"
+				letter-spacing="2">NAV</text
+			>
+
+			<!-- Galley -->
 			<rect
-				x="135"
-				y="200"
-				width="45"
-				height="44"
+				x="32"
+				y="430"
+				width="84"
+				height="56"
 				fill="none"
-				stroke="rgba(196,146,58,0.18)"
-				stroke-width="0.7"
+				stroke="rgba(196,146,58,0.12)"
+				stroke-width="1"
 			/>
 			<text
-				x="160"
-				y="190"
+				x="74"
+				y="462"
 				text-anchor="middle"
-				font-size="4.5"
+				font-size="9"
 				font-family="DM Sans"
-				fill="rgba(196,146,58,0.35)"
-				letter-spacing="1">NAV</text>
+				fill="rgba(196,146,58,0.28)"
+				letter-spacing="1">GALLEY</text
+			>
+
+			<!-- Companionway hatch -->
 			<rect
-				x="136"
-				y="177"
-				width="44"
-				height="20"
-				fill="none"
-				stroke="rgba(196,146,58,0.18)"
-				stroke-width="0.5"
+				x="152"
+				y="494"
+				width="116"
+				height="18"
+				fill="rgba(13,27,46,0.8)"
+				stroke="rgba(196,146,58,0.4)"
+				stroke-width="1.2"
+			/>
+			<text
+				x="210"
+				y="507"
+				text-anchor="middle"
+				font-size="8"
+				font-family="DM Sans"
+				fill="rgba(196,146,58,0.6)"
+				letter-spacing="2">ZEJŚCIE</text
+			>
+
+			<!-- Separator: salon → middle cabins -->
+			<line
+				x1="28"
+				y1="524"
+				x2="392"
+				y2="524"
+				stroke="#c4923a"
+				stroke-width="1.8"
 			/>
 
-			<line x1="100" y1="295" x2="100" y2="395" stroke="#c4923a" stroke-width="0.8" />
-			<line x1="15" y1="395" x2="185" y2="395" stroke="#c4923a" stroke-width="0.8" />
+			<!-- Middle section centreline -->
+			<line
+				x1="210"
+				y1="524"
+				x2="210"
+				y2="764"
+				stroke="#c4923a"
+				stroke-width="1.6"
+			/>
 
+			<!-- E section label -->
 			<text
-				x="54"
-				y="308"
+				x="289"
+				y="564"
 				text-anchor="middle"
-				font-size="7.5"
+				font-size="13"
 				font-family="DM Sans"
-				fill="rgba(196,146,58,0.5)"
 				font-weight="700"
-				letter-spacing="1">D</text>
+				fill="rgba(196,146,58,0.6)">E</text
+			>
 			<text
-				x="146"
-				y="308"
+				x="323"
+				y="580"
 				text-anchor="middle"
-				font-size="7.5"
+				font-size="9"
 				font-family="DM Sans"
-				fill="rgba(196,146,58,0.5)"
-				font-weight="700"
-				letter-spacing="1">E</text>
+				fill="rgba(196,146,58,0.65)">piętrowe</text
+			>
 
-			<line x1="100" y1="395" x2="100" y2="487" stroke="#c4923a" stroke-width="0.8" />
+			<!-- E2 upper-bunk outline (dashed overlay, shown when not selected/taken) -->
+			<rect
+				x="322"
+				y="585"
+				width="66"
+				height="174"
+				fill="none"
+				stroke="rgba(196,146,58,0.35)"
+				stroke-width="1"
+				stroke-dasharray="6 3"
+			/>
 
-			<text
-				x="54"
-				y="408"
-				text-anchor="middle"
-				font-size="7.5"
-				font-family="DM Sans"
-				fill="rgba(196,146,58,0.5)"
-				font-weight="700"
-				letter-spacing="1">B</text>
-			<text
-				x="146"
-				y="408"
-				text-anchor="middle"
-				font-size="7.5"
-				font-family="DM Sans"
-				fill="rgba(196,146,58,0.5)"
-				font-weight="700"
-				letter-spacing="1">C</text>
+			<!-- Port-side mid dashed separator (head area) -->
+			<line
+				x1="32"
+				y1="656"
+				x2="206"
+				y2="656"
+				stroke="rgba(196,146,58,0.28)"
+				stroke-width="1"
+				stroke-dasharray="4 4"
+			/>
 
+			<!-- Separator: middle → aft cabins -->
+			<line
+				x1="28"
+				y1="764"
+				x2="392"
+				y2="764"
+				stroke="#c4923a"
+				stroke-width="1.8"
+			/>
+
+			<!-- Aft section: centreline + labels -->
+			<line
+				x1="210"
+				y1="764"
+				x2="210"
+				y2="990"
+				stroke="#c4923a"
+				stroke-width="1.6"
+			/>
+			<text
+				x="114"
+				y="790"
+				text-anchor="middle"
+				font-size="13"
+				font-family="DM Sans"
+				font-weight="700"
+				fill="rgba(196,146,58,0.6)">C</text
+			>
+			<text
+				x="284"
+				y="790"
+				text-anchor="middle"
+				font-size="13"
+				font-family="DM Sans"
+				font-weight="700"
+				fill="rgba(196,146,58,0.6)">D</text
+			>
+
+			<!-- Aft dashed internal separator (D cabin) -->
+			<line
+				x1="214"
+				y1="886"
+				x2="388"
+				y2="886"
+				stroke="rgba(196,146,58,0.28)"
+				stroke-width="1"
+				stroke-dasharray="4 4"
+			/>
+
+			<!-- ── STERN ── -->
+			<text
+				x="210"
+				y="1022"
+				text-anchor="middle"
+				font-size="11"
+				font-family="DM Sans"
+				fill="rgba(196,146,58,0.45)"
+				letter-spacing="4">RUFA</text
+			>
+			<text
+				x="210"
+				y="1054"
+				text-anchor="middle"
+				font-size="9"
+				font-family="DM Sans"
+				fill="rgba(196,146,58,0.28)"
+				letter-spacing="1">JEANNEAU SUN ODYSSEY 519</text
+			>
+			<text
+				x="210"
+				y="1070"
+				text-anchor="middle"
+				font-size="7"
+				font-family="DM Sans"
+				fill="rgba(196,146,58,0.16)"
+				letter-spacing="1">Sailing Architects · rzut kojowy</text
+			>
+
+			<!-- ── INTERACTIVE BERTHS ── -->
 			{#each berthSlots as berth (berth.id)}
 				{@const state = berthState(berth.id)}
 				<g
 					class="boat__berth"
-					class:boat__berth--clickable={state !== 'taken'}
+					class:boat__berth--clickable={state === 'available' ||
+						state === 'hovered'}
 					role="button"
-					tabindex={state === 'taken' ? -1 : 0}
-					aria-label={`Koja ${berth.id} — ${state === 'taken' ? 'zajęta' : state === 'selected' ? 'wybrana' : 'dostępna'}`}
+					tabindex={state === 'available' ||
+					state === 'hovered' ||
+					state === 'selected'
+						? 0
+						: -1}
+					aria-label={`Koja ${berth.id} — ${state === 'captain' ? 'kapitan' : state === 'complimentary' ? 'bezpłatna' : state === 'taken' ? 'zajęta' : state === 'selected' ? 'wybrana' : 'dostępna'}`}
 					aria-pressed={state === 'selected'}
-					aria-disabled={state === 'taken'}
+					aria-disabled={state !== 'available' &&
+						state !== 'hovered' &&
+						state !== 'selected'}
 					onclick={() => handleBerth(berth.id)}
 					onkeydown={(e) => handleKey(e, berth.id)}
 					onmouseenter={() => (hovered = berth.id)}
@@ -279,109 +495,102 @@
 						height={berth.h}
 						fill={berthFill(berth.id)}
 						stroke={berthStroke(berth.id)}
-						stroke-width={state === 'selected' ? 1.5 : 0.8}
+						stroke-width={state === 'selected' ? 3 : 1.6}
 						rx="0"
 					/>
 					{#if state === 'taken'}
 						<line
-							x1={berth.x + 4}
-							y1={berth.y + 4}
-							x2={berth.x + berth.w - 4}
-							y2={berth.y + berth.h - 4}
+							x1={berth.x + 6}
+							y1={berth.y + 6}
+							x2={berth.x + berth.w - 6}
+							y2={berth.y + berth.h - 6}
 							stroke="#3a4a5c"
-							stroke-width="0.8"
+							stroke-width="1.5"
+						/>
+					{/if}
+					{#if state === 'complimentary'}
+						<line
+							x1={berth.x + 6}
+							y1={berth.y + 6}
+							x2={berth.x + berth.w - 6}
+							y2={berth.y + berth.h - 6}
+							stroke="rgba(196,146,58,0.3)"
+							stroke-width="1"
+						/>
+						<line
+							x1={berth.x + berth.w - 6}
+							y1={berth.y + 6}
+							x2={berth.x + 6}
+							y2={berth.y + berth.h - 6}
+							stroke="rgba(196,146,58,0.3)"
+							stroke-width="1"
 						/>
 					{/if}
 					{#if state === 'selected'}
 						<line
-							x1={berth.x + berth.w / 2 - 4}
+							x1={berth.x + berth.w / 2 - 8}
 							y1={berth.y + berth.h / 2}
-							x2={berth.x + berth.w / 2 + 4}
+							x2={berth.x + berth.w / 2 + 8}
 							y2={berth.y + berth.h / 2}
 							stroke="#fff"
-							stroke-width="1.2"
+							stroke-width="2.5"
 						/>
 						<line
 							x1={berth.x + berth.w / 2}
-							y1={berth.y + berth.h / 2 - 4}
+							y1={berth.y + berth.h / 2 - 8}
 							x2={berth.x + berth.w / 2}
-							y2={berth.y + berth.h / 2 + 4}
+							y2={berth.y + berth.h / 2 + 8}
 							stroke="#fff"
-							stroke-width="1.2"
+							stroke-width="2.5"
 						/>
 					{/if}
-					<text
-						x={berth.x + berth.w / 2}
-						y={berth.y + berth.h / 2}
-						text-anchor="middle"
-						dominant-baseline="central"
-						font-size="7"
-						font-family="DM Sans, sans-serif"
-						fill={berthLabelColor(berth.id)}
-						font-weight="600"
-						letter-spacing="0.5">{berth.id}</text>
+					{#if state === 'captain'}
+						<!-- Anchor symbol for captain berth -->
+						<text
+							x={berth.x + berth.w / 2}
+							y={berth.y + berth.h / 2 - 6}
+							text-anchor="middle"
+							dominant-baseline="central"
+							font-size="18"
+							fill="rgba(196,146,58,0.45)">⚓</text
+						>
+						<text
+							x={berth.x + berth.w / 2}
+							y={berth.y + berth.h / 2 + 14}
+							text-anchor="middle"
+							dominant-baseline="central"
+							font-size="9"
+							font-family="DM Sans, sans-serif"
+							fill="rgba(196,146,58,0.35)"
+							letter-spacing="1">SKP</text
+						>
+					{:else}
+						<text
+							x={berth.x + berth.w / 2}
+							y={berth.y + berth.h / 2}
+							text-anchor="middle"
+							dominant-baseline="central"
+							font-size="14"
+							font-family="DM Sans, sans-serif"
+							fill={berthLabelColor(berth.id)}
+							font-weight="600"
+							letter-spacing="0.5">{berth.id}</text
+						>
+						{#if berth.id === 'E1' || berth.id === 'E2'}
+							<text
+								x={berth.x + berth.w / 2}
+								y={berth.y + berth.h / 2 + 18}
+								text-anchor="middle"
+								dominant-baseline="central"
+								font-size="9"
+								font-family="DM Sans, sans-serif"
+								fill={berthLabelColor(berth.id)}
+								fill-opacity="0.7">{berth.id === 'E1' ? 'dół' : 'góra'}</text
+							>
+						{/if}
+					{/if}
 				</g>
 			{/each}
-
-			<rect
-				x="72"
-				y="290"
-				width="56"
-				height="8"
-				fill="rgba(13,27,46,0.4)"
-				stroke="rgba(196,146,58,0.3)"
-				stroke-width="0.6"
-			/>
-			<text
-				x="100"
-				y="296.5"
-				text-anchor="middle"
-				font-size="4"
-				font-family="DM Sans"
-				fill="rgba(196,146,58,0.5)"
-				letter-spacing="1">ZEJŚCIE</text>
-
-			<g transform="translate(166, 258)">
-				<circle cx="0" cy="0" r="10" fill="none" stroke="rgba(196,146,58,0.2)" stroke-width="0.5" />
-				<text
-					x="0"
-					y="-13"
-					text-anchor="middle"
-					font-size="5"
-					font-family="DM Sans"
-					fill="rgba(196,146,58,0.4)"
-					font-weight="700">N</text>
-				<line x1="0" y1="-9" x2="0" y2="9" stroke="rgba(196,146,58,0.3)" stroke-width="0.6" />
-				<line x1="-9" y1="0" x2="9" y2="0" stroke="rgba(196,146,58,0.3)" stroke-width="0.6" />
-			</g>
-
-			<line x1="20" y1="505" x2="80" y2="505" stroke="rgba(196,146,58,0.4)" stroke-width="0.8" />
-			<line x1="20" y1="502" x2="20" y2="508" stroke="rgba(196,146,58,0.4)" stroke-width="0.8" />
-			<line x1="80" y1="502" x2="80" y2="508" stroke="rgba(196,146,58,0.4)" stroke-width="0.8" />
-			<text
-				x="50"
-				y="514"
-				text-anchor="middle"
-				font-size="4.5"
-				font-family="DM Sans"
-				fill="rgba(196,146,58,0.4)">≈ 8m</text>
-
-			<text
-				x="130"
-				y="504"
-				text-anchor="middle"
-				font-size="5"
-				font-family="DM Sans"
-				fill="rgba(196,146,58,0.35)"
-				letter-spacing="1">JEANNEAU SO 519</text>
-			<text
-				x="130"
-				y="512"
-				text-anchor="middle"
-				font-size="4"
-				font-family="DM Sans"
-				fill="rgba(196,146,58,0.25)"
-				letter-spacing="0.5">rzut poziomy / plan kojowy</text>
 		</svg>
 	</div>
 
@@ -391,7 +600,10 @@
 			<div class="boat__legend-list">
 				{#each legend as item (item.label)}
 					<div class="boat__legend-item">
-						<span class="swatch" style:background={item.fill} style:border-color={item.stroke}
+						<span
+							class="swatch"
+							style:background={item.fill}
+							style:border-color={item.stroke}
 						></span>
 						<span class="boat__legend-label">{item.label}</span>
 					</div>
@@ -416,14 +628,18 @@
 									class="berth-btn"
 									class:berth-btn--selected={state === 'selected'}
 									class:berth-btn--taken={state === 'taken'}
+									class:berth-btn--captain={state === 'captain'}
+									class:berth-btn--complimentary={state === 'complimentary'}
 									aria-pressed={state === 'selected'}
-									aria-disabled={state === 'taken'}
+									aria-disabled={state !== 'available' &&
+										state !== 'hovered' &&
+										state !== 'selected'}
 									aria-label={`Koja ${b}`}
 									onclick={() => handleBerth(b)}
 									onmouseenter={() => (hovered = b)}
 									onmouseleave={() => (hovered = null)}
 								>
-									{b}
+									{state === 'captain' ? '⚓' : b}
 								</button>
 							{/each}
 						</div>
@@ -436,7 +652,9 @@
 			<aside class="boat__selected">
 				<p class="boat__selected-eyebrow">Wybrana</p>
 				<p class="boat__selected-title">Koja {selectedBerth}</p>
-				<p class="boat__selected-meta">{selectedCabin.label} · {selectedCabin.position}</p>
+				<p class="boat__selected-meta">
+					{selectedCabin.label} · {selectedCabin.position}
+				</p>
 			</aside>
 		{/if}
 	</aside>
@@ -473,7 +691,7 @@
 	}
 
 	.boat__berth:focus-visible rect {
-		stroke-width: 2;
+		stroke-width: 4;
 	}
 
 	.boat__sidebar {
@@ -577,7 +795,10 @@
 		font-weight: 700;
 		letter-spacing: 0.3px;
 		color: var(--color-brass);
-		transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+		transition:
+			background-color 150ms ease,
+			color 150ms ease,
+			border-color 150ms ease;
 		padding: 0;
 		border-radius: 0;
 	}
@@ -595,6 +816,21 @@
 		background: rgba(13, 27, 46, 0.5);
 		border-color: #3a4a5c;
 		color: #3a4a5c;
+		cursor: not-allowed;
+	}
+
+	.berth-btn--captain {
+		background: rgba(8, 18, 36, 0.9);
+		border-color: rgba(196, 146, 58, 0.4);
+		color: rgba(196, 146, 58, 0.45);
+		cursor: not-allowed;
+		font-size: 11px;
+	}
+
+	.berth-btn--complimentary {
+		background: rgba(196, 146, 58, 0.05);
+		border-color: rgba(196, 146, 58, 0.3);
+		color: rgba(196, 146, 58, 0.35);
 		cursor: not-allowed;
 	}
 

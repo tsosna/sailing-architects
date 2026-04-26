@@ -1,538 +1,1823 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pl">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Sailing Architects — Sail Adventure 2026</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --navy: #0d1b2e;
-    --navy-mid: #162840;
-    --navy-light: #1e3a5c;
-    --brass: #c4923a;
-    --brass-light: #d4aa5a;
-    --warm-white: #f5f0e8;
-    --cream: #ede5d8;
-    --muted: rgba(245,240,232,0.45);
-    --font-serif: 'Playfair Display', Georgia, serif;
-    --font-sans: 'DM Sans', system-ui, sans-serif;
-  }
-  html { scroll-behavior: smooth; }
-  body { background: var(--navy); color: var(--warm-white); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
-  ::selection { background: rgba(196,146,58,0.3); }
-  input, select, textarea, button { font-family: var(--font-sans); }
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: var(--navy); }
-  ::-webkit-scrollbar-thumb { background: rgba(196,146,58,0.3); }
-</style>
-</head>
-<body>
-<div id="root"></div>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Sailing Architects — Sail Adventure 2026</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
+		<script
+			src="https://unpkg.com/react@18.3.1/umd/react.development.js"
+			integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"
+			integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"
+			integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y"
+			crossorigin="anonymous"
+		></script>
+		<style>
+			*,
+			*::before,
+			*::after {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			:root {
+				--navy: #0d1b2e;
+				--navy-mid: #162840;
+				--navy-light: #1e3a5c;
+				--brass: #c4923a;
+				--brass-light: #d4aa5a;
+				--warm-white: #f5f0e8;
+				--cream: #ede5d8;
+				--muted: rgba(245, 240, 232, 0.45);
+				--font-serif: 'Playfair Display', Georgia, serif;
+				--font-sans: 'DM Sans', system-ui, sans-serif;
+			}
+			html {
+				scroll-behavior: smooth;
+			}
+			body {
+				background: var(--navy);
+				color: var(--warm-white);
+				font-family: var(--font-sans);
+				-webkit-font-smoothing: antialiased;
+			}
+			::selection {
+				background: rgba(196, 146, 58, 0.3);
+			}
+			input,
+			select,
+			textarea,
+			button {
+				font-family: var(--font-sans);
+			}
+			::-webkit-scrollbar {
+				width: 4px;
+			}
+			::-webkit-scrollbar-track {
+				background: var(--navy);
+			}
+			::-webkit-scrollbar-thumb {
+				background: rgba(196, 146, 58, 0.3);
+			}
+		</style>
+	</head>
+	<body>
+		<div id="root"></div>
 
-<script type="text/babel" src="tweaks-panel.jsx"></script>
-<script type="text/babel" src="components/boat-plan.jsx"></script>
-<script type="text/babel" src="components/booking-flow.jsx"></script>
-<script type="text/babel" src="components/dashboard.jsx"></script>
+		<script type="text/babel" src="tweaks-panel.jsx"></script>
+		<script type="text/babel" src="components/boat-plan.jsx"></script>
+		<script type="text/babel" src="components/booking-flow.jsx"></script>
+		<script type="text/babel" src="components/dashboard.jsx"></script>
 
-<script type="text/babel">
+		<script type="text/babel">
+			// ── TWEAK DEFAULTS ──────────────────────────────────────
+			const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/ {
+				accentColor: '#c4923a',
+				heroStyle: 'gradient',
+				sectionSpacing: 96,
+				showFaq: true,
+				language: 'pl'
+			} /*EDITMODE-END*/
 
-// ── TWEAK DEFAULTS ──────────────────────────────────────
-const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
-  "accentColor": "#c4923a",
-  "heroStyle": "gradient",
-  "sectionSpacing": 96,
-  "showFaq": true,
-  "language": "pl"
-}/*EDITMODE-END*/;
+			// ── SA LOGO ─────────────────────────────────────────────
+			function SALogo({ size = 36, light = false }) {
+				const c = light ? '#f5f0e8' : '#c4923a'
+				return (
+					<svg width={size} height={size} viewBox="0 0 40 40" fill="none">
+						<circle cx="20" cy="20" r="19" stroke={c} strokeWidth="1.5" />
+						<text
+							x="20"
+							y="25"
+							textAnchor="middle"
+							fontSize="14"
+							fontWeight="700"
+							fontFamily="DM Sans, sans-serif"
+							fill={c}
+							letterSpacing="1"
+						>
+							SA
+						</text>
+					</svg>
+				)
+			}
 
-// ── SA LOGO ─────────────────────────────────────────────
-function SALogo({ size = 36, light = false }) {
-  const c = light ? '#f5f0e8' : '#c4923a';
-  return (
-    <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
-      <circle cx="20" cy="20" r="19" stroke={c} strokeWidth="1.5" />
-      <text x="20" y="25" textAnchor="middle" fontSize="14" fontWeight="700"
-        fontFamily="DM Sans, sans-serif" fill={c} letterSpacing="1">SA</text>
-    </svg>
-  );
-}
+			// ── NAV ──────────────────────────────────────────────────
+			function Nav({ onBook, onDashboard, tweaks }) {
+				const [scrolled, setScrolled] = React.useState(false)
+				React.useEffect(() => {
+					const fn = () => setScrolled(window.scrollY > 60)
+					window.addEventListener('scroll', fn)
+					return () => window.removeEventListener('scroll', fn)
+				}, [])
+				return (
+					<nav
+						style={{
+							position: 'fixed',
+							top: 0,
+							left: 0,
+							right: 0,
+							zIndex: 100,
+							padding: '0 32px',
+							background: scrolled ? 'rgba(13,27,46,0.97)' : 'transparent',
+							backdropFilter: scrolled ? 'blur(12px)' : 'none',
+							borderBottom: scrolled
+								? '1px solid rgba(196,146,58,0.1)'
+								: 'none',
+							transition: 'all 0.3s ease',
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'space-between',
+							height: '64px'
+						}}
+					>
+						<div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+							<SALogo size={32} />
+							<span
+								style={{
+									fontFamily: 'var(--font-serif)',
+									fontSize: '16px',
+									letterSpacing: '1px',
+									color: 'var(--warm-white)'
+								}}
+							>
+								Sailing Architects
+							</span>
+						</div>
+						<div style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
+							{[
+								['Jacht', '#vessel'],
+								['Trasa', '#route'],
+								['Kajuty', '#cabins'],
+								['Cennik', '#pricing']
+							].map(([l, h]) => (
+								<a
+									key={l}
+									href={h}
+									style={{
+										fontFamily: 'var(--font-sans)',
+										fontSize: '12px',
+										letterSpacing: '1.5px',
+										textTransform: 'uppercase',
+										color: 'rgba(245,240,232,0.6)',
+										textDecoration: 'none',
+										transition: 'color 0.2s'
+									}}
+									onMouseEnter={(e) => (e.target.style.color = '#c4923a')}
+									onMouseLeave={(e) =>
+										(e.target.style.color = 'rgba(245,240,232,0.6)')
+									}
+								>
+									{l}
+								</a>
+							))}
+							<button
+								onClick={onDashboard}
+								style={{
+									background: 'none',
+									border: '1px solid rgba(196,146,58,0.3)',
+									padding: '8px 16px',
+									color: 'rgba(245,240,232,0.6)',
+									fontSize: '11px',
+									letterSpacing: '1.5px',
+									textTransform: 'uppercase',
+									cursor: 'pointer',
+									borderRadius: 0
+								}}
+							>
+								Panel
+							</button>
+							<button
+								onClick={onBook}
+								style={{
+									background: tweaks.accentColor,
+									border: 'none',
+									padding: '10px 24px',
+									color: '#0d1b2e',
+									fontWeight: '700',
+									fontSize: '11px',
+									letterSpacing: '2px',
+									textTransform: 'uppercase',
+									cursor: 'pointer',
+									borderRadius: 0
+								}}
+							>
+								Rezerwuj
+							</button>
+						</div>
+					</nav>
+				)
+			}
 
-// ── NAV ──────────────────────────────────────────────────
-function Nav({ onBook, onDashboard, tweaks }) {
-  const [scrolled, setScrolled] = React.useState(false);
-  React.useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 60);
-    window.addEventListener('scroll', fn);
-    return () => window.removeEventListener('scroll', fn);
-  }, []);
-  return (
-    <nav style={{
-      position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-      padding: '0 32px',
-      background: scrolled ? 'rgba(13,27,46,0.97)' : 'transparent',
-      backdropFilter: scrolled ? 'blur(12px)' : 'none',
-      borderBottom: scrolled ? '1px solid rgba(196,146,58,0.1)' : 'none',
-      transition: 'all 0.3s ease',
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      height: '64px',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <SALogo size={32} />
-        <span style={{ fontFamily: 'var(--font-serif)', fontSize: '16px', letterSpacing: '1px', color: 'var(--warm-white)' }}>Sailing Architects</span>
-      </div>
-      <div style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
-        {[['Jacht','#vessel'],['Trasa','#route'],['Kajuty','#cabins'],['Cennik','#pricing']].map(([l,h]) => (
-          <a key={l} href={h} style={{ fontFamily: 'var(--font-sans)', fontSize: '12px', letterSpacing: '1.5px', textTransform: 'uppercase', color: 'rgba(245,240,232,0.6)', textDecoration: 'none', transition: 'color 0.2s' }}
-            onMouseEnter={e => e.target.style.color = '#c4923a'}
-            onMouseLeave={e => e.target.style.color = 'rgba(245,240,232,0.6)'}
-          >{l}</a>
-        ))}
-        <button onClick={onDashboard} style={{ background: 'none', border: '1px solid rgba(196,146,58,0.3)', padding: '8px 16px', color: 'rgba(245,240,232,0.6)', fontSize: '11px', letterSpacing: '1.5px', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 0 }}>Panel</button>
-        <button onClick={onBook} style={{ background: tweaks.accentColor, border: 'none', padding: '10px 24px', color: '#0d1b2e', fontWeight: '700', fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 0 }}>Rezerwuj</button>
-      </div>
-    </nav>
-  );
-}
+			// ── HERO ─────────────────────────────────────────────────
+			function Hero({ onBook, tweaks }) {
+				return (
+					<section
+						style={{
+							minHeight: '100vh',
+							background:
+								tweaks.heroStyle === 'gradient'
+									? 'linear-gradient(165deg, #0d1b2e 0%, #162840 35%, #1e3a5c 65%, #0d1b2e 100%)'
+									: '#0d1b2e',
+							display: 'flex',
+							flexDirection: 'column',
+							justifyContent: 'flex-end',
+							padding: '0 0 80px',
+							position: 'relative',
+							overflow: 'hidden'
+						}}
+					>
+						{/* Background texture — hatched placeholder representing hero photography */}
+						<div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+							<svg
+								width="100%"
+								height="100%"
+								style={{ position: 'absolute', inset: 0, opacity: 0.06 }}
+							>
+								<defs>
+									<pattern
+										id="diagonal"
+										patternUnits="userSpaceOnUse"
+										width="20"
+										height="20"
+										patternTransform="rotate(35)"
+									>
+										<line
+											x1="0"
+											y1="0"
+											x2="0"
+											y2="20"
+											stroke="#c4923a"
+											strokeWidth="1"
+										/>
+									</pattern>
+								</defs>
+								<rect width="100%" height="100%" fill="url(#diagonal)" />
+							</svg>
+							{/* Horizon glow */}
+							<div
+								style={{
+									position: 'absolute',
+									bottom: '20%',
+									left: '50%',
+									transform: 'translateX(-50%)',
+									width: '60%',
+									height: '200px',
+									background:
+										'radial-gradient(ellipse, rgba(196,146,58,0.08) 0%, transparent 70%)'
+								}}
+							/>
+							{/* Photo placeholder */}
+							<div
+								style={{
+									position: 'absolute',
+									top: '10%',
+									left: '50%',
+									transform: 'translateX(-50%)',
+									width: '90%',
+									maxWidth: '900px',
+									height: '55vh',
+									display: 'flex',
+									alignItems: 'center',
+									justifyContent: 'center',
+									border: '1px dashed rgba(196,146,58,0.12)',
+									background: 'rgba(196,146,58,0.02)'
+								}}
+							>
+								<div style={{ textAlign: 'center' }}>
+									<div
+										style={{
+											fontFamily: 'monospace',
+											fontSize: '11px',
+											color: 'rgba(196,146,58,0.25)',
+											letterSpacing: '2px',
+											textTransform: 'uppercase',
+											lineHeight: 2
+										}}
+									>
+										[ hero photography ]<br />
+										sailing at sea · golden hour · jacht SO 519
+										<br />
+										1600 × 900 px
+									</div>
+								</div>
+							</div>
+						</div>
 
-// ── HERO ─────────────────────────────────────────────────
-function Hero({ onBook, tweaks }) {
-  return (
-    <section style={{
-      minHeight: '100vh',
-      background: tweaks.heroStyle === 'gradient'
-        ? 'linear-gradient(165deg, #0d1b2e 0%, #162840 35%, #1e3a5c 65%, #0d1b2e 100%)'
-        : '#0d1b2e',
-      display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
-      padding: '0 0 80px',
-      position: 'relative', overflow: 'hidden',
-    }}>
-      {/* Background texture — hatched placeholder representing hero photography */}
-      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
-        <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0, opacity: 0.06 }}>
-          <defs>
-            <pattern id="diagonal" patternUnits="userSpaceOnUse" width="20" height="20" patternTransform="rotate(35)">
-              <line x1="0" y1="0" x2="0" y2="20" stroke="#c4923a" strokeWidth="1" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#diagonal)" />
-        </svg>
-        {/* Horizon glow */}
-        <div style={{ position: 'absolute', bottom: '20%', left: '50%', transform: 'translateX(-50%)', width: '60%', height: '200px', background: 'radial-gradient(ellipse, rgba(196,146,58,0.08) 0%, transparent 70%)' }} />
-        {/* Photo placeholder */}
-        <div style={{ position: 'absolute', top: '10%', left: '50%', transform: 'translateX(-50%)', width: '90%', maxWidth: '900px', height: '55vh', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed rgba(196,146,58,0.12)', background: 'rgba(196,146,58,0.02)' }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontFamily: 'monospace', fontSize: '11px', color: 'rgba(196,146,58,0.25)', letterSpacing: '2px', textTransform: 'uppercase', lineHeight: 2 }}>
-              [ hero photography ]<br/>
-              sailing at sea · golden hour · jacht SO 519<br/>
-              1600 × 900 px
-            </div>
-          </div>
-        </div>
-      </div>
+						{/* Content */}
+						<div
+							style={{
+								position: 'relative',
+								zIndex: 2,
+								maxWidth: '1100px',
+								margin: '0 auto',
+								padding: '0 40px',
+								width: '100%'
+							}}
+						>
+							<div
+								style={{
+									display: 'flex',
+									gap: '24px',
+									alignItems: 'flex-end',
+									flexWrap: 'wrap'
+								}}
+							>
+								<div style={{ flex: 1, minWidth: '300px' }}>
+									<p
+										style={{
+											fontFamily: 'var(--font-sans)',
+											fontSize: '11px',
+											letterSpacing: '4px',
+											textTransform: 'uppercase',
+											color: 'rgba(196,146,58,0.7)',
+											margin: '0 0 16px'
+										}}
+									>
+										Jesień 2026
+									</p>
+									<h1
+										style={{
+											fontFamily: 'var(--font-serif)',
+											fontSize: 'clamp(40px, 6vw, 76px)',
+											lineHeight: 1.05,
+											color: 'var(--warm-white)',
+											margin: '0 0 8px',
+											fontWeight: '400'
+										}}
+									>
+										Sail
+										<br />
+										<em>Adventure</em>
+									</h1>
+									<p
+										style={{
+											fontFamily: 'var(--font-serif)',
+											fontSize: 'clamp(16px, 2vw, 22px)',
+											color: 'rgba(196,146,58,0.8)',
+											margin: '0 0 24px',
+											fontStyle: 'italic'
+										}}
+									>
+										Palma de Mallorca → Cabo Verde
+									</p>
+									<p
+										style={{
+											fontFamily: 'var(--font-sans)',
+											fontSize: '14px',
+											color: 'rgba(245,240,232,0.55)',
+											margin: '0 0 40px',
+											lineHeight: '1.7',
+											maxWidth: '420px'
+										}}
+									>
+										Cztery etapy przez Atlantyk. Jacht Jeanneau Sun Odyssey 519.
+										Październik–Listopad 2026. Wybierz swoją koję i dołącz do
+										załogi.
+									</p>
+									<div
+										style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}
+									>
+										<button
+											onClick={onBook}
+											style={{
+												padding: '16px 40px',
+												background: tweaks.accentColor,
+												border: 'none',
+												color: '#0d1b2e',
+												fontWeight: '700',
+												fontSize: '13px',
+												letterSpacing: '2px',
+												textTransform: 'uppercase',
+												cursor: 'pointer',
+												borderRadius: 0
+											}}
+										>
+											Wybierz koję
+										</button>
+										<a
+											href="#route"
+											style={{
+												padding: '16px 32px',
+												background: 'none',
+												border: '1px solid rgba(196,146,58,0.35)',
+												color: 'rgba(245,240,232,0.7)',
+												fontSize: '12px',
+												letterSpacing: '2px',
+												textTransform: 'uppercase',
+												cursor: 'pointer',
+												textDecoration: 'none',
+												display: 'inline-flex',
+												alignItems: 'center'
+											}}
+										>
+											Zobacz trasę
+										</a>
+									</div>
+								</div>
 
-      {/* Content */}
-      <div style={{ position: 'relative', zIndex: 2, maxWidth: '1100px', margin: '0 auto', padding: '0 40px', width: '100%' }}>
-        <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: '300px' }}>
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', letterSpacing: '4px', textTransform: 'uppercase', color: 'rgba(196,146,58,0.7)', margin: '0 0 16px' }}>Jesień 2026</p>
-            <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(40px, 6vw, 76px)', lineHeight: 1.05, color: 'var(--warm-white)', margin: '0 0 8px', fontWeight: '400' }}>
-              Sail<br /><em>Adventure</em>
-            </h1>
-            <p style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(16px, 2vw, 22px)', color: 'rgba(196,146,58,0.8)', margin: '0 0 24px', fontStyle: 'italic' }}>
-              Palma de Mallorca → Cabo Verde
-            </p>
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '14px', color: 'rgba(245,240,232,0.55)', margin: '0 0 40px', lineHeight: '1.7', maxWidth: '420px' }}>
-              Cztery etapy przez Atlantyk. Jacht Jeanneau Sun Odyssey 519. Październik–Listopad 2026. Wybierz swoją koję i dołącz do załogi.
-            </p>
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              <button onClick={onBook} style={{ padding: '16px 40px', background: tweaks.accentColor, border: 'none', color: '#0d1b2e', fontWeight: '700', fontSize: '13px', letterSpacing: '2px', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 0 }}>
-                Wybierz koję
-              </button>
-              <a href="#route" style={{ padding: '16px 32px', background: 'none', border: '1px solid rgba(196,146,58,0.35)', color: 'rgba(245,240,232,0.7)', fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase', cursor: 'pointer', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
-                Zobacz trasę
-              </a>
-            </div>
-          </div>
+								{/* Stats */}
+								<div
+									style={{
+										display: 'flex',
+										gap: '1px',
+										background: 'rgba(196,146,58,0.15)'
+									}}
+								>
+									{[
+										['4', 'etapy'],
+										['10', 'miejsc'],
+										['~3500km', 'trasa'],
+										['41 dni', 'łącznie']
+									].map(([v, l]) => (
+										<div
+											key={l}
+											style={{
+												padding: '20px 24px',
+												background: 'rgba(13,27,46,0.85)',
+												textAlign: 'center',
+												minWidth: '90px'
+											}}
+										>
+											<p
+												style={{
+													fontFamily: 'var(--font-serif)',
+													fontSize: '28px',
+													color: 'var(--warm-white)',
+													margin: '0 0 4px'
+												}}
+											>
+												{v}
+											</p>
+											<p
+												style={{
+													fontFamily: 'var(--font-sans)',
+													fontSize: '9px',
+													letterSpacing: '2px',
+													textTransform: 'uppercase',
+													color: 'rgba(196,146,58,0.6)',
+													margin: 0
+												}}
+											>
+												{l}
+											</p>
+										</div>
+									))}
+								</div>
+							</div>
+						</div>
+					</section>
+				)
+			}
 
-          {/* Stats */}
-          <div style={{ display: 'flex', gap: '1px', background: 'rgba(196,146,58,0.15)' }}>
-            {[['4','etapy'],['10','miejsc'],['~3500km','trasa'],['41 dni','łącznie']].map(([v, l]) => (
-              <div key={l} style={{ padding: '20px 24px', background: 'rgba(13,27,46,0.85)', textAlign: 'center', minWidth: '90px' }}>
-                <p style={{ fontFamily: 'var(--font-serif)', fontSize: '28px', color: 'var(--warm-white)', margin: '0 0 4px' }}>{v}</p>
-                <p style={{ fontFamily: 'var(--font-sans)', fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(196,146,58,0.6)', margin: 0 }}>{l}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
+			// ── VESSEL ───────────────────────────────────────────────
+			function VesselSection() {
+				const specs = [
+					['Model', 'Jeanneau Sun Odyssey 519'],
+					['Rok produkcji', '2019'],
+					['Długość', '15,6 m'],
+					['Szerokość', '4,6 m'],
+					['Kajuty', '5 × 2 koje = 10 miejsc'],
+					['Silnik', 'Volvo Penta 55 KM'],
+					['Żagiel główny', 'Lazy bag + furling'],
+					['Elektronika', 'Ploter, AIS, VHF, automat']
+				]
+				return (
+					<section
+						id="vessel"
+						style={{ background: '#0d1b2e', padding: `96px 40px` }}
+					>
+						<div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+							<p
+								style={{
+									fontFamily: 'var(--font-sans)',
+									fontSize: '11px',
+									letterSpacing: '4px',
+									textTransform: 'uppercase',
+									color: 'rgba(196,146,58,0.6)',
+									margin: '0 0 12px'
+								}}
+							>
+								Jacht
+							</p>
+							<h2
+								style={{
+									fontFamily: 'var(--font-serif)',
+									fontSize: 'clamp(28px, 4vw, 48px)',
+									color: 'var(--warm-white)',
+									margin: '0 0 48px',
+									fontWeight: '400'
+								}}
+							>
+								Jeanneau Sun Odyssey 519
+							</h2>
+							<div
+								style={{
+									display: 'grid',
+									gridTemplateColumns: '1fr 1fr',
+									gap: '40px',
+									alignItems: 'start'
+								}}
+							>
+								<div>
+									{/* Photo placeholder */}
+									<div
+										style={{
+											width: '100%',
+											aspectRatio: '4/3',
+											border: '1px dashed rgba(196,146,58,0.15)',
+											display: 'flex',
+											alignItems: 'center',
+											justifyContent: 'center',
+											background: 'rgba(196,146,58,0.02)',
+											marginBottom: '16px'
+										}}
+									>
+										<div
+											style={{
+												textAlign: 'center',
+												fontFamily: 'monospace',
+												fontSize: '10px',
+												color: 'rgba(196,146,58,0.2)',
+												letterSpacing: '1px',
+												lineHeight: 2
+											}}
+										>
+											[ zdjęcie jachtu — widok z boku ]<br />
+											Jeanneau Sun Odyssey 519
+										</div>
+									</div>
+									<div
+										style={{
+											display: 'grid',
+											gridTemplateColumns: '1fr 1fr',
+											gap: '8px'
+										}}
+									>
+										{[
+											'cockpit · 360°',
+											'kabina dziobowa',
+											'salon główny',
+											'kabina rufowa'
+										].map((l) => (
+											<div
+												key={l}
+												style={{
+													aspectRatio: '4/3',
+													border: '1px dashed rgba(196,146,58,0.1)',
+													display: 'flex',
+													alignItems: 'center',
+													justifyContent: 'center',
+													background: 'rgba(196,146,58,0.015)'
+												}}
+											>
+												<span
+													style={{
+														fontFamily: 'monospace',
+														fontSize: '9px',
+														color: 'rgba(196,146,58,0.18)',
+														textAlign: 'center',
+														padding: '8px'
+													}}
+												>
+													{l}
+												</span>
+											</div>
+										))}
+									</div>
+								</div>
+								<div>
+									<p
+										style={{
+											fontFamily: 'var(--font-sans)',
+											fontSize: '15px',
+											color: 'rgba(245,240,232,0.6)',
+											lineHeight: '1.8',
+											margin: '0 0 36px'
+										}}
+									>
+										Nowoczesny, wygodny jacht oceaniczny zaprojektowany z myślą
+										o długich rejsach. Pięć niezależnych kajut dwuosobowych
+										zapewnia prywatność i komfort na każdym etapie podróży.
+									</p>
+									<div
+										style={{
+											display: 'grid',
+											gridTemplateColumns: '1fr 1fr',
+											gap: '1px',
+											background: 'rgba(196,146,58,0.1)'
+										}}
+									>
+										{specs.map(([k, v]) => (
+											<div
+												key={k}
+												style={{ padding: '14px 16px', background: '#0d1b2e' }}
+											>
+												<p
+													style={{
+														fontFamily: 'var(--font-sans)',
+														fontSize: '9px',
+														letterSpacing: '2px',
+														textTransform: 'uppercase',
+														color: 'rgba(196,146,58,0.45)',
+														margin: '0 0 3px'
+													}}
+												>
+													{k}
+												</p>
+												<p
+													style={{
+														fontFamily: 'var(--font-sans)',
+														fontSize: '13px',
+														color: 'var(--warm-white)',
+														margin: 0
+													}}
+												>
+													{v}
+												</p>
+											</div>
+										))}
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+				)
+			}
 
-// ── VESSEL ───────────────────────────────────────────────
-function VesselSection() {
-  const specs = [
-    ['Model', 'Jeanneau Sun Odyssey 519'],
-    ['Rok produkcji', '2019'],
-    ['Długość', '15,6 m'],
-    ['Szerokość', '4,6 m'],
-    ['Kajuty', '5 × 2 koje = 10 miejsc'],
-    ['Silnik', 'Volvo Penta 55 KM'],
-    ['Żagiel główny', 'Lazy bag + furling'],
-    ['Elektronika', 'Ploter, AIS, VHF, automat'],
-  ];
-  return (
-    <section id="vessel" style={{ background: '#0d1b2e', padding: `96px 40px` }}>
-      <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-        <p style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', letterSpacing: '4px', textTransform: 'uppercase', color: 'rgba(196,146,58,0.6)', margin: '0 0 12px' }}>Jacht</p>
-        <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px, 4vw, 48px)', color: 'var(--warm-white)', margin: '0 0 48px', fontWeight: '400' }}>Jeanneau Sun Odyssey 519</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'start' }}>
-          <div>
-            {/* Photo placeholder */}
-            <div style={{ width: '100%', aspectRatio: '4/3', border: '1px dashed rgba(196,146,58,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(196,146,58,0.02)', marginBottom: '16px' }}>
-              <div style={{ textAlign: 'center', fontFamily: 'monospace', fontSize: '10px', color: 'rgba(196,146,58,0.2)', letterSpacing: '1px', lineHeight: 2 }}>
-                [ zdjęcie jachtu — widok z boku ]<br/>Jeanneau Sun Odyssey 519
-              </div>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-              {['cockpit · 360°','kabina dziobowa','salon główny','kabina rufowa'].map(l => (
-                <div key={l} style={{ aspectRatio: '4/3', border: '1px dashed rgba(196,146,58,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(196,146,58,0.015)' }}>
-                  <span style={{ fontFamily: 'monospace', fontSize: '9px', color: 'rgba(196,146,58,0.18)', textAlign: 'center', padding: '8px' }}>{l}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div>
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '15px', color: 'rgba(245,240,232,0.6)', lineHeight: '1.8', margin: '0 0 36px' }}>
-              Nowoczesny, wygodny jacht oceaniczny zaprojektowany z myślą o długich rejsach. Pięć niezależnych kajut dwuosobowych zapewnia prywatność i komfort na każdym etapie podróży.
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: 'rgba(196,146,58,0.1)' }}>
-              {specs.map(([k,v]) => (
-                <div key={k} style={{ padding: '14px 16px', background: '#0d1b2e' }}>
-                  <p style={{ fontFamily: 'var(--font-sans)', fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(196,146,58,0.45)', margin: '0 0 3px' }}>{k}</p>
-                  <p style={{ fontFamily: 'var(--font-sans)', fontSize: '13px', color: 'var(--warm-white)', margin: 0 }}>{v}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
+			// ── ROUTE ────────────────────────────────────────────────
+			function RouteSection() {
+				const [activeStage, setActiveStage] = React.useState(0)
+				const stages = [
+					{
+						num: '01',
+						from: 'Palma de Mallorca',
+						to: 'Gibraltar',
+						dates: '4–11.10.2026',
+						days: 7,
+						price: 1800,
+						desc: 'Start wyprawy. Żegluga wzdłuż wschodniego wybrzeża Hiszpanii, przez Cieśninę Gibraltarską — jedną z najważniejszych morskich bram świata.'
+					},
+					{
+						num: '02',
+						from: 'Gibraltar',
+						to: 'Madera',
+						dates: '12–21.10.2026',
+						days: 9,
+						price: 2300,
+						desc: 'Kurs na południe-zachód. Pierwsze etapy oceaniczne. Madera — zielona perła Atlantyku, wulkaniczne klify, tarasowe winnice, historyczne Funchal.'
+					},
+					{
+						num: '03',
+						from: 'Madera',
+						to: 'Teneryfa',
+						dates: '22–31.10.2026',
+						days: 9,
+						price: 2300,
+						desc: 'Wyspy Kanaryjskie. Teneryfa oferuje majestatyczny wulkan Teide, turkusowe plaże i doskonałą kuchnię — idealny odpoczynek przed ostatnim etapem.'
+					},
+					{
+						num: '04',
+						from: 'Teneryfa',
+						to: 'Cabo Verde',
+						dates: '1–14.11.2026',
+						days: 13,
+						price: 3200,
+						desc: 'Finał — prawdziwy ocean. Pasaty, wieloryby i delfinty. Cabo Verde to esencja egzotyki: afrykańskie rytmy, oceaniczna przestrzeń, wulkaniczne krajobrazy.'
+					}
+				]
+				const s = stages[activeStage]
+				return (
+					<section
+						id="route"
+						style={{ background: '#0f1f35', padding: '96px 40px' }}
+					>
+						<div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+							<p
+								style={{
+									fontFamily: 'var(--font-sans)',
+									fontSize: '11px',
+									letterSpacing: '4px',
+									textTransform: 'uppercase',
+									color: 'rgba(196,146,58,0.6)',
+									margin: '0 0 12px'
+								}}
+							>
+								Trasa rejsu
+							</p>
+							<h2
+								style={{
+									fontFamily: 'var(--font-serif)',
+									fontSize: 'clamp(28px, 4vw, 48px)',
+									color: 'var(--warm-white)',
+									margin: '0 0 48px',
+									fontWeight: '400'
+								}}
+							>
+								Cztery etapy przez Atlantyk
+							</h2>
 
-// ── ROUTE ────────────────────────────────────────────────
-function RouteSection() {
-  const [activeStage, setActiveStage] = React.useState(0);
-  const stages = [
-    { num:'01', from:'Palma de Mallorca', to:'Gibraltar', dates:'4–11.10.2026', days:7, price:1800, desc:'Start wyprawy. Żegluga wzdłuż wschodniego wybrzeża Hiszpanii, przez Cieśninę Gibraltarską — jedną z najważniejszych morskich bram świata.' },
-    { num:'02', from:'Gibraltar', to:'Madera', dates:'12–21.10.2026', days:9, price:2300, desc:'Kurs na południe-zachód. Pierwsze etapy oceaniczne. Madera — zielona perła Atlantyku, wulkaniczne klify, tarasowe winnice, historyczne Funchal.' },
-    { num:'03', from:'Madera', to:'Teneryfa', dates:'22–31.10.2026', days:9, price:2300, desc:'Wyspy Kanaryjskie. Teneryfa oferuje majestatyczny wulkan Teide, turkusowe plaże i doskonałą kuchnię — idealny odpoczynek przed ostatnim etapem.' },
-    { num:'04', from:'Teneryfa', to:'Cabo Verde', dates:'1–14.11.2026', days:13, price:3200, desc:'Finał — prawdziwy ocean. Pasaty, wieloryby i delfinty. Cabo Verde to esencja egzotyki: afrykańskie rytmy, oceaniczna przestrzeń, wulkaniczne krajobrazy.' },
-  ];
-  const s = stages[activeStage];
-  return (
-    <section id="route" style={{ background: '#0f1f35', padding: '96px 40px' }}>
-      <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-        <p style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', letterSpacing: '4px', textTransform: 'uppercase', color: 'rgba(196,146,58,0.6)', margin: '0 0 12px' }}>Trasa rejsu</p>
-        <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px, 4vw, 48px)', color: 'var(--warm-white)', margin: '0 0 48px', fontWeight: '400' }}>Cztery etapy przez Atlantyk</h2>
+							<div
+								style={{
+									display: 'grid',
+									gridTemplateColumns: '1fr 1fr',
+									gap: '48px',
+									alignItems: 'start'
+								}}
+							>
+								{/* Map placeholder + stage nav */}
+								<div>
+									<div
+										style={{
+											width: '100%',
+											aspectRatio: '1/1.1',
+											border: '1px dashed rgba(196,146,58,0.15)',
+											display: 'flex',
+											alignItems: 'center',
+											justifyContent: 'center',
+											background: 'rgba(196,146,58,0.02)',
+											marginBottom: '24px',
+											position: 'relative'
+										}}
+									>
+										{/* Simple illustrated route dots */}
+										<svg
+											viewBox="0 0 300 330"
+											width="80%"
+											style={{ position: 'absolute' }}
+										>
+											{/* Route line */}
+											<polyline
+												points="200,40 220,120 120,200 80,280"
+												fill="none"
+												stroke="rgba(196,146,58,0.35)"
+												strokeWidth="1"
+												strokeDasharray="4 3"
+											/>
+											{[
+												{ x: 200, y: 40, label: 'Palma de Mallorca', n: '01' },
+												{ x: 220, y: 120, label: 'Gibraltar', n: '02' },
+												{ x: 120, y: 200, label: 'Madera', n: '03' },
+												{ x: 80, y: 280, label: 'Teneryfa', n: '' }
+											].map((p, i) => (
+												<g
+													key={i}
+													onClick={() => setActiveStage(Math.max(0, i - 0))}
+													style={{ cursor: 'pointer' }}
+												>
+													<circle
+														cx={p.x}
+														cy={p.y}
+														r="5"
+														fill={
+															activeStage === i
+																? '#c4923a'
+																: 'rgba(196,146,58,0.3)'
+														}
+														stroke="#c4923a"
+														strokeWidth="1"
+													/>
+													<text
+														x={p.x + 10}
+														y={p.y + 4}
+														fontSize="9"
+														fontFamily="DM Sans, sans-serif"
+														fill="rgba(245,240,232,0.5)"
+													>
+														{p.label}
+													</text>
+												</g>
+											))}
+											{/* Cabo Verde below */}
+											<g
+												onClick={() => setActiveStage(3)}
+												style={{ cursor: 'pointer' }}
+											>
+												<polyline
+													points="80,280 40,320"
+													fill="none"
+													stroke="rgba(196,146,58,0.35)"
+													strokeWidth="1"
+													strokeDasharray="4 3"
+												/>
+												<circle
+													cx="40"
+													cy="320"
+													r="5"
+													fill={
+														activeStage === 3
+															? '#c4923a'
+															: 'rgba(196,146,58,0.3)'
+													}
+													stroke="#c4923a"
+													strokeWidth="1"
+												/>
+												<text
+													x="50"
+													y="324"
+													fontSize="9"
+													fontFamily="DM Sans, sans-serif"
+													fill="rgba(245,240,232,0.5)"
+												>
+													Cabo Verde
+												</text>
+											</g>
+											<text
+												x="150"
+												y="320"
+												fontSize="7"
+												fontFamily="monospace"
+												fill="rgba(196,146,58,0.15)"
+												letterSpacing="2"
+											>
+												OCEAN ATLANTYCKI
+											</text>
+										</svg>
+										<div
+											style={{
+												position: 'absolute',
+												top: '12px',
+												right: '12px',
+												fontFamily: 'monospace',
+												fontSize: '8px',
+												color: 'rgba(196,146,58,0.18)',
+												letterSpacing: '1px'
+											}}
+										>
+											mapa poglądowa
+										</div>
+									</div>
+								</div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px', alignItems: 'start' }}>
-          {/* Map placeholder + stage nav */}
-          <div>
-            <div style={{ width: '100%', aspectRatio: '1/1.1', border: '1px dashed rgba(196,146,58,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(196,146,58,0.02)', marginBottom: '24px', position: 'relative' }}>
-              {/* Simple illustrated route dots */}
-              <svg viewBox="0 0 300 330" width="80%" style={{ position: 'absolute' }}>
-                {/* Route line */}
-                <polyline points="200,40 220,120 120,200 80,280" fill="none" stroke="rgba(196,146,58,0.35)" strokeWidth="1" strokeDasharray="4 3" />
-                {[
-                  {x:200,y:40,label:'Palma de Mallorca',n:'01'},
-                  {x:220,y:120,label:'Gibraltar',n:'02'},
-                  {x:120,y:200,label:'Madera',n:'03'},
-                  {x:80,y:280,label:'Teneryfa',n:''},
-                ].map((p,i) => (
-                  <g key={i} onClick={() => setActiveStage(Math.max(0,i-0))} style={{ cursor: 'pointer' }}>
-                    <circle cx={p.x} cy={p.y} r="5" fill={activeStage === i ? '#c4923a' : 'rgba(196,146,58,0.3)'} stroke="#c4923a" strokeWidth="1" />
-                    <text x={p.x+10} y={p.y+4} fontSize="9" fontFamily="DM Sans, sans-serif" fill="rgba(245,240,232,0.5)">{p.label}</text>
-                  </g>
-                ))}
-                {/* Cabo Verde below */}
-                <g onClick={() => setActiveStage(3)} style={{ cursor: 'pointer' }}>
-                  <polyline points="80,280 40,320" fill="none" stroke="rgba(196,146,58,0.35)" strokeWidth="1" strokeDasharray="4 3" />
-                  <circle cx="40" cy="320" r="5" fill={activeStage === 3 ? '#c4923a' : 'rgba(196,146,58,0.3)'} stroke="#c4923a" strokeWidth="1" />
-                  <text x="50" y="324" fontSize="9" fontFamily="DM Sans, sans-serif" fill="rgba(245,240,232,0.5)">Cabo Verde</text>
-                </g>
-                <text x="150" y="320" fontSize="7" fontFamily="monospace" fill="rgba(196,146,58,0.15)" letterSpacing="2">OCEAN ATLANTYCKI</text>
-              </svg>
-              <div style={{ position: 'absolute', top: '12px', right: '12px', fontFamily: 'monospace', fontSize: '8px', color: 'rgba(196,146,58,0.18)', letterSpacing: '1px' }}>mapa poglądowa</div>
-            </div>
-          </div>
+								{/* Stage details */}
+								<div>
+									{/* Stage selector */}
+									<div
+										style={{
+											display: 'flex',
+											gap: '1px',
+											marginBottom: '32px',
+											background: 'rgba(196,146,58,0.1)'
+										}}
+									>
+										{stages.map((st, i) => (
+											<button
+												key={i}
+												onClick={() => setActiveStage(i)}
+												style={{
+													flex: 1,
+													padding: '12px 4px',
+													background:
+														activeStage === i
+															? 'rgba(196,146,58,0.15)'
+															: '#0f1f35',
+													border: 'none',
+													borderBottom: `2px solid ${activeStage === i ? '#c4923a' : 'transparent'}`,
+													color:
+														activeStage === i
+															? '#c4923a'
+															: 'rgba(245,240,232,0.3)',
+													fontFamily: 'var(--font-sans)',
+													fontSize: '11px',
+													fontWeight: '700',
+													letterSpacing: '1px',
+													cursor: 'pointer'
+												}}
+											>
+												{st.num}
+											</button>
+										))}
+									</div>
 
-          {/* Stage details */}
-          <div>
-            {/* Stage selector */}
-            <div style={{ display: 'flex', gap: '1px', marginBottom: '32px', background: 'rgba(196,146,58,0.1)' }}>
-              {stages.map((st, i) => (
-                <button key={i} onClick={() => setActiveStage(i)} style={{
-                  flex: 1, padding: '12px 4px', background: activeStage === i ? 'rgba(196,146,58,0.15)' : '#0f1f35',
-                  border: 'none', borderBottom: `2px solid ${activeStage === i ? '#c4923a' : 'transparent'}`,
-                  color: activeStage === i ? '#c4923a' : 'rgba(245,240,232,0.3)',
-                  fontFamily: 'var(--font-sans)', fontSize: '11px', fontWeight: '700',
-                  letterSpacing: '1px', cursor: 'pointer',
-                }}>
-                  {st.num}
-                </button>
-              ))}
-            </div>
+									<div
+										style={{
+											padding: '28px',
+											border: '1px solid rgba(196,146,58,0.15)',
+											background: 'rgba(196,146,58,0.03)'
+										}}
+									>
+										<p
+											style={{
+												fontFamily: 'var(--font-sans)',
+												fontSize: '9px',
+												letterSpacing: '2px',
+												textTransform: 'uppercase',
+												color: 'rgba(196,146,58,0.5)',
+												margin: '0 0 8px'
+											}}
+										>
+											Etap {s.num}
+										</p>
+										<h3
+											style={{
+												fontFamily: 'var(--font-serif)',
+												fontSize: '24px',
+												color: 'var(--warm-white)',
+												margin: '0 0 4px',
+												fontWeight: '400'
+											}}
+										>
+											{s.from}
+										</h3>
+										<p
+											style={{
+												fontFamily: 'var(--font-serif)',
+												fontSize: '16px',
+												color: 'rgba(196,146,58,0.7)',
+												margin: '0 0 20px',
+												fontStyle: 'italic'
+											}}
+										>
+											→ {s.to}
+										</p>
+										<p
+											style={{
+												fontFamily: 'var(--font-sans)',
+												fontSize: '13px',
+												color: 'rgba(245,240,232,0.55)',
+												lineHeight: '1.7',
+												margin: '0 0 24px'
+											}}
+										>
+											{s.desc}
+										</p>
+										<div
+											style={{
+												display: 'flex',
+												gap: '24px',
+												paddingTop: '20px',
+												borderTop: '1px solid rgba(196,146,58,0.1)'
+											}}
+										>
+											<div>
+												<p
+													style={{
+														fontFamily: 'var(--font-sans)',
+														fontSize: '9px',
+														letterSpacing: '2px',
+														textTransform: 'uppercase',
+														color: 'rgba(196,146,58,0.45)',
+														margin: '0 0 3px'
+													}}
+												>
+													Termin
+												</p>
+												<p
+													style={{
+														fontFamily: 'var(--font-sans)',
+														fontSize: '14px',
+														color: 'var(--warm-white)',
+														margin: 0
+													}}
+												>
+													{s.dates}
+												</p>
+											</div>
+											<div>
+												<p
+													style={{
+														fontFamily: 'var(--font-sans)',
+														fontSize: '9px',
+														letterSpacing: '2px',
+														textTransform: 'uppercase',
+														color: 'rgba(196,146,58,0.45)',
+														margin: '0 0 3px'
+													}}
+												>
+													Dni
+												</p>
+												<p
+													style={{
+														fontFamily: 'var(--font-sans)',
+														fontSize: '14px',
+														color: 'var(--warm-white)',
+														margin: 0
+													}}
+												>
+													{s.days}
+												</p>
+											</div>
+											<div>
+												<p
+													style={{
+														fontFamily: 'var(--font-sans)',
+														fontSize: '9px',
+														letterSpacing: '2px',
+														textTransform: 'uppercase',
+														color: 'rgba(196,146,58,0.45)',
+														margin: '0 0 3px'
+													}}
+												>
+													Cena
+												</p>
+												<p
+													style={{
+														fontFamily: 'var(--font-serif)',
+														fontSize: '22px',
+														color: '#c4923a',
+														margin: 0
+													}}
+												>
+													{s.price.toLocaleString('pl-PL')} zł
+												</p>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+				)
+			}
 
-            <div style={{ padding: '28px', border: '1px solid rgba(196,146,58,0.15)', background: 'rgba(196,146,58,0.03)' }}>
-              <p style={{ fontFamily: 'var(--font-sans)', fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(196,146,58,0.5)', margin: '0 0 8px' }}>Etap {s.num}</p>
-              <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', color: 'var(--warm-white)', margin: '0 0 4px', fontWeight: '400' }}>{s.from}</h3>
-              <p style={{ fontFamily: 'var(--font-serif)', fontSize: '16px', color: 'rgba(196,146,58,0.7)', margin: '0 0 20px', fontStyle: 'italic' }}>→ {s.to}</p>
-              <p style={{ fontFamily: 'var(--font-sans)', fontSize: '13px', color: 'rgba(245,240,232,0.55)', lineHeight: '1.7', margin: '0 0 24px' }}>{s.desc}</p>
-              <div style={{ display: 'flex', gap: '24px', paddingTop: '20px', borderTop: '1px solid rgba(196,146,58,0.1)' }}>
-                <div>
-                  <p style={{ fontFamily: 'var(--font-sans)', fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(196,146,58,0.45)', margin: '0 0 3px' }}>Termin</p>
-                  <p style={{ fontFamily: 'var(--font-sans)', fontSize: '14px', color: 'var(--warm-white)', margin: 0 }}>{s.dates}</p>
-                </div>
-                <div>
-                  <p style={{ fontFamily: 'var(--font-sans)', fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(196,146,58,0.45)', margin: '0 0 3px' }}>Dni</p>
-                  <p style={{ fontFamily: 'var(--font-sans)', fontSize: '14px', color: 'var(--warm-white)', margin: 0 }}>{s.days}</p>
-                </div>
-                <div>
-                  <p style={{ fontFamily: 'var(--font-sans)', fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(196,146,58,0.45)', margin: '0 0 3px' }}>Cena</p>
-                  <p style={{ fontFamily: 'var(--font-serif)', fontSize: '22px', color: '#c4923a', margin: 0 }}>{s.price.toLocaleString('pl-PL')} zł</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
+			// ── CABIN SELECTOR ───────────────────────────────────────
+			function CabinSection({
+				selectedBerth,
+				onSelectBerth,
+				selectedSegment,
+				onSelectSegment,
+				onBook
+			}) {
+				return (
+					<section
+						id="cabins"
+						style={{ background: '#0d1b2e', padding: '96px 40px' }}
+					>
+						<div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+							<p
+								style={{
+									fontFamily: 'var(--font-sans)',
+									fontSize: '11px',
+									letterSpacing: '4px',
+									textTransform: 'uppercase',
+									color: 'rgba(196,146,58,0.6)',
+									margin: '0 0 12px'
+								}}
+							>
+								Plan kajutowy
+							</p>
+							<h2
+								style={{
+									fontFamily: 'var(--font-serif)',
+									fontSize: 'clamp(28px, 4vw, 48px)',
+									color: 'var(--warm-white)',
+									margin: '0 0 12px',
+									fontWeight: '400'
+								}}
+							>
+								Wybierz swoją koję
+							</h2>
+							<p
+								style={{
+									fontFamily: 'var(--font-sans)',
+									fontSize: '14px',
+									color: 'rgba(245,240,232,0.45)',
+									margin: '0 0 48px',
+									maxWidth: '480px',
+									lineHeight: '1.7'
+								}}
+							>
+								Kliknij koję na planie lub użyj listy. Szary oznacza zajęte,
+								mosiądz — dostępne, złoty — wybrane.
+							</p>
 
-// ── CABIN SELECTOR ───────────────────────────────────────
-function CabinSection({ selectedBerth, onSelectBerth, selectedSegment, onSelectSegment, onBook }) {
-  return (
-    <section id="cabins" style={{ background: '#0d1b2e', padding: '96px 40px' }}>
-      <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-        <p style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', letterSpacing: '4px', textTransform: 'uppercase', color: 'rgba(196,146,58,0.6)', margin: '0 0 12px' }}>Plan kajutowy</p>
-        <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px, 4vw, 48px)', color: 'var(--warm-white)', margin: '0 0 12px', fontWeight: '400' }}>Wybierz swoją koję</h2>
-        <p style={{ fontFamily: 'var(--font-sans)', fontSize: '14px', color: 'rgba(245,240,232,0.45)', margin: '0 0 48px', maxWidth: '480px', lineHeight: '1.7' }}>
-          Kliknij koję na planie lub użyj listy. Szary oznacza zajęte, mosiądz — dostępne, złoty — wybrane.
-        </p>
+							{/* Segment picker */}
+							<div
+								style={{
+									display: 'flex',
+									gap: '1px',
+									marginBottom: '48px',
+									background: 'rgba(196,146,58,0.1)',
+									flexWrap: 'wrap'
+								}}
+							>
+								{VOYAGE_SEGMENTS.map((seg) => (
+									<button
+										key={seg.id}
+										onClick={() => onSelectSegment(seg.id)}
+										style={{
+											flex: 1,
+											minWidth: '160px',
+											padding: '16px 20px',
+											background:
+												selectedSegment === seg.id
+													? 'rgba(196,146,58,0.12)'
+													: '#0d1b2e',
+											border: 'none',
+											borderBottom: `2px solid ${selectedSegment === seg.id ? '#c4923a' : 'transparent'}`,
+											cursor: 'pointer',
+											textAlign: 'left'
+										}}
+									>
+										<p
+											style={{
+												fontFamily: 'var(--font-sans)',
+												fontSize: '10px',
+												letterSpacing: '1px',
+												textTransform: 'uppercase',
+												color:
+													selectedSegment === seg.id
+														? '#c4923a'
+														: 'rgba(196,146,58,0.3)',
+												margin: '0 0 4px'
+											}}
+										>
+											{seg.dates}
+										</p>
+										<p
+											style={{
+												fontFamily: 'var(--font-sans)',
+												fontSize: '13px',
+												color:
+													selectedSegment === seg.id
+														? 'var(--warm-white)'
+														: 'rgba(245,240,232,0.4)',
+												margin: '0 0 4px',
+												fontWeight: '500'
+											}}
+										>
+											{seg.name}
+										</p>
+										<p
+											style={{
+												fontFamily: 'var(--font-serif)',
+												fontSize: '18px',
+												color:
+													selectedSegment === seg.id
+														? '#c4923a'
+														: 'rgba(196,146,58,0.4)',
+												margin: 0
+											}}
+										>
+											{seg.price.toLocaleString('pl-PL')} zł
+										</p>
+									</button>
+								))}
+							</div>
 
-        {/* Segment picker */}
-        <div style={{ display: 'flex', gap: '1px', marginBottom: '48px', background: 'rgba(196,146,58,0.1)', flexWrap: 'wrap' }}>
-          {VOYAGE_SEGMENTS.map(seg => (
-            <button key={seg.id} onClick={() => onSelectSegment(seg.id)} style={{
-              flex: 1, minWidth: '160px', padding: '16px 20px',
-              background: selectedSegment === seg.id ? 'rgba(196,146,58,0.12)' : '#0d1b2e',
-              border: 'none', borderBottom: `2px solid ${selectedSegment === seg.id ? '#c4923a' : 'transparent'}`,
-              cursor: 'pointer', textAlign: 'left',
-            }}>
-              <p style={{ fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', color: selectedSegment === seg.id ? '#c4923a' : 'rgba(196,146,58,0.3)', margin: '0 0 4px' }}>{seg.dates}</p>
-              <p style={{ fontFamily: 'var(--font-sans)', fontSize: '13px', color: selectedSegment === seg.id ? 'var(--warm-white)' : 'rgba(245,240,232,0.4)', margin: '0 0 4px', fontWeight: '500' }}>{seg.name}</p>
-              <p style={{ fontFamily: 'var(--font-serif)', fontSize: '18px', color: selectedSegment === seg.id ? '#c4923a' : 'rgba(196,146,58,0.4)', margin: 0 }}>{seg.price.toLocaleString('pl-PL')} zł</p>
-            </button>
-          ))}
-        </div>
+							<BoatPlan
+								selectedBerth={selectedBerth}
+								onSelectBerth={onSelectBerth}
+							/>
 
-        <BoatPlan selectedBerth={selectedBerth} onSelectBerth={onSelectBerth} />
+							{selectedBerth && (
+								<div
+									style={{
+										marginTop: '48px',
+										display: 'flex',
+										alignItems: 'center',
+										gap: '24px',
+										flexWrap: 'wrap'
+									}}
+								>
+									<div
+										style={{
+											flex: 1,
+											padding: '20px 24px',
+											background: 'rgba(196,146,58,0.07)',
+											border: '1px solid rgba(196,146,58,0.25)'
+										}}
+									>
+										<p
+											style={{
+												fontFamily: 'var(--font-sans)',
+												fontSize: '9px',
+												letterSpacing: '2px',
+												textTransform: 'uppercase',
+												color: 'rgba(196,146,58,0.5)',
+												margin: '0 0 4px'
+											}}
+										>
+											Wybrano
+										</p>
+										<p
+											style={{
+												fontFamily: 'var(--font-serif)',
+												fontSize: '20px',
+												color: 'var(--warm-white)',
+												margin: 0
+											}}
+										>
+											Koja {selectedBerth} ·{' '}
+											{
+												CABINS.find((c) => c.berths.includes(selectedBerth))
+													?.label
+											}{' '}
+											·{' '}
+											{
+												VOYAGE_SEGMENTS.find((s) => s.id === selectedSegment)
+													?.name
+											}
+										</p>
+									</div>
+									<button
+										onClick={onBook}
+										style={{
+											padding: '18px 48px',
+											background: '#c4923a',
+											border: 'none',
+											color: '#0d1b2e',
+											fontWeight: '700',
+											fontSize: '13px',
+											letterSpacing: '2px',
+											textTransform: 'uppercase',
+											cursor: 'pointer',
+											borderRadius: 0,
+											whiteSpace: 'nowrap'
+										}}
+									>
+										Rezerwuj →
+									</button>
+								</div>
+							)}
+						</div>
+					</section>
+				)
+			}
 
-        {selectedBerth && (
-          <div style={{ marginTop: '48px', display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, padding: '20px 24px', background: 'rgba(196,146,58,0.07)', border: '1px solid rgba(196,146,58,0.25)' }}>
-              <p style={{ fontFamily: 'var(--font-sans)', fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(196,146,58,0.5)', margin: '0 0 4px' }}>Wybrano</p>
-              <p style={{ fontFamily: 'var(--font-serif)', fontSize: '20px', color: 'var(--warm-white)', margin: 0 }}>
-                Koja {selectedBerth} · {CABINS.find(c=>c.berths.includes(selectedBerth))?.label} · {VOYAGE_SEGMENTS.find(s=>s.id===selectedSegment)?.name}
-              </p>
-            </div>
-            <button onClick={onBook} style={{ padding: '18px 48px', background: '#c4923a', border: 'none', color: '#0d1b2e', fontWeight: '700', fontSize: '13px', letterSpacing: '2px', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 0, whiteSpace: 'nowrap' }}>
-              Rezerwuj →
-            </button>
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}
+			// ── PRICING ──────────────────────────────────────────────
+			function PricingSection({ onBook }) {
+				return (
+					<section
+						id="pricing"
+						style={{ background: '#0f1f35', padding: '96px 40px' }}
+					>
+						<div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+							<p
+								style={{
+									fontFamily: 'var(--font-sans)',
+									fontSize: '11px',
+									letterSpacing: '4px',
+									textTransform: 'uppercase',
+									color: 'rgba(196,146,58,0.6)',
+									margin: '0 0 12px'
+								}}
+							>
+								Cennik
+							</p>
+							<h2
+								style={{
+									fontFamily: 'var(--font-serif)',
+									fontSize: 'clamp(28px, 4vw, 48px)',
+									color: 'var(--warm-white)',
+									margin: '0 0 48px',
+									fontWeight: '400'
+								}}
+							>
+								Wybierz swój etap
+							</h2>
 
-// ── PRICING ──────────────────────────────────────────────
-function PricingSection({ onBook }) {
-  return (
-    <section id="pricing" style={{ background: '#0f1f35', padding: '96px 40px' }}>
-      <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-        <p style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', letterSpacing: '4px', textTransform: 'uppercase', color: 'rgba(196,146,58,0.6)', margin: '0 0 12px' }}>Cennik</p>
-        <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px, 4vw, 48px)', color: 'var(--warm-white)', margin: '0 0 48px', fontWeight: '400' }}>Wybierz swój etap</h2>
+							<div
+								style={{
+									display: 'grid',
+									gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))',
+									gap: '1px',
+									background: 'rgba(196,146,58,0.1)'
+								}}
+							>
+								{VOYAGE_SEGMENTS.map((seg, i) => (
+									<div
+										key={seg.id}
+										style={{
+											padding: '32px 28px',
+											background: '#0f1f35',
+											position: 'relative'
+										}}
+									>
+										{i === 3 && (
+											<div
+												style={{
+													position: 'absolute',
+													top: '16px',
+													right: '16px',
+													padding: '4px 10px',
+													background: '#c4923a',
+													color: '#0d1b2e',
+													fontSize: '9px',
+													fontWeight: '700',
+													letterSpacing: '1.5px',
+													textTransform: 'uppercase'
+												}}
+											>
+												OSTATNIE MIEJSCA
+											</div>
+										)}
+										<p
+											style={{
+												fontFamily: 'var(--font-sans)',
+												fontSize: '9px',
+												letterSpacing: '2px',
+												textTransform: 'uppercase',
+												color: 'rgba(196,146,58,0.5)',
+												margin: '0 0 8px'
+											}}
+										>
+											Etap {String(i + 1).padStart(2, '0')}
+										</p>
+										<h3
+											style={{
+												fontFamily: 'var(--font-serif)',
+												fontSize: '20px',
+												color: 'var(--warm-white)',
+												margin: '0 0 4px',
+												fontWeight: '400'
+											}}
+										>
+											{seg.name}
+										</h3>
+										<p
+											style={{
+												fontFamily: 'var(--font-sans)',
+												fontSize: '12px',
+												color: 'rgba(245,240,232,0.35)',
+												margin: '0 0 24px'
+											}}
+										>
+											{seg.dates} · {seg.days} dni
+										</p>
+										<p
+											style={{
+												fontFamily: 'var(--font-serif)',
+												fontSize: '36px',
+												color: '#c4923a',
+												margin: '0 0 6px'
+											}}
+										>
+											{seg.price.toLocaleString('pl-PL')}
+											<span style={{ fontSize: '16px' }}> zł</span>
+										</p>
+										<p
+											style={{
+												fontFamily: 'var(--font-sans)',
+												fontSize: '10px',
+												color: 'rgba(245,240,232,0.3)',
+												margin: '0 0 24px'
+											}}
+										>
+											za osobę · 1 koja
+										</p>
+										<button
+											onClick={onBook}
+											style={{
+												width: '100%',
+												padding: '12px',
+												background: 'none',
+												border: '1px solid rgba(196,146,58,0.3)',
+												color: 'rgba(245,240,232,0.7)',
+												fontFamily: 'var(--font-sans)',
+												fontSize: '11px',
+												fontWeight: '600',
+												letterSpacing: '2px',
+												textTransform: 'uppercase',
+												cursor: 'pointer',
+												borderRadius: 0
+											}}
+										>
+											Zarezerwuj
+										</button>
+									</div>
+								))}
+							</div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: '1px', background: 'rgba(196,146,58,0.1)' }}>
-          {VOYAGE_SEGMENTS.map((seg, i) => (
-            <div key={seg.id} style={{ padding: '32px 28px', background: '#0f1f35', position: 'relative' }}>
-              {i === 3 && <div style={{ position: 'absolute', top: '16px', right: '16px', padding: '4px 10px', background: '#c4923a', color: '#0d1b2e', fontSize: '9px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase' }}>OSTATNIE MIEJSCA</div>}
-              <p style={{ fontFamily: 'var(--font-sans)', fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(196,146,58,0.5)', margin: '0 0 8px' }}>Etap {String(i+1).padStart(2,'0')}</p>
-              <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '20px', color: 'var(--warm-white)', margin: '0 0 4px', fontWeight: '400' }}>{seg.name}</h3>
-              <p style={{ fontFamily: 'var(--font-sans)', fontSize: '12px', color: 'rgba(245,240,232,0.35)', margin: '0 0 24px' }}>{seg.dates} · {seg.days} dni</p>
-              <p style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', color: '#c4923a', margin: '0 0 6px' }}>{seg.price.toLocaleString('pl-PL')}<span style={{ fontSize: '16px' }}> zł</span></p>
-              <p style={{ fontFamily: 'var(--font-sans)', fontSize: '10px', color: 'rgba(245,240,232,0.3)', margin: '0 0 24px' }}>za osobę · 1 koja</p>
-              <button onClick={onBook} style={{ width: '100%', padding: '12px', background: 'none', border: '1px solid rgba(196,146,58,0.3)', color: 'rgba(245,240,232,0.7)', fontFamily: 'var(--font-sans)', fontSize: '11px', fontWeight: '600', letterSpacing: '2px', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 0 }}>
-                Zarezerwuj
-              </button>
-            </div>
-          ))}
-        </div>
+							{/* What's included */}
+							<div
+								style={{
+									marginTop: '48px',
+									display: 'grid',
+									gridTemplateColumns: '1fr 1fr',
+									gap: '32px'
+								}}
+							>
+								<div>
+									<p
+										style={{
+											fontFamily: 'var(--font-sans)',
+											fontSize: '10px',
+											letterSpacing: '2px',
+											textTransform: 'uppercase',
+											color: 'rgba(196,146,58,0.6)',
+											margin: '0 0 16px'
+										}}
+									>
+										Cena zawiera
+									</p>
+									{[
+										'Koja na jachcie',
+										'Skipper + doświadczona załoga',
+										'Wachty nawigacyjne',
+										'Wspólne gotowanie na pokładzie',
+										'Sprzęt bezpieczeństwa'
+									].map((item) => (
+										<div
+											key={item}
+											style={{
+												display: 'flex',
+												gap: '10px',
+												alignItems: 'center',
+												marginBottom: '10px'
+											}}
+										>
+											<div
+												style={{
+													width: '6px',
+													height: '6px',
+													background: '#c4923a',
+													flexShrink: 0
+												}}
+											/>
+											<span
+												style={{
+													fontFamily: 'var(--font-sans)',
+													fontSize: '13px',
+													color: 'rgba(245,240,232,0.6)'
+												}}
+											>
+												{item}
+											</span>
+										</div>
+									))}
+								</div>
+								<div>
+									<p
+										style={{
+											fontFamily: 'var(--font-sans)',
+											fontSize: '10px',
+											letterSpacing: '2px',
+											textTransform: 'uppercase',
+											color: 'rgba(196,146,58,0.4)',
+											margin: '0 0 16px'
+										}}
+									>
+										Cena nie zawiera
+									</p>
+									{[
+										'Dojazd do mariny',
+										'Opłaty portowe i paliwo (~150–200 EUR/os)',
+										'Ubezpieczenie turystyczne (~250 zł/os)',
+										'Napoje i wycieczki lądowe'
+									].map((item) => (
+										<div
+											key={item}
+											style={{
+												display: 'flex',
+												gap: '10px',
+												alignItems: 'center',
+												marginBottom: '10px'
+											}}
+										>
+											<div
+												style={{
+													width: '6px',
+													height: '6px',
+													border: '1px solid rgba(196,146,58,0.3)',
+													flexShrink: 0
+												}}
+											/>
+											<span
+												style={{
+													fontFamily: 'var(--font-sans)',
+													fontSize: '13px',
+													color: 'rgba(245,240,232,0.35)'
+												}}
+											>
+												{item}
+											</span>
+										</div>
+									))}
+								</div>
+							</div>
+						</div>
+					</section>
+				)
+			}
 
-        {/* What's included */}
-        <div style={{ marginTop: '48px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
-          <div>
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(196,146,58,0.6)', margin: '0 0 16px' }}>Cena zawiera</p>
-            {['Koja na jachcie','Skipper + doświadczona załoga','Wachty nawigacyjne','Wspólne gotowanie na pokładzie','Sprzęt bezpieczeństwa'].map(item => (
-              <div key={item} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
-                <div style={{ width: '6px', height: '6px', background: '#c4923a', flexShrink: 0 }} />
-                <span style={{ fontFamily: 'var(--font-sans)', fontSize: '13px', color: 'rgba(245,240,232,0.6)' }}>{item}</span>
-              </div>
-            ))}
-          </div>
-          <div>
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(196,146,58,0.4)', margin: '0 0 16px' }}>Cena nie zawiera</p>
-            {['Dojazd do mariny','Opłaty portowe i paliwo (~150–200 EUR/os)','Ubezpieczenie turystyczne (~250 zł/os)','Napoje i wycieczki lądowe'].map(item => (
-              <div key={item} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
-                <div style={{ width: '6px', height: '6px', border: '1px solid rgba(196,146,58,0.3)', flexShrink: 0 }} />
-                <span style={{ fontFamily: 'var(--font-sans)', fontSize: '13px', color: 'rgba(245,240,232,0.35)' }}>{item}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
+			// ── FAQ ──────────────────────────────────────────────────
+			function FaqSection({ tweaks }) {
+				const [open, setOpen] = React.useState(null)
+				if (!tweaks.showFaq) return null
+				const items = [
+					[
+						'Czy muszę mieć patent żeglarski?',
+						'Nie. Nie wymagamy patentu. Doświadczenie mile widziane, ale przyjmujemy osoby bez doświadczenia — pod warunkiem chęci do nauki i pracy w załodze.'
+					],
+					[
+						'Ile osób jest na jachcie?',
+						'Maksymalnie 10 uczestników + skipper. Każdy ma własną koje w jednej z 5 kajut. Wszystkie kajuty są dwuosobowe.'
+					],
+					[
+						'Jak wygląda życie na pokładzie?',
+						'Wachty nawigacyjne, wspólne gotowanie, zwiedzanie portów. Atmosfera jest luźna, ale wszyscy aktywnie uczestniczą w rejsie.'
+					],
+					[
+						'Co wziąć na rejs?',
+						'Prześlemy pełną listę po rezerwacji. Podstawy: odzież szorarska, kurtka przeciwdeszczowa, obuwie z białą podeszwą, dokumenty tożsamości.'
+					],
+					[
+						'Jaka jest polityka anulacji?',
+						'Do 60 dni przed rejsem — pełny zwrot. 30–60 dni — 50% zwrotu. Poniżej 30 dni — brak zwrotu (można wskazać zastępstwo).'
+					],
+					[
+						'Jak skontaktować się z organizatorem?',
+						'Michał: +48 601 671 182 · sailingarchitects@gmail.com. Odpowiadamy w ciągu 24h.'
+					]
+				]
+				return (
+					<section style={{ background: '#0d1b2e', padding: '96px 40px' }}>
+						<div style={{ maxWidth: '720px', margin: '0 auto' }}>
+							<p
+								style={{
+									fontFamily: 'var(--font-sans)',
+									fontSize: '11px',
+									letterSpacing: '4px',
+									textTransform: 'uppercase',
+									color: 'rgba(196,146,58,0.6)',
+									margin: '0 0 12px'
+								}}
+							>
+								FAQ
+							</p>
+							<h2
+								style={{
+									fontFamily: 'var(--font-serif)',
+									fontSize: 'clamp(28px, 4vw, 40px)',
+									color: 'var(--warm-white)',
+									margin: '0 0 48px',
+									fontWeight: '400'
+								}}
+							>
+								Pytania i odpowiedzi
+							</h2>
+							{items.map(([q, a], i) => (
+								<div
+									key={i}
+									style={{ borderTop: '1px solid rgba(196,146,58,0.1)' }}
+								>
+									<button
+										onClick={() => setOpen(open === i ? null : i)}
+										style={{
+											width: '100%',
+											padding: '20px 0',
+											background: 'none',
+											border: 'none',
+											display: 'flex',
+											justifyContent: 'space-between',
+											alignItems: 'center',
+											cursor: 'pointer',
+											gap: '16px'
+										}}
+									>
+										<span
+											style={{
+												fontFamily: 'var(--font-sans)',
+												fontSize: '15px',
+												color: open === i ? '#c4923a' : 'var(--warm-white)',
+												textAlign: 'left',
+												fontWeight: '400'
+											}}
+										>
+											{q}
+										</span>
+										<span
+											style={{
+												color: '#c4923a',
+												fontSize: '18px',
+												flexShrink: 0,
+												transform: open === i ? 'rotate(45deg)' : 'none',
+												transition: 'transform 0.2s'
+											}}
+										>
+											+
+										</span>
+									</button>
+									{open === i && (
+										<div style={{ paddingBottom: '20px' }}>
+											<p
+												style={{
+													fontFamily: 'var(--font-sans)',
+													fontSize: '14px',
+													color: 'rgba(245,240,232,0.55)',
+													lineHeight: '1.75',
+													margin: 0
+												}}
+											>
+												{a}
+											</p>
+										</div>
+									)}
+								</div>
+							))}
+							<div style={{ borderTop: '1px solid rgba(196,146,58,0.1)' }} />
+						</div>
+					</section>
+				)
+			}
 
-// ── FAQ ──────────────────────────────────────────────────
-function FaqSection({ tweaks }) {
-  const [open, setOpen] = React.useState(null);
-  if (!tweaks.showFaq) return null;
-  const items = [
-    ['Czy muszę mieć patent żeglarski?', 'Nie. Nie wymagamy patentu. Doświadczenie mile widziane, ale przyjmujemy osoby bez doświadczenia — pod warunkiem chęci do nauki i pracy w załodze.'],
-    ['Ile osób jest na jachcie?', 'Maksymalnie 10 uczestników + skipper. Każdy ma własną koje w jednej z 5 kajut. Wszystkie kajuty są dwuosobowe.'],
-    ['Jak wygląda życie na pokładzie?', 'Wachty nawigacyjne, wspólne gotowanie, zwiedzanie portów. Atmosfera jest luźna, ale wszyscy aktywnie uczestniczą w rejsie.'],
-    ['Co wziąć na rejs?', 'Prześlemy pełną listę po rezerwacji. Podstawy: odzież szorarska, kurtka przeciwdeszczowa, obuwie z białą podeszwą, dokumenty tożsamości.'],
-    ['Jaka jest polityka anulacji?', 'Do 60 dni przed rejsem — pełny zwrot. 30–60 dni — 50% zwrotu. Poniżej 30 dni — brak zwrotu (można wskazać zastępstwo).'],
-    ['Jak skontaktować się z organizatorem?', 'Michał: +48 601 671 182 · sailingarchitects@gmail.com. Odpowiadamy w ciągu 24h.'],
-  ];
-  return (
-    <section style={{ background: '#0d1b2e', padding: '96px 40px' }}>
-      <div style={{ maxWidth: '720px', margin: '0 auto' }}>
-        <p style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', letterSpacing: '4px', textTransform: 'uppercase', color: 'rgba(196,146,58,0.6)', margin: '0 0 12px' }}>FAQ</p>
-        <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px, 4vw, 40px)', color: 'var(--warm-white)', margin: '0 0 48px', fontWeight: '400' }}>Pytania i odpowiedzi</h2>
-        {items.map(([q, a], i) => (
-          <div key={i} style={{ borderTop: '1px solid rgba(196,146,58,0.1)' }}>
-            <button onClick={() => setOpen(open === i ? null : i)} style={{ width: '100%', padding: '20px 0', background: 'none', border: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', gap: '16px' }}>
-              <span style={{ fontFamily: 'var(--font-sans)', fontSize: '15px', color: open === i ? '#c4923a' : 'var(--warm-white)', textAlign: 'left', fontWeight: '400' }}>{q}</span>
-              <span style={{ color: '#c4923a', fontSize: '18px', flexShrink: 0, transform: open === i ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s' }}>+</span>
-            </button>
-            {open === i && (
-              <div style={{ paddingBottom: '20px' }}>
-                <p style={{ fontFamily: 'var(--font-sans)', fontSize: '14px', color: 'rgba(245,240,232,0.55)', lineHeight: '1.75', margin: 0 }}>{a}</p>
-              </div>
-            )}
-          </div>
-        ))}
-        <div style={{ borderTop: '1px solid rgba(196,146,58,0.1)' }} />
-      </div>
-    </section>
-  );
-}
+			// ── FOOTER ───────────────────────────────────────────────
+			function Footer({ onBook }) {
+				return (
+					<footer
+						style={{
+							background: '#07111e',
+							padding: '64px 40px 40px',
+							borderTop: '1px solid rgba(196,146,58,0.1)'
+						}}
+					>
+						<div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+							<div
+								style={{
+									display: 'grid',
+									gridTemplateColumns: '1fr auto',
+									gap: '48px',
+									alignItems: 'end',
+									marginBottom: '48px',
+									flexWrap: 'wrap'
+								}}
+							>
+								<div>
+									<div
+										style={{
+											display: 'flex',
+											alignItems: 'center',
+											gap: '12px',
+											marginBottom: '16px'
+										}}
+									>
+										<SALogo size={28} />
+										<span
+											style={{
+												fontFamily: 'var(--font-serif)',
+												fontSize: '18px',
+												color: 'var(--warm-white)'
+											}}
+										>
+											Sailing Architects
+										</span>
+									</div>
+									<p
+										style={{
+											fontFamily: 'var(--font-sans)',
+											fontSize: '13px',
+											color: 'rgba(245,240,232,0.35)',
+											maxWidth: '360px',
+											lineHeight: '1.7',
+											margin: '0 0 20px'
+										}}
+									>
+										Boutique sailing trips. Łączymy pasję żeglowania z
+										odkrywaniem świata.
+									</p>
+									<p
+										style={{
+											fontFamily: 'var(--font-sans)',
+											fontSize: '12px',
+											color: 'rgba(196,146,58,0.5)'
+										}}
+									>
+										sailingarchitects@gmail.com · +48 601 671 182
+									</p>
+								</div>
+								<button
+									onClick={onBook}
+									style={{
+										padding: '16px 40px',
+										background: '#c4923a',
+										border: 'none',
+										color: '#0d1b2e',
+										fontWeight: '700',
+										fontSize: '12px',
+										letterSpacing: '2px',
+										textTransform: 'uppercase',
+										cursor: 'pointer',
+										borderRadius: 0,
+										whiteSpace: 'nowrap'
+									}}
+								>
+									Zarezerwuj kojê →
+								</button>
+							</div>
+							<div
+								style={{
+									borderTop: '1px solid rgba(196,146,58,0.08)',
+									paddingTop: '24px',
+									display: 'flex',
+									justifyContent: 'space-between',
+									flexWrap: 'wrap',
+									gap: '12px'
+								}}
+							>
+								<p
+									style={{
+										fontFamily: 'var(--font-sans)',
+										fontSize: '11px',
+										color: 'rgba(245,240,232,0.2)'
+									}}
+								>
+									© 2026 Sailing Architects. Projekt: hi-fi prototype.
+								</p>
+								<p
+									style={{
+										fontFamily: 'var(--font-sans)',
+										fontSize: '11px',
+										color: 'rgba(245,240,232,0.2)'
+									}}
+								>
+									SvelteKit + Convex + Stripe + Clerk
+								</p>
+							</div>
+						</div>
+					</footer>
+				)
+			}
 
-// ── FOOTER ───────────────────────────────────────────────
-function Footer({ onBook }) {
-  return (
-    <footer style={{ background: '#07111e', padding: '64px 40px 40px', borderTop: '1px solid rgba(196,146,58,0.1)' }}>
-      <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '48px', alignItems: 'end', marginBottom: '48px', flexWrap: 'wrap' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-              <SALogo size={28} />
-              <span style={{ fontFamily: 'var(--font-serif)', fontSize: '18px', color: 'var(--warm-white)' }}>Sailing Architects</span>
-            </div>
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '13px', color: 'rgba(245,240,232,0.35)', maxWidth: '360px', lineHeight: '1.7', margin: '0 0 20px' }}>
-              Boutique sailing trips. Łączymy pasję żeglowania z odkrywaniem świata.
-            </p>
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '12px', color: 'rgba(196,146,58,0.5)' }}>
-              sailingarchitects@gmail.com · +48 601 671 182
-            </p>
-          </div>
-          <button onClick={onBook} style={{ padding: '16px 40px', background: '#c4923a', border: 'none', color: '#0d1b2e', fontWeight: '700', fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 0, whiteSpace: 'nowrap' }}>
-            Zarezerwuj kojê →
-          </button>
-        </div>
-        <div style={{ borderTop: '1px solid rgba(196,146,58,0.08)', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', color: 'rgba(245,240,232,0.2)' }}>© 2026 Sailing Architects. Projekt: hi-fi prototype.</p>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', color: 'rgba(245,240,232,0.2)' }}>SvelteKit + Convex + Stripe + Clerk</p>
-        </div>
-      </div>
-    </footer>
-  );
-}
+			// ── APP ──────────────────────────────────────────────────
+			function App() {
+				const result = useTweaks(TWEAK_DEFAULTS)
+				const tweaks = result?.tweaks ?? TWEAK_DEFAULTS
+				const [page, setPage] = React.useState('landing') // 'landing' | 'booking' | 'dashboard'
+				const [selectedBerth, setSelectedBerth] = React.useState(null)
+				const [selectedSegment, setSelectedSegment] = React.useState('s1')
 
-// ── APP ──────────────────────────────────────────────────
-function App() {
-  const result = useTweaks(TWEAK_DEFAULTS);
-  const tweaks = result?.tweaks ?? TWEAK_DEFAULTS;
-  const [page, setPage] = React.useState('landing'); // 'landing' | 'booking' | 'dashboard'
-  const [selectedBerth, setSelectedBerth] = React.useState(null);
-  const [selectedSegment, setSelectedSegment] = React.useState('s1');
+				// Apply accent color from tweaks
+				React.useEffect(() => {
+					document.documentElement.style.setProperty(
+						'--brass',
+						tweaks.accentColor
+					)
+				}, [tweaks.accentColor])
 
-  // Apply accent color from tweaks
-  React.useEffect(() => {
-    document.documentElement.style.setProperty('--brass', tweaks.accentColor);
-  }, [tweaks.accentColor]);
+				if (page === 'booking') {
+					return (
+						<BookingFlow
+							selectedBerth={selectedBerth}
+							selectedSegment={selectedSegment}
+							onBack={() => setPage('landing')}
+							onDashboard={() => setPage('dashboard')}
+						/>
+					)
+				}
+				if (page === 'dashboard') {
+					return <Dashboard onBack={() => setPage('landing')} />
+				}
 
-  if (page === 'booking') {
-    return <BookingFlow selectedBerth={selectedBerth} selectedSegment={selectedSegment} onBack={() => setPage('landing')} onDashboard={() => setPage('dashboard')} />;
-  }
-  if (page === 'dashboard') {
-    return <Dashboard onBack={() => setPage('landing')} />;
-  }
+				const goBook = () => setPage('booking')
 
-  const goBook = () => setPage('booking');
+				return (
+					<div>
+						<Nav
+							onBook={goBook}
+							onDashboard={() => setPage('dashboard')}
+							tweaks={tweaks}
+						/>
+						<Hero onBook={goBook} tweaks={tweaks} />
+						<VesselSection />
+						<RouteSection />
+						<CabinSection
+							selectedBerth={selectedBerth}
+							onSelectBerth={setSelectedBerth}
+							selectedSegment={selectedSegment}
+							onSelectSegment={setSelectedSegment}
+							onBook={goBook}
+						/>
+						<PricingSection onBook={goBook} />
+						<FaqSection tweaks={tweaks} />
+						<Footer onBook={goBook} />
 
-  return (
-    <div>
-      <Nav onBook={goBook} onDashboard={() => setPage('dashboard')} tweaks={tweaks} />
-      <Hero onBook={goBook} tweaks={tweaks} />
-      <VesselSection />
-      <RouteSection />
-      <CabinSection selectedBerth={selectedBerth} onSelectBerth={setSelectedBerth} selectedSegment={selectedSegment} onSelectSegment={setSelectedSegment} onBook={goBook} />
-      <PricingSection onBook={goBook} />
-      <FaqSection tweaks={tweaks} />
-      <Footer onBook={goBook} />
+						<TweaksPanel>
+							<TweakSection title="Kolory">
+								<TweakColor id="accentColor" label="Kolor akcentu" />
+							</TweakSection>
+							<TweakSection title="Hero">
+								<TweakRadio
+									id="heroStyle"
+									label="Tło hero"
+									options={[
+										{ value: 'gradient', label: 'Gradient' },
+										{ value: 'dark', label: 'Ciemne' }
+									]}
+								/>
+							</TweakSection>
+							<TweakSection title="Sekcje">
+								<TweakToggle id="showFaq" label="Pokaż FAQ" />
+							</TweakSection>
+						</TweaksPanel>
+					</div>
+				)
+			}
 
-      <TweaksPanel>
-        <TweakSection title="Kolory">
-          <TweakColor id="accentColor" label="Kolor akcentu" />
-        </TweakSection>
-        <TweakSection title="Hero">
-          <TweakRadio id="heroStyle" label="Tło hero" options={[{value:'gradient',label:'Gradient'},{value:'dark',label:'Ciemne'}]} />
-        </TweakSection>
-        <TweakSection title="Sekcje">
-          <TweakToggle id="showFaq" label="Pokaż FAQ" />
-        </TweakSection>
-      </TweaksPanel>
-    </div>
-  );
-}
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
-</script>
-</body>
+			const root = ReactDOM.createRoot(document.getElementById('root'))
+			root.render(<App />)
+		</script>
+	</body>
 </html>

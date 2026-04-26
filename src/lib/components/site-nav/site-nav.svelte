@@ -22,7 +22,13 @@
 
 <nav class="site-nav" class:site-nav--scrolled={scrolled}>
 	<a class="brand" href={resolve('/')}>
-		<svg width="32" height="32" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+		<svg
+			width="32"
+			height="32"
+			viewBox="0 0 40 40"
+			fill="none"
+			aria-hidden="true"
+		>
 			<circle cx="20" cy="20" r="19" stroke="#c4923a" stroke-width="1.5" />
 			<text
 				x="20"
@@ -32,7 +38,8 @@
 				font-weight="700"
 				font-family="DM Sans, sans-serif"
 				fill="#c4923a"
-				letter-spacing="1">SA</text>
+				letter-spacing="1">SA</text
+			>
 		</svg>
 		<span>Sailing Architects</span>
 	</a>
@@ -61,7 +68,10 @@
 		background: transparent;
 		backdrop-filter: none;
 		border-bottom: 1px solid transparent;
-		transition: background 300ms ease, backdrop-filter 300ms ease, border-color 300ms ease;
+		transition:
+			background 300ms ease,
+			backdrop-filter 300ms ease,
+			border-color 300ms ease;
 	}
 
 	.site-nav--scrolled {
@@ -113,7 +123,10 @@
 		border-radius: 0;
 		display: inline-flex;
 		align-items: center;
-		transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+		transition:
+			background-color 200ms ease,
+			color 200ms ease,
+			border-color 200ms ease;
 	}
 
 	.btn--ghost {

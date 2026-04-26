@@ -33,7 +33,9 @@
 					<h3 class="card__title">{seg.name}</h3>
 					<p class="card__dates">{seg.dates} · {seg.days} dni</p>
 					<p class="card__price">
-						{seg.price.toLocaleString('pl-PL')}<span class="card__price-unit">&nbsp;zł</span>
+						{seg.price.toLocaleString('pl-PL')}<span class="card__price-unit"
+							>&nbsp;zł</span
+						>
 					</p>
 					<p class="card__per">za osobę · 1 koja</p>
 					<a class="card__cta" href={resolve('/book')}>Zarezerwuj</a>
@@ -183,7 +185,10 @@
 		cursor: pointer;
 		border-radius: 0;
 		margin-top: auto;
-		transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+		transition:
+			background-color 200ms ease,
+			color 200ms ease,
+			border-color 200ms ease;
 	}
 
 	.card__cta:hover {

@@ -28,8 +28,9 @@
 
 			<div class="copy">
 				<p class="lead">
-					Nowoczesny, wygodny jacht oceaniczny zaprojektowany z myślą o długich rejsach. Pięć
-					niezależnych kajut dwuosobowych zapewnia prywatność i komfort na każdym etapie podróży.
+					Nowoczesny, wygodny jacht oceaniczny zaprojektowany z myślą o długich
+					rejsach. Pięć niezależnych kajut dwuosobowych zapewnia prywatność i
+					komfort na każdym etapie podróży.
 				</p>
 				<div class="specs">
 					{#each specs as [label, value] (label)}

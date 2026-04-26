@@ -7,8 +7,20 @@
 		<div class="footer__top">
 			<div class="footer__brand">
 				<div class="footer__logo">
-					<svg width="28" height="28" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-						<circle cx="20" cy="20" r="19" stroke="#c4923a" stroke-width="1.5" />
+					<svg
+						width="28"
+						height="28"
+						viewBox="0 0 40 40"
+						fill="none"
+						aria-hidden="true"
+					>
+						<circle
+							cx="20"
+							cy="20"
+							r="19"
+							stroke="#c4923a"
+							stroke-width="1.5"
+						/>
 						<text
 							x="20"
 							y="25"
@@ -17,7 +29,8 @@
 							font-weight="700"
 							font-family="DM Sans, sans-serif"
 							fill="#c4923a"
-							letter-spacing="1">SA</text>
+							letter-spacing="1">SA</text
+						>
 					</svg>
 					<span>Sailing Architects</span>
 				</div>
@@ -25,7 +38,10 @@
 					Boutique sailing trips. Łączymy pasję żeglowania z odkrywaniem świata.
 				</p>
 				<p class="footer__contact">
-					<a href="mailto:sailingarchitects@gmail.com">sailingarchitects@gmail.com</a> ·
+					<a href="mailto:sailingarchitects@gmail.com"
+						>sailingarchitects@gmail.com</a
+					>
+					·
 					<a href="tel:+48601671182">+48 601 671 182</a>
 				</p>
 			</div>

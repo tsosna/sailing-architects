@@ -1,31 +1,71 @@
 <script lang="ts">
 	import { resolve } from '$app/paths'
-	import { useClerkContext } from 'svelte-clerk'
+	import { useQuery } from 'convex-svelte'
+	import { useClerkContext, SignOutButton } from 'svelte-clerk'
+	import { api } from '$convex/api'
 
 	type Tab = 'booking' | 'profile' | 'docs'
 
 	const ctx = useClerkContext()
 	const firstName = $derived(ctx.user?.firstName ?? 'Żeglarz')
+	const userId = $derived(ctx.auth.userId ?? '')
 
 	let tab = $state<Tab>('booking')
 
-	const booking = {
-		ref: 'SA-2026-0047',
-		segment: { name: 'Gibraltar → Madera', dates: '12–21.10.2026', days: 9, price: 2300 },
-		berth: 'B1',
-		cabin: 'Kabina B',
-		position: 'Rufowa lewa'
-	}
+	// ── Convex queries ────────────────────────────────────────────────────
+	const bookingQuery = useQuery(api.queries.bookingByUser, () => ({ userId }))
+	const profileQuery = useQuery(api.queries.crewProfileByUser, () => ({
+		userId
+	}))
 
-	const bookingRows: ReadonlyArray<readonly [string, string]> = [
-		['Termin', booking.segment.dates],
-		['Dni', String(booking.segment.days)],
-		['Koja', booking.berth],
-		['Kabina', booking.cabin],
-		['Pozycja', booking.position],
-		['Cena', `${booking.segment.price.toLocaleString('pl-PL')} zł`]
-	]
+	const bookingData = $derived(bookingQuery.data)
+	const profileData = $derived(profileQuery.data)
 
+	// ── Derived display data from Convex (falls back to placeholders) ─────
+	const bookingRows = $derived<ReadonlyArray<readonly [string, string]>>(
+		bookingData
+			? [
+					['Ref', bookingData.bookingRef],
+					['Etap', bookingData.segment?.name ?? '—'],
+					['Termin', bookingData.segment?.dates ?? '—'],
+					['Dni', String(bookingData.segment?.days ?? '—')],
+					[
+						'Status',
+						bookingData.status === 'confirmed'
+							? 'Potwierdzona'
+							: 'Oczekuje na płatność'
+					],
+					[
+						'Cena',
+						`${(bookingData.segment?.pricePerBerth ?? 0).toLocaleString('pl-PL')} zł`
+					]
+				]
+			: []
+	)
+
+	const profile = $derived<ReadonlyArray<readonly [string, string]>>(
+		profileData
+			? [
+					[
+						'Imię i nazwisko',
+						`${profileData.firstName} ${profileData.lastName}`
+					],
+					['Data urodzenia', profileData.dateOfBirth],
+					['Narodowość', profileData.nationality],
+					[
+						'Typ dokumentu',
+						profileData.docType === 'passport' ? 'Paszport' : 'Dowód osobisty'
+					],
+					['Numer dokumentu', profileData.docNumber],
+					['Kontakt alarmowy', profileData.emergencyContactName],
+					['Tel. alarmowy', profileData.emergencyContactPhone],
+					['Umiejętności pływackie', profileData.swimmingAbility],
+					['Doświadczenie', profileData.sailingExperience]
+				]
+			: []
+	)
+
+	// Timeline ports — static for Sail Adventure 2026
 	const ports = [
 		{ port: 'Palma de Mallorca', date: '4.10', active: false },
 		{ port: 'Gibraltar', date: '11.10', active: true },
@@ -37,18 +77,6 @@
 	function legActive(i: number): boolean {
 		return ports[i]?.active === true && ports[i + 1]?.active === true
 	}
-
-	const profile: ReadonlyArray<readonly [string, string]> = [
-		['Imię i nazwisko', 'Michał Kowalski'],
-		['Data urodzenia', '15.03.1985'],
-		['Narodowość', 'Polska'],
-		['Typ dokumentu', 'Paszport'],
-		['Numer dokumentu', 'AB 1234567'],
-		['Kontakt alarmowy', 'Anna Kowalska'],
-		['Tel. alarmowy', '+48 601 234 567'],
-		['Umiejętności pływackie', 'Dobry pływak'],
-		['Doświadczenie', 'Kilka rejsów']
-	]
 
 	const docs = [
 		{ name: 'Potwierdzenie rezerwacji', date: '24.04.2026', type: 'PDF' },
@@ -76,9 +104,14 @@
 				<p class="eyebrow">Panel użytkownika</p>
 				<h1 class="dash__title">Cześć, {firstName}</h1>
 			</div>
-			<div class="dash__ref">
-				<p class="dash__ref-label">Numer rezerwacji</p>
-				<p class="dash__ref-value">{booking.ref}</p>
+			<div class="dash__header-right">
+				{#if bookingData}
+					<div class="dash__ref">
+						<p class="dash__ref-label">Numer rezerwacji</p>
+						<p class="dash__ref-value">{bookingData.bookingRef}</p>
+					</div>
+				{/if}
+				<SignOutButton class="btn btn--signout">Wyloguj</SignOutButton>
 			</div>
 		</header>
 
@@ -102,29 +135,38 @@
 			<div id="panel-booking" role="tabpanel">
 				<div class="status">
 					<span class="status__dot" aria-hidden="true"></span>
-					<span class="status__text">Rezerwacja potwierdzona · Płatność zrealizowana</span>
+					<span class="status__text"
+						>Rezerwacja potwierdzona · Płatność zrealizowana</span
+					>
 				</div>
 
 				<article class="voyage">
 					<header class="voyage__header">
 						<p class="voyage__eyebrow">Sail Adventure 2026</p>
-						<h3 class="voyage__title">{booking.segment.name}</h3>
+						<h3 class="voyage__title">{bookingData?.segment?.name ?? '—'}</h3>
 					</header>
-					<dl class="voyage__rows">
-						{#each bookingRows as [label, value] (label)}
-							<div class="voyage__cell">
-								<dt class="voyage__label">{label}</dt>
-								<dd class="voyage__value">{value}</dd>
-							</div>
-						{/each}
-					</dl>
+					{#if bookingRows.length}
+						<dl class="voyage__rows">
+							{#each bookingRows as [label, value] (label)}
+								<div class="voyage__cell">
+									<dt class="voyage__label">{label}</dt>
+									<dd class="voyage__value">{value}</dd>
+								</div>
+							{/each}
+						</dl>
+					{:else}
+						<p class="voyage__empty">Brak aktywnej rezerwacji.</p>
+					{/if}
 				</article>
 
 				<section class="timeline">
 					<p class="timeline__title">Cała trasa rejsu</p>
 					<ol class="timeline__list" aria-label="Porty na trasie">
 						{#each ports as p, i (p.port)}
-							<li class="timeline__port" class:timeline__port--active={p.active}>
+							<li
+								class="timeline__port"
+								class:timeline__port--active={p.active}
+							>
 								<span class="timeline__diamond" aria-hidden="true"></span>
 								<span class="timeline__name">{p.port}</span>
 								<span class="timeline__date">{p.date}</span>
@@ -141,8 +183,12 @@
 				</section>
 
 				<div class="actions">
-					<button type="button" class="btn btn--primary" disabled>↓ Pobierz potwierdzenie</button>
-					<button type="button" class="btn btn--ghost" disabled>Kontakt z organizatorem</button>
+					<button type="button" class="btn btn--primary" disabled
+						>↓ Pobierz potwierdzenie</button
+					>
+					<button type="button" class="btn btn--ghost" disabled
+						>Kontakt z organizatorem</button
+					>
 				</div>
 			</div>
 		{/if}
@@ -150,17 +196,24 @@
 		{#if tab === 'profile'}
 			<div id="panel-profile" role="tabpanel">
 				<p class="lead">
-					Dane wymagane przez kapitana. Możesz je aktualizować do 30 dni przed rejsem.
+					Dane wymagane przez kapitana. Możesz je aktualizować do 30 dni przed
+					rejsem.
 				</p>
-				<div class="profile">
-					{#each profile as [label, value] (label)}
-						<div class="profile__card">
-							<p class="profile__label">{label}</p>
-							<p class="profile__value">{value}</p>
-						</div>
-					{/each}
-				</div>
-				<button type="button" class="btn btn--outline" disabled>Edytuj dane</button>
+				{#if profile.length}
+					<div class="profile">
+						{#each profile as [label, value] (label)}
+							<div class="profile__card">
+								<p class="profile__label">{label}</p>
+								<p class="profile__value">{value}</p>
+							</div>
+						{/each}
+					</div>
+					<button type="button" class="btn btn--outline" disabled
+						>Edytuj dane</button
+					>
+				{:else}
+					<p class="voyage__empty">Profil nie został jeszcze uzupełniony.</p>
+				{/if}
 			</div>
 		{/if}
 
@@ -204,6 +257,36 @@
 		margin-bottom: 48px;
 		flex-wrap: wrap;
 		gap: 16px;
+	}
+
+	.dash__header-right {
+		display: flex;
+		align-items: flex-start;
+		gap: 16px;
+		flex-wrap: wrap;
+	}
+
+	:global(.btn--signout) {
+		font-family: var(--font-sans);
+		text-transform: uppercase;
+		letter-spacing: 2px;
+		font-size: 11px;
+		padding: 12px 24px;
+		background: none;
+		border: 1px solid rgba(196, 146, 58, 0.3);
+		color: rgba(245, 240, 232, 0.6);
+		cursor: pointer;
+		border-radius: 0;
+		transition:
+			background-color 200ms ease,
+			color 200ms ease,
+			border-color 200ms ease;
+	}
+
+	:global(.btn--signout:hover) {
+		color: var(--color-warm-white);
+		border-color: var(--color-brass);
+		background: rgba(196, 146, 58, 0.06);
 	}
 
 	.dash__back {
@@ -284,7 +367,9 @@
 		text-transform: uppercase;
 		cursor: pointer;
 		margin-bottom: -1px;
-		transition: color 200ms ease, border-color 200ms ease;
+		transition:
+			color 200ms ease,
+			border-color 200ms ease;
 	}
 
 	.tabs__btn:hover {
@@ -346,6 +431,14 @@
 		font-size: 22px;
 		font-weight: 400;
 		color: var(--color-warm-white);
+		margin: 0;
+	}
+
+	.voyage__empty {
+		font-family: var(--font-sans);
+		font-size: 13px;
+		color: rgba(245, 240, 232, 0.3);
+		padding: 24px;
 		margin: 0;
 	}
 
@@ -475,7 +568,10 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+		transition:
+			background-color 200ms ease,
+			color 200ms ease,
+			border-color 200ms ease;
 	}
 
 	.btn--primary {
@@ -577,7 +673,9 @@
 		cursor: pointer;
 		text-align: left;
 		font-family: inherit;
-		transition: border-color 200ms ease, background-color 200ms ease;
+		transition:
+			border-color 200ms ease,
+			background-color 200ms ease;
 	}
 
 	.docs__item:hover:not(:disabled) {

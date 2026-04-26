@@ -22,7 +22,10 @@
 <ol class="indicator" aria-label="Postęp rezerwacji">
 	{#each steps as s, i (s.id)}
 		{@const state = status(s.id)}
-		<li class="indicator__item" aria-current={state === 'active' ? 'step' : undefined}>
+		<li
+			class="indicator__item"
+			aria-current={state === 'active' ? 'step' : undefined}
+		>
 			<div class="indicator__node indicator__node--{state}">
 				{#if state === 'done'}
 					<span class="visually-hidden">ukończone</span>✓
@@ -33,7 +36,12 @@
 			<span class="indicator__label indicator__label--{state}">{s.label}</span>
 		</li>
 		{#if i < steps.length - 1}
-			<div class="indicator__sep indicator__sep--{s.id < current ? 'done' : 'todo'}" aria-hidden="true"></div>
+			<div
+				class="indicator__sep indicator__sep--{s.id < current
+					? 'done'
+					: 'todo'}"
+				aria-hidden="true"
+			></div>
 		{/if}
 	{/each}
 </ol>
@@ -68,7 +76,10 @@
 		font-size: 10px;
 		font-weight: 700;
 		letter-spacing: 0.5px;
-		transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+		transition:
+			background-color 200ms ease,
+			color 200ms ease,
+			border-color 200ms ease;
 	}
 
 	.indicator__node--done {

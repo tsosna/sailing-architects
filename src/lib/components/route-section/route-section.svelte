@@ -96,7 +96,9 @@
 								cx={port.x}
 								cy={port.y}
 								r="5"
-								fill={activeStage === port.stage ? '#c4923a' : 'rgba(196,146,58,0.3)'}
+								fill={activeStage === port.stage
+									? '#c4923a'
+									: 'rgba(196,146,58,0.3)'}
 								stroke="#c4923a"
 								stroke-width="1"
 							/>
@@ -105,7 +107,8 @@
 								y={port.y + 4}
 								font-size="9"
 								font-family="DM Sans, sans-serif"
-								fill="rgba(245,240,232,0.5)">{port.label}</text>
+								fill="rgba(245,240,232,0.5)">{port.label}</text
+							>
 						</g>
 					{/each}
 					<text
@@ -115,7 +118,8 @@
 						font-family="monospace"
 						fill="rgba(196,146,58,0.18)"
 						letter-spacing="2"
-						text-anchor="middle">OCEAN ATLANTYCKI</text>
+						text-anchor="middle">OCEAN ATLANTYCKI</text
+					>
 				</svg>
 			</div>
 
@@ -255,7 +259,10 @@
 		font-weight: 700;
 		letter-spacing: 1px;
 		cursor: pointer;
-		transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+		transition:
+			color 150ms ease,
+			background-color 150ms ease,
+			border-color 150ms ease;
 	}
 
 	.selector__btn:hover {

@@ -7,6 +7,7 @@
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
 
 Przed implementacją:
+
 - Sformułuj założenia wprost. Jeśli niepewny — zapytaj.
 - Jeśli istnieje wiele interpretacji — przedstaw je, nie wybieraj w ciszy.
 - Jeśli prostsze rozwiązanie istnieje — powiedz o tym.
@@ -38,6 +39,7 @@ Każda zmieniona linia musi wynikać wprost z prośby użytkownika.
 **Zdefiniuj kryteria sukcesu. Weryfikuj po każdym kroku.**
 
 Dla zadań wieloetapowych podaj krótki plan:
+
 ```
 1. [Krok] → weryfikacja: [check]
 2. [Krok] → weryfikacja: [check]
@@ -59,6 +61,7 @@ Indeks jest już dostępny — nie czytaj go ponownie.
 3. Jeśli nie istnieje pasujący artykuł — rozwiąż problem normalnie
 
 Czytaj artykuł gdy zadanie dotyczy:
+
 - komponentu, wzorca lub mechanizmu który już był wcześniej omawiany
 - problemu architektonicznego (routing, state, API, struktura folderów)
 - narzędzia lub biblioteki wymienionej w indeksie
@@ -83,16 +86,21 @@ Gdy użytkownik napisze `close session`:
 ## Sesja YYYY-MM-DD HH:MM — [krótki tytuł]
 
 ### Zmiany
+
 - Co zostało zaimplementowane (konkretne pliki/komponenty)
 
 ### Decyzje
+
 - Świadome wybory techniczne z uzasadnieniem
 
 ### Wnioski
+
 - Gotchas, nieoczywiste zachowania, rzeczy które warto pamiętać
 
 ### Następne kroki
+
 #### Next
+
 - Konkretne zadania do zrobienia w następnej sesji
 
 #### Blocked / Later / Open questions

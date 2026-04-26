@@ -4,14 +4,14 @@ SvelteKit + Convex + Wuchale + Stripe + Tailwind CSS v4.
 
 ## Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | SvelteKit 2 + Svelte 5 (runes) |
+| Layer        | Technology                                                       |
+| ------------ | ---------------------------------------------------------------- |
+| Framework    | SvelteKit 2 + Svelte 5 (runes)                                   |
 | Backend / DB | [Convex](https://convex.dev) — realtime, reactive, no migrations |
-| Styling | Tailwind CSS v4 (CSS-first, `@theme` in `app.css`) |
-| i18n | [Wuchale](https://wuchale.dev) — zero-code-change, PO files |
-| Payments | [Stripe](https://stripe.com) — Payment Intents + webhook |
-| Deploy | Vercel |
+| Styling      | Tailwind CSS v4 (CSS-first, `@theme` in `app.css`)               |
+| i18n         | [Wuchale](https://wuchale.dev) — zero-code-change, PO files      |
+| Payments     | [Stripe](https://stripe.com) — Payment Intents + webhook         |
+| Deploy       | Vercel                                                           |
 
 ## Getting started
 

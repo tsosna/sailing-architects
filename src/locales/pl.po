@@ -7,9 +7,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/routes/[[lang=lang]]/[[lang=lang]]/+page.svelte
-msgid "[project-name]"
-msgstr "[project-name]"
+#~ msgid "[project-name]"
+#~ msgstr "[project-name]"
 
 #: src/routes/[[lang=lang]]/+page.svelte
 msgid "łącznie"
@@ -60,6 +59,8 @@ msgid "Cennik"
 msgstr "Cennik"
 
 #: src/lib/components/boat-plan/boat-plan.svelte
+#: src/lib/components/boat-plan/boat-plan.svelte
+#: src/lib/components/boat-plan/boat-plan.svelte
 #: src/lib/components/route-section/route-section.svelte
 #: src/lib/components/site-footer/site-footer.svelte
 #: src/lib/components/site-nav/site-nav.svelte
@@ -102,8 +103,12 @@ msgstr "Wybierz etap rejsu"
 
 #. 0: seg.price.toLocaleString('pl-PL')
 #. 0: priceFormatted
+#. 0: priceFormatted
+#. 0: priceFormatted
 #: src/lib/components/cabins-section/cabins-section.svelte
 #: src/lib/components/route-section/route-section.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "{0} zł"
 msgstr "{0} zł"
 
@@ -125,18 +130,16 @@ msgstr "Rezerwuj →"
 msgid "Enter"
 msgstr "Enter"
 
-#: src/lib/components/boat-plan/boat-plan.svelte
-msgid "Dostępna koja"
-msgstr "Dostępna koja"
+#~ msgid "Dostępna koja"
+#~ msgstr "Dostępna koja"
+
+#~ msgid "Wybrana koja"
+#~ msgstr "Wybrana koja"
+
+#~ msgid "Zajęta koja"
+#~ msgstr "Zajęta koja"
 
 #: src/lib/components/boat-plan/boat-plan.svelte
-msgid "Wybrana koja"
-msgstr "Wybrana koja"
-
-#: src/lib/components/boat-plan/boat-plan.svelte
-msgid "Zajęta koja"
-msgstr "Zajęta koja"
-
 #: src/lib/components/boat-plan/boat-plan.svelte
 #: src/lib/components/boat-plan/boat-plan.svelte
 #: src/lib/components/boat-plan/boat-plan.svelte
@@ -185,7 +188,7 @@ msgstr "B"
 msgid "C"
 msgstr "C"
 
-#. 0: berth.id; 1: state === 'taken' ? 'zajęta' \\: state === 'selected' ? 'wybrana' \\: 'dostępna'
+#. 0: berth.id; 1: state === 'captain' ? 'kapitan' \\: state === 'complimentary' ? 'bezpłatna' \\: state === 'taken' ? 'zajęta' \\: state === 'selected' ? 'wybrana' \\: 'dostępna'
 #: src/lib/components/boat-plan/boat-plan.svelte
 msgid "Koja {0} — {1}"
 msgstr "Koja {0} — {1}"
@@ -194,21 +197,17 @@ msgstr "Koja {0} — {1}"
 msgid "ZEJŚCIE"
 msgstr "ZEJŚCIE"
 
-#: src/lib/components/boat-plan/boat-plan.svelte
-msgid "N"
-msgstr "N"
+#~ msgid "N"
+#~ msgstr "N"
 
-#: src/lib/components/boat-plan/boat-plan.svelte
-msgid "≈ 8m"
-msgstr "≈ 8m"
+#~ msgid "≈ 8m"
+#~ msgstr "≈ 8m"
 
-#: src/lib/components/boat-plan/boat-plan.svelte
-msgid "JEANNEAU SO 519"
-msgstr "JEANNEAU SO 519"
+#~ msgid "JEANNEAU SO 519"
+#~ msgstr "JEANNEAU SO 519"
 
-#: src/lib/components/boat-plan/boat-plan.svelte
-msgid "rzut poziomy / plan kojowy"
-msgstr "rzut poziomy / plan kojowy"
+#~ msgid "rzut poziomy / plan kojowy"
+#~ msgstr "rzut poziomy / plan kojowy"
 
 #: src/lib/components/boat-plan/boat-plan.svelte
 msgid "Legenda"
@@ -216,11 +215,14 @@ msgstr "Legenda"
 
 #. 0: b
 #. 0: selectedBerth
+#. 0: berth
 #: src/lib/components/boat-plan/boat-plan.svelte
 #: src/lib/components/boat-plan/boat-plan.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Koja {0}"
 msgstr "Koja {0}"
 
+#: src/lib/components/boat-plan/boat-plan.svelte
 #: src/lib/components/boat-plan/boat-plan.svelte
 msgid "Wybrana"
 msgstr "Wybrana"
@@ -361,12 +363,14 @@ msgstr "Cena nie zawiera"
 
 #: src/lib/components/route-section/route-section.svelte
 #: src/lib/components/route-section/route-section.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Palma de Mallorca"
 msgstr "Palma de Mallorca"
 
 #: src/lib/components/route-section/route-section.svelte
 #: src/lib/components/route-section/route-section.svelte
 #: src/lib/components/route-section/route-section.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Gibraltar"
 msgstr "Gibraltar"
 
@@ -377,6 +381,7 @@ msgstr "Start wyprawy. Żegluga wzdłuż wschodniego wybrzeża Hiszpanii, przez 
 #: src/lib/components/route-section/route-section.svelte
 #: src/lib/components/route-section/route-section.svelte
 #: src/lib/components/route-section/route-section.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Madera"
 msgstr "Madera"
 
@@ -387,6 +392,7 @@ msgstr "Kurs na południe-zachód. Pierwsze etapy oceaniczne. Madera — zielona
 #: src/lib/components/route-section/route-section.svelte
 #: src/lib/components/route-section/route-section.svelte
 #: src/lib/components/route-section/route-section.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Teneryfa"
 msgstr "Teneryfa"
 
@@ -396,6 +402,7 @@ msgstr "Wyspy Kanaryjskie. Teneryfa oferuje majestatyczny wulkan Teide, turkusow
 
 #: src/lib/components/route-section/route-section.svelte
 #: src/lib/components/route-section/route-section.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Cabo Verde"
 msgstr "Cabo Verde"
 
@@ -424,14 +431,19 @@ msgid "Wybierz etap"
 msgstr "Wybierz etap"
 
 #: src/lib/components/route-section/route-section.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Termin"
 msgstr "Termin"
 
 #: src/lib/components/route-section/route-section.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Dni"
 msgstr "Dni"
 
 #: src/lib/components/route-section/route-section.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Cena"
 msgstr "Cena"
 
@@ -503,3 +515,614 @@ msgstr "Ploter, AIS, VHF, automat"
 #: src/lib/components/vessel-section/vessel-section.svelte
 msgid "Nowoczesny, wygodny jacht oceaniczny zaprojektowany z myślą o długich rejsach. Pięć niezależnych kajut dwuosobowych zapewnia prywatność i komfort na każdym etapie podróży."
 msgstr "Nowoczesny, wygodny jacht oceaniczny zaprojektowany z myślą o długich rejsach. Pięć niezależnych kajut dwuosobowych zapewnia prywatność i komfort na każdym etapie podróży."
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "GALLEY"
+msgstr "GALLEY"
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "piętrowe"
+msgstr "piętrowe"
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "RUFA"
+msgstr "RUFA"
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "JEANNEAU SUN ODYSSEY 519"
+msgstr "JEANNEAU SUN ODYSSEY 519"
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "Sailing Architects · rzut kojowy"
+msgstr "Sailing Architects · rzut kojowy"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Konto"
+msgstr "Konto"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Dane załogi"
+msgstr "Dane załogi"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Potwierdzenie"
+msgstr "Potwierdzenie"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Płatność"
+msgstr "Płatność"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Gotowe"
+msgstr "Gotowe"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Polska"
+msgstr "Polska"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Niemcy"
+msgstr "Niemcy"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Wielka Brytania"
+msgstr "Wielka Brytania"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Inna"
+msgstr "Inna"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Paszport"
+msgstr "Paszport"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Dowód osobisty"
+msgstr "Dowód osobisty"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Wybierz..."
+msgstr "Wybierz..."
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Doskonały pływak"
+msgstr "Doskonały pływak"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Dobry pływak"
+msgstr "Dobry pływak"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Podstawowy"
+msgstr "Podstawowy"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Nie pływam"
+msgstr "Nie pływam"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Skipper / patent"
+msgstr "Skipper / patent"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Doświadczony crew"
+msgstr "Doświadczony crew"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Kilka rejsów"
+msgstr "Kilka rejsów"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Pierwszy rejs"
+msgstr "Pierwszy rejs"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Etap"
+msgstr "Etap"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Czas trwania"
+msgstr "Czas trwania"
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Koja"
+msgstr "Koja"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Kabina A"
+msgstr "Kabina A"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Pozycja"
+msgstr "Pozycja"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Dziobowa"
+msgstr "Dziobowa"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Rezerwacja · Sailing Architects"
+msgstr "Rezerwacja · Sailing Architects"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "← Wróć do strony głównej"
+msgstr "← Wróć do strony głównej"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Krok 1"
+msgstr "Krok 1"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Zaloguj się lub utwórz konto"
+msgstr "Zaloguj się lub utwórz konto"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Sesja aktywna"
+msgstr "Sesja aktywna"
+
+#. 0: userEmail
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Zalogowano jako {0}"
+msgstr "Zalogowano jako {0}"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Możesz przejść dalej."
+msgstr "Możesz przejść dalej."
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Logowanie"
+msgstr "Logowanie"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Rejestracja"
+msgstr "Rejestracja"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Dalej →"
+msgstr "Dalej →"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Krok 2"
+msgstr "Krok 2"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Wymagane przez kapitana i władze portowe. Dane przechowywane bezpiecznie, widoczne tylko dla organizatora."
+msgstr "Wymagane przez kapitana i władze portowe. Dane przechowywane bezpiecznie, widoczne tylko dla organizatora."
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Imię"
+msgstr "Imię"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Nazwisko"
+msgstr "Nazwisko"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Data urodzenia"
+msgstr "Data urodzenia"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Narodowość"
+msgstr "Narodowość"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Dokument tożsamości"
+msgstr "Dokument tożsamości"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Typ dokumentu"
+msgstr "Typ dokumentu"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Numer dokumentu"
+msgstr "Numer dokumentu"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Wymagane do rejestru jachtu"
+msgstr "Wymagane do rejestru jachtu"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Kontakt alarmowy"
+msgstr "Kontakt alarmowy"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Imię i nazwisko"
+msgstr "Imię i nazwisko"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Telefon"
+msgstr "Telefon"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Profil żeglarski"
+msgstr "Profil żeglarski"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Umiejętności pływackie"
+msgstr "Umiejętności pływackie"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Doświadczenie żeglarskie"
+msgstr "Doświadczenie żeglarskie"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Wymagania dietetyczne"
+msgstr "Wymagania dietetyczne"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Wegetarianizm, alergie, itp."
+msgstr "Wegetarianizm, alergie, itp."
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Uwagi medyczne"
+msgstr "Uwagi medyczne"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Informacje istotne dla bezpieczeństwa"
+msgstr "Informacje istotne dla bezpieczeństwa"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "← Wróć"
+msgstr "← Wróć"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Krok 3"
+msgstr "Krok 3"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Potwierdzenie rezerwacji"
+msgstr "Potwierdzenie rezerwacji"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Rejs"
+msgstr "Rejs"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Sail Adventure 2026"
+msgstr "Sail Adventure 2026"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Cena nie zawiera: kosztów dojazdu do mariny, opłat portowych i paliwa (ok. 150–200 EUR/os), ubezpieczenia turystycznego (ok. 250 zł/os)."
+msgstr "Cena nie zawiera: kosztów dojazdu do mariny, opłat portowych i paliwa (ok. 150–200 EUR/os), ubezpieczenia turystycznego (ok. 250 zł/os)."
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Przejdź do płatności →"
+msgstr "Przejdź do płatności →"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Krok 4"
+msgstr "Krok 4"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "🔒 Płatność obsługiwana przez Stripe. Twoje dane są bezpieczne."
+msgstr "🔒 Płatność obsługiwana przez Stripe. Twoje dane są bezpieczne."
+
+#~ msgid "Numer karty"
+#~ msgstr "Numer karty"
+
+#~ msgid "Data ważności"
+#~ msgstr "Data ważności"
+
+#~ msgid "Imię i nazwisko na karcie"
+#~ msgstr "Imię i nazwisko na karcie"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Podsumowanie"
+msgstr "Podsumowanie"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Razem"
+msgstr "Razem"
+
+#. 0: priceFormatted
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Zapłać {0} zł →"
+msgstr "Zapłać {0} zł →"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Rezerwacja potwierdzona"
+msgstr "Rezerwacja potwierdzona"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Witaj na pokładzie!"
+msgstr "Witaj na pokładzie!"
+
+#~ msgid "Koja <0/> na etapie <1/> ({0}) jest Twoja. Potwierdzenie zostało wysłane e-mailem."
+#~ msgstr "Koja <0/> na etapie <1/> ({0}) jest Twoja. Potwierdzenie zostało wysłane e-mailem."
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Mój panel"
+msgstr "Mój panel"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "↓ Pobierz PDF"
+msgstr "↓ Pobierz PDF"
+
+#: src/lib/components/step-indicator/step-indicator.svelte
+msgid "Postęp rezerwacji"
+msgstr "Postęp rezerwacji"
+
+#: src/lib/components/step-indicator/step-indicator.svelte
+msgid "ukończone"
+msgstr "ukończone"
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Błąd"
+msgstr "Błąd"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "DM Sans, system-ui, sans-serif"
+msgstr "DM Sans, system-ui, sans-serif"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Błąd inicjalizacji płatności"
+msgstr "Błąd inicjalizacji płatności"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Płatność nie powiodła się"
+msgstr "Płatność nie powiodła się"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Błąd zapisu danych"
+msgstr "Błąd zapisu danych"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Zapisywanie…"
+msgstr "Zapisywanie…"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Inicjalizacja płatności…"
+msgstr "Inicjalizacja płatności…"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Przetwarzanie…"
+msgstr "Przetwarzanie…"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Numer rezerwacji"
+msgstr "Numer rezerwacji"
+
+#. 0: segment.dates
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Koja <0/> na etapie <1/> ({0}) jest Twoja. Potwierdzenie zostanie wysłane e-mailem po zaksięgowaniu płatności."
+msgstr "Koja <0/> na etapie <1/> ({0}) jest Twoja. Potwierdzenie zostanie wysłane e-mailem po zaksięgowaniu płatności."
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Żeglarz"
+msgstr "Żeglarz"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Ref"
+msgstr "Ref"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Status"
+msgstr "Status"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Potwierdzona"
+msgstr "Potwierdzona"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Oczekuje na płatność"
+msgstr "Oczekuje na płatność"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Tel. alarmowy"
+msgstr "Tel. alarmowy"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Doświadczenie"
+msgstr "Doświadczenie"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Regulamin rejsu"
+msgstr "Regulamin rejsu"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Lista rzeczy do zabrania"
+msgstr "Lista rzeczy do zabrania"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Plan trasy szczegółowy"
+msgstr "Plan trasy szczegółowy"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Rezerwacja"
+msgstr "Rezerwacja"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Dokumenty"
+msgstr "Dokumenty"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Panel · Sailing Architects"
+msgstr "Panel · Sailing Architects"
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "← Strona główna"
+msgstr "← Strona główna"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Panel użytkownika"
+msgstr "Panel użytkownika"
+
+#. 0: firstName
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Cześć, {0}"
+msgstr "Cześć, {0}"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Sekcje panelu"
+msgstr "Sekcje panelu"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Rezerwacja potwierdzona · Płatność zrealizowana"
+msgstr "Rezerwacja potwierdzona · Płatność zrealizowana"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Brak aktywnej rezerwacji."
+msgstr "Brak aktywnej rezerwacji."
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Cała trasa rejsu"
+msgstr "Cała trasa rejsu"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Porty na trasie"
+msgstr "Porty na trasie"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "↓ Pobierz potwierdzenie"
+msgstr "↓ Pobierz potwierdzenie"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Kontakt z organizatorem"
+msgstr "Kontakt z organizatorem"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Dane wymagane przez kapitana. Możesz je aktualizować do 30 dni przed rejsem."
+msgstr "Dane wymagane przez kapitana. Możesz je aktualizować do 30 dni przed rejsem."
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Edytuj dane"
+msgstr "Edytuj dane"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Profil nie został jeszcze uzupełniony."
+msgstr "Profil nie został jeszcze uzupełniony."
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Dokumenty do pobrania"
+msgstr "Dokumenty do pobrania"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Pole wymagane"
+msgstr "Pole wymagane"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Wybierz opcję"
+msgstr "Wybierz opcję"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Wyloguj"
+msgstr "Wyloguj"
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "Dostępna"
+msgstr "Dostępna"
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "Zajęta"
+msgstr "Zajęta"
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "Kapitan ⚓"
+msgstr "Kapitan ⚓"
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "Bezpłatna"
+msgstr "Bezpłatna"
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "SKP"
+msgstr "SKP"
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Koja i imię gościa są wymagane"
+msgstr "Koja i imię gościa są wymagane"
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Ustawi C1 jako \"kapitan\" na wszystkich etapach. Kontynuować?"
+msgstr "Ustawi C1 jako \"kapitan\" na wszystkich etapach. Kontynuować?"
+
+#. 0: result.updated
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Zaktualizowano: {0} koj"
+msgstr "Zaktualizowano: {0} koj"
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Błąd migracji"
+msgstr "Błąd migracji"
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Admin · Sailing Architects"
+msgstr "Admin · Sailing Architects"
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Panel administracyjny"
+msgstr "Panel administracyjny"
+
+#. 0: voyageSegments.find((s) => s.id === selectedSegment)?.name
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Koje · {0}"
+msgstr "Koje · {0}"
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Anuluj"
+msgstr "Anuluj"
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Nowa rezerwacja bezpłatna"
+msgstr "Nowa rezerwacja bezpłatna"
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "— wybierz —"
+msgstr "— wybierz —"
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Imię i nazwisko gościa"
+msgstr "Imię i nazwisko gościa"
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Uwagi (opcjonalnie)"
+msgstr "Uwagi (opcjonalnie)"
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Rezerwacja zapisana."
+msgstr "Rezerwacja zapisana."
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Zapisuję…"
+msgstr "Zapisuję…"
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Zarezerwuj bezpłatnie"
+msgstr "Zarezerwuj bezpłatnie"
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Narzędzia migracji"
+msgstr "Narzędzia migracji"
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Jeśli baza danych była seedowana przed Block 2 — uruchom migrację, aby ustawić C1 jako \"kapitan\" na wszystkich etapach."
+msgstr "Jeśli baza danych była seedowana przed Block 2 — uruchom migrację, aby ustawić C1 jako \"kapitan\" na wszystkich etapach."
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Ustaw C1 = kapitan (migracja)"
+msgstr "Ustaw C1 = kapitan (migracja)"

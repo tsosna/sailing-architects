@@ -21,18 +21,16 @@ Pixel-perfect mockup z finalnymi kolorami, typografią, spacingiem i interakcjam
 ### Kolory
 
 ```css
---navy:        #0d1b2e   /* główne tło */
---navy-mid:    #0f1f35   /* tło sekcji naprzemiennych */
---navy-light:  #162840   /* tło sekcji jasniejszych */
---brass:       #c4923a   /* akcent mosiądz — CTA, highlights */
---brass-light: #d4aa5a   /* hover stanu brass */
---warm-white:  #f5f0e8   /* tekst główny */
---cream:       #ede5d8   /* tekst drugorzędny jasny */
---muted:       rgba(245,240,232,0.45)  /* tekst wyciszony */
-
-/* Tailwind @theme tokens w app.css — zaktualizuj: */
---color-primary: oklch(0.65 0.12 65);   /* brass ≈ #c4923a */
---color-surface: oklch(0.12 0.08 252);  /* navy ≈ #0d1b2e */
+--navy: #0d1b2e /* główne tło */ --navy-mid: #0f1f35
+	/* tło sekcji naprzemiennych */ --navy-light: #162840
+	/* tło sekcji jasniejszych */ --brass: #c4923a
+	/* akcent mosiądz — CTA, highlights */ --brass-light: #d4aa5a
+	/* hover stanu brass */ --warm-white: #f5f0e8 /* tekst główny */
+	--cream: #ede5d8 /* tekst drugorzędny jasny */
+	--muted: rgba(245, 240, 232, 0.45) /* tekst wyciszony */
+	/* Tailwind @theme tokens w app.css — zaktualizuj: */
+	--color-primary: oklch(0.65 0.12 65); /* brass ≈ #c4923a */
+--color-surface: oklch(0.12 0.08 252); /* navy ≈ #0d1b2e */
 ```
 
 ### Typografia
@@ -59,6 +57,7 @@ gap w grid 1px:     background: rgba(196,146,58,0.1) + child bg = separator tric
 ### Borders & Dividers
 
 **Brak linii działowych między sekcjami.** Sekcje rozróżniane wyłącznie tonalnymi tłami:
+
 - `#0d1b2e` — sekcja główna (hero, jacht, kajuty, FAQ, footer)
 - `#0f1f35` — sekcja naprzemiennia (trasa, cennik)
 
@@ -149,6 +148,7 @@ Multi-step form, 5 kroków. **Step indicator** na górze: numery `01`–`05` w k
 #### Krok 2 — Dane załogi
 
 Grid 2-kolumnowy, pola:
+
 - Imię, Nazwisko, Data urodzenia (date input), Narodowość (select)
 - Sekcja „Dokument tożsamości": Typ (Paszport/Dowód), Numer dokumentu
 - Sekcja „Kontakt alarmowy": Imię i nazwisko, Telefon
@@ -157,6 +157,7 @@ Grid 2-kolumnowy, pola:
 Separator sekcji: `border-top: 1px solid rgba(196,146,58,0.1)` + label 10px uppercase brass
 
 **Input style:**
+
 ```
 background: rgba(255,255,255,0.04)
 border: 1px solid rgba(196,146,58,0.25)
@@ -224,6 +225,7 @@ Architektoniczny rzut z góry jachtu Jeanneau Sun Odyssey 519. SVG `viewBox="0 0
 **10 koje:** A1, A2, B1, B2, C1, C2, D1, D2, E1, E2
 
 **Stany koji:**
+
 ```
 available: fill rgba(245,240,232,0.12), stroke #c4923a 0.8px
 hovered:   fill rgba(196,146,58,0.22), stroke #c4923a
@@ -232,16 +234,17 @@ taken:     fill rgba(13,27,46,0.55), stroke #3a4a5c + przekreślenie
 ```
 
 **Implementacja Svelte:**
+
 ```svelte
 <!-- +page.svelte lub komponent BoatPlan.svelte -->
 <script>
-  let selectedBerth = $state(null);
-  const takenBerths = new Set(['A2', 'C1', 'D2']); // z Convex DB
-  
-  function selectBerth(id) {
-    if (takenBerths.has(id)) return;
-    selectedBerth = selectedBerth === id ? null : id;
-  }
+	let selectedBerth = $state(null)
+	const takenBerths = new Set(['A2', 'C1', 'D2']) // z Convex DB
+
+	function selectBerth(id) {
+		if (takenBerths.has(id)) return
+		selectedBerth = selectedBerth === id ? null : id
+	}
 </script>
 ```
 
@@ -254,12 +257,12 @@ Wielokrotnie używany formularz. Obsługuje: `text`, `email`, `password`, `date`
 ```svelte
 <!-- lib/components/Input.svelte -->
 <script>
-  export let label = '';
-  export let type = 'text';
-  export let value = '';
-  export let required = false;
-  export let hint = '';
-  export let options = null; // [{value, label}] dla select
+	export let label = ''
+	export let type = 'text'
+	export let value = ''
+	export let required = false
+	export let hint = ''
+	export let options = null // [{value, label}] dla select
 </script>
 ```
 
@@ -267,14 +270,14 @@ Wielokrotnie używany formularz. Obsługuje: `text`, `email`, `password`, `date`
 
 ## Interakcje i animacje
 
-| Interakcja | Czas | Easing | Właściwości |
-|---|---|---|---|
-| Nav scroll | 300ms | ease | background, backdropFilter, borderBottom |
-| Hover linki nav | 200ms | ease | color |
-| FAQ accordion | instant (no transition) | — | display toggle |
-| Etap route hover | 150ms | ease | opacity |
-| Koja hover/select | 150ms | ease | fill, stroke, strokeWidth |
-| Selektor etapów | instant | — | borderBottom, background |
+| Interakcja        | Czas                    | Easing | Właściwości                              |
+| ----------------- | ----------------------- | ------ | ---------------------------------------- |
+| Nav scroll        | 300ms                   | ease   | background, backdropFilter, borderBottom |
+| Hover linki nav   | 200ms                   | ease   | color                                    |
+| FAQ accordion     | instant (no transition) | —      | display toggle                           |
+| Etap route hover  | 150ms                   | ease   | opacity                                  |
+| Koja hover/select | 150ms                   | ease   | fill, stroke, strokeWidth                |
+| Selektor etapów   | instant                 | —      | borderBottom, background                 |
 
 ---
 
@@ -299,69 +302,69 @@ Wszystkie linki wewnętrzne przez Wuchale localePath helper.
 
 ```typescript
 // src/convex/schema.ts
-import { defineSchema, defineTable } from "convex/server";
-import { v } from "convex/values";
+import { defineSchema, defineTable } from 'convex/server'
+import { v } from 'convex/values'
 
 export default defineSchema({
-  voyageSegments: defineTable({
-    name: v.string(),           // "Gibraltar → Madera"
-    dates: v.string(),
-    startDate: v.number(),      // timestamp
-    endDate: v.number(),
-    pricePerBerth: v.number(),  // PLN
-    days: v.number(),
-  }),
+	voyageSegments: defineTable({
+		name: v.string(), // "Gibraltar → Madera"
+		dates: v.string(),
+		startDate: v.number(), // timestamp
+		endDate: v.number(),
+		pricePerBerth: v.number(), // PLN
+		days: v.number()
+	}),
 
-  berths: defineTable({
-    segmentId: v.id("voyageSegments"),
-    cabinId: v.string(),        // "A" | "B" | "C" | "D" | "E"
-    berthId: v.string(),        // "A1" | "A2" | ...
-    status: v.union(v.literal("available"), v.literal("taken")),
-  }),
+	berths: defineTable({
+		segmentId: v.id('voyageSegments'),
+		cabinId: v.string(), // "A" | "B" | "C" | "D" | "E"
+		berthId: v.string(), // "A1" | "A2" | ...
+		status: v.union(v.literal('available'), v.literal('taken'))
+	}),
 
-  bookings: defineTable({
-    userId: v.string(),          // Clerk user ID
-    berthId: v.id("berths"),
-    segmentId: v.id("voyageSegments"),
-    status: v.union(
-      v.literal("pending"),
-      v.literal("confirmed"),
-      v.literal("cancelled")
-    ),
-    stripePaymentIntentId: v.optional(v.string()),
-    paidAt: v.optional(v.number()),
-    bookingRef: v.string(),      // "SA-2026-XXXX"
-  }),
+	bookings: defineTable({
+		userId: v.string(), // Clerk user ID
+		berthId: v.id('berths'),
+		segmentId: v.id('voyageSegments'),
+		status: v.union(
+			v.literal('pending'),
+			v.literal('confirmed'),
+			v.literal('cancelled')
+		),
+		stripePaymentIntentId: v.optional(v.string()),
+		paidAt: v.optional(v.number()),
+		bookingRef: v.string() // "SA-2026-XXXX"
+	}),
 
-  crewProfiles: defineTable({
-    userId: v.string(),
-    firstName: v.string(),
-    lastName: v.string(),
-    dateOfBirth: v.string(),
-    nationality: v.string(),
-    docType: v.union(v.literal("passport"), v.literal("id")),
-    docNumber: v.string(),
-    emergencyContactName: v.string(),
-    emergencyContactPhone: v.string(),
-    swimmingAbility: v.string(),
-    sailingExperience: v.string(),
-    dietaryRequirements: v.optional(v.string()),
-    medicalNotes: v.optional(v.string()),
-  }),
-});
+	crewProfiles: defineTable({
+		userId: v.string(),
+		firstName: v.string(),
+		lastName: v.string(),
+		dateOfBirth: v.string(),
+		nationality: v.string(),
+		docType: v.union(v.literal('passport'), v.literal('id')),
+		docNumber: v.string(),
+		emergencyContactName: v.string(),
+		emergencyContactPhone: v.string(),
+		swimmingAbility: v.string(),
+		sailingExperience: v.string(),
+		dietaryRequirements: v.optional(v.string()),
+		medicalNotes: v.optional(v.string())
+	})
+})
 ```
 
 ---
 
 ## Assets
 
-| Asset | Status | Ścieżka |
-|---|---|---|
-| Hero photography | **PLACEHOLDER** — podmień | 1600×900px, żeglowanie, golden hour |
-| Zdjęcia jachtu | **PLACEHOLDER** — podmień | SO519 burt + cockpit + kabiny (4 szt.) |
-| Logo SA (SVG) | W kodzie jako SVG inline | Okrąg + litery SA |
-| Broszura referencji | W projekcie | `docs/assets/WhatsApp Image 2025-12-31 at 14.30.57*.jpeg` |
-| Mapa trasy | **PLACEHOLDER** — podmień | Mapa Atlantyku z trasą |
+| Asset               | Status                    | Ścieżka                                                   |
+| ------------------- | ------------------------- | --------------------------------------------------------- |
+| Hero photography    | **PLACEHOLDER** — podmień | 1600×900px, żeglowanie, golden hour                       |
+| Zdjęcia jachtu      | **PLACEHOLDER** — podmień | SO519 burt + cockpit + kabiny (4 szt.)                    |
+| Logo SA (SVG)       | W kodzie jako SVG inline  | Okrąg + litery SA                                         |
+| Broszura referencji | W projekcie               | `docs/assets/WhatsApp Image 2025-12-31 at 14.30.57*.jpeg` |
+| Mapa trasy          | **PLACEHOLDER** — podmień | Mapa Atlantyku z trasą                                    |
 
 ---
 
@@ -379,6 +382,7 @@ design_handoff_sailing_architects/
 ```
 
 **Instrukcja podglądu:**
+
 1. Otwórz `Sailing Architects.html` bezpośrednio w przeglądarce (Chrome/Firefox)
 2. Strona jest w pełni interaktywna — klikaj koje, przechódź przez booking flow, otwieraj dashboard
 3. Kliknij „Tweaks" w prawym dolnym rogu aby zobaczyć warianty

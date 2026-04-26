@@ -20,15 +20,15 @@
 
 ## Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | SvelteKit 2 + Svelte 5 (runes) |
-| Backend / DB | Convex (`convex` + `convex-svelte`) |
-| Auth | Clerk (`@clerk/clerk-js` + `svelte-clerk`) |
-| Styling | Tailwind CSS v4 (CSS-first) |
-| i18n | Wuchale (`wuchale` + `@wuchale/svelte`) |
-| Payments | Stripe (`stripe` server + `@stripe/stripe-js` client) |
-| Deploy | Vercel (`@sveltejs/adapter-vercel`) |
+| Layer        | Technology                                            |
+| ------------ | ----------------------------------------------------- |
+| Framework    | SvelteKit 2 + Svelte 5 (runes)                        |
+| Backend / DB | Convex (`convex` + `convex-svelte`)                   |
+| Auth         | Clerk (`@clerk/clerk-js` + `svelte-clerk`)            |
+| Styling      | Tailwind CSS v4 (CSS-first)                           |
+| i18n         | Wuchale (`wuchale` + `@wuchale/svelte`)               |
+| Payments     | Stripe (`stripe` server + `@stripe/stripe-js` client) |
+| Deploy       | Vercel (`@sveltejs/adapter-vercel`)                   |
 
 ---
 
@@ -38,25 +38,28 @@ Pełna specyfikacja: `docs/design/design_handoff_sailing_architects/README.md`
 Interaktywny prototyp: `docs/design/design_handoff_sailing_architects/Sailing Architects.html`
 
 ### Paleta kolorów
-| Token | Hex | Użycie |
-|---|---|---|
-| `--color-navy` | `#0d1b2e` | Główne tło, hero, footer |
-| `--color-navy-mid` | `#0f1f35` | Sekcje naprzemienne (trasa, cennik) |
-| `--color-navy-light` | `#162840` | Sekcje jasniejsze |
-| `--color-navy-deep` | `#07111e` | Footer bottom bar |
-| `--color-brass` | `#c4923a` | Akcent — CTA, highlights, aktywne stany |
-| `--color-brass-light` | `#d4aa5a` | Hover brass |
-| `--color-warm-white` | `#f5f0e8` | Tekst główny |
-| `--color-cream` | `#ede5d8` | Tekst drugorzędny |
-| `--color-muted` | `rgba(245,240,232,0.45)` | Tekst wyciszony |
+
+| Token                 | Hex                      | Użycie                                  |
+| --------------------- | ------------------------ | --------------------------------------- |
+| `--color-navy`        | `#0d1b2e`                | Główne tło, hero, footer                |
+| `--color-navy-mid`    | `#0f1f35`                | Sekcje naprzemienne (trasa, cennik)     |
+| `--color-navy-light`  | `#162840`                | Sekcje jasniejsze                       |
+| `--color-navy-deep`   | `#07111e`                | Footer bottom bar                       |
+| `--color-brass`       | `#c4923a`                | Akcent — CTA, highlights, aktywne stany |
+| `--color-brass-light` | `#d4aa5a`                | Hover brass                             |
+| `--color-warm-white`  | `#f5f0e8`                | Tekst główny                            |
+| `--color-cream`       | `#ede5d8`                | Tekst drugorzędny                       |
+| `--color-muted`       | `rgba(245,240,232,0.45)` | Tekst wyciszony                         |
 
 ### Typografia
+
 - **Nagłówki:** Playfair Display (serif) — weights 400/600, italic variant
 - **UI/body:** DM Sans (sans-serif) — weights 300/400/500/600/700
 - H1: `clamp(40px, 6vw, 76px)`, lineHeight 1.05
 - Google Fonts import jest w `src/app.css`
 
 ### Spacing / Layout
+
 - `max-width: 1100px` (centred)
 - Section padding: `96px 40px`
 - Nav height: `64px` fixed
@@ -64,10 +67,12 @@ Interaktywny prototyp: `docs/design/design_handoff_sailing_architects/Sailing Ar
 - Separator trick: `gap: 1px` na `rgba(196,146,58,0.1)` bg + child bg = optyczny border
 
 ### Tonal layering (bez linii działowych)
+
 - Sekcja główna: `#0d1b2e` (hero, jacht, kajuty, FAQ, footer)
 - Sekcja naprzemiennia: `#0f1f35` (trasa, cennik)
 
 ### Stany interaktywne koja (BoatPlan SVG)
+
 ```
 available: fill rgba(245,240,232,0.12), stroke #c4923a 0.8px
 hovered:   fill rgba(196,146,58,0.22), stroke #c4923a
@@ -120,15 +125,18 @@ src/routes/
 ## Convex — Backend & Realtime DB
 
 ### Konfiguracja
+
 - Funkcje backendu w `src/convex/` (zmienione z domyślnego `convex/` — wymagane przez SvelteKit)
 - `convex.json` musi zawierać `"functions": "src/convex/"`
 - `PUBLIC_CONVEX_URL` w `.env` — URL deploymentu
 
 ### Integracja w SvelteKit
+
 - `setupConvex(PUBLIC_CONVEX_URL)` **MUSI** być wywołane w root `+layout.svelte` — inicjalizuje klienta globalnie
 - Używaj `$env/static/public` dla `PUBLIC_CONVEX_URL` — nigdy `process.env.*`
 
 ### Queries i mutacje w komponentach
+
 ```ts
 import { useQuery, useMutation } from 'convex-svelte'
 import { api } from '../convex/_generated/api'
@@ -143,32 +151,36 @@ await create({ name: 'example' })
 ```
 
 ### Definicja funkcji Convex
+
 ```ts
 // src/convex/items.ts
 import { query, mutation } from './_generated/server'
 import { v } from 'convex/values'
 
 export const list = query({
-  args: {},
-  handler: async (ctx) => ctx.db.query('items').collect(),
+	args: {},
+	handler: async (ctx) => ctx.db.query('items').collect()
 })
 
 export const create = mutation({
-  args: { name: v.string() },
-  handler: async (ctx, args) => ctx.db.insert('items', args),
+	args: { name: v.string() },
+	handler: async (ctx, args) => ctx.db.insert('items', args)
 })
 ```
 
 ### Schema
+
 - Definicja w `src/convex/schema.ts`
 - Typy przez `v.string()`, `v.number()`, `v.id('tableName')` etc.
 - **Brak migracji SQL** — zmiany schematu przez `npx convex dev` (hot reload)
 
 ### Webhook od Stripe → Convex
+
 - Stripe webhook trafia do `src/routes/api/stripe/webhook/+server.ts`
 - Po weryfikacji sygnatury — wywołaj Convex mutation przez HTTP action lub `ConvexHttpClient`
 
 ### Dev workflow
+
 ```bash
 npx convex dev   # uruchom razem z pnpm dev (osobny terminal)
 ```
@@ -178,39 +190,44 @@ npx convex dev   # uruchom razem z pnpm dev (osobny terminal)
 ## Wuchale — i18n (zero-code-change)
 
 ### Jak działa
+
 - Wuchale automatycznie wyciąga stringi z komponentów Svelte do plików `.po`
 - **Nie owijaj stringów** ręcznie — pisz naturalny kod: `<p>Witaj</p>` → wyciągnie samo
 - Pliki tłumaczeń w `locales/pl/`, `locales/en/` (format Gettext `.po`)
 
 ### Konfiguracja
+
 ```js
 // wuchale.config.js
 import { adapter as svelte } from '@wuchale/svelte'
 import { defineConfig } from 'wuchale'
 
 export default defineConfig({
-  locales: ['pl', 'en'],
-  adapters: { main: svelte({ loader: 'svelte' }) },
+	locales: ['pl', 'en'],
+	adapters: { main: svelte({ loader: 'svelte' }) }
 })
 ```
 
 ### Vite plugin — kolejność krytyczna
+
 ```ts
 // vite.config.ts
 plugins: [
-  wuchale(),    // MUSI być przed sveltekit()
-  tailwindcss(),
-  sveltekit(),
+	wuchale(), // MUSI być przed sveltekit()
+	tailwindcss(),
+	sveltekit()
 ]
 ```
 
 ### Workflow
+
 1. Napisz komponenty naturalnie (bez `m.*` czy `t()`)
 2. `npx wuchale` — inicjalne scaffoldowanie katalogów i ekstrakcja
 3. Edytuj `.po` pliki dla każdej lokalizacji
 4. HMR automatycznie ładuje zmiany tłumaczeń
 
 ### Czego NIE robić
+
 - Nie używaj `@inlang/paraglide-js` — ten projekt używa Wuchale
 - Nie twórz ręcznie plików `.po` — wygeneruj przez `npx wuchale`
 - Pliki `locales/` są w `.prettierignore` — nie formatuj ich Prettierem
@@ -220,12 +237,14 @@ plugins: [
 ## Stripe — Payments
 
 ### Klucze
+
 - `STRIPE_SECRET_KEY` — tylko server-side (`$env/static/private`)
 - `STRIPE_WEBHOOK_SECRET` — tylko server-side
 - `PUBLIC_STRIPE_PUBLISHABLE_KEY` — client-side (`$env/static/public`)
 - **NIGDY `process.env.*`** — używaj `$env/static/private` lub `$env/static/public`
 
 ### Server client
+
 ```ts
 // src/lib/server/stripe.ts
 import Stripe from 'stripe'
@@ -234,18 +253,20 @@ export const stripe = new Stripe(STRIPE_SECRET_KEY)
 ```
 
 ### Webhook
+
 - Endpoint: `src/routes/api/stripe/webhook/+server.ts`
 - Zawsze weryfikuj sygnaturę: `stripe.webhooks.constructEvent(body, signature, secret)`
 - `body` musi być raw string (`.text()`) — nie JSON
 - Po weryfikacji aktualizuj stan w Convex
 
 ### Payment Intent flow (zalecany dla custom UI)
+
 ```ts
 // +page.server.ts (action)
 const paymentIntent = await stripe.paymentIntents.create({
-  amount: 9900, // w groszach
-  currency: 'pln',
-  metadata: { bookingId: '...' },
+	amount: 9900, // w groszach
+	currency: 'pln',
+	metadata: { bookingId: '...' }
 })
 return { clientSecret: paymentIntent.client_secret }
 ```
@@ -255,6 +276,7 @@ return { clientSecret: paymentIntent.client_secret }
 ## Svelte 5 — Runes
 
 ### `$props()` — zawsze z generic
+
 ```ts
 // poprawne
 let { data, form } = $props<{ data: PageData; form: ActionData }>()
@@ -263,11 +285,13 @@ let { data, form }: { data: PageData; form: ActionData } = $props()
 ```
 
 ### Zmienne środowiskowe
+
 - `$env/static/private` — build-time, server-only
 - `$env/static/public` — build-time, dostępne w przeglądarce
 - **Nigdy `process.env.*`** — Vite module runner nie wstrzykuje `.env`
 
 ### MCP Server dla Svelte (opcjonalny)
+
 Jeśli skonfigurowany: `@sveltejs/mcp` w `.mcp.json` w rocie projektu.
 Dostarcza: `list-sections`, `get-documentation`, `svelte-autofixer`.
 

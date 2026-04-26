@@ -1,14 +1,34 @@
 <script lang="ts">
 	import { resolve } from '$app/paths'
+	import { useQuery } from 'convex-svelte'
 	import { BoatPlan } from '$components/boat-plan'
 	import { findCabinByBerth } from '$lib/data/cabins'
 	import { voyageSegments } from '$lib/data/voyage-segments'
+	import { api } from '$convex/api'
 
 	let selectedSegment = $state<string>(voyageSegments[0].id)
 	let selectedBerth = $state<string | null>(null)
 
-	const segment = $derived(voyageSegments.find((s) => s.id === selectedSegment) ?? voyageSegments[0])
-	const cabin = $derived(selectedBerth ? findCabinByBerth(selectedBerth) : undefined)
+	const segment = $derived(
+		voyageSegments.find((s) => s.id === selectedSegment) ?? voyageSegments[0]
+	)
+	const cabin = $derived(
+		selectedBerth ? findCabinByBerth(selectedBerth) : undefined
+	)
+
+	// Live berth statuses from Convex — falls back to empty map while loading
+	const statusQuery = useQuery(api.queries.berthStatusesBySlug, () => ({
+		slug: selectedSegment
+	}))
+	type BerthStatus = 'taken' | 'captain' | 'complimentary'
+	const berthStatuses = $derived(
+		new Map(
+			(statusQuery.data ?? []).map(({ berthId, status }) => [
+				berthId,
+				status as BerthStatus
+			])
+		)
+	)
 </script>
 
 <section id="cabins" class="cabins">
@@ -16,8 +36,8 @@
 		<p class="eyebrow">Plan kajutowy</p>
 		<h2 class="title">Wybierz swoją koję</h2>
 		<p class="lead">
-			Kliknij koję na planie lub użyj listy. Szary oznacza zajęte, mosiądz — dostępne, złoty —
-			wybrane.
+			Kliknij koję na planie lub użyj listy. Szary oznacza zajęte, mosiądz —
+			dostępne, złoty — wybrane.
 		</p>
 
 		<div class="segments" role="tablist" aria-label="Wybierz etap rejsu">
@@ -32,12 +52,18 @@
 				>
 					<span class="segments__dates">{seg.dates}</span>
 					<span class="segments__name">{seg.name}</span>
-					<span class="segments__price">{seg.price.toLocaleString('pl-PL')} zł</span>
+					<span class="segments__price"
+						>{seg.price.toLocaleString('pl-PL')} zł</span
+					>
 				</button>
 			{/each}
 		</div>
 
-		<BoatPlan {selectedBerth} onSelectBerth={(id) => (selectedBerth = id)} />
+		<BoatPlan
+			{selectedBerth}
+			{berthStatuses}
+			onSelectBerth={(id) => (selectedBerth = id)}
+		/>
 
 		{#if selectedBerth && cabin}
 			<div class="banner" aria-live="polite">
@@ -47,7 +73,11 @@
 						Koja {selectedBerth} · {cabin.label} · {segment.name}
 					</p>
 				</div>
-				<a class="banner__cta" href={resolve('/book')}>Rezerwuj →</a>
+				<a
+					class="banner__cta"
+					href={`${resolve('/book')}?segment=${selectedSegment}&berth=${selectedBerth}`}
+					>Rezerwuj →</a
+				>
 			</div>
 		{/if}
 	</div>
@@ -110,7 +140,9 @@
 		display: flex;
 		flex-direction: column;
 		gap: 4px;
-		transition: background-color 150ms ease, border-color 150ms ease;
+		transition:
+			background-color 150ms ease,
+			border-color 150ms ease;
 	}
 
 	.segments__btn--active {

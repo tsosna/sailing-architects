@@ -1,11 +1,19 @@
 <script lang="ts">
 	import { resolve } from '$app/paths'
 	import { page } from '$app/state'
+	import { useConvexClient } from 'convex-svelte'
+	import {
+		loadStripe,
+		type Stripe,
+		type StripeElements
+	} from '@stripe/stripe-js'
+	import { PUBLIC_STRIPE_PUBLISHABLE_KEY } from '$env/static/public'
 	import { BookingInput } from '$components/booking-input'
 	import { StepIndicator } from '$components/step-indicator'
 	import { findCabinByBerth } from '$lib/data/cabins'
 	import { voyageSegments } from '$lib/data/voyage-segments'
 	import { SignIn, SignUp, useClerkContext } from 'svelte-clerk'
+	import { api } from '$convex/api'
 
 	const STEPS = [
 		{ id: 1, label: 'Konto' },
@@ -75,10 +83,166 @@
 		medical: ''
 	})
 
-	let payment = $state({ card: '', exp: '', cvc: '', name: '' })
+	// ── Convex client (mutations) ─────────────────────────────────────────
+	const convex = useConvexClient()
+	let savingProfile = $state(false)
+	let saveError = $state<string | null>(null)
+	let errors = $state<Record<string, string>>({})
 
-	function next() {
+	type CrewField = keyof typeof crew
+
+	function validate(): { valid: boolean; errors: Record<string, string> } {
+		const next: Record<string, string> = {}
+		const requiredText: ReadonlyArray<CrewField> = [
+			'firstName',
+			'lastName',
+			'dob',
+			'docNumber',
+			'emergencyName',
+			'emergencyPhone'
+		]
+		for (const f of requiredText) {
+			if (!crew[f].trim()) next[f] = 'Pole wymagane'
+		}
+		if (!crew.swimming) next.swimming = 'Wybierz opcję'
+		if (!crew.experience) next.experience = 'Wybierz opcję'
+		return { valid: Object.keys(next).length === 0, errors: next }
+	}
+
+	function clearError(field: CrewField) {
+		if (errors[field]) {
+			const { [field]: _, ...rest } = errors
+			errors = rest
+		}
+	}
+
+	// ── Stripe state ─────────────────────────────────────────────────────
+	let stripeInstance = $state<Stripe | null>(null)
+	let stripeElements = $state<StripeElements | null>(null)
+	let paymentMountRef = $state<HTMLElement | null>(null)
+	let clientSecret = $state<string | null>(null)
+	let createdBookingRef = $state<string | null>(null)
+	let intentLoading = $state(false)
+	let intentError = $state<string | null>(null)
+	let paymentLoading = $state(false)
+	let paymentError = $state<string | null>(null)
+
+	/** Fetch PaymentIntent + init Stripe when entering step 4. */
+	$effect(() => {
+		if (step !== 4 || clientSecret) return
+
+		intentLoading = true
+		intentError = null
+
+		fetch('/api/stripe/create-intent', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				segmentSlug: segment.id,
+				berthId: berth,
+				userId: ctx.auth.userId
+			})
+		})
+			.then((r) => {
+				if (!r.ok)
+					return r
+						.json()
+						.then((d) => Promise.reject(new Error(d.message ?? 'Błąd')))
+				return r.json()
+			})
+			.then(async ({ clientSecret: cs, bookingRef }) => {
+				clientSecret = cs
+				createdBookingRef = bookingRef
+				stripeInstance = await loadStripe(PUBLIC_STRIPE_PUBLISHABLE_KEY)
+				if (stripeInstance) {
+					stripeElements = stripeInstance.elements({
+						clientSecret: cs,
+						appearance: {
+							theme: 'night',
+							variables: {
+								colorPrimary: '#c4923a',
+								colorBackground: '#0f1f35',
+								colorText: '#f5f0e8',
+								colorDanger: '#ef4444',
+								fontFamily: 'DM Sans, system-ui, sans-serif',
+								borderRadius: '0px'
+							}
+						}
+					})
+				}
+			})
+			.catch((err: unknown) => {
+				intentError =
+					err instanceof Error ? err.message : 'Błąd inicjalizacji płatności'
+			})
+			.finally(() => {
+				intentLoading = false
+			})
+	})
+
+	/** Mount PaymentElement when both DOM ref and StripeElements are ready. */
+	$effect(() => {
+		if (!paymentMountRef || !stripeElements) return
+		const el = stripeElements.create('payment')
+		el.mount(paymentMountRef)
+		return () => {
+			el.unmount()
+		}
+	})
+
+	async function submitPayment() {
+		if (!stripeInstance || !stripeElements) return
+		paymentLoading = true
+		paymentError = null
+		const { error: stripeErr } = await stripeInstance.confirmPayment({
+			elements: stripeElements,
+			redirect: 'if_required'
+		})
+		if (stripeErr) {
+			paymentError = stripeErr.message ?? 'Płatność nie powiodła się'
+			paymentLoading = false
+		} else {
+			step = 5
+			paymentLoading = false
+		}
+	}
+
+	async function next() {
 		if (step === 1 && !isSignedIn) return
+
+		if (step === 2) {
+			const result = validate()
+			if (!result.valid) {
+				errors = result.errors
+				return
+			}
+			savingProfile = true
+			saveError = null
+			try {
+				await convex.mutation(api.mutations.upsertCrewProfile, {
+					userId: ctx.auth.userId!,
+					firstName: crew.firstName,
+					lastName: crew.lastName,
+					dateOfBirth: crew.dob,
+					nationality: crew.nationality,
+					docType: crew.docType as 'passport' | 'id',
+					docNumber: crew.docNumber,
+					emergencyContactName: crew.emergencyName,
+					emergencyContactPhone: crew.emergencyPhone,
+					swimmingAbility: crew.swimming,
+					sailingExperience: crew.experience,
+					dietaryRequirements: crew.diet || undefined,
+					medicalNotes: crew.medical || undefined
+				})
+				step = 3
+			} catch (err) {
+				saveError = err instanceof Error ? err.message : 'Błąd zapisu danych'
+			} finally {
+				savingProfile = false
+			}
+			return
+		}
+
 		step = Math.min(step + 1, 5)
 	}
 
@@ -154,7 +318,8 @@
 						type="button"
 						class="btn btn--primary"
 						disabled={!isSignedIn}
-						onclick={next}>Dalej →</button>
+						onclick={next}>Dalej →</button
+					>
 				</div>
 			</section>
 		{/if}
@@ -164,18 +329,36 @@
 				<p class="eyebrow">Krok 2</p>
 				<h2 class="title">Dane załogi</h2>
 				<p class="lead">
-					Wymagane przez kapitana i władze portowe. Dane przechowywane bezpiecznie, widoczne tylko
-					dla organizatora.
+					Wymagane przez kapitana i władze portowe. Dane przechowywane
+					bezpiecznie, widoczne tylko dla organizatora.
 				</p>
 
 				<div class="form">
-					<BookingInput label="Imię" bind:value={crew.firstName} required />
-					<BookingInput label="Nazwisko" bind:value={crew.lastName} required />
-					<BookingInput label="Data urodzenia" type="date" bind:value={crew.dob} required />
+					<BookingInput
+						label="Imię"
+						bind:value={crew.firstName}
+						required
+						error={errors.firstName}
+						oninput={() => clearError('firstName')}
+					/>
+					<BookingInput
+						label="Nazwisko"
+						bind:value={crew.lastName}
+						required
+						error={errors.lastName}
+						oninput={() => clearError('lastName')}
+					/>
+					<BookingInput
+						label="Data urodzenia"
+						type="date"
+						bind:value={crew.dob}
+						required
+						error={errors.dob}
+						oninput={() => clearError('dob')}
+					/>
 					<BookingInput
 						label="Narodowość"
 						bind:value={crew.nationality}
-						required
 						options={NATIONALITY_OPTIONS}
 					/>
 
@@ -183,20 +366,39 @@
 						<p class="form__divider-label">Dokument tożsamości</p>
 					</div>
 
-					<BookingInput label="Typ dokumentu" bind:value={crew.docType} options={DOC_TYPE_OPTIONS} />
+					<BookingInput
+						label="Typ dokumentu"
+						bind:value={crew.docType}
+						options={DOC_TYPE_OPTIONS}
+					/>
 					<BookingInput
 						label="Numer dokumentu"
 						bind:value={crew.docNumber}
 						required
 						hint="Wymagane do rejestru jachtu"
+						error={errors.docNumber}
+						oninput={() => clearError('docNumber')}
 					/>
 
 					<div class="form__divider">
 						<p class="form__divider-label">Kontakt alarmowy</p>
 					</div>
 
-					<BookingInput label="Imię i nazwisko" bind:value={crew.emergencyName} required />
-					<BookingInput label="Telefon" type="tel" bind:value={crew.emergencyPhone} required />
+					<BookingInput
+						label="Imię i nazwisko"
+						bind:value={crew.emergencyName}
+						required
+						error={errors.emergencyName}
+						oninput={() => clearError('emergencyName')}
+					/>
+					<BookingInput
+						label="Telefon"
+						type="tel"
+						bind:value={crew.emergencyPhone}
+						required
+						error={errors.emergencyPhone}
+						oninput={() => clearError('emergencyPhone')}
+					/>
 
 					<div class="form__divider">
 						<p class="form__divider-label">Profil żeglarski</p>
@@ -205,12 +407,18 @@
 					<BookingInput
 						label="Umiejętności pływackie"
 						bind:value={crew.swimming}
+						required
 						options={SWIMMING_OPTIONS}
+						error={errors.swimming}
+						oninput={() => clearError('swimming')}
 					/>
 					<BookingInput
 						label="Doświadczenie żeglarskie"
 						bind:value={crew.experience}
+						required
 						options={EXPERIENCE_OPTIONS}
+						error={errors.experience}
+						oninput={() => clearError('experience')}
 					/>
 					<BookingInput
 						label="Wymagania dietetyczne"
@@ -226,9 +434,22 @@
 					/>
 				</div>
 
+				{#if saveError}
+					<p class="error-msg" role="alert">{saveError}</p>
+				{/if}
+
 				<div class="actions">
-					<button type="button" class="btn btn--ghost" onclick={back}>← Wróć</button>
-					<button type="button" class="btn btn--primary" onclick={next}>Dalej →</button>
+					<button type="button" class="btn btn--ghost" onclick={back}
+						>← Wróć</button
+					>
+					<button
+						type="button"
+						class="btn btn--primary"
+						disabled={savingProfile}
+						onclick={next}
+					>
+						{savingProfile ? 'Zapisywanie…' : 'Dalej →'}
+					</button>
 				</div>
 			</section>
 		{/if}
@@ -253,14 +474,17 @@
 					</dl>
 					<footer class="confirm__footer">
 						<p>
-							Cena nie zawiera: kosztów dojazdu do mariny, opłat portowych i paliwa (ok. 150–200
-							EUR/os), ubezpieczenia turystycznego (ok. 250 zł/os).
+							Cena nie zawiera: kosztów dojazdu do mariny, opłat portowych i
+							paliwa (ok. 150–200 EUR/os), ubezpieczenia turystycznego (ok. 250
+							zł/os).
 						</p>
 					</footer>
 				</div>
 
 				<div class="actions">
-					<button type="button" class="btn btn--ghost" onclick={back}>← Wróć</button>
+					<button type="button" class="btn btn--ghost" onclick={back}
+						>← Wróć</button
+					>
 					<button type="button" class="btn btn--primary" onclick={next}>
 						Przejdź do płatności →
 					</button>
@@ -275,13 +499,26 @@
 
 				<div class="pay">
 					<div class="pay__form">
-						<div class="pay__notice">🔒 Płatność obsługiwana przez Stripe. Twoje dane są bezpieczne.</div>
-						<BookingInput label="Numer karty" bind:value={payment.card} hint="1234 5678 9012 3456" />
-						<div class="pay__split">
-							<BookingInput label="Data ważności" bind:value={payment.exp} hint="MM/RR" />
-							<BookingInput label="CVC" bind:value={payment.cvc} hint="3 cyfry" />
+						<div class="pay__notice">
+							🔒 Płatność obsługiwana przez Stripe. Twoje dane są bezpieczne.
 						</div>
-						<BookingInput label="Imię i nazwisko na karcie" bind:value={payment.name} required />
+
+						{#if intentError}
+							<p class="error-msg" role="alert">{intentError}</p>
+						{:else if intentLoading}
+							<div class="pay__loading" aria-live="polite">
+								Inicjalizacja płatności…
+							</div>
+						{:else if stripeElements}
+							<div
+								bind:this={paymentMountRef}
+								id="stripe-payment-element"
+							></div>
+						{/if}
+
+						{#if paymentError}
+							<p class="error-msg" role="alert">{paymentError}</p>
+						{/if}
 					</div>
 
 					<aside class="pay__summary">
@@ -290,7 +527,7 @@
 						<p class="pay__summary-dates">{segment.dates}</p>
 						<div class="pay__summary-rows">
 							<div class="pay__summary-row">
-								<span>Koja</span>
+								<span>Koja {berth}</span>
 								<span>{priceFormatted} zł</span>
 							</div>
 							<div class="pay__summary-row pay__summary-row--total">
@@ -302,9 +539,26 @@
 				</div>
 
 				<div class="actions">
-					<button type="button" class="btn btn--ghost" onclick={back}>← Wróć</button>
-					<button type="button" class="btn btn--primary" onclick={next}>
-						Zapłać {priceFormatted} zł →
+					<button
+						type="button"
+						class="btn btn--ghost"
+						onclick={back}
+						disabled={paymentLoading}
+					>
+						← Wróć
+					</button>
+					<button
+						type="button"
+						class="btn btn--primary"
+						disabled={paymentLoading ||
+							!!intentError ||
+							intentLoading ||
+							!stripeElements}
+						onclick={submitPayment}
+					>
+						{paymentLoading
+							? 'Przetwarzanie…'
+							: `Zapłać ${priceFormatted} zł →`}
 					</button>
 				</div>
 			</section>
@@ -315,13 +569,22 @@
 				<div class="success__check" aria-hidden="true">✓</div>
 				<p class="eyebrow">Rezerwacja potwierdzona</p>
 				<h2 class="title">Witaj na pokładzie!</h2>
+				{#if createdBookingRef}
+					<p class="success__ref" aria-label="Numer rezerwacji">
+						{createdBookingRef}
+					</p>
+				{/if}
 				<p class="success__lead">
-					Koja <strong>{berth}</strong> na etapie <strong>{segment.name}</strong> ({segment.dates}) jest
-					Twoja. Potwierdzenie zostało wysłane e-mailem.
+					Koja <strong>{berth}</strong> na etapie
+					<strong>{segment.name}</strong>
+					({segment.dates}) jest Twoja. Potwierdzenie zostanie wysłane e-mailem
+					po zaksięgowaniu płatności.
 				</p>
 				<div class="actions actions--center">
 					<a class="btn btn--primary" href={resolve('/dashboard')}>Mój panel</a>
-					<button type="button" class="btn btn--ghost" disabled>↓ Pobierz PDF</button>
+					<button type="button" class="btn btn--ghost" disabled
+						>↓ Pobierz PDF</button
+					>
 				</div>
 			</section>
 		{/if}
@@ -453,7 +716,9 @@
 		text-transform: uppercase;
 		cursor: pointer;
 		margin-bottom: -1px;
-		transition: color 200ms ease, border-color 200ms ease;
+		transition:
+			color 200ms ease,
+			border-color 200ms ease;
 	}
 
 	.auth-tab:hover {
@@ -587,10 +852,39 @@
 		color: rgba(245, 240, 232, 0.5);
 	}
 
-	.pay__split {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 16px;
+	.pay__loading {
+		font-family: var(--font-sans);
+		font-size: 13px;
+		color: rgba(245, 240, 232, 0.4);
+		padding: 24px 0;
+	}
+
+	#stripe-payment-element {
+		/* Stripe injects iframe here — needs explicit min-height to avoid flicker */
+		min-height: 200px;
+	}
+
+	.error-msg {
+		font-family: var(--font-sans);
+		font-size: 12px;
+		color: #ef4444;
+		background: rgba(239, 68, 68, 0.08);
+		border: 1px solid rgba(239, 68, 68, 0.25);
+		padding: 10px 14px;
+		margin: 0;
+	}
+
+	.success__ref {
+		font-family: var(--font-sans);
+		font-size: 11px;
+		letter-spacing: 3px;
+		text-transform: uppercase;
+		color: var(--color-brass);
+		background: rgba(196, 146, 58, 0.08);
+		border: 1px solid rgba(196, 146, 58, 0.25);
+		padding: 8px 20px;
+		display: inline-block;
+		margin: 0 auto 24px;
 	}
 
 	.pay__summary {
@@ -705,7 +999,10 @@
 		font-size: 12px;
 		cursor: pointer;
 		border-radius: 0;
-		transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+		transition:
+			background-color 200ms ease,
+			color 200ms ease,
+			border-color 200ms ease;
 		text-decoration: none;
 		display: inline-flex;
 		align-items: center;

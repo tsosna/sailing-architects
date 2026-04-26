@@ -7,7 +7,9 @@
 		type?: 'text' | 'email' | 'password' | 'date' | 'tel' | 'textarea'
 		required?: boolean
 		hint?: string
+		error?: string
 		options?: ReadonlyArray<Option>
+		oninput?: () => void
 	}
 
 	let {
@@ -16,7 +18,9 @@
 		type = 'text',
 		required = false,
 		hint,
-		options
+		error,
+		options,
+		oninput
 	}: Props = $props()
 </script>
 
@@ -25,17 +29,36 @@
 		{label}{required ? ' *' : ''}
 	</span>
 	{#if options}
-		<select class="field__input field__input--select" bind:value>
+		<select
+			class="field__input field__input--select"
+			class:field__input--error={error}
+			bind:value
+			{oninput}
+		>
 			{#each options as opt (opt.value)}
 				<option value={opt.value}>{opt.label}</option>
 			{/each}
 		</select>
 	{:else if type === 'textarea'}
-		<textarea class="field__input field__input--textarea" rows="3" bind:value></textarea>
+		<textarea
+			class="field__input field__input--textarea"
+			class:field__input--error={error}
+			rows="3"
+			bind:value
+			{oninput}
+		></textarea>
 	{:else}
-		<input class="field__input" {type} bind:value />
+		<input
+			class="field__input"
+			class:field__input--error={error}
+			{type}
+			bind:value
+			{oninput}
+		/>
 	{/if}
-	{#if hint}
+	{#if error}
+		<span class="field__error" role="alert">{error}</span>
+	{:else if hint}
 		<span class="field__hint">{hint}</span>
 	{/if}
 </label>
@@ -67,7 +90,9 @@
 		box-sizing: border-box;
 		border-radius: 0;
 		appearance: none;
-		transition: border-color 150ms ease, background-color 150ms ease;
+		transition:
+			border-color 150ms ease,
+			background-color 150ms ease;
 	}
 
 	.field__input:focus-visible {
@@ -77,14 +102,15 @@
 
 	.field__input--select {
 		cursor: pointer;
-		background-image: linear-gradient(
-				45deg,
-				transparent 50%,
-				rgba(196, 146, 58, 0.6) 50%
-			),
+		background-image:
+			linear-gradient(45deg, transparent 50%, rgba(196, 146, 58, 0.6) 50%),
 			linear-gradient(135deg, rgba(196, 146, 58, 0.6) 50%, transparent 50%);
-		background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
-		background-size: 5px 5px, 5px 5px;
+		background-position:
+			calc(100% - 18px) 50%,
+			calc(100% - 13px) 50%;
+		background-size:
+			5px 5px,
+			5px 5px;
 		background-repeat: no-repeat;
 		padding-right: 30px;
 	}
@@ -104,5 +130,17 @@
 		font-family: var(--font-sans);
 		font-size: 10px;
 		color: rgba(245, 240, 232, 0.3);
+	}
+
+	.field__input--error {
+		border-color: #ef4444;
+	}
+
+	.field__error {
+		font-family: var(--font-sans);
+		font-size: 11px;
+		color: #ef4444;
+		margin-top: 4px;
+		display: block;
 	}
 </style>

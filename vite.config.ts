@@ -7,6 +7,6 @@ export default defineConfig({
 	plugins: [
 		wuchale(), // must come before sveltekit
 		tailwindcss(),
-		sveltekit(),
-	],
+		sveltekit()
+	]
 })

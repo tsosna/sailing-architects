@@ -26,7 +26,14 @@
 					height="20"
 					patternTransform="rotate(35)"
 				>
-					<line x1="0" y1="0" x2="0" y2="20" stroke="#c4923a" stroke-width="1" />
+					<line
+						x1="0"
+						y1="0"
+						x2="0"
+						y2="20"
+						stroke="#c4923a"
+						stroke-width="1"
+					/>
 				</pattern>
 			</defs>
 			<rect width="100%" height="100%" fill="url(#diagonal)" />
@@ -43,8 +50,8 @@
 				</h1>
 				<p class="subtitle">Palma de Mallorca → Cabo Verde</p>
 				<p class="lead">
-					Cztery etapy przez Atlantyk. Jacht Jeanneau Sun Odyssey 519. Październik–Listopad 2026.
-					Wybierz swoją koję i dołącz do załogi.
+					Cztery etapy przez Atlantyk. Jacht Jeanneau Sun Odyssey 519.
+					Październik–Listopad 2026. Wybierz swoją koję i dołącz do załogi.
 				</p>
 				<div class="cta">
 					<a class="btn btn--primary" href={resolve('/book')}>Wybierz koję</a>
@@ -80,7 +87,13 @@
 		justify-content: flex-end;
 		padding: 0 0 80px;
 		overflow: hidden;
-		background: linear-gradient(165deg, #0d1b2e 0%, #162840 35%, #1e3a5c 65%, #0d1b2e 100%);
+		background: linear-gradient(
+			165deg,
+			#0d1b2e 0%,
+			#162840 35%,
+			#1e3a5c 65%,
+			#0d1b2e 100%
+		);
 	}
 
 	.hero__bg {
@@ -102,7 +115,11 @@
 		transform: translateX(-50%);
 		width: 60%;
 		height: 200px;
-		background: radial-gradient(ellipse, rgba(196, 146, 58, 0.08) 0%, transparent 70%);
+		background: radial-gradient(
+			ellipse,
+			rgba(196, 146, 58, 0.08) 0%,
+			transparent 70%
+		);
 		pointer-events: none;
 	}
 
@@ -180,7 +197,10 @@
 		cursor: pointer;
 		display: inline-flex;
 		align-items: center;
-		transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+		transition:
+			background-color 200ms ease,
+			color 200ms ease,
+			border-color 200ms ease;
 	}
 
 	.btn--primary {
