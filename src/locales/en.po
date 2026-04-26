@@ -103,8 +103,8 @@ msgstr ""
 
 #. 0: seg.price.toLocaleString('pl-PL')
 #. 0: priceFormatted
-#. 0: priceFormatted
-#. 0: priceFormatted
+#. 0: pricePerBerthFormatted
+#. 0: totalPriceFormatted
 #: src/lib/components/cabins-section/cabins-section.svelte
 #: src/lib/components/route-section/route-section.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
@@ -112,14 +112,11 @@ msgstr ""
 msgid "{0} zł"
 msgstr ""
 
-#: src/lib/components/cabins-section/cabins-section.svelte
-msgid "Wybrano"
-msgstr ""
+#~ msgid "Wybrano"
+#~ msgstr ""
 
-#. 0: selectedBerth; 1: cabin.label; 2: segment.name
-#: src/lib/components/cabins-section/cabins-section.svelte
-msgid "Koja {0} · {1} · {2}"
-msgstr ""
+#~ msgid "Koja {0} · {1} · {2}"
+#~ msgstr ""
 
 #: src/lib/components/cabins-section/cabins-section.svelte
 msgid "Rezerwuj →"
@@ -214,8 +211,8 @@ msgid "Legenda"
 msgstr ""
 
 #. 0: b
-#. 0: selectedBerth
-#. 0: berth
+#. 0: d.id
+#. 0: b
 #: src/lib/components/boat-plan/boat-plan.svelte
 #: src/lib/components/boat-plan/boat-plan.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
@@ -442,7 +439,6 @@ msgid "Dni"
 msgstr ""
 
 #: src/lib/components/route-section/route-section.svelte
-#: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Cena"
 msgstr ""
@@ -633,20 +629,19 @@ msgstr ""
 
 #: src/routes/[[lang=lang]]/admin/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Koja"
 msgstr ""
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Kabina A"
-msgstr ""
+#~ msgid "Kabina A"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Pozycja"
-msgstr ""
+#~ msgid "Pozycja"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Dziobowa"
-msgstr ""
+#~ msgid "Dziobowa"
+#~ msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Rezerwacja · Sailing Architects"
@@ -831,10 +826,11 @@ msgid "Podsumowanie"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Razem"
 msgstr ""
 
-#. 0: priceFormatted
+#. 0: totalPriceFormatted
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Zapłać {0} zł →"
 msgstr ""
@@ -905,10 +901,8 @@ msgstr ""
 msgid "Numer rezerwacji"
 msgstr ""
 
-#. 0: segment.dates
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Koja <0/> na etapie <1/> ({0}) jest Twoja. Potwierdzenie zostanie wysłane e-mailem po zaksięgowaniu płatności."
-msgstr ""
+#~ msgid "Koja <0/> na etapie <1/> ({0}) jest Twoja. Potwierdzenie zostanie wysłane e-mailem po zaksięgowaniu płatności."
+#~ msgstr ""
 
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Żeglarz"
@@ -1125,4 +1119,43 @@ msgstr ""
 
 #: src/routes/[[lang=lang]]/admin/+page.svelte
 msgid "Ustaw C1 = kapitan (migracja)"
+msgstr ""
+
+#. 0: selectedDetails.length
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "Wybrane ({0})"
+msgstr ""
+
+#. 0: selectedBerths.length; 1: selectedBerths.length === 1 ? 'koję' \\: 'koje'
+#: src/lib/components/cabins-section/cabins-section.svelte
+msgid "Wybrano {0} {1}"
+msgstr ""
+
+#. 0: selectedBerths.join(', '); 1: segment.name; 2: totalPrice.toLocaleString( 'pl-PL' )
+#: src/lib/components/cabins-section/cabins-section.svelte
+msgid "{0} · {1} · {2} zł"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Koje"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Kabina"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Liczba miejsc"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Cena za miejsce"
+msgstr ""
+
+#. 0: berths.length === 1 ? 'Koja' \\: 'Koje'; 1: segment.dates; 2: berths.length === 1 ? 'jest Twoja' \\: 'są Twoje'
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "{0} <0/> na etapie <1/> ({1}) {2}. Potwierdzenie zostanie wysłane e-mailem po zaksięgowaniu płatności."
 msgstr ""

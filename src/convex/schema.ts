@@ -30,7 +30,7 @@ export default defineSchema({
 
 	bookings: defineTable({
 		userId: v.string(), // Clerk user ID
-		berthId: v.id('berths'),
+		berthIds: v.array(v.id('berths')),
 		segmentId: v.id('voyageSegments'),
 		status: v.union(
 			v.literal('pending'),

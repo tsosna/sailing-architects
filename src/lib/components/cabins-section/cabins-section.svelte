@@ -2,19 +2,24 @@
 	import { resolve } from '$app/paths'
 	import { useQuery } from 'convex-svelte'
 	import { BoatPlan } from '$components/boat-plan'
-	import { findCabinByBerth } from '$lib/data/cabins'
 	import { voyageSegments } from '$lib/data/voyage-segments'
 	import { api } from '$convex/api'
 
 	let selectedSegment = $state<string>(voyageSegments[0].id)
-	let selectedBerth = $state<string | null>(null)
+	let selectedBerths = $state<string[]>([])
 
 	const segment = $derived(
 		voyageSegments.find((s) => s.id === selectedSegment) ?? voyageSegments[0]
 	)
-	const cabin = $derived(
-		selectedBerth ? findCabinByBerth(selectedBerth) : undefined
-	)
+	const totalPrice = $derived(segment.price * selectedBerths.length)
+
+	function toggleBerth(id: string) {
+		if (selectedBerths.includes(id)) {
+			selectedBerths = selectedBerths.filter((b) => b !== id)
+		} else {
+			selectedBerths = [...selectedBerths, id]
+		}
+	}
 
 	// Live berth statuses from Convex — falls back to empty map while loading
 	const statusQuery = useQuery(api.queries.berthStatusesBySlug, () => ({
@@ -29,6 +34,11 @@
 			])
 		)
 	)
+
+	function selectSegment(id: string) {
+		selectedSegment = id
+		selectedBerths = []
+	}
 </script>
 
 <section id="cabins" class="cabins">
@@ -48,7 +58,7 @@
 					aria-selected={selectedSegment === seg.id}
 					class="segments__btn"
 					class:segments__btn--active={selectedSegment === seg.id}
-					onclick={() => (selectedSegment = seg.id)}
+					onclick={() => selectSegment(seg.id)}
 				>
 					<span class="segments__dates">{seg.dates}</span>
 					<span class="segments__name">{seg.name}</span>
@@ -59,23 +69,24 @@
 			{/each}
 		</div>
 
-		<BoatPlan
-			{selectedBerth}
-			{berthStatuses}
-			onSelectBerth={(id) => (selectedBerth = id)}
-		/>
+		<BoatPlan {selectedBerths} {berthStatuses} onToggleBerth={toggleBerth} />
 
-		{#if selectedBerth && cabin}
+		{#if selectedBerths.length > 0}
 			<div class="banner" aria-live="polite">
 				<div class="banner__copy">
-					<p class="banner__eyebrow">Wybrano</p>
+					<p class="banner__eyebrow">
+						Wybrano {selectedBerths.length}
+						{selectedBerths.length === 1 ? 'koję' : 'koje'}
+					</p>
 					<p class="banner__title">
-						Koja {selectedBerth} · {cabin.label} · {segment.name}
+						{selectedBerths.join(', ')} · {segment.name} · {totalPrice.toLocaleString(
+							'pl-PL'
+						)} zł
 					</p>
 				</div>
 				<a
 					class="banner__cta"
-					href={`${resolve('/book')}?segment=${selectedSegment}&berth=${selectedBerth}`}
+					href={`${resolve('/book')}?segment=${selectedSegment}&berths=${selectedBerths.join(',')}`}
 					>Rezerwuj →</a
 				>
 			</div>

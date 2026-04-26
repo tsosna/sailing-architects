@@ -103,8 +103,8 @@ msgstr "Wybierz etap rejsu"
 
 #. 0: seg.price.toLocaleString('pl-PL')
 #. 0: priceFormatted
-#. 0: priceFormatted
-#. 0: priceFormatted
+#. 0: pricePerBerthFormatted
+#. 0: totalPriceFormatted
 #: src/lib/components/cabins-section/cabins-section.svelte
 #: src/lib/components/route-section/route-section.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
@@ -112,14 +112,11 @@ msgstr "Wybierz etap rejsu"
 msgid "{0} zł"
 msgstr "{0} zł"
 
-#: src/lib/components/cabins-section/cabins-section.svelte
-msgid "Wybrano"
-msgstr "Wybrano"
+#~ msgid "Wybrano"
+#~ msgstr "Wybrano"
 
-#. 0: selectedBerth; 1: cabin.label; 2: segment.name
-#: src/lib/components/cabins-section/cabins-section.svelte
-msgid "Koja {0} · {1} · {2}"
-msgstr "Koja {0} · {1} · {2}"
+#~ msgid "Koja {0} · {1} · {2}"
+#~ msgstr "Koja {0} · {1} · {2}"
 
 #: src/lib/components/cabins-section/cabins-section.svelte
 msgid "Rezerwuj →"
@@ -214,8 +211,8 @@ msgid "Legenda"
 msgstr "Legenda"
 
 #. 0: b
-#. 0: selectedBerth
-#. 0: berth
+#. 0: d.id
+#. 0: b
 #: src/lib/components/boat-plan/boat-plan.svelte
 #: src/lib/components/boat-plan/boat-plan.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
@@ -442,7 +439,6 @@ msgid "Dni"
 msgstr "Dni"
 
 #: src/lib/components/route-section/route-section.svelte
-#: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Cena"
 msgstr "Cena"
@@ -633,20 +629,19 @@ msgstr "Czas trwania"
 
 #: src/routes/[[lang=lang]]/admin/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Koja"
 msgstr "Koja"
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Kabina A"
-msgstr "Kabina A"
+#~ msgid "Kabina A"
+#~ msgstr "Kabina A"
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Pozycja"
-msgstr "Pozycja"
+#~ msgid "Pozycja"
+#~ msgstr "Pozycja"
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Dziobowa"
-msgstr "Dziobowa"
+#~ msgid "Dziobowa"
+#~ msgstr "Dziobowa"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Rezerwacja · Sailing Architects"
@@ -831,10 +826,11 @@ msgid "Podsumowanie"
 msgstr "Podsumowanie"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Razem"
 msgstr "Razem"
 
-#. 0: priceFormatted
+#. 0: totalPriceFormatted
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Zapłać {0} zł →"
 msgstr "Zapłać {0} zł →"
@@ -905,10 +901,8 @@ msgstr "Przetwarzanie…"
 msgid "Numer rezerwacji"
 msgstr "Numer rezerwacji"
 
-#. 0: segment.dates
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Koja <0/> na etapie <1/> ({0}) jest Twoja. Potwierdzenie zostanie wysłane e-mailem po zaksięgowaniu płatności."
-msgstr "Koja <0/> na etapie <1/> ({0}) jest Twoja. Potwierdzenie zostanie wysłane e-mailem po zaksięgowaniu płatności."
+#~ msgid "Koja <0/> na etapie <1/> ({0}) jest Twoja. Potwierdzenie zostanie wysłane e-mailem po zaksięgowaniu płatności."
+#~ msgstr "Koja <0/> na etapie <1/> ({0}) jest Twoja. Potwierdzenie zostanie wysłane e-mailem po zaksięgowaniu płatności."
 
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Żeglarz"
@@ -1126,3 +1120,42 @@ msgstr "Jeśli baza danych była seedowana przed Block 2 — uruchom migrację, 
 #: src/routes/[[lang=lang]]/admin/+page.svelte
 msgid "Ustaw C1 = kapitan (migracja)"
 msgstr "Ustaw C1 = kapitan (migracja)"
+
+#. 0: selectedDetails.length
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "Wybrane ({0})"
+msgstr "Wybrane ({0})"
+
+#. 0: selectedBerths.length; 1: selectedBerths.length === 1 ? 'koję' \\: 'koje'
+#: src/lib/components/cabins-section/cabins-section.svelte
+msgid "Wybrano {0} {1}"
+msgstr "Wybrano {0} {1}"
+
+#. 0: selectedBerths.join(', '); 1: segment.name; 2: totalPrice.toLocaleString( 'pl-PL' )
+#: src/lib/components/cabins-section/cabins-section.svelte
+msgid "{0} · {1} · {2} zł"
+msgstr "{0} · {1} · {2} zł"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Koje"
+msgstr "Koje"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Kabina"
+msgstr "Kabina"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Liczba miejsc"
+msgstr "Liczba miejsc"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Cena za miejsce"
+msgstr "Cena za miejsce"
+
+#. 0: berths.length === 1 ? 'Koja' \\: 'Koje'; 1: segment.dates; 2: berths.length === 1 ? 'jest Twoja' \\: 'są Twoje'
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "{0} <0/> na etapie <1/> ({1}) {2}. Potwierdzenie zostanie wysłane e-mailem po zaksięgowaniu płatności."
+msgstr "{0} <0/> na etapie <1/> ({1}) {2}. Potwierdzenie zostanie wysłane e-mailem po zaksięgowaniu płatności."

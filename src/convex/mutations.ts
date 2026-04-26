@@ -33,40 +33,50 @@ export const upsertCrewProfile = mutation({
 })
 
 /**
- * Create a pending booking and immediately mark the berth as taken.
+ * Create a pending booking and immediately mark all berths as taken.
  * Called server-side from /api/stripe/create-intent after the PaymentIntent is created.
- * Throws if the berth is already taken (race condition guard).
+ * Throws if any berth is already taken (race condition guard) — entire booking aborts.
  */
 export const createBooking = mutation({
 	args: {
 		userId: v.string(),
 		segmentSlug: v.string(),
-		berthId: v.string(),
+		berthIds: v.array(v.string()),
 		stripePaymentIntentId: v.string(),
 		bookingRef: v.string()
 	},
 	handler: async (ctx, args) => {
+		if (args.berthIds.length === 0)
+			throw new Error('Wybierz przynajmniej jedną koję')
+
 		const segment = await ctx.db
 			.query('voyageSegments')
 			.withIndex('by_slug', (q) => q.eq('slug', args.segmentSlug))
 			.first()
 		if (!segment) throw new Error(`Segment not found: ${args.segmentSlug}`)
 
-		const berth = await ctx.db
-			.query('berths')
-			.withIndex('by_segment_berth', (q) =>
-				q.eq('segmentId', segment._id).eq('berthId', args.berthId)
-			)
-			.first()
-		if (!berth) throw new Error(`Berth not found: ${args.berthId}`)
-		if (berth.status !== 'available') throw new Error('Koja jest już zajęta')
+		const resolved = []
+		for (const berthId of args.berthIds) {
+			const berth = await ctx.db
+				.query('berths')
+				.withIndex('by_segment_berth', (q) =>
+					q.eq('segmentId', segment._id).eq('berthId', berthId)
+				)
+				.first()
+			if (!berth) throw new Error(`Berth not found: ${berthId}`)
+			if (berth.status !== 'available')
+				throw new Error(`Koja ${berthId} jest już zajęta`)
+			resolved.push(berth)
+		}
 
-		// Atomic: mark berth taken before inserting booking
-		await ctx.db.patch(berth._id, { status: 'taken' })
+		// Atomic: mark all berths taken before inserting booking
+		for (const berth of resolved) {
+			await ctx.db.patch(berth._id, { status: 'taken' })
+		}
 
 		return ctx.db.insert('bookings', {
 			userId: args.userId,
-			berthId: berth._id,
+			berthIds: resolved.map((b) => b._id),
 			segmentId: segment._id,
 			status: 'pending',
 			stripePaymentIntentId: args.stripePaymentIntentId,
@@ -178,7 +188,7 @@ export const migrateCaptainBerths = mutation({
 	}
 })
 
-/** Release berth and cancel booking on failed/cancelled payment (called from webhook). */
+/** Release all berths and cancel booking on failed/cancelled payment (called from webhook). */
 export const cancelBooking = mutation({
 	args: { stripePaymentIntentId: v.string() },
 	handler: async (ctx, { stripePaymentIntentId }) => {
@@ -190,7 +200,9 @@ export const cancelBooking = mutation({
 			.first()
 		if (!booking) return
 
-		await ctx.db.patch(booking.berthId, { status: 'available' })
+		for (const berthId of booking.berthIds) {
+			await ctx.db.patch(berthId, { status: 'available' })
+		}
 		await ctx.db.patch(booking._id, { status: 'cancelled' })
 	}
 })

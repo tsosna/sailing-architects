@@ -53,7 +53,7 @@ export const allBerthsBySlug = query({
 })
 
 /**
- * Latest booking for a user, enriched with segment data.
+ * Latest booking for a user, enriched with segment data and resolved berths.
  * Used on the dashboard.
  */
 export const bookingByUser = query({
@@ -67,7 +67,13 @@ export const bookingByUser = query({
 		if (!booking) return null
 
 		const segment = await ctx.db.get(booking.segmentId)
-		return { ...booking, segment }
+		const berthDocs = await Promise.all(
+			booking.berthIds.map((id) => ctx.db.get(id))
+		)
+		const berths = berthDocs.filter(
+			(b): b is NonNullable<typeof b> => b !== null
+		)
+		return { ...booking, segment, berths }
 	}
 })
 

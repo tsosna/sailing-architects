@@ -11,14 +11,14 @@
 		| 'complimentary'
 
 	type Props = {
-		selectedBerth: string | null
-		onSelectBerth: (id: string | null) => void
+		selectedBerths: ReadonlyArray<string>
+		onToggleBerth: (id: string) => void
 		berthStatuses?: ReadonlyMap<string, BerthStatus>
 	}
 
 	let {
-		selectedBerth,
-		onSelectBerth,
+		selectedBerths,
+		onToggleBerth,
 		berthStatuses = new Map<string, BerthStatus>([
 			['A2', 'taken'],
 			['C1', 'captain'],
@@ -31,7 +31,7 @@
 	function berthState(id: string): BerthState {
 		const status = berthStatuses.get(id)
 		if (status) return status
-		if (selectedBerth === id) return 'selected'
+		if (selectedBerths.includes(id)) return 'selected'
 		if (hovered === id) return 'hovered'
 		return 'available'
 	}
@@ -83,7 +83,7 @@
 
 	function handleBerth(id: string) {
 		if (berthStatuses.has(id)) return
-		onSelectBerth(selectedBerth === id ? null : id)
+		onToggleBerth(id)
 	}
 
 	function handleKey(e: KeyboardEvent, id: string) {
@@ -126,8 +126,13 @@
 		}
 	]
 
-	const selectedCabin = $derived(
-		selectedBerth ? findCabinByBerth(selectedBerth) : undefined
+	const selectedDetails = $derived(
+		selectedBerths
+			.map((id) => ({ id, cabin: findCabinByBerth(id) }))
+			.filter(
+				(d): d is { id: string; cabin: NonNullable<typeof d.cabin> } =>
+					!!d.cabin
+			)
 	)
 </script>
 
@@ -648,13 +653,19 @@
 			</ul>
 		</section>
 
-		{#if selectedBerth && selectedCabin}
+		{#if selectedDetails.length > 0}
 			<aside class="boat__selected">
-				<p class="boat__selected-eyebrow">Wybrana</p>
-				<p class="boat__selected-title">Koja {selectedBerth}</p>
-				<p class="boat__selected-meta">
-					{selectedCabin.label} · {selectedCabin.position}
+				<p class="boat__selected-eyebrow">
+					{selectedDetails.length === 1
+						? 'Wybrana'
+						: `Wybrane (${selectedDetails.length})`}
 				</p>
+				{#each selectedDetails as d (d.id)}
+					<p class="boat__selected-title">Koja {d.id}</p>
+					<p class="boat__selected-meta">
+						{d.cabin.label} · {d.cabin.position}
+					</p>
+				{/each}
 			</aside>
 		{/if}
 	</aside>

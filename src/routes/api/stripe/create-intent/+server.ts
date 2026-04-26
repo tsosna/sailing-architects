@@ -9,10 +9,19 @@ const convex = new ConvexHttpClient(PUBLIC_CONVEX_URL)
 
 export const POST: RequestHandler = async ({ request }) => {
 	const body = await request.json().catch(() => null)
-	const { segmentSlug, berthId, userId } = body ?? {}
+	const { segmentSlug, berthIds, userId } = (body ?? {}) as {
+		segmentSlug?: string
+		berthIds?: string[]
+		userId?: string
+	}
 
-	if (!segmentSlug || !berthId || !userId) {
-		error(400, 'Brakujące pola: segmentSlug, berthId, userId')
+	if (
+		!segmentSlug ||
+		!userId ||
+		!Array.isArray(berthIds) ||
+		berthIds.length === 0
+	) {
+		error(400, 'Brakujące pola: segmentSlug, berthIds, userId')
 	}
 
 	// Resolve segment for the price
@@ -23,25 +32,30 @@ export const POST: RequestHandler = async ({ request }) => {
 	// Generate booking reference
 	const bookingRef = `SA-2026-${String(Math.floor(Math.random() * 9000) + 1000)}`
 
-	// Create Stripe PaymentIntent (amount in grosze = PLN × 100)
+	// Create Stripe PaymentIntent (amount = price per berth × count, in grosze)
 	let paymentIntent: Awaited<ReturnType<typeof stripe.paymentIntents.create>>
 	try {
 		paymentIntent = await stripe.paymentIntents.create({
-			amount: segment.pricePerBerth * 100,
+			amount: segment.pricePerBerth * berthIds.length * 100,
 			currency: 'pln',
-			metadata: { segmentSlug, berthId, userId, bookingRef }
+			metadata: {
+				segmentSlug,
+				berthIds: berthIds.join(','),
+				userId,
+				bookingRef
+			}
 		})
 	} catch (stripeErr) {
 		console.error('Stripe error:', stripeErr)
 		error(502, 'Błąd inicjalizacji płatności')
 	}
 
-	// Create Convex booking — marks berth as taken (throws if already taken)
+	// Create Convex booking — marks all berths as taken (throws if any already taken)
 	try {
 		await convex.mutation(api.mutations.createBooking, {
 			userId,
 			segmentSlug,
-			berthId,
+			berthIds,
 			stripePaymentIntentId: paymentIntent.id,
 			bookingRef
 		})

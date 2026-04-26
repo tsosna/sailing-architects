@@ -30,6 +30,11 @@
 					['Termin', bookingData.segment?.dates ?? '—'],
 					['Dni', String(bookingData.segment?.days ?? '—')],
 					[
+						bookingData.berths.length === 1 ? 'Koja' : 'Koje',
+						bookingData.berths.map((b) => b.berthId).join(', ') || '—'
+					],
+					['Liczba miejsc', String(bookingData.berths.length)],
+					[
 						'Status',
 						bookingData.status === 'confirmed'
 							? 'Potwierdzona'
@@ -37,7 +42,7 @@
 					],
 					[
 						'Cena',
-						`${(bookingData.segment?.pricePerBerth ?? 0).toLocaleString('pl-PL')} zł`
+						`${((bookingData.segment?.pricePerBerth ?? 0) * bookingData.berths.length).toLocaleString('pl-PL')} zł`
 					]
 				]
 			: []

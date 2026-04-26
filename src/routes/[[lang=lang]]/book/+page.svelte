@@ -56,14 +56,25 @@
 	const userEmail = $derived(ctx.user?.primaryEmailAddress?.emailAddress ?? '')
 
 	const segmentParam = $derived(page.url.searchParams.get('segment'))
-	const berthParam = $derived(page.url.searchParams.get('berth'))
+	const berthsParam = $derived(page.url.searchParams.get('berths'))
 
 	const segment = $derived(
 		voyageSegments.find((s) => s.id === segmentParam) ?? voyageSegments[0]
 	)
-	const berth = $derived(berthParam ?? 'A1')
-	const cabin = $derived(findCabinByBerth(berth))
-	const priceFormatted = $derived(segment.price.toLocaleString('pl-PL'))
+	const berths = $derived(
+		berthsParam
+			? berthsParam
+					.split(',')
+					.map((b) => b.trim())
+					.filter(Boolean)
+			: ['A1']
+	)
+	const berthDetails = $derived(
+		berths.map((id) => ({ id, cabin: findCabinByBerth(id) }))
+	)
+	const totalPrice = $derived(segment.price * berths.length)
+	const totalPriceFormatted = $derived(totalPrice.toLocaleString('pl-PL'))
+	const pricePerBerthFormatted = $derived(segment.price.toLocaleString('pl-PL'))
 
 	let step = $state(1)
 	let authMode = $state<'signin' | 'signup'>('signin')
@@ -139,7 +150,7 @@
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
 				segmentSlug: segment.id,
-				berthId: berth,
+				berthIds: berths,
 				userId: ctx.auth.userId
 			})
 		})
@@ -254,9 +265,15 @@
 		['Etap', segment.name],
 		['Termin', segment.dates],
 		['Czas trwania', `${segment.days} dni`],
-		['Koja', `${berth} — ${cabin?.label ?? 'Kabina A'}`],
-		['Pozycja', cabin?.position ?? 'Dziobowa'],
-		['Cena', `${priceFormatted} zł / osoba`]
+		[
+			berths.length === 1 ? 'Koja' : 'Koje',
+			berthDetails
+				.map((d) => `${d.id} — ${d.cabin?.label ?? 'Kabina'}`)
+				.join(', ')
+		],
+		['Liczba miejsc', String(berths.length)],
+		['Cena za miejsce', `${pricePerBerthFormatted} zł`],
+		['Razem', `${totalPriceFormatted} zł`]
 	])
 </script>
 
@@ -526,13 +543,15 @@
 						<p class="pay__summary-title">{segment.name}</p>
 						<p class="pay__summary-dates">{segment.dates}</p>
 						<div class="pay__summary-rows">
-							<div class="pay__summary-row">
-								<span>Koja {berth}</span>
-								<span>{priceFormatted} zł</span>
-							</div>
+							{#each berths as b (b)}
+								<div class="pay__summary-row">
+									<span>Koja {b}</span>
+									<span>{pricePerBerthFormatted} zł</span>
+								</div>
+							{/each}
 							<div class="pay__summary-row pay__summary-row--total">
 								<span>Razem</span>
-								<span>{priceFormatted} zł</span>
+								<span>{totalPriceFormatted} zł</span>
 							</div>
 						</div>
 					</aside>
@@ -558,7 +577,7 @@
 					>
 						{paymentLoading
 							? 'Przetwarzanie…'
-							: `Zapłać ${priceFormatted} zł →`}
+							: `Zapłać ${totalPriceFormatted} zł →`}
 					</button>
 				</div>
 			</section>
@@ -575,10 +594,13 @@
 					</p>
 				{/if}
 				<p class="success__lead">
-					Koja <strong>{berth}</strong> na etapie
+					{berths.length === 1 ? 'Koja' : 'Koje'}
+					<strong>{berths.join(', ')}</strong>
+					na etapie
 					<strong>{segment.name}</strong>
-					({segment.dates}) jest Twoja. Potwierdzenie zostanie wysłane e-mailem
-					po zaksięgowaniu płatności.
+					({segment.dates})
+					{berths.length === 1 ? 'jest Twoja' : 'są Twoje'}. Potwierdzenie
+					zostanie wysłane e-mailem po zaksięgowaniu płatności.
 				</p>
 				<div class="actions actions--center">
 					<a class="btn btn--primary" href={resolve('/dashboard')}>Mój panel</a>
