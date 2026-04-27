@@ -474,7 +474,8 @@
 				<g
 					class="boat__berth"
 					class:boat__berth--clickable={state === 'available' ||
-						state === 'hovered'}
+						state === 'hovered' ||
+						state === 'selected'}
 					role="button"
 					tabindex={state === 'available' ||
 					state === 'hovered' ||

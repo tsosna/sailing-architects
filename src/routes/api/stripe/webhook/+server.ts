@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit'
 import { ConvexHttpClient } from 'convex/browser'
+import type Stripe from 'stripe'
 import { PUBLIC_CONVEX_URL } from '$env/static/public'
 import { stripe } from '$lib/server/stripe'
 import { STRIPE_WEBHOOK_SECRET } from '$env/static/private'
@@ -14,38 +15,30 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	const body = await request.text()
 
-	let event: ReturnType<typeof stripe.webhooks.constructEvent> extends Promise<
-		infer T
-	>
-		? T
-		: ReturnType<typeof stripe.webhooks.constructEvent>
+	let event: Stripe.Event
 	try {
 		event = stripe.webhooks.constructEvent(
 			body,
 			signature,
 			STRIPE_WEBHOOK_SECRET
 		)
-	} catch {
-		error(400, 'Invalid webhook signature')
+	} catch (err) {
+		error(400, err instanceof Error ? err.message : 'Invalid webhook signature')
 	}
 
 	switch (event.type) {
-		case 'payment_intent.succeeded': {
-			const pi = event.data.object
+		case 'payment_intent.succeeded':
 			await convex.mutation(api.mutations.confirmBooking, {
-				stripePaymentIntentId: pi.id,
+				stripePaymentIntentId: event.data.object.id,
 				paidAt: Date.now()
 			})
 			break
-		}
 		case 'payment_intent.payment_failed':
-		case 'payment_intent.canceled': {
-			const pi = event.data.object
+		case 'payment_intent.canceled':
 			await convex.mutation(api.mutations.cancelBooking, {
-				stripePaymentIntentId: pi.id
+				stripePaymentIntentId: event.data.object.id
 			})
 			break
-		}
 	}
 
 	return new Response(null, { status: 200 })
