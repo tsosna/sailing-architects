@@ -8,23 +8,23 @@
  * @module
  */
 
-import type * as http from "../http.js";
-import type * as mutations from "../mutations.js";
-import type * as queries from "../queries.js";
-import type * as seed from "../seed.js";
+import type * as http from '../http.js'
+import type * as mutations from '../mutations.js'
+import type * as queries from '../queries.js'
+import type * as seed from '../seed.js'
 
 import type {
-  ApiFromModules,
-  FilterApi,
-  FunctionReference,
-} from "convex/server";
+	ApiFromModules,
+	FilterApi,
+	FunctionReference
+} from 'convex/server'
 
 declare const fullApi: ApiFromModules<{
-  http: typeof http;
-  mutations: typeof mutations;
-  queries: typeof queries;
-  seed: typeof seed;
-}>;
+	http: typeof http
+	mutations: typeof mutations
+	queries: typeof queries
+	seed: typeof seed
+}>
 
 /**
  * A utility for referencing Convex functions in your app's public API.
@@ -35,9 +35,9 @@ declare const fullApi: ApiFromModules<{
  * ```
  */
 export declare const api: FilterApi<
-  typeof fullApi,
-  FunctionReference<any, "public">
->;
+	typeof fullApi,
+	FunctionReference<any, 'public'>
+>
 
 /**
  * A utility for referencing Convex functions in your app's internal API.
@@ -48,8 +48,8 @@ export declare const api: FilterApi<
  * ```
  */
 export declare const internal: FilterApi<
-  typeof fullApi,
-  FunctionReference<any, "internal">
->;
+	typeof fullApi,
+	FunctionReference<any, 'internal'>
+>
 
-export declare const components: {};
+export declare const components: {}

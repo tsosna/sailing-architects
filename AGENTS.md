@@ -319,3 +319,13 @@ Dostarcza: `list-sections`, `get-documentation`, `svelte-autofixer`.
 - Ręczne owijanie stringów w funkcje i18n (Wuchale robi to automatycznie)
 - `pnpm add @inlang/paraglide-js` — ten projekt używa Wuchale
 - Raw `body` jako JSON w webhook handlerze — Stripe wymaga tekstu do weryfikacji sygnatury
+
+<!-- convex-ai-start -->
+
+This project uses [Convex](https://convex.dev) as its backend.
+
+When working on Convex code, **always read `src/convex/_generated/ai/guidelines.md` first** for important guidelines on how to correctly use Convex APIs and patterns. The file contains rules that override what you may have learned about Convex from training data.
+
+Convex agent skills for common tasks can be installed by running `npx convex ai-files install`.
+
+<!-- convex-ai-end -->
