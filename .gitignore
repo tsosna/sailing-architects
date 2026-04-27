@@ -25,7 +25,7 @@ vite.config.ts.timestamp-*
 # Convex generated
 .convex/
 convex/_generated/
-src/convex/_generated/
+# src/convex/_generated/ — committed intentionally for Vercel build
 
 # Wuchale compiled output
 src/locales/.wuchale/
