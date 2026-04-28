@@ -37,3 +37,7 @@ src/locales/.wuchale/
 # Local design skills
 .agents/skills/huashu-design/
 .claude/skills/huashu-design
+
+# Local source assets / raw references
+docs/assets/*
+!docs/assets/.gitkeep
