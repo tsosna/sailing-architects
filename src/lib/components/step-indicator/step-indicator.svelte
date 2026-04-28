@@ -91,13 +91,13 @@
 	.indicator__node--active {
 		border-color: var(--color-brass);
 		background: transparent;
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 	}
 
 	.indicator__node--inactive {
 		border-color: rgba(196, 146, 58, 0.25);
 		background: transparent;
-		color: rgba(196, 146, 58, 0.3);
+		color: rgba(212, 170, 90, 0.58);
 	}
 
 	.indicator__label {
@@ -109,15 +109,15 @@
 	}
 
 	.indicator__label--done {
-		color: rgba(196, 146, 58, 0.7);
+		color: var(--color-brass-text-soft);
 	}
 
 	.indicator__label--active {
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 	}
 
 	.indicator__label--inactive {
-		color: rgba(196, 146, 58, 0.25);
+		color: rgba(212, 170, 90, 0.58);
 	}
 
 	.indicator__sep {

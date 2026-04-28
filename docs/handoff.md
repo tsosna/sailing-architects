@@ -286,3 +286,149 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 - Stripe produkcja: jeden webhook endpoint dla dev i prod czy osobne? (Vercel preview deployments komplikują)
 - Czy `/admin` dostaje osobny Clerk role (np. `admin`) czy wystarczy URL obscurity?
+
+---
+
+## Sesja 2026-04-27 — Stripe webhook + Clerk PL/brass theme
+
+### Zmiany
+
+- **Stripe webhook** (`src/routes/api/stripe/webhook/+server.ts`): rewrite z czystym typem `Stripe.Event` (zamiast conditional-type construct). Raw body przez `await request.text()`, weryfikacja sygnatury przez `stripe.webhooks.constructEvent(body, signature, STRIPE_WEBHOOK_SECRET)`.
+  - `payment_intent.succeeded` → `api.mutations.confirmBooking({ stripePaymentIntentId, paidAt: Date.now() })`
+  - `payment_intent.payment_failed` / `canceled` → `api.mutations.cancelBooking({ stripePaymentIntentId })`
+  - unknown event types → 200 (Stripe retries on non-2xx)
+  - signature failure → 400 z message
+- **Clerk PL + brass/navy theme** (`src/routes/+layout.svelte`): zainstalowany `@clerk/localizations@4.5.5`. Dodane `localization={plPL}` + `appearance` prop: `colorPrimary: '#c4923a'`, `colorBackground: '#0d1b2e'`, `colorText: '#f5f0e8'`, `colorInputBackground: '#07111e'` (--color-navy-deep), `borderRadius: '2px'`.
+
+### Decyzje
+
+- **Modyfikowany `src/routes/+layout.svelte` (root), nie `[[lang=lang]]/+layout.svelte`** — `ClerkProvider` jest w root, zgodnie z AGENTS.md. Prompt wskazywał `[[lang=lang]]` (błąd; root jest właściwym miejscem).
+- **`appearance.variables` jako hex literals**, nie `var(--color-brass)` — Clerk parsuje wartości jako kolory natywnie i nie ma dostępu do CSS custom properties z `app.css`.
+- **`colorInputBackground: '#07111e'`** użyłem istniejącego tokenu `--color-navy-deep` zamiast wymyślać nowy odcień.
+- **Webhook: `import type Stripe from 'stripe'` + `let event: Stripe.Event`** zamiast conditional type — czytelniej, ten sam efekt runtime'owy.
+
+### Wnioski
+
+- **`appearance.variables` w Clerk = literały kolorów, nie CSS variables** — zmiana tokenu w `app.css` nie propaguje się do Clerk UI. Synchronizacja ręczna albo wspólny moduł JS importowany przez oba miejsca. → **Promocja kandydat: `concepts/clerk-appearance-no-css-vars.md`**
+- **`pnpm lint` failuje na 27 plikach pre-existing** (`.agents/skills/*`, `src/convex/_generated/ai/*`, `AGENTS.md`, `CLAUDE.md`, `pnpm-lock.yaml`). Wygląda jakby blok `<!-- convex-ai-start -->` dodany do CLAUDE.md sprowadził auto-generowane pliki bez prettier-ignore. Warto rozszerzyć `.prettierignore`.
+- **Webhook handler — Stripe wymaga raw bytes** dla `constructEvent()`. W SvelteKit: `await request.text()`, nie `.json()`. (Już było wspomniane w AGENTS.md, ale warto trzymać świadomość.)
+
+### Następne kroki
+
+#### Next
+
+- Rozszerzyć `.prettierignore` o `.agents/skills/`, `src/convex/_generated/ai/` — odblokowuje czysty `pnpm lint`
+- Test webhook end-to-end: `stripe listen --forward-to localhost:5173/api/stripe/webhook` + test booking → weryfikacja `bookings.status: pending → confirmed`
+- Tłumaczenia `pl.po`/`en.po` (nadal puste)
+
+#### Later
+
+- Synchronizacja tokenów brass/navy między `app.css` i Clerk `appearance` (wspólny `$lib/design-tokens.ts`?)
+- Vercel deploy + Stripe webhook URL produkcyjny
+- Booking step state w URL (`?step=N`)
+- Limit max koj per booking (UI hint + server-side)
+- Locale-aware redirects
+- Admin page: Clerk guard
+
+#### Open questions
+
+- Dla `payment_intent.canceled` rozróżniać cancel-by-user vs cancel-by-system? Obecnie oba lecą do tego samego `cancelBooking`.
+- `colorInputBackground: '#07111e'` na dark background `#0d1b2e` daje ledwo widoczny kontrast inputów — sprawdzić w przeglądarce, być może lepszy `#162840` (--color-navy-light).
+
+---
+
+## Sesja 2026-04-27 (III) — Vercel deploy, Convex prod, webhook, Clerk PL live
+
+### Zmiany
+
+- **Stripe webhook scommitowany** (`src/routes/api/stripe/webhook/+server.ts`) — napisany przez Opus w sesji II, scommitowany tu. Cursor bug fix w `boat-plan.svelte` (`boat__berth--clickable` dodane dla `state === 'selected'`) — Opus poprawił przy okazji.
+- **Convex prod deployment**: `npx convex login` → `npx convex deploy` → `PUBLIC_CONVEX_URL=https://qualified-crab-196.eu-west-1.convex.cloud`. Seed uruchomiony z Convex Dashboard: `seed:initializeVoyage` + `mutations:migrateCaptainBerths`.
+- **Vercel env vars**: `PUBLIC_CONVEX_URL`, `CONVEX_DEPLOY_KEY`, `PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `STRIPE_SECRET_KEY`, `PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` ustawione w Vercel Dashboard.
+- **Vercel build fix — `_generated/` scommitowane**: `npx convex deploy --cmd 'pnpm build'` nie generuje lokalnych plików na Vercel CI. Fix: wyciągnięcie `src/convex/_generated/` z `.gitignore` i scommitowanie. Komentarz w `.gitignore`: `# committed intentionally for Vercel build`.
+- **Vercel Ignored Build Step**: ustawiono "Only build production" — pushe na `main` nie triggerują buildu.
+- **`pnpm-lock.yaml` dodany do `.prettierignore`** — eliminuje false positive w `pnpm lint`.
+- **Clerk PL + brass/navy theme** (z sesji II) — zdeployowane, działa na produkcji.
+- **Stripe webhook zarejestrowany w Stripe Dashboard** (test mode): URL `https://sailing-architects.wysokijohn.pl/api/stripe/webhook`, events: `payment_intent.succeeded/failed/canceled`.
+- **Strona live**: `https://sailing-architects.wysokijohn.pl` — Convex dane w tabelach, Clerk PL, booking flow dostępny.
+- **Grafiki**: 3 pliki WhatsApp JPEG w `docs/assets/` — to ulotki marketingowe z nałożonym tekstem, nie czyste fotografie. Image `(2)` = mapa trasy (Majorka→Gibraltar→Madera→Teneryfa→Cabo Verde), idealna dla route-section. Decyzja o użyciu wstrzymana do ustalenia czy są oryginały.
+
+### Decyzje
+
+- **`src/convex/_generated/` commitowane** — pragmatyczny wybór dla Vercel CI. Pliki są deterministyczne względem schematu; aktualizują się po `npx convex dev` i muszą być scommitowane razem ze zmianą schematu.
+- **Stripe webhook: test mode na razie** — produkcyjne klucze Stripe (`sk_live_`) do dodania gdy klient gotowy na prawdziwe płatności.
+- **Grafiki w `/static/`** (nie Cloudinary) — projekt ma ~15 zdjęć statycznych, bez potrzeby admin uploadu. SvelteKit `enhanced:img` generuje WebP + srcset przy buildzie.
+
+### Wnioski
+
+- **`npx convex deploy --cmd` nie generuje `_generated/` na Vercel** — musi być commitowane osobno. → Promocja: `concepts/convex-vercel-production-deployment.md`
+- **Vercel "Ignored Build Step" = UI dropdown**, nie ręczna komenda — opcja "Only build production" dostępna od razu bez pisania skryptu. → Promocja: `concepts/vercel-ignored-build-step.md`
+- **Sekwencja Convex prod**: login → deploy → seed — w tej kolejności; bez seedu baza pusta i UI nie działa.
+
+### Następne kroki
+
+#### Next
+
+- Grafiki: potwierdzić z klientem czy są oryginalne fotografie (nie ulotki). Jeśli tak — skopiować do `/static/images/`, podmienić diagonal placeholders w `vessel-section` i `hero-section`.
+- Stripe live: zmiana `sk_test_` → `sk_live_` + rejestracja nowego webhooka w live mode gdy klient gotowy.
+- Test end-to-end booking flow na produkcji (Stripe test card `4242 4242 4242 4242`).
+- Admin page: dodać Clerk guard przed produkcją.
+
+#### Later
+
+- Tłumaczenia `pl.po`/`en.po` (Wuchale extracted, wartości puste)
+- Wspólny moduł `$lib/design-tokens.ts` (synchronizacja `app.css` i Clerk `appearance`)
+- Booking step state w URL (`?step=N`)
+- Locale-aware redirects (preserve `/{lang}/` w guardach)
+- Limit max koj per booking
+
+#### Open questions
+
+- Grafiki: ulotki jako-jest (image 2 dla route-section?) czy czekamy na oryginały?
+- Clerk: kiedy przełączyć z test keys na live (production Clerk)?
+
+## Sesja 2026-04-29 00:34 — Huashu assets i hero d.jpg
+
+Sesja obejmowała dopracowanie designu Sailing Architects na bazie huashu-design: propozycje HTML, poprawki Clerk auth w /book, kotwice nav oraz wdrożenie assetów z docs/assets do static z d.jpg jako hero.
+
+### Zmiany
+
+- **Huashu design review / warianty HTML**: przygotowano i aktualizowano `docs/design/huashu-sailing-architects-review-variants.html` oraz `docs/design/huashu-assets-placement-proposals.html` z wariantami dla kontaktu do Michała, poprawy kontrastu brass eyebrow text, odróżnienia Clerk login modal i rozmieszczenia zdjęć z `docs/assets`.
+- **Assety statyczne dla Vercel**: skopiowano aktualne pliki z `docs/assets` do `static/images/sailing/`, logo do `static/images/brand/logo.png` oraz favicon do `static/favicon.png`.
+- **Hero landing** (`src/routes/[[lang=lang]]/+page.svelte`): wdrożono rekomendowany wariant z `d.jpg` jako tłem hero, z navy overlay i dopasowaniem CTA/kotwic.
+- **Logo w UI** (`src/lib/components/site-nav/site-nav.svelte`, `src/lib/components/site-footer/site-footer.svelte`, `src/app.html`): podstawiono realne logo w belce menu i footerze oraz ustawiono favicon.
+- **Galeria / jacht** (`src/lib/components/vessel-section/vessel-section.svelte`): placeholderowe pola graficzne zastąpiono zdjęciami `wiatr.jpg`, `salon.jpg`, `niebo.jpg`, `jola.jpg`, `majorka.jpg`.
+- **Booking flow** (`src/routes/[[lang=lang]]/book/+page.svelte`): poprawiono sumowanie wybranych koi, layout listy kajut i panelu wyboru, etykiety `undefined`, pozycję informacji „Cena nie zawiera...”, widoczność panelu kontaktu do organizatora oraz wygląd Clerk login modal.
+- **Clerk SignIn/SignUp routing** (`src/routes/[[lang=lang]]/book/+page.svelte`): synchronizacja `auth=signin|signup` z URL, czyszczenie Clerk hash `#/?auth=...`, przełączanie formularza po kliknięciu „Zaloguj się” / „Zarejestruj się”.
+- **Menu na `/book`** (`src/lib/components/site-nav/site-nav.svelte`): linki kotwic prowadzą do strony głównej (`/#vessel`, `/#route` itd.), a nie do `/book#vessel`.
+- **Kontrast brass text** (`src/app.css` i komponenty): dodano mocniejsze tokeny `--color-brass-text` / `--color-brass-text-soft` i poprawiono małe złote etykiety o niskim kontraście.
+- **Repo hygiene**: dodano `.claude/skills/huashu-design/` do `.gitignore`.
+
+### Decyzje
+
+- **`d.jpg` jako hero** — wybrane jako spokojniejsze, bardziej premium tło niż `a.jpg`; `a.jpg` po ponownej analizie nadal miało charakter materiału promocyjnego z mocną typografią, więc nie zostało użyte jako główny hero poster.
+- **`static/` dla obrazów** — zdjęcia i logo są lokalnymi assetami dla Vercel deploy, bez wprowadzania zewnętrznego storage.
+- **Clerk auth mode przez query param** — `/book?auth=signin|signup` stało się źródłem stanu dla formularza, żeby linki Clerk nie wyprowadzały użytkownika na `accounts.dev` ani nie tworzyły podwójnych `auth` w hash/query.
+- **Kontakt do Michała jako element pierwszoplanowy** — numer `+48 601 671 182` i `sailingarchitects@gmail.com` mają być widoczne bez szukania, szczególnie w hero/booking/auth context.
+- **Mały brass text nie może być półprzezroczysty na navy** — dla małych liter 9-11px kontrast jest ważniejszy niż subtelność; opacity obniżono/zastąpiono mocniejszymi tokenami.
+
+### Wnioski
+
+- **Tweaks panel w HTML jest tylko podglądem runtime** — wartości z suwaków, np. rozmiar logo, nie są widoczne dla Codex i nie zapisują się do komponentów/CSS, dopóki użytkownik nie poda wartości lub nie zapisze ich w pliku.
+- **Clerk UI ma własne style i linki w hash/query** — trzeba przechwytywać kliknięcia w linki przełączające SignIn/SignUp oraz resetować komponent przez `{#key authMode}`, inaczej Svelte state i wewnętrzny Clerk router rozjeżdżają się.
+- **Nie wszystkie zmiany wizualne w Clerk łapią przez oczywiste selektory** — rozmiar ikon social providerów był ograniczany głębiej w strukturze Clerk; zmiana jednego wrappera nie wystarczała.
+- **`pnpm check` przechodzi**, ale **`pnpm lint` nadal pada na znanych plikach formatowania**: `skills-lock.json` i `src/convex/_generated/*`.
+
+### Następne kroki
+
+#### Next
+
+- Sprawdzić wizualnie hero/nav/footer/galerię w przeglądarce na desktop/mobile i ewentualnie dopasować wielkość logo (obecnie 46px nav, 58px footer) oraz overlay hero.
+- Zweryfikować cały booking flow po zmianach Clerk: `/book`, `/book?auth=signin`, `/book?auth=signup`, przełączanie formularzy oraz wybór koi.
+- Ocenić czy `wiatr.jpg`, `salon.jpg`, `niebo.jpg`, `jola.jpg`, `majorka.jpg` dobrze działają w galerii jachtu na mobile.
+- Uporządkować lint/prettier dla istniejących problematycznych plików `skills-lock.json` i `src/convex/_generated/*` albo dodać je do `.prettierignore`.
+
+#### Later / Open questions
+
+- Czy rozmiar logo ustawiony w aktualnym kodzie odpowiada wartościom ustawianym ręcznie w Tweaks panel?
+- Czy `a.jpg` ma zostać użyte gdzieś jako social proof / materiał promocyjny, czy całkowicie wypada z landing page?
+- Czy kontakt do Michała ma być dodatkowo powtórzony w sticky barze na mobile?

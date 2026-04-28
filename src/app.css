@@ -10,6 +10,8 @@
 	/* Brass accent */
 	--color-brass: #c4923a;
 	--color-brass-light: #d4aa5a;
+	--color-brass-text: #d4aa5a;
+	--color-brass-text-soft: rgba(212, 170, 90, 0.86);
 	--color-brass-dim: rgba(196, 146, 58, 0.25);
 	--color-brass-sep: rgba(196, 146, 58, 0.1);
 

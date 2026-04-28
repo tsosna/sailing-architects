@@ -75,7 +75,7 @@
 		font-size: 10px;
 		letter-spacing: 2px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.7);
+		color: var(--color-brass-text-soft);
 	}
 
 	.field__input {

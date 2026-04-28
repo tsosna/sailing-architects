@@ -82,7 +82,7 @@
 		font-size: 11px;
 		letter-spacing: 4px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.6);
+		color: var(--color-brass-text);
 		margin: 0 0 12px;
 	}
 
@@ -120,11 +120,11 @@
 	}
 
 	.faq__btn--open .faq__q {
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 	}
 
 	.faq__icon {
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 		font-size: 18px;
 		flex-shrink: 0;
 		transition: transform 200ms ease;

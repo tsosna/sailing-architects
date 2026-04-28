@@ -134,6 +134,11 @@
 					!!d.cabin
 			)
 	)
+	const selectedHeading = $derived(
+		selectedDetails.length === 1
+			? ['Wybrana', 'koja'].join(' ')
+			: ['Wybrane', 'koje', `(${selectedDetails.length})`].join(' ')
+	)
 </script>
 
 <div class="boat">
@@ -617,58 +622,58 @@
 			</div>
 		</section>
 
-		<section>
-			<p class="boat__legend-title">Kajuty</p>
-			<ul class="boat__cabins">
-				{#each cabins as cabin (cabin.id)}
-					<li class="boat__cabin">
-						<div class="boat__cabin-text">
-							<span class="boat__cabin-label">{cabin.label}</span>
-							<span class="boat__cabin-pos">{cabin.position}</span>
-						</div>
-						<div class="boat__cabin-berths">
-							{#each cabin.berths as b (b)}
-								{@const state = berthState(b)}
-								<button
-									type="button"
-									class="berth-btn"
-									class:berth-btn--selected={state === 'selected'}
-									class:berth-btn--taken={state === 'taken'}
-									class:berth-btn--captain={state === 'captain'}
-									class:berth-btn--complimentary={state === 'complimentary'}
-									aria-pressed={state === 'selected'}
-									aria-disabled={state !== 'available' &&
-										state !== 'hovered' &&
-										state !== 'selected'}
-									aria-label={`Koja ${b}`}
-									onclick={() => handleBerth(b)}
-									onmouseenter={() => (hovered = b)}
-									onmouseleave={() => (hovered = null)}
-								>
-									{state === 'captain' ? '⚓' : b}
-								</button>
-							{/each}
-						</div>
-					</li>
-				{/each}
-			</ul>
-		</section>
+		<section class="boat__cabins-panel">
+			<div class="boat__cabins-list">
+				<p class="boat__legend-title">Kajuty</p>
+				<ul class="boat__cabins">
+					{#each cabins as cabin (cabin.id)}
+						<li class="boat__cabin">
+							<div class="boat__cabin-text">
+								<span class="boat__cabin-label">{cabin.label}</span>
+								<span class="boat__cabin-pos">{cabin.position}</span>
+							</div>
+							<div class="boat__cabin-berths">
+								{#each cabin.berths as b (b)}
+									{@const state = berthState(b)}
+									<button
+										type="button"
+										class="berth-btn"
+										class:berth-btn--selected={state === 'selected'}
+										class:berth-btn--taken={state === 'taken'}
+										class:berth-btn--captain={state === 'captain'}
+										class:berth-btn--complimentary={state === 'complimentary'}
+										aria-pressed={state === 'selected'}
+										aria-disabled={state !== 'available' &&
+											state !== 'hovered' &&
+											state !== 'selected'}
+										aria-label={`Koja ${b}`}
+										onclick={() => handleBerth(b)}
+										onmouseenter={() => (hovered = b)}
+										onmouseleave={() => (hovered = null)}
+									>
+										{state === 'captain' ? '⚓' : b}
+									</button>
+								{/each}
+							</div>
+						</li>
+					{/each}
+				</ul>
+			</div>
 
-		{#if selectedDetails.length > 0}
-			<aside class="boat__selected">
-				<p class="boat__selected-eyebrow">
-					{selectedDetails.length === 1
-						? 'Wybrana'
-						: `Wybrane (${selectedDetails.length})`}
-				</p>
-				{#each selectedDetails as d (d.id)}
-					<p class="boat__selected-title">Koja {d.id}</p>
-					<p class="boat__selected-meta">
-						{d.cabin.label} · {d.cabin.position}
-					</p>
-				{/each}
-			</aside>
-		{/if}
+			{#if selectedDetails.length > 0}
+				<aside class="boat__selected">
+					<p class="boat__selected-eyebrow">{selectedHeading}</p>
+					{#each selectedDetails as d (d.id)}
+						<div class="boat__selected-entry">
+							<p class="boat__selected-title">Koja {d.id}</p>
+							<p class="boat__selected-meta">
+								{d.cabin.label} · {d.cabin.position}
+							</p>
+						</div>
+					{/each}
+				</aside>
+			{/if}
+		</section>
 	</aside>
 </div>
 
@@ -708,7 +713,8 @@
 
 	.boat__sidebar {
 		min-width: 220px;
-		max-width: 280px;
+		max-width: 560px;
+		flex: 1 1 500px;
 		display: flex;
 		flex-direction: column;
 		gap: 20px;
@@ -718,14 +724,14 @@
 		font-family: var(--font-sans);
 		font-size: 11px;
 		letter-spacing: 2px;
-		color: rgba(196, 146, 58, 0.7);
+		color: var(--color-brass-text);
 		text-transform: uppercase;
 		margin: 0 0 12px;
 	}
 
 	.boat__legend-list {
 		display: flex;
-		flex-direction: column;
+		flex-wrap: wrap;
 		gap: 8px;
 	}
 
@@ -746,6 +752,17 @@
 		font-family: var(--font-sans);
 		font-size: 12px;
 		color: rgba(245, 240, 232, 0.6);
+	}
+
+	.boat__cabins-panel {
+		display: grid;
+		grid-template-columns: minmax(240px, 1fr) minmax(210px, 0.82fr);
+		gap: 20px;
+		align-items: start;
+	}
+
+	.boat__cabins-list {
+		min-width: 0;
 	}
 
 	.boat__cabins {
@@ -806,7 +823,7 @@
 		font-size: 9px;
 		font-weight: 700;
 		letter-spacing: 0.3px;
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 		transition:
 			background-color 150ms ease,
 			color 150ms ease,
@@ -834,7 +851,7 @@
 	.berth-btn--captain {
 		background: rgba(8, 18, 36, 0.9);
 		border-color: rgba(196, 146, 58, 0.4);
-		color: rgba(196, 146, 58, 0.45);
+		color: var(--color-brass-text-soft);
 		cursor: not-allowed;
 		font-size: 11px;
 	}
@@ -842,7 +859,7 @@
 	.berth-btn--complimentary {
 		background: rgba(196, 146, 58, 0.05);
 		border-color: rgba(196, 146, 58, 0.3);
-		color: rgba(196, 146, 58, 0.35);
+		color: var(--color-brass-text-soft);
 		cursor: not-allowed;
 	}
 
@@ -850,13 +867,15 @@
 		padding: 14px 16px;
 		background: rgba(196, 146, 58, 0.12);
 		border: 1px solid rgba(196, 146, 58, 0.4);
+		min-height: 100%;
+		box-sizing: border-box;
 	}
 
 	.boat__selected-eyebrow {
 		font-family: var(--font-sans);
 		font-size: 10px;
 		letter-spacing: 2px;
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 		text-transform: uppercase;
 		margin: 0 0 4px;
 	}
@@ -873,5 +892,21 @@
 		font-size: 11px;
 		color: rgba(245, 240, 232, 0.5);
 		margin: 0;
+	}
+
+	.boat__selected-entry + .boat__selected-entry {
+		margin-top: 10px;
+		padding-top: 10px;
+		border-top: 1px solid rgba(196, 146, 58, 0.18);
+	}
+
+	@media (max-width: 920px) {
+		.boat__sidebar {
+			max-width: 100%;
+		}
+
+		.boat__cabins-panel {
+			grid-template-columns: 1fr;
+		}
 	}
 </style>

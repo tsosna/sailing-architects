@@ -33,3 +33,7 @@ src/locales/.wuchale/
 # Claude Code — local machine settings (contain absolute paths)
 .claude/settings.json
 .claude/settings.local.json
+
+# Local design skills
+.agents/skills/huashu-design/
+.claude/skills/huashu-design

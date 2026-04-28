@@ -9,6 +9,29 @@
 		['Żagiel główny', 'Lazy bag + furling'],
 		['Elektronika', 'Ploter, AIS, VHF, automat']
 	] as const
+
+	const galleryImages = [
+		{
+			src: '/images/sailing/wiatr.jpg',
+			alt: 'Jacht płynący w mocnym wietrze'
+		},
+		{
+			src: '/images/sailing/salon.jpg',
+			alt: 'Załoga w salonie jachtu'
+		},
+		{
+			src: '/images/sailing/niebo.jpg',
+			alt: 'Nocne niebo nad jachtem'
+		},
+		{
+			src: '/images/sailing/jola.jpg',
+			alt: 'Uczestniczka rejsu na pokładzie'
+		},
+		{
+			src: '/images/sailing/majorka.jpg',
+			alt: 'Katedra w Palmie na Majorce'
+		}
+	] as const
 </script>
 
 <section id="vessel" class="vessel">
@@ -18,10 +41,14 @@
 
 		<div class="vessel__grid">
 			<div class="gallery">
-				<div class="gallery__hero diagonal" aria-hidden="true"></div>
+				<figure class="gallery__hero">
+					<img src={galleryImages[0].src} alt={galleryImages[0].alt} />
+				</figure>
 				<div class="gallery__thumbs">
-					{#each Array(4) as _, i (i)}
-						<div class="gallery__thumb diagonal" aria-hidden="true"></div>
+					{#each galleryImages.slice(1) as image (image.src)}
+						<figure class="gallery__thumb">
+							<img src={image.src} alt={image.alt} />
+						</figure>
 					{/each}
 				</div>
 			</div>
@@ -61,7 +88,7 @@
 		font-size: 11px;
 		letter-spacing: 4px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.6);
+		color: var(--color-brass-text);
 		margin: 0 0 12px;
 	}
 
@@ -80,22 +107,17 @@
 		align-items: start;
 	}
 
-	.diagonal {
-		background-color: rgba(196, 146, 58, 0.02);
-		background-image: repeating-linear-gradient(
-			-55deg,
-			transparent 0,
-			transparent 19px,
-			rgba(196, 146, 58, 0.08) 19px,
-			rgba(196, 146, 58, 0.08) 20px
-		);
-		border: 1px solid rgba(196, 146, 58, 0.1);
-	}
-
 	.gallery__hero {
 		width: 100%;
 		aspect-ratio: 4 / 3;
 		margin-bottom: 16px;
+		margin-top: 0;
+		margin-left: 0;
+		margin-right: 0;
+		position: relative;
+		background: var(--color-navy-deep);
+		border: 1px solid rgba(196, 146, 58, 0.16);
+		overflow: hidden;
 	}
 
 	.gallery__thumbs {
@@ -106,7 +128,37 @@
 
 	.gallery__thumb {
 		aspect-ratio: 4 / 3;
-		border-color: rgba(196, 146, 58, 0.08);
+		margin: 0;
+		position: relative;
+		background: var(--color-navy-deep);
+		border: 1px solid rgba(196, 146, 58, 0.1);
+		overflow: hidden;
+	}
+
+	.gallery__hero img,
+	.gallery__thumb img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+		filter: saturate(0.9) contrast(1.02);
+	}
+
+	.gallery__hero img {
+		object-position: 50% 48%;
+	}
+
+	.gallery__thumb:nth-child(1) img {
+		object-position: 50% 48%;
+	}
+
+	.gallery__thumb:nth-child(2) img {
+		object-position: 50% 42%;
+	}
+
+	.gallery__thumb:nth-child(3) img,
+	.gallery__thumb:nth-child(4) img {
+		object-position: 50% 35%;
 	}
 
 	.copy {
@@ -138,7 +190,7 @@
 		font-size: 9px;
 		letter-spacing: 2px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.45);
+		color: var(--color-brass-text-soft);
 		margin: 0 0 3px;
 	}
 

@@ -86,7 +86,7 @@
 		font-size: 11px;
 		letter-spacing: 4px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.6);
+		color: var(--color-brass-text);
 		margin: 0 0 12px;
 	}
 
@@ -132,7 +132,7 @@
 		font-size: 9px;
 		letter-spacing: 2px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.5);
+		color: var(--color-brass-text-soft);
 		margin: 0 0 8px;
 	}
 
@@ -154,7 +154,7 @@
 	.card__price {
 		font-family: var(--font-serif);
 		font-size: 36px;
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 		margin: 0 0 6px;
 	}
 
@@ -209,12 +209,12 @@
 		font-size: 10px;
 		letter-spacing: 2px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.6);
+		color: var(--color-brass-text);
 		margin: 0 0 16px;
 	}
 
 	.lists__title--dim {
-		color: rgba(196, 146, 58, 0.4);
+		color: var(--color-brass-text-soft);
 	}
 
 	.lists__items {

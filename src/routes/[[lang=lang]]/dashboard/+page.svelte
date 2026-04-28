@@ -297,7 +297,7 @@
 	.dash__back {
 		background: none;
 		border: none;
-		color: rgba(196, 146, 58, 0.5);
+		color: var(--color-brass-text-soft);
 		font-family: var(--font-sans);
 		font-size: 11px;
 		letter-spacing: 2px;
@@ -311,14 +311,14 @@
 	}
 
 	.dash__back:hover {
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 	}
 
 	.eyebrow {
 		font-family: var(--font-sans);
 		font-size: 11px;
 		letter-spacing: 3px;
-		color: rgba(196, 146, 58, 0.6);
+		color: var(--color-brass-text);
 		text-transform: uppercase;
 		margin: 0 0 6px;
 	}
@@ -342,14 +342,14 @@
 		font-size: 9px;
 		letter-spacing: 2px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.5);
+		color: var(--color-brass-text-soft);
 		margin: 0 0 4px;
 	}
 
 	.dash__ref-value {
 		font-family: var(--font-serif);
 		font-size: 20px;
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 		margin: 0;
 	}
 
@@ -382,7 +382,7 @@
 	}
 
 	.tabs__btn--active {
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 		border-bottom-color: var(--color-brass);
 	}
 
@@ -427,7 +427,7 @@
 		font-size: 10px;
 		letter-spacing: 2px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.6);
+		color: var(--color-brass-text);
 		margin: 0 0 4px;
 	}
 
@@ -464,7 +464,7 @@
 		font-size: 9px;
 		letter-spacing: 2px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.45);
+		color: var(--color-brass-text-soft);
 		margin: 0 0 4px;
 	}
 
@@ -485,7 +485,7 @@
 		font-size: 10px;
 		letter-spacing: 2px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.5);
+		color: var(--color-brass-text-soft);
 		margin: 0 0 16px;
 	}
 
@@ -537,11 +537,11 @@
 	.timeline__date {
 		font-family: var(--font-sans);
 		font-size: 9px;
-		color: rgba(196, 146, 58, 0.3);
+		color: var(--color-brass-text-soft);
 	}
 
 	.timeline__port--active .timeline__date {
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 	}
 
 	.timeline__leg {
@@ -607,7 +607,7 @@
 		padding: 12px 28px;
 		background: none;
 		border: 1px solid rgba(196, 146, 58, 0.35);
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 		margin-top: 28px;
 	}
 
@@ -646,7 +646,7 @@
 		font-size: 9px;
 		letter-spacing: 2px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.45);
+		color: var(--color-brass-text-soft);
 		margin: 0 0 4px;
 	}
 
@@ -710,7 +710,7 @@
 	.docs__icon {
 		font-family: var(--font-sans);
 		font-size: 11px;
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 		letter-spacing: 1px;
 	}
 

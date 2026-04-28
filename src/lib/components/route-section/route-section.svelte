@@ -180,7 +180,7 @@
 		font-size: 11px;
 		letter-spacing: 4px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.6);
+		color: var(--color-brass-text);
 		margin: 0 0 12px;
 	}
 
@@ -217,7 +217,7 @@
 		right: 12px;
 		font-family: monospace;
 		font-size: 8px;
-		color: rgba(196, 146, 58, 0.18);
+		color: var(--color-brass-text-soft);
 		letter-spacing: 1px;
 	}
 
@@ -272,7 +272,7 @@
 	.selector__btn--active {
 		background: rgba(196, 146, 58, 0.15);
 		border-bottom-color: var(--color-brass);
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 	}
 
 	.card {
@@ -286,7 +286,7 @@
 		font-size: 9px;
 		letter-spacing: 2px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.5);
+		color: var(--color-brass-text-soft);
 		margin: 0 0 8px;
 	}
 
@@ -302,7 +302,7 @@
 		font-family: var(--font-serif);
 		font-size: 16px;
 		font-style: italic;
-		color: rgba(196, 146, 58, 0.7);
+		color: var(--color-brass-text-soft);
 		margin: 0 0 20px;
 	}
 
@@ -327,7 +327,7 @@
 		font-size: 9px;
 		letter-spacing: 2px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.45);
+		color: var(--color-brass-text-soft);
 		margin: 0 0 3px;
 	}
 
@@ -341,7 +341,7 @@
 	.card__price {
 		font-family: var(--font-serif);
 		font-size: 22px;
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 		margin: 0;
 	}
 

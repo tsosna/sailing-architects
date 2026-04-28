@@ -17,6 +17,7 @@
 
 <section class="hero">
 	<div class="hero__bg" aria-hidden="true">
+		<img class="hero__image" src="/images/sailing/d.jpg" alt="" />
 		<svg class="hero__pattern" width="100%" height="100%">
 			<defs>
 				<pattern
@@ -55,7 +56,16 @@
 				</p>
 				<div class="cta">
 					<a class="btn btn--primary" href={resolve('/book')}>Wybierz koję</a>
-					<a class="btn btn--ghost" href="#route">Zobacz trasę</a>
+					<a class="btn btn--ghost" href={`${resolve('/')}#route`}
+						>Zobacz trasę</a
+					>
+				</div>
+				<div class="hero__contact" aria-label="Kontakt do organizatora">
+					<strong>Michał</strong>
+					<a href="tel:+48601671182">+48 601 671 182</a>
+					<a href="mailto:sailingarchitects@gmail.com"
+						>sailingarchitects@gmail.com</a
+					>
 				</div>
 			</div>
 
@@ -87,13 +97,7 @@
 		justify-content: flex-end;
 		padding: 0 0 80px;
 		overflow: hidden;
-		background: linear-gradient(
-			165deg,
-			#0d1b2e 0%,
-			#162840 35%,
-			#1e3a5c 65%,
-			#0d1b2e 100%
-		);
+		background: var(--color-navy);
 	}
 
 	.hero__bg {
@@ -102,10 +106,41 @@
 		overflow: hidden;
 	}
 
+	.hero__bg::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background:
+			linear-gradient(
+				90deg,
+				rgba(7, 17, 30, 0.9) 0%,
+				rgba(13, 27, 46, 0.66) 38%,
+				rgba(13, 27, 46, 0.22) 72%
+			),
+			linear-gradient(
+				0deg,
+				rgba(7, 17, 30, 0.9) 0%,
+				rgba(7, 17, 30, 0.36) 42%,
+				rgba(7, 17, 30, 0.24) 100%
+			);
+	}
+
+	.hero__image {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: 50% 58%;
+		filter: saturate(0.9) contrast(1.03);
+	}
+
 	.hero__pattern {
 		position: absolute;
 		inset: 0;
-		opacity: 0.06;
+		z-index: 1;
+		opacity: 0.055;
+		mix-blend-mode: screen;
 	}
 
 	.hero__glow {
@@ -117,10 +152,11 @@
 		height: 200px;
 		background: radial-gradient(
 			ellipse,
-			rgba(196, 146, 58, 0.08) 0%,
+			rgba(196, 146, 58, 0.12) 0%,
 			transparent 70%
 		);
 		pointer-events: none;
+		z-index: 1;
 	}
 
 	.hero__inner {
@@ -149,7 +185,7 @@
 		font-size: 11px;
 		letter-spacing: 4px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.7);
+		color: var(--color-brass-light);
 		margin: 0 0 16px;
 	}
 
@@ -187,6 +223,49 @@
 		display: flex;
 		gap: 12px;
 		flex-wrap: wrap;
+	}
+
+	.hero__contact {
+		margin-top: 24px;
+		display: inline-grid;
+		grid-template-columns: auto auto auto;
+		align-items: center;
+		gap: 1px;
+		max-width: 100%;
+		background: rgba(196, 146, 58, 0.22);
+		font-family: var(--font-sans);
+		font-size: 13px;
+	}
+
+	.hero__contact > * {
+		min-height: 52px;
+		display: flex;
+		align-items: center;
+		background: rgba(7, 17, 30, 0.82);
+		padding: 14px 18px;
+	}
+
+	.hero__contact strong {
+		font-size: 11px;
+		font-weight: 700;
+		letter-spacing: 2px;
+		text-transform: uppercase;
+		color: var(--color-brass-light);
+	}
+
+	.hero__contact a {
+		color: var(--color-warm-white);
+		font-weight: 600;
+		text-decoration: none;
+		white-space: nowrap;
+		transition:
+			color 200ms ease,
+			background-color 200ms ease;
+	}
+
+	.hero__contact a:hover {
+		color: var(--color-brass-light);
+		background: var(--color-navy-deep);
 	}
 
 	.btn {
@@ -256,7 +335,18 @@
 		font-size: 9px;
 		letter-spacing: 2px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.6);
+		color: var(--color-brass-text-soft);
 		margin: 0;
+	}
+
+	@media (max-width: 720px) {
+		.hero__contact {
+			grid-template-columns: 1fr;
+			width: 100%;
+		}
+
+		.hero__contact > * {
+			min-height: 48px;
+		}
 	}
 </style>

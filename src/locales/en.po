@@ -62,15 +62,11 @@ msgstr ""
 #: src/lib/components/boat-plan/boat-plan.svelte
 #: src/lib/components/boat-plan/boat-plan.svelte
 #: src/lib/components/route-section/route-section.svelte
-#: src/lib/components/site-footer/site-footer.svelte
-#: src/lib/components/site-nav/site-nav.svelte
 msgid "DM Sans, sans-serif"
 msgstr ""
 
-#: src/lib/components/site-footer/site-footer.svelte
-#: src/lib/components/site-nav/site-nav.svelte
-msgid "SA"
-msgstr ""
+#~ msgid "SA"
+#~ msgstr ""
 
 #: src/lib/components/site-footer/site-footer.svelte
 #: src/lib/components/site-nav/site-nav.svelte
@@ -103,17 +99,20 @@ msgstr ""
 
 #. 0: seg.price.toLocaleString('pl-PL')
 #. 0: priceFormatted
+#. 0: totalPriceFormatted
 #. 0: pricePerBerthFormatted
 #. 0: totalPriceFormatted
 #: src/lib/components/cabins-section/cabins-section.svelte
 #: src/lib/components/route-section/route-section.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "{0} zł"
 msgstr ""
 
-#~ msgid "Wybrano"
-#~ msgstr ""
+#: src/lib/components/cabins-section/cabins-section.svelte
+msgid "Wybrano"
+msgstr ""
 
 #~ msgid "Koja {0} · {1} · {2}"
 #~ msgstr ""
@@ -429,6 +428,7 @@ msgstr ""
 
 #: src/lib/components/route-section/route-section.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Termin"
 msgstr ""
@@ -448,6 +448,8 @@ msgid "Boutique sailing trips. Łączymy pasję żeglowania z odkrywaniem świat
 msgstr ""
 
 #: src/lib/components/site-footer/site-footer.svelte
+#: src/routes/[[lang=lang]]/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "sailingarchitects@gmail.com"
 msgstr ""
 
@@ -619,6 +621,7 @@ msgid "Pierwszy rejs"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Etap"
 msgstr ""
@@ -628,6 +631,7 @@ msgid "Czas trwania"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/admin/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
@@ -655,9 +659,8 @@ msgstr ""
 msgid "Krok 1"
 msgstr ""
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Zaloguj się lub utwórz konto"
-msgstr ""
+#~ msgid "Zaloguj się lub utwórz konto"
+#~ msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Sesja aktywna"
@@ -792,6 +795,7 @@ msgid "Rejs"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Sail Adventure 2026"
 msgstr ""
@@ -825,6 +829,7 @@ msgstr ""
 msgid "Podsumowanie"
 msgstr ""
 
+#: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Razem"
@@ -868,6 +873,7 @@ msgstr ""
 msgid "Błąd"
 msgstr ""
 
+#: src/routes/+layout.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "DM Sans, system-ui, sans-serif"
 msgstr ""
@@ -1121,21 +1127,16 @@ msgstr ""
 msgid "Ustaw C1 = kapitan (migracja)"
 msgstr ""
 
-#. 0: selectedDetails.length
-#: src/lib/components/boat-plan/boat-plan.svelte
-msgid "Wybrane ({0})"
-msgstr ""
+#~ msgid "Wybrane ({0})"
+#~ msgstr ""
 
-#. 0: selectedBerths.length; 1: selectedBerths.length === 1 ? 'koję' \\: 'koje'
-#: src/lib/components/cabins-section/cabins-section.svelte
-msgid "Wybrano {0} {1}"
-msgstr ""
+#~ msgid "Wybrano {0} {1}"
+#~ msgstr ""
 
-#. 0: selectedBerths.join(', '); 1: segment.name; 2: totalPrice.toLocaleString( 'pl-PL' )
-#: src/lib/components/cabins-section/cabins-section.svelte
-msgid "{0} · {1} · {2} zł"
-msgstr ""
+#~ msgid "{0} · {1} · {2} zł"
+#~ msgstr ""
 
+#: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
@@ -1158,4 +1159,78 @@ msgstr ""
 #. 0: berths.length === 1 ? 'Koja' \\: 'Koje'; 1: segment.dates; 2: berths.length === 1 ? 'jest Twoja' \\: 'są Twoje'
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "{0} <0/> na etapie <1/> ({1}) {2}. Potwierdzenie zostanie wysłane e-mailem po zaksięgowaniu płatności."
+msgstr ""
+
+#: src/lib/components/site-footer/site-footer.svelte
+#: src/lib/components/site-footer/site-footer.svelte
+#: src/routes/[[lang=lang]]/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Kontakt do organizatora"
+msgstr ""
+
+#: src/lib/components/site-footer/site-footer.svelte
+#: src/routes/[[lang=lang]]/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Michał"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Szczegóły rezerwacji"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Rezerwujesz"
+msgstr ""
+
+#~ msgid "Kontakt"
+#~ msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Booking-first"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Rezerwacja jako manifest pokładowy"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Zachowujesz kontekst etapu, koi i kontaktu do organizatora podczas logowania."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Wejdź na pokład"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Konto załogi zabezpiecza dane rezerwacji i płatności."
+msgstr ""
+
+#~ msgid "Wybrano <0/> {0}"
+#~ msgstr ""
+
+#~ msgid "Wybrane koje ({0})"
+#~ msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "Wybrane"
+msgstr ""
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Jacht płynący w mocnym wietrze"
+msgstr ""
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Załoga w salonie jachtu"
+msgstr ""
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Nocne niebo nad jachtem"
+msgstr ""
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Uczestniczka rejsu na pokładzie"
+msgstr ""
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Katedra w Palmie na Majorce"
 msgstr ""

@@ -1,0 +1,977 @@
+<!doctype html>
+<html lang="pl">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Huashu Asset Placement · Sailing Architects</title>
+		<link rel="icon" href="../assets/logo.png" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap"
+			rel="stylesheet"
+		/>
+		<style>
+			:root {
+				--color-navy: #0d1b2e;
+				--color-navy-mid: #0f1f35;
+				--color-navy-light: #162840;
+				--color-navy-deep: #07111e;
+				--color-brass: #c4923a;
+				--color-brass-light: #d4aa5a;
+				--color-warm-white: #f5f0e8;
+				--color-cream: #ede5d8;
+				--font-serif: 'Playfair Display', Georgia, serif;
+				--font-sans: 'DM Sans', system-ui, sans-serif;
+				--overlay: 0.58;
+				--media-contrast: 1.02;
+				--logo-size: 42px;
+			}
+
+			* {
+				box-sizing: border-box;
+			}
+
+			body {
+				margin: 0;
+				background: var(--color-navy);
+				color: var(--color-warm-white);
+				font-family: var(--font-sans);
+			}
+
+			button,
+			select,
+			input {
+				font: inherit;
+			}
+
+			a {
+				color: inherit;
+			}
+
+			.page {
+				min-height: 100vh;
+				background:
+					linear-gradient(
+						180deg,
+						rgba(7, 17, 30, 0.92),
+						rgba(13, 27, 46, 0.72)
+					),
+					var(--color-navy);
+			}
+
+			.topbar {
+				position: sticky;
+				top: 0;
+				z-index: 20;
+				height: 72px;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 0 40px;
+				background: rgba(7, 17, 30, 0.92);
+				border-bottom: 1px solid rgba(196, 146, 58, 0.18);
+				backdrop-filter: blur(16px);
+			}
+
+			.brand {
+				display: flex;
+				align-items: center;
+				gap: 14px;
+				text-decoration: none;
+			}
+
+			.logo-box {
+				width: var(--logo-size);
+				height: var(--logo-size);
+				display: grid;
+				place-items: center;
+				background: rgba(245, 240, 232, 0.96);
+				border: 1px solid rgba(196, 146, 58, 0.5);
+				overflow: hidden;
+			}
+
+			.logo-box img {
+				width: 88%;
+				height: 88%;
+				object-fit: contain;
+			}
+
+			.brand strong {
+				font-family: var(--font-serif);
+				font-size: 18px;
+				font-weight: 400;
+				letter-spacing: 0.02em;
+			}
+
+			.nav-links {
+				display: flex;
+				align-items: center;
+				gap: 28px;
+				font-size: 11px;
+				letter-spacing: 0.18em;
+				text-transform: uppercase;
+				color: rgba(245, 240, 232, 0.68);
+			}
+
+			.nav-links span {
+				color: var(--color-brass-light);
+			}
+
+			.shell {
+				max-width: 1220px;
+				margin: 0 auto;
+				padding: 56px 32px 96px;
+			}
+
+			.hero {
+				display: grid;
+				grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
+				gap: 1px;
+				background: rgba(196, 146, 58, 0.18);
+				min-height: 620px;
+			}
+
+			.hero-copy,
+			.hero-media {
+				background: var(--color-navy-mid);
+			}
+
+			.hero-copy {
+				padding: 48px;
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+			}
+
+			.kicker,
+			.label,
+			.tweak-label,
+			.asset-label {
+				margin: 0;
+				font-size: 10px;
+				line-height: 1.4;
+				letter-spacing: 0.22em;
+				text-transform: uppercase;
+				color: var(--color-brass-light);
+			}
+
+			h1,
+			h2,
+			h3 {
+				font-family: var(--font-serif);
+				font-weight: 400;
+				margin: 0;
+			}
+
+			h1 {
+				margin-top: 18px;
+				max-width: 560px;
+				font-size: clamp(48px, 6vw, 86px);
+				line-height: 0.98;
+			}
+
+			.hero-copy p:not(.kicker):not(.label) {
+				max-width: 520px;
+				color: rgba(245, 240, 232, 0.68);
+				font-size: 15px;
+				line-height: 1.75;
+			}
+
+			.hero-media {
+				position: relative;
+				min-height: 620px;
+				overflow: hidden;
+			}
+
+			.hero-media img {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				filter: contrast(var(--media-contrast)) saturate(0.94);
+			}
+
+			.hero-media::after,
+			.media-card::after,
+			.footer-media::after {
+				content: '';
+				position: absolute;
+				inset: 0;
+				background:
+					linear-gradient(
+						90deg,
+						rgba(7, 17, 30, var(--overlay)),
+						rgba(7, 17, 30, 0.08)
+					),
+					linear-gradient(0deg, rgba(7, 17, 30, 0.34), rgba(7, 17, 30, 0));
+				pointer-events: none;
+			}
+
+			.media-caption {
+				position: absolute;
+				left: 28px;
+				right: 28px;
+				bottom: 28px;
+				z-index: 1;
+				display: grid;
+				grid-template-columns: 1fr auto;
+				gap: 18px;
+				align-items: end;
+			}
+
+			.media-caption strong {
+				font-family: var(--font-serif);
+				font-size: 28px;
+				font-weight: 400;
+			}
+
+			.media-caption span {
+				color: rgba(245, 240, 232, 0.68);
+				font-size: 12px;
+				line-height: 1.5;
+			}
+
+			.callout {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 1px;
+				margin-top: 1px;
+				background: rgba(196, 146, 58, 0.18);
+			}
+
+			.callout > div {
+				background: var(--color-navy-deep);
+				padding: 22px;
+			}
+
+			.callout strong {
+				display: block;
+				margin-top: 8px;
+				font-family: var(--font-serif);
+				font-size: 24px;
+				font-weight: 400;
+			}
+
+			.variants {
+				margin-top: 56px;
+				display: grid;
+				gap: 56px;
+			}
+
+			.variant {
+				display: none;
+			}
+
+			.variant.is-active {
+				display: block;
+			}
+
+			.section-head {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) minmax(260px, 0.42fr);
+				gap: 32px;
+				align-items: end;
+				margin-bottom: 24px;
+			}
+
+			.section-head h2 {
+				margin-top: 10px;
+				font-size: clamp(34px, 4vw, 56px);
+			}
+
+			.section-head p {
+				margin: 0;
+				color: rgba(245, 240, 232, 0.64);
+				font-size: 14px;
+				line-height: 1.7;
+			}
+
+			.media-grid {
+				display: grid;
+				grid-template-columns: 1.15fr 0.85fr 0.85fr;
+				gap: 1px;
+				background: rgba(196, 146, 58, 0.18);
+			}
+
+			.media-card {
+				position: relative;
+				min-height: 420px;
+				overflow: hidden;
+				background: var(--color-navy-mid);
+			}
+
+			.media-card--wide {
+				min-height: 540px;
+			}
+
+			.media-card img {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				filter: contrast(var(--media-contrast)) saturate(0.92);
+			}
+
+			.media-card--top img {
+				object-position: 50% 12%;
+			}
+
+			.media-card--center img {
+				object-position: 50% 46%;
+			}
+
+			.media-card--bottom img {
+				object-position: 50% 78%;
+			}
+
+			.card-copy {
+				position: absolute;
+				inset: auto 22px 22px;
+				z-index: 1;
+			}
+
+			.card-copy h3 {
+				margin-top: 8px;
+				font-size: 26px;
+			}
+
+			.card-copy p {
+				margin: 10px 0 0;
+				color: rgba(245, 240, 232, 0.7);
+				font-size: 13px;
+				line-height: 1.55;
+			}
+
+			.poster-strip {
+				display: grid;
+				grid-template-columns: repeat(4, 1fr);
+				gap: 1px;
+				background: rgba(196, 146, 58, 0.18);
+			}
+
+			.poster {
+				min-height: 520px;
+				background: var(--color-navy-mid);
+				padding: 14px;
+			}
+
+			.poster img {
+				width: 100%;
+				height: 430px;
+				object-fit: cover;
+				object-position: 50% 20%;
+				display: block;
+				filter: saturate(0.92);
+			}
+
+			.poster p {
+				margin: 14px 0 0;
+				color: rgba(245, 240, 232, 0.68);
+				font-size: 12px;
+				line-height: 1.5;
+			}
+
+			.footer-proposal {
+				margin-top: 56px;
+				display: grid;
+				grid-template-columns: 0.84fr 1.16fr;
+				gap: 1px;
+				background: rgba(196, 146, 58, 0.18);
+			}
+
+			.footer-panel {
+				background: var(--color-navy-deep);
+				padding: 36px;
+			}
+
+			.footer-panel .brand {
+				margin-bottom: 34px;
+			}
+
+			.footer-panel h2 {
+				font-size: 38px;
+				line-height: 1.08;
+			}
+
+			.footer-panel p {
+				color: rgba(245, 240, 232, 0.64);
+				line-height: 1.7;
+			}
+
+			.footer-media {
+				position: relative;
+				min-height: 430px;
+				overflow: hidden;
+				background: var(--color-navy-mid);
+			}
+
+			.footer-media img {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				object-position: 50% 32%;
+			}
+
+			.asset-map {
+				margin-top: 56px;
+				display: grid;
+				grid-template-columns: repeat(4, 1fr);
+				gap: 1px;
+				background: rgba(196, 146, 58, 0.18);
+			}
+
+			.asset-item {
+				background: var(--color-navy-mid);
+				padding: 14px;
+			}
+
+			.asset-item img {
+				width: 100%;
+				aspect-ratio: 0.74;
+				object-fit: cover;
+				object-position: 50% 22%;
+				display: block;
+				background: var(--color-navy-deep);
+			}
+
+			.asset-item p {
+				margin: 12px 0 0;
+				color: rgba(245, 240, 232, 0.68);
+				font-size: 12px;
+				line-height: 1.45;
+			}
+
+			.notes {
+				margin-top: 56px;
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 1px;
+				background: rgba(196, 146, 58, 0.18);
+			}
+
+			.note {
+				background: var(--color-navy-mid);
+				padding: 26px;
+			}
+
+			.note h3 {
+				font-size: 26px;
+				margin: 8px 0 12px;
+			}
+
+			.note p,
+			.note li {
+				color: rgba(245, 240, 232, 0.68);
+				font-size: 13px;
+				line-height: 1.65;
+			}
+
+			.note code {
+				color: var(--color-brass-light);
+			}
+
+			.tweaks {
+				position: fixed;
+				right: 18px;
+				bottom: 18px;
+				z-index: 30;
+				width: 300px;
+				background: rgba(7, 17, 30, 0.94);
+				border: 1px solid rgba(196, 146, 58, 0.34);
+				padding: 18px;
+				box-shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+				backdrop-filter: blur(18px);
+			}
+
+			.tweaks h2 {
+				margin: 6px 0 16px;
+				font-size: 24px;
+			}
+
+			.control {
+				display: grid;
+				gap: 8px;
+				margin-top: 14px;
+			}
+
+			.control select,
+			.control input {
+				width: 100%;
+				background: var(--color-navy-light);
+				border: 1px solid rgba(196, 146, 58, 0.34);
+				color: var(--color-warm-white);
+				padding: 10px 12px;
+				border-radius: 2px;
+			}
+
+			@media (max-width: 920px) {
+				.topbar,
+				.shell {
+					padding-left: 20px;
+					padding-right: 20px;
+				}
+
+				.nav-links {
+					display: none;
+				}
+
+				.hero,
+				.section-head,
+				.media-grid,
+				.footer-proposal,
+				.notes {
+					grid-template-columns: 1fr;
+				}
+
+				.callout,
+				.poster-strip,
+				.asset-map {
+					grid-template-columns: repeat(2, 1fr);
+				}
+
+				.tweaks {
+					position: static;
+					width: auto;
+					margin: 32px 20px 0;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="page">
+			<nav class="topbar">
+				<a class="brand" href="#">
+					<span class="logo-box">
+						<img src="../assets/logo.png" alt="Sailing Architects logo" />
+					</span>
+					<strong>Sailing Architects</strong>
+				</a>
+				<div class="nav-links" aria-label="Podgląd menu">
+					<span>Jacht</span>
+					<span>Trasa</span>
+					<span>Kajuty</span>
+					<span>Cennik</span>
+					<span>Rezerwuj</span>
+				</div>
+			</nav>
+
+			<div class="tweaks" aria-label="Tweaks panel">
+				<p class="tweak-label">Tweaks panel</p>
+				<h2>Podgląd assetów</h2>
+				<label class="control">
+					<span class="tweak-label">Wariant</span>
+					<select id="variant">
+						<option value="editorial">A · Open water masthead</option>
+						<option value="logbook">B · Crew logbook</option>
+						<option value="booking">C · Route & booking proof</option>
+					</select>
+				</label>
+				<label class="control">
+					<span class="tweak-label">Przyciemnienie posterów</span>
+					<input
+						id="overlay"
+						type="range"
+						min="0.28"
+						max="0.78"
+						step="0.02"
+						value="0.58"
+					/>
+				</label>
+				<label class="control">
+					<span class="tweak-label">Kontrast zdjęć</span>
+					<input
+						id="contrast"
+						type="range"
+						min="0.9"
+						max="1.16"
+						step="0.01"
+						value="1.02"
+					/>
+				</label>
+				<label class="control">
+					<span class="tweak-label">Rozmiar logo</span>
+					<input
+						id="logoSize"
+						type="range"
+						min="34"
+						max="58"
+						step="1"
+						value="42"
+					/>
+				</label>
+			</div>
+
+			<main class="shell">
+				<section class="hero">
+					<div class="hero-copy">
+						<div>
+							<p class="kicker">Huashu proposal · asset placement</p>
+							<h1>Zdjęcia jako dowód rejsu, nie dekoracja</h1>
+							<p>
+								Po aktualnym czyszczeniu assetów najlepszy układ zmienia się:
+								<strong>d.jpg</strong> lub <strong>wiatr.jpg</strong> niosą
+								hero, <strong>g.jpg</strong> wzmacnia kajuty, a
+								<strong>a.jpg</strong>
+								zostaje niżej jako materiał promocyjny.
+							</p>
+						</div>
+						<div class="callout">
+							<div>
+								<p class="label">Logo</p>
+								<strong>Menu + footer</strong>
+							</div>
+							<div>
+								<p class="label">Favicon</p>
+								<strong>z logo.png</strong>
+							</div>
+							<div>
+								<p class="label">Deploy</p>
+								<strong>static/</strong>
+							</div>
+						</div>
+					</div>
+					<div class="hero-media">
+						<img src="../assets/d.jpg" alt="Wieczorne niebo nad wodą" />
+						<div class="media-caption">
+							<strong>d.jpg jako główne hero</strong>
+							<span>
+								Czysty, szeroki nastrój morza. Dużo powietrza pod headline i
+								premium warstwowanie.
+							</span>
+						</div>
+					</div>
+				</section>
+
+				<div class="variants">
+					<section class="variant is-active" data-variant="editorial">
+						<header class="section-head">
+							<div>
+								<p class="kicker">Wariant A</p>
+								<h2>Open water masthead</h2>
+							</div>
+							<p>
+								Najbliższy obecnemu premium landingowi. Hero opiera się na
+								czystym kadrze morza, a zdjęcia z ludźmi i detalami wchodzą
+								dopiero jako dowód doświadczenia.
+							</p>
+						</header>
+						<div class="media-grid">
+							<article class="media-card media-card--wide media-card--center">
+								<img
+									src="../assets/wiatr.jpg"
+									alt="Jacht płynący w mocnym wietrze"
+								/>
+								<div class="card-copy">
+									<p class="asset-label">Hero alternatywne / emocja</p>
+									<h3>wiatr.jpg · ruch i energia</h3>
+									<p>
+										Najlepszy kandydat na dynamiczny hero albo pierwszy panel po
+										hero. Ma autentyczne napięcie rejsu.
+									</p>
+								</div>
+							</article>
+							<article class="media-card media-card--top">
+								<img src="../assets/niebo.jpg" alt="Nocne niebo nad jachtem" />
+								<div class="card-copy">
+									<p class="asset-label">Atmosfera</p>
+									<h3>niebo.jpg</h3>
+									<p>
+										Noc na pokładzie. Dobre do sekcji “dlaczego warto” albo
+										closing CTA.
+									</p>
+								</div>
+							</article>
+							<article class="media-card media-card--bottom">
+								<img src="../assets/salon.jpg" alt="Załoga w salonie jachtu" />
+								<div class="card-copy">
+									<p class="asset-label">Załoga</p>
+									<h3>salon.jpg</h3>
+									<p>
+										Autentyczny społeczny proof. Lepszy w mniejszym panelu niż
+										jako pełne hero.
+									</p>
+								</div>
+							</article>
+						</div>
+					</section>
+
+					<section class="variant" data-variant="logbook">
+						<header class="section-head">
+							<div>
+								<p class="kicker">Wariant B</p>
+								<h2>Crew logbook</h2>
+							</div>
+							<p>
+								Wariant galerii pokazuje ludzi, emocję i detale. Tu mogą wejść
+								mniejsze, mniej ostre kadry, bo pracują jako dziennik wyprawy,
+								nie jako hero.
+							</p>
+						</header>
+						<div class="poster-strip">
+							<article class="poster">
+								<img src="../assets/e.jpg" alt="Grafika rejsowa E" />
+								<p>
+									<strong>e.jpg</strong> · bardzo mocny kadr ludzki, dobry przy
+									sekcji kontaktu i zaufania.
+								</p>
+							</article>
+							<article class="poster">
+								<img
+									src="../assets/jola.jpg"
+									alt="Uczestniczka rejsu na pokładzie"
+								/>
+								<p>
+									<strong>jola.jpg</strong> · portret pokładowy, dobry do
+									testimonial lub “dla kogo”.
+								</p>
+							</article>
+							<article class="poster">
+								<img
+									src="../assets/madera.jpg"
+									alt="Kieliszki i butelka przy skałach"
+								/>
+								<p>
+									<strong>madera.jpg</strong> · lifestyle i portowy rytuał,
+									używać jako mały detal premium.
+								</p>
+							</article>
+							<article class="poster">
+								<img
+									src="../assets/majorka.jpg"
+									alt="Katedra w Palmie na Majorce"
+								/>
+								<p>
+									<strong>majorka.jpg</strong> · destynacja, karta etapu albo
+									miniatura trasy.
+								</p>
+							</article>
+						</div>
+					</section>
+
+					<section class="variant" data-variant="booking">
+						<header class="section-head">
+							<div>
+								<p class="kicker">Wariant C</p>
+								<h2>Route & booking proof</h2>
+							</div>
+							<p>
+								Wariant pod rezerwację: plan jachtu i mapa wspierają decyzję,
+								ale nie konkurują z wyborem koi, kwotą i kontaktem do Michała.
+							</p>
+						</header>
+						<div class="media-grid">
+							<article class="media-card media-card--top">
+								<img src="../assets/g.jpg" alt="Plan wnętrza jachtu" />
+								<div class="card-copy">
+									<p class="asset-label">Kajuty / plan</p>
+									<h3>g.jpg · plan jachtu</h3>
+									<p>
+										Najbardziej funkcjonalny asset. Warto go połączyć z
+										interaktywnym BoatPlan SVG.
+									</p>
+								</div>
+							</article>
+							<article class="media-card media-card--wide media-card--center">
+								<img src="../assets/h.jpg" alt="Mapa Sail Adventure" />
+								<div class="card-copy">
+									<p class="asset-label">Mapa trasy</p>
+									<h3>h.jpg · route proof</h3>
+									<p>
+										Dobra wizualna mapa wyprawy. Nie używać jako jedynego źródła
+										cen.
+									</p>
+								</div>
+							</article>
+							<article class="media-card media-card--bottom">
+								<img
+									src="../assets/a.jpg"
+									alt="Grafika Sailing Architects z kotwicą"
+								/>
+								<div class="card-copy">
+									<p class="asset-label">Promo poster</p>
+									<h3>a.jpg · nie jako hero</h3>
+									<p>
+										Ma wbudowany tekst, dlatego lepiej działa jako promocyjny
+										proof niż hero.
+									</p>
+								</div>
+							</article>
+						</div>
+					</section>
+				</div>
+
+				<section class="footer-proposal">
+					<div class="footer-panel">
+						<a class="brand" href="#">
+							<span class="logo-box">
+								<img src="../assets/logo.png" alt="Sailing Architects logo" />
+							</span>
+							<strong>Sailing Architects</strong>
+						</a>
+						<p class="kicker">Footer / identity</p>
+						<h2>Logo powinno wejść do stopki jako znak, nie mała ikonka</h2>
+						<p>
+							W footerze logo może być większe niż w menu, na jasnym
+							mikro-polach lub w wersji przygotowanej pod ciemne tło. Obecny
+							plik ma przezroczystość, ale czarne elementy mogą gubić się na
+							navy.
+						</p>
+					</div>
+					<div class="footer-media">
+						<img src="../assets/niebo.jpg" alt="Nocne niebo nad jachtem" />
+					</div>
+				</section>
+
+				<section class="asset-map">
+					<div class="asset-item">
+						<img src="../assets/a.jpg" alt="a.jpg" />
+						<p>
+							<span class="asset-label">a.jpg</span><br />Promo/social proof.
+							Nie hero premium, bo ma własną typografię.
+						</p>
+					</div>
+					<div class="asset-item">
+						<img src="../assets/d.jpg" alt="d.jpg" />
+						<p>
+							<span class="asset-label">d.jpg</span><br />Najlepsze czyste hero:
+							morze, horyzont, dużo powietrza.
+						</p>
+					</div>
+					<div class="asset-item">
+						<img src="../assets/e.jpg" alt="e.jpg" />
+						<p>
+							<span class="asset-label">e.jpg</span><br />Ludzki proof, dobry
+							przy sekcji kontaktu lub “załoga”.
+						</p>
+					</div>
+					<div class="asset-item">
+						<img src="../assets/g.jpg" alt="g.jpg" />
+						<p>
+							<span class="asset-label">g.jpg</span><br />Plan jachtu, najlepszy
+							do sekcji kajut i rezerwacji.
+						</p>
+					</div>
+					<div class="asset-item">
+						<img src="../assets/h.jpg" alt="h.jpg" />
+						<p>
+							<span class="asset-label">h.jpg</span><br />Mapa trasy, dobra jako
+							visual proof przy etapach.
+						</p>
+					</div>
+					<div class="asset-item">
+						<img src="../assets/wiatr.jpg" alt="wiatr.jpg" />
+						<p>
+							<span class="asset-label">wiatr.jpg</span><br />Najbardziej
+							dynamiczne hero alternatywne.
+						</p>
+					</div>
+					<div class="asset-item">
+						<img src="../assets/niebo.jpg" alt="niebo.jpg" />
+						<p>
+							<span class="asset-label">niebo.jpg</span><br />Closing CTA,
+							footer, nastrój nocnego rejsu.
+						</p>
+					</div>
+					<div class="asset-item">
+						<img src="../assets/salon.jpg" alt="salon.jpg" />
+						<p>
+							<span class="asset-label">salon.jpg</span><br />Życie załogi,
+							proof autentyczności.
+						</p>
+					</div>
+					<div class="asset-item">
+						<img src="../assets/jola.jpg" alt="jola.jpg" />
+						<p>
+							<span class="asset-label">jola.jpg</span><br />Portret pokładowy,
+							testimonial lub “dla kogo”.
+						</p>
+					</div>
+					<div class="asset-item">
+						<img src="../assets/majorka.jpg" alt="majorka.jpg" />
+						<p>
+							<span class="asset-label">majorka.jpg</span><br />Miniatura etapu:
+							start z Majorki.
+						</p>
+					</div>
+					<div class="asset-item">
+						<img src="../assets/madera.jpg" alt="madera.jpg" />
+						<p>
+							<span class="asset-label">madera.jpg</span><br />Lifestyle/detal,
+							mały akcent premium.
+						</p>
+					</div>
+				</section>
+
+				<section class="notes">
+					<article class="note">
+						<p class="kicker">Rekomendacja</p>
+						<h3>Wybrać A + fragmenty B</h3>
+						<p>
+							Na landing najlepszy jest Wariant A z hero na d.jpg albo
+							wiatr.jpg, plus galeria załogi i detali z Wariantu B. a.jpg
+							zostaje niżej jako materiał promocyjny.
+						</p>
+					</article>
+					<article class="note">
+						<p class="kicker">Static paths</p>
+						<h3>Docelowe pliki</h3>
+						<ul>
+							<li><code>static/images/sailing/d.jpg</code> jako główne hero</li>
+							<li>
+								<code>static/images/sailing/wiatr.jpg</code> jako hero
+								alternatywne
+							</li>
+							<li><code>static/images/sailing/a.jpg</code> jako promo proof</li>
+							<li><code>static/images/brand/logo.png</code></li>
+							<li>
+								<code>static/favicon.png</code> lub wygenerowane
+								<code>favicon.ico</code>
+							</li>
+						</ul>
+					</article>
+					<article class="note">
+						<p class="kicker">Ryzyko</p>
+						<h3>Logo na navy</h3>
+						<p>
+							Logo ma granat i czerń. Na ciemnym tle wymaga jasnego pola, brass
+							outline albo osobnej wersji monochromatycznej warm-white/brass.
+						</p>
+					</article>
+				</section>
+			</main>
+		</div>
+
+		<script>
+			const root = document.documentElement
+			const variantSelect = document.querySelector('#variant')
+			const overlayInput = document.querySelector('#overlay')
+			const contrastInput = document.querySelector('#contrast')
+			const logoSizeInput = document.querySelector('#logoSize')
+			const variants = [...document.querySelectorAll('.variant')]
+
+			function setVariant(value) {
+				for (const variant of variants) {
+					variant.classList.toggle(
+						'is-active',
+						variant.dataset.variant === value
+					)
+				}
+			}
+
+			variantSelect.addEventListener('change', (event) => {
+				setVariant(event.target.value)
+			})
+
+			overlayInput.addEventListener('input', (event) => {
+				root.style.setProperty('--overlay', event.target.value)
+			})
+
+			contrastInput.addEventListener('input', (event) => {
+				root.style.setProperty('--media-contrast', event.target.value)
+			})
+
+			logoSizeInput.addEventListener('input', (event) => {
+				root.style.setProperty('--logo-size', `${event.target.value}px`)
+			})
+		</script>
+	</body>
+</html>

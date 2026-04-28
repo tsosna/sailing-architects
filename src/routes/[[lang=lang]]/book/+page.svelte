@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation'
 	import { resolve } from '$app/paths'
 	import { page } from '$app/state'
 	import { useConvexClient } from 'convex-svelte'
@@ -77,7 +78,89 @@
 	const pricePerBerthFormatted = $derived(segment.price.toLocaleString('pl-PL'))
 
 	let step = $state(1)
-	let authMode = $state<'signin' | 'signup'>('signin')
+	type AuthMode = 'signin' | 'signup'
+
+	let selectedAuthMode = $state<AuthMode>('signin')
+	const authParam = $derived(page.url.searchParams.get('auth'))
+	const authMode = $derived(
+		authParam === 'signin' || authParam === 'signup'
+			? authParam
+			: selectedAuthMode
+	)
+
+	function authUrl(mode: AuthMode): string {
+		const params = new URLSearchParams(page.url.searchParams)
+		params.set('auth', mode)
+		const query = params.toString()
+		return `${page.url.pathname}${query ? `?${query}` : ''}`
+	}
+
+	const signInUrl = $derived(authUrl('signin'))
+	const signUpUrl = $derived(authUrl('signup'))
+
+	async function setAuthMode(mode: AuthMode) {
+		selectedAuthMode = mode
+		await goto(authUrl(mode), {
+			replaceState: true,
+			noScroll: true,
+			keepFocus: true
+		})
+	}
+
+	function modeFromClerkLink(anchor: HTMLAnchorElement): AuthMode | null {
+		const href = anchor.getAttribute('href')?.toLowerCase() ?? ''
+		const label = anchor.textContent?.toLowerCase() ?? ''
+
+		if (
+			label.includes('zarejestruj') ||
+			label.includes('utwórz') ||
+			label.includes('sign up') ||
+			label.includes('create account')
+		) {
+			return 'signup'
+		}
+
+		if (
+			label.includes('zaloguj') ||
+			label.includes('sign in') ||
+			label.includes('log in')
+		) {
+			return 'signin'
+		}
+
+		if (href.includes('auth=signin') || href.includes('sign-in')) {
+			return 'signin'
+		}
+
+		if (href.includes('auth=signup') || href.includes('sign-up')) {
+			return 'signup'
+		}
+
+		return null
+	}
+
+	function handleClerkModeClick(event: MouseEvent) {
+		if (!(event.target instanceof Element)) return
+
+		const anchor = event.target.closest('a')
+		if (!(anchor instanceof HTMLAnchorElement)) return
+
+		const mode = modeFromClerkLink(anchor)
+		if (!mode) return
+
+		event.preventDefault()
+		event.stopPropagation()
+		void setAuthMode(mode)
+	}
+
+	$effect(() => {
+		if (!page.url.hash.includes('auth=')) return
+		void goto(authUrl(authMode), {
+			replaceState: true,
+			noScroll: true,
+			keepFocus: true
+		})
+	})
 
 	let crew = $state({
 		firstName: '',
@@ -287,56 +370,107 @@
 		<StepIndicator current={step} steps={STEPS} />
 
 		{#if step === 1}
-			<section class="step">
-				<p class="eyebrow">Krok 1</p>
-				<h2 class="title">Zaloguj się lub utwórz konto</h2>
+			<section class="step step--auth">
+				<p class="eyebrow">Booking-first</p>
+				<h2 class="title">Rezerwacja jako manifest pokładowy</h2>
+				<p class="lead lead--auth">
+					Zachowujesz kontekst etapu, koi i kontaktu do organizatora podczas
+					logowania.
+				</p>
 
-				{#if isSignedIn}
-					<div class="signed-in" role="status">
-						<p class="signed-in__eyebrow">Sesja aktywna</p>
-						<p class="signed-in__title">Zalogowano jako {userEmail}</p>
-						<p class="signed-in__hint">Możesz przejść dalej.</p>
-					</div>
-				{:else}
-					<div class="auth-tabs" role="tablist">
-						<button
-							type="button"
-							role="tab"
-							aria-selected={authMode === 'signin'}
-							class="auth-tab"
-							class:auth-tab--active={authMode === 'signin'}
-							onclick={() => (authMode = 'signin')}
-						>
-							Logowanie
-						</button>
-						<button
-							type="button"
-							role="tab"
-							aria-selected={authMode === 'signup'}
-							class="auth-tab"
-							class:auth-tab--active={authMode === 'signup'}
-							onclick={() => (authMode = 'signup')}
-						>
-							Rejestracja
-						</button>
-					</div>
+				<div class="auth-layout">
+					<aside class="auth-summary" aria-label="Szczegóły rezerwacji">
+						<p class="auth-summary__eyebrow">Rezerwujesz</p>
+						<p class="auth-summary__title">Sail Adventure 2026</p>
+						<dl class="auth-summary__rows">
+							<div>
+								<dt>Etap</dt>
+								<dd>{segment.name}</dd>
+							</div>
+							<div>
+								<dt>Termin</dt>
+								<dd>{segment.dates}</dd>
+							</div>
+							<div>
+								<dt>{berths.length === 1 ? 'Koja' : 'Koje'}</dt>
+								<dd>{berths.join(', ')}</dd>
+							</div>
+							<div>
+								<dt>Razem</dt>
+								<dd>{totalPriceFormatted} zł</dd>
+							</div>
+						</dl>
+						<div class="auth-contact">
+							<p>Kontakt do organizatora</p>
+							<strong>Michał</strong>
+							<a href="tel:+48601671182">+48 601 671 182</a>
+							<a href="mailto:sailingarchitects@gmail.com"
+								>sailingarchitects@gmail.com</a
+							>
+						</div>
+						<p class="auth-note">
+							Cena nie zawiera: kosztów dojazdu do mariny, opłat portowych i
+							paliwa (ok. 150–200 EUR/os), ubezpieczenia turystycznego (ok. 250
+							zł/os).
+						</p>
+					</aside>
 
-					<div class="clerk-host">
-						{#if authMode === 'signin'}
-							<SignIn />
+					<div class="auth-panel">
+						<div class="auth-panel__intro">
+							<p class="auth-panel__eyebrow">Krok 1</p>
+							<h3>Wejdź na pokład</h3>
+							<p>Konto załogi zabezpiecza dane rezerwacji i płatności.</p>
+						</div>
+						{#if isSignedIn}
+							<div class="signed-in" role="status">
+								<p class="signed-in__eyebrow">Sesja aktywna</p>
+								<p class="signed-in__title">Zalogowano jako {userEmail}</p>
+								<p class="signed-in__hint">Możesz przejść dalej.</p>
+							</div>
 						{:else}
-							<SignUp />
-						{/if}
-					</div>
-				{/if}
+							<div class="auth-tabs" role="tablist">
+								<button
+									type="button"
+									role="tab"
+									aria-selected={authMode === 'signin'}
+									class="auth-tab"
+									class:auth-tab--active={authMode === 'signin'}
+									onclick={() => void setAuthMode('signin')}
+								>
+									Logowanie
+								</button>
+								<button
+									type="button"
+									role="tab"
+									aria-selected={authMode === 'signup'}
+									class="auth-tab"
+									class:auth-tab--active={authMode === 'signup'}
+									onclick={() => void setAuthMode('signup')}
+								>
+									Rejestracja
+								</button>
+							</div>
 
-				<div class="actions">
-					<button
-						type="button"
-						class="btn btn--primary"
-						disabled={!isSignedIn}
-						onclick={next}>Dalej →</button
-					>
+							<div class="clerk-host" onclickcapture={handleClerkModeClick}>
+								{#key authMode}
+									{#if authMode === 'signin'}
+										<SignIn {signUpUrl} />
+									{:else}
+										<SignUp {signInUrl} />
+									{/if}
+								{/key}
+							</div>
+						{/if}
+
+						<div class="actions">
+							<button
+								type="button"
+								class="btn btn--primary"
+								disabled={!isSignedIn}
+								onclick={next}>Dalej →</button
+							>
+						</div>
+					</div>
 				</div>
 			</section>
 		{/if}
@@ -489,13 +623,6 @@
 							</div>
 						{/each}
 					</dl>
-					<footer class="confirm__footer">
-						<p>
-							Cena nie zawiera: kosztów dojazdu do mariny, opłat portowych i
-							paliwa (ok. 150–200 EUR/os), ubezpieczenia turystycznego (ok. 250
-							zł/os).
-						</p>
-					</footer>
 				</div>
 
 				<div class="actions">
@@ -621,14 +748,14 @@
 	}
 
 	.book__inner {
-		max-width: 800px;
+		max-width: 920px;
 		margin: 0 auto;
 	}
 
 	.book__back {
 		background: none;
 		border: none;
-		color: rgba(196, 146, 58, 0.5);
+		color: var(--color-brass-text-soft);
 		font-family: var(--font-sans);
 		font-size: 11px;
 		letter-spacing: 2px;
@@ -642,11 +769,15 @@
 	}
 
 	.book__back:hover {
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 	}
 
 	.step {
 		min-height: 320px;
+	}
+
+	.step--auth {
+		max-width: 920px;
 	}
 
 	.step--success {
@@ -660,7 +791,7 @@
 		font-family: var(--font-sans);
 		font-size: 11px;
 		letter-spacing: 2px;
-		color: rgba(196, 146, 58, 0.6);
+		color: var(--color-brass-light);
 		text-transform: uppercase;
 		margin: 0 0 8px;
 	}
@@ -671,6 +802,10 @@
 		font-weight: 400;
 		color: var(--color-warm-white);
 		margin: 0 0 32px;
+	}
+
+	.step--auth .title {
+		margin-bottom: 24px;
 	}
 
 	.step--success .title {
@@ -687,20 +822,24 @@
 		margin: -24px 0 32px;
 	}
 
+	.lead--auth {
+		margin: -12px 0 28px;
+		color: rgba(245, 240, 232, 0.64);
+	}
+
 	.signed-in {
 		padding: 20px 24px;
 		background: rgba(196, 146, 58, 0.08);
 		border: 1px solid rgba(196, 146, 58, 0.25);
-		margin-bottom: 32px;
-		max-width: 480px;
+		margin-bottom: 0;
 	}
 
 	.signed-in__eyebrow {
 		font-family: var(--font-sans);
-		font-size: 9px;
+		font-size: 10px;
 		letter-spacing: 2px;
 		text-transform: uppercase;
-		color: var(--color-brass);
+		color: var(--color-brass-light);
 		margin: 0 0 6px;
 	}
 
@@ -721,9 +860,8 @@
 	.auth-tabs {
 		display: flex;
 		gap: 0;
-		margin-bottom: 32px;
-		border-bottom: 1px solid rgba(196, 146, 58, 0.15);
-		max-width: 480px;
+		margin-bottom: 24px;
+		border-bottom: 1px solid rgba(196, 146, 58, 0.22);
 	}
 
 	.auth-tab {
@@ -748,13 +886,280 @@
 	}
 
 	.auth-tab--active {
-		color: var(--color-brass);
+		color: var(--color-brass-light);
 		border-bottom-color: var(--color-brass);
 	}
 
+	.auth-layout {
+		display: grid;
+		grid-template-columns: minmax(280px, 0.72fr) minmax(360px, 1fr);
+		gap: 1px;
+		background: rgba(196, 146, 58, 0.18);
+		max-width: 920px;
+	}
+
+	.auth-summary,
+	.auth-panel {
+		background: var(--color-navy-mid);
+	}
+
+	.auth-summary {
+		padding: 34px;
+		border-left: 3px solid var(--color-brass);
+	}
+
+	.auth-summary__eyebrow,
+	.auth-contact p {
+		font-family: var(--font-sans);
+		font-size: 10px;
+		letter-spacing: 2px;
+		text-transform: uppercase;
+		color: var(--color-brass-light);
+		margin: 0 0 10px;
+	}
+
+	.auth-summary__title {
+		font-family: var(--font-serif);
+		font-size: 34px;
+		line-height: 1.2;
+		color: var(--color-warm-white);
+		margin: 0 0 28px;
+	}
+
+	.auth-summary__rows {
+		display: grid;
+		gap: 1px;
+		background: rgba(196, 146, 58, 0.16);
+		margin: 0 0 28px;
+	}
+
+	.auth-summary__rows div {
+		display: grid;
+		grid-template-columns: 92px 1fr;
+		gap: 12px;
+		background: var(--color-navy);
+		padding: 12px 14px;
+	}
+
+	.auth-summary__rows dt {
+		font-family: var(--font-sans);
+		font-size: 10px;
+		letter-spacing: 1px;
+		text-transform: uppercase;
+		color: rgba(245, 240, 232, 0.58);
+	}
+
+	.auth-summary__rows dd {
+		font-family: var(--font-sans);
+		font-size: 13px;
+		color: var(--color-warm-white);
+		margin: 0;
+		text-align: right;
+	}
+
+	.auth-contact {
+		background: var(--color-navy-deep);
+		border-top: 1px solid rgba(196, 146, 58, 0.18);
+		border-left: 3px solid var(--color-brass);
+		padding: 18px;
+		font-family: var(--font-sans);
+	}
+
+	.auth-contact strong {
+		display: block;
+		font-size: 16px;
+		color: var(--color-warm-white);
+		margin-bottom: 10px;
+	}
+
+	.auth-contact a {
+		display: table;
+		color: rgba(245, 240, 232, 0.86);
+		font-size: 13px;
+		line-height: 1.6;
+		text-decoration: none;
+		border-bottom: 1px solid rgba(196, 146, 58, 0.35);
+		transition:
+			color 200ms ease,
+			border-color 200ms ease;
+	}
+
+	.auth-contact a + a {
+		margin-top: 6px;
+	}
+
+	.auth-contact a:hover {
+		color: var(--color-brass-light);
+		border-bottom-color: var(--color-brass-light);
+	}
+
+	.auth-note {
+		font-family: var(--font-sans);
+		font-size: 11px;
+		line-height: 1.55;
+		color: rgba(245, 240, 232, 0.48);
+		margin: 12px 0 0;
+		padding-left: 14px;
+		border-left: 1px solid rgba(196, 146, 58, 0.28);
+	}
+
+	.auth-panel {
+		padding: 34px;
+		border-top: 3px solid var(--color-brass);
+		box-shadow: 0 24px 80px rgba(0, 0, 0, 0.24);
+	}
+
+	.auth-panel__intro {
+		margin-bottom: 24px;
+	}
+
+	.auth-panel__eyebrow {
+		font-family: var(--font-sans);
+		font-size: 10px;
+		letter-spacing: 2px;
+		text-transform: uppercase;
+		color: var(--color-brass-light);
+		margin: 0 0 8px;
+	}
+
+	.auth-panel__intro h3 {
+		font-family: var(--font-serif);
+		font-size: 34px;
+		font-weight: 400;
+		color: var(--color-warm-white);
+		margin: 0 0 8px;
+	}
+
+	.auth-panel__intro p:last-child {
+		font-family: var(--font-sans);
+		font-size: 13px;
+		line-height: 1.6;
+		color: rgba(245, 240, 232, 0.62);
+		margin: 0;
+	}
+
 	.clerk-host {
-		max-width: 480px;
 		margin-bottom: 8px;
+	}
+
+	.clerk-host :global(.cl-rootBox) {
+		width: 100%;
+	}
+
+	.clerk-host :global(.cl-card) {
+		width: 100%;
+		background: var(--color-navy-deep);
+		border: 1px solid rgba(212, 170, 90, 0.46);
+		box-shadow: 0 24px 70px rgba(0, 0, 0, 0.26);
+	}
+
+	.clerk-host :global(.cl-headerTitle) {
+		color: var(--color-warm-white);
+	}
+
+	.clerk-host :global(.cl-headerSubtitle),
+	.clerk-host :global(.cl-footerActionText) {
+		color: rgba(245, 240, 232, 0.7);
+	}
+
+	.clerk-host :global(.cl-socialButtonsBlockButton) {
+		min-height: 54px;
+		min-width: 54px;
+		background: rgba(245, 240, 232, 0.08);
+		border-color: rgba(212, 170, 90, 0.32);
+		color: var(--color-warm-white);
+		transition:
+			background-color 180ms ease,
+			border-color 180ms ease;
+	}
+
+	.clerk-host :global(.cl-socialButtonsIconButton),
+	.clerk-host :global(button[aria-label*='Facebook']),
+	.clerk-host :global(button[aria-label*='GitHub']),
+	.clerk-host :global(button[aria-label*='Github']),
+	.clerk-host :global(button[aria-label*='Google']) {
+		width: 74px !important;
+		height: 54px !important;
+		min-width: 74px !important;
+		min-height: 54px !important;
+		background: rgba(245, 240, 232, 0.08) !important;
+		border: 1px solid rgba(212, 170, 90, 0.32) !important;
+		color: var(--color-warm-white) !important;
+	}
+
+	.clerk-host :global(.cl-socialButtonsBlockButton:hover) {
+		background: rgba(245, 240, 232, 0.12);
+		border-color: rgba(212, 170, 90, 0.46);
+	}
+
+	.clerk-host :global(.cl-socialButtonsIconButton:hover),
+	.clerk-host :global(button[aria-label*='Facebook']:hover),
+	.clerk-host :global(button[aria-label*='GitHub']:hover),
+	.clerk-host :global(button[aria-label*='Github']:hover),
+	.clerk-host :global(button[aria-label*='Google']:hover) {
+		background: rgba(245, 240, 232, 0.12) !important;
+		border-color: rgba(212, 170, 90, 0.54) !important;
+	}
+
+	.clerk-host :global(.cl-socialButtonsBlockButton svg),
+	.clerk-host :global(.cl-socialButtonsIconButton svg),
+	.clerk-host :global(.cl-socialButtonsProviderIcon),
+	.clerk-host :global(button[aria-label*='Facebook'] svg),
+	.clerk-host :global(button[aria-label*='GitHub'] svg),
+	.clerk-host :global(button[aria-label*='Github'] svg),
+	.clerk-host :global(button[aria-label*='Google'] svg),
+	.clerk-host :global(button[aria-label*='Facebook'] img),
+	.clerk-host :global(button[aria-label*='GitHub'] img),
+	.clerk-host :global(button[aria-label*='Github'] img),
+	.clerk-host :global(button[aria-label*='Google'] img) {
+		width: 26px !important;
+		height: 26px !important;
+	}
+
+	.clerk-host :global(button[aria-label*='GitHub'] svg),
+	.clerk-host :global(button[aria-label*='Github'] svg) {
+		color: var(--color-warm-white) !important;
+		fill: currentColor !important;
+	}
+
+	.clerk-host :global(button[aria-label*='GitHub'] svg *),
+	.clerk-host :global(button[aria-label*='Github'] svg *) {
+		fill: currentColor !important;
+	}
+
+	.clerk-host :global(.cl-dividerText) {
+		color: rgba(245, 240, 232, 0.56);
+	}
+
+	.clerk-host :global(.cl-formFieldLabel) {
+		color: var(--color-brass-text);
+		font-size: 12px;
+		font-weight: 600;
+	}
+
+	.clerk-host :global(.cl-formFieldInput) {
+		background: var(--color-navy-light);
+		border-color: rgba(212, 170, 90, 0.46);
+		color: var(--color-warm-white);
+		font-size: 14px;
+	}
+
+	.clerk-host :global(.cl-formFieldInput::placeholder) {
+		color: rgba(245, 240, 232, 0.42);
+	}
+
+	.clerk-host :global(.cl-formFieldInput:focus) {
+		border-color: var(--color-brass-text);
+		box-shadow: 0 0 0 1px rgba(212, 170, 90, 0.36);
+	}
+
+	.clerk-host :global(.cl-formButtonPrimary) {
+		color: var(--color-navy-deep);
+		font-weight: 700;
+	}
+
+	.auth-panel .actions {
+		margin-top: 28px;
 	}
 
 	.form {
@@ -775,7 +1180,7 @@
 		font-size: 10px;
 		letter-spacing: 2px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.5);
+		color: var(--color-brass-text-soft);
 		margin: 0;
 	}
 
@@ -795,7 +1200,7 @@
 		font-size: 10px;
 		letter-spacing: 2px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.6);
+		color: var(--color-brass-text);
 		margin: 0 0 4px;
 	}
 
@@ -834,19 +1239,6 @@
 		font-weight: 500;
 		margin: 0;
 		text-align: right;
-	}
-
-	.confirm__footer {
-		padding: 14px 24px;
-		background: rgba(196, 146, 58, 0.05);
-	}
-
-	.confirm__footer p {
-		font-family: var(--font-sans);
-		font-size: 10px;
-		color: rgba(245, 240, 232, 0.3);
-		margin: 0;
-		line-height: 1.6;
 	}
 
 	.pay {
@@ -901,7 +1293,7 @@
 		font-size: 11px;
 		letter-spacing: 3px;
 		text-transform: uppercase;
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 		background: rgba(196, 146, 58, 0.08);
 		border: 1px solid rgba(196, 146, 58, 0.25);
 		padding: 8px 20px;
@@ -921,7 +1313,7 @@
 		font-size: 10px;
 		letter-spacing: 2px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.6);
+		color: var(--color-brass-text);
 		margin: 0 0 16px;
 	}
 
@@ -965,7 +1357,7 @@
 		font-weight: 700;
 		letter-spacing: 1px;
 		text-transform: uppercase;
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 	}
 
 	.pay__summary-row--total > span:last-child {
@@ -973,7 +1365,7 @@
 		font-size: 18px;
 		font-weight: 400;
 		letter-spacing: 0;
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 		text-transform: none;
 	}
 
@@ -987,7 +1379,7 @@
 		justify-content: center;
 		margin: 0 auto 32px;
 		font-size: 24px;
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 	}
 
 	.success__lead {
@@ -1069,6 +1461,24 @@
 	@media (max-width: 640px) {
 		.book {
 			padding: 100px 16px 60px;
+		}
+
+		.auth-layout {
+			grid-template-columns: 1fr;
+		}
+
+		.auth-summary,
+		.auth-panel {
+			padding: 22px;
+		}
+
+		.auth-summary__rows div {
+			grid-template-columns: 1fr;
+			gap: 4px;
+		}
+
+		.auth-summary__rows dd {
+			text-align: left;
 		}
 
 		.actions {

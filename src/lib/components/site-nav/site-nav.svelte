@@ -13,34 +13,18 @@
 	})
 
 	const links = [
-		['Jacht', '#vessel'],
-		['Trasa', '#route'],
-		['Kajuty', '#cabins'],
-		['Cennik', '#pricing']
+		['Jacht', `${resolve('/')}#vessel`],
+		['Trasa', `${resolve('/')}#route`],
+		['Kajuty', `${resolve('/')}#cabins`],
+		['Cennik', `${resolve('/')}#pricing`]
 	] as const
 </script>
 
 <nav class="site-nav" class:site-nav--scrolled={scrolled}>
 	<a class="brand" href={resolve('/')}>
-		<svg
-			width="32"
-			height="32"
-			viewBox="0 0 40 40"
-			fill="none"
-			aria-hidden="true"
-		>
-			<circle cx="20" cy="20" r="19" stroke="#c4923a" stroke-width="1.5" />
-			<text
-				x="20"
-				y="25"
-				text-anchor="middle"
-				font-size="14"
-				font-weight="700"
-				font-family="DM Sans, sans-serif"
-				fill="#c4923a"
-				letter-spacing="1">SA</text
-			>
-		</svg>
+		<span class="brand__mark">
+			<img src="/images/brand/logo.png" alt="" />
+		</span>
 		<span>Sailing Architects</span>
 	</a>
 
@@ -89,7 +73,25 @@
 		color: var(--color-warm-white);
 	}
 
-	.brand span {
+	.brand__mark {
+		width: 46px;
+		height: 46px;
+		display: grid;
+		place-items: center;
+		background: rgba(245, 240, 232, 0.96);
+		border: 1px solid rgba(196, 146, 58, 0.48);
+		overflow: hidden;
+		flex: 0 0 auto;
+	}
+
+	.brand__mark img {
+		width: 88%;
+		height: 88%;
+		object-fit: contain;
+		display: block;
+	}
+
+	.brand > span:last-child {
 		font-family: var(--font-serif);
 		font-size: 16px;
 		letter-spacing: 1px;
@@ -112,7 +114,7 @@
 	}
 
 	.link:hover {
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 	}
 
 	.btn {

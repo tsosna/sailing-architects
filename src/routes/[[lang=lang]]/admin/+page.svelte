@@ -230,12 +230,12 @@
 
 	.admin__back {
 		font-size: 12px;
-		color: rgba(196, 146, 58, 0.6);
+		color: var(--color-brass-text-soft);
 		text-decoration: none;
 	}
 
 	.admin__back:hover {
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 	}
 
 	.admin__segments {
@@ -290,7 +290,7 @@
 		font-size: 11px;
 		letter-spacing: 3px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.6);
+		color: var(--color-brass-text);
 		margin: 0 0 20px;
 	}
 
@@ -342,7 +342,7 @@
 		font-size: 9px;
 		letter-spacing: 1px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.5);
+		color: var(--color-brass-text-soft);
 	}
 
 	.berth-card__guest {
@@ -362,7 +362,7 @@
 		padding: 4px 8px;
 		background: transparent;
 		border: 1px solid rgba(196, 146, 58, 0.3);
-		color: rgba(196, 146, 58, 0.6);
+		color: var(--color-brass-text-soft);
 		font-size: 10px;
 		cursor: pointer;
 		font-family: var(--font-sans);
@@ -371,7 +371,7 @@
 
 	.berth-card__cancel:hover {
 		border-color: var(--color-brass);
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 	}
 
 	.admin__form {
@@ -390,7 +390,7 @@
 		font-size: 11px;
 		letter-spacing: 1px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.6);
+		color: var(--color-brass-text-soft);
 	}
 
 	.field__input {
@@ -434,12 +434,12 @@
 	.admin__btn--secondary {
 		background: transparent;
 		border: 1px solid rgba(196, 146, 58, 0.4);
-		color: rgba(196, 146, 58, 0.7);
+		color: var(--color-brass-text-soft);
 	}
 
 	.admin__btn--secondary:hover {
 		border-color: var(--color-brass);
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 		background: transparent;
 	}
 
@@ -451,7 +451,7 @@
 
 	.admin__ok {
 		font-size: 12px;
-		color: rgba(196, 146, 58, 0.9);
+		color: var(--color-brass-text);
 		margin: 0;
 	}
 

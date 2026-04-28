@@ -7,43 +7,22 @@
 		<div class="footer__top">
 			<div class="footer__brand">
 				<div class="footer__logo">
-					<svg
-						width="28"
-						height="28"
-						viewBox="0 0 40 40"
-						fill="none"
-						aria-hidden="true"
-					>
-						<circle
-							cx="20"
-							cy="20"
-							r="19"
-							stroke="#c4923a"
-							stroke-width="1.5"
-						/>
-						<text
-							x="20"
-							y="25"
-							text-anchor="middle"
-							font-size="14"
-							font-weight="700"
-							font-family="DM Sans, sans-serif"
-							fill="#c4923a"
-							letter-spacing="1">SA</text
-						>
-					</svg>
+					<span class="footer__mark">
+						<img src="/images/brand/logo.png" alt="" />
+					</span>
 					<span>Sailing Architects</span>
 				</div>
 				<p class="footer__desc">
 					Boutique sailing trips. Łączymy pasję żeglowania z odkrywaniem świata.
 				</p>
-				<p class="footer__contact">
+				<div class="footer__contact" aria-label="Kontakt do organizatora">
+					<p>Kontakt do organizatora</p>
+					<strong>Michał</strong>
+					<a href="tel:+48601671182">+48 601 671 182</a>
 					<a href="mailto:sailingarchitects@gmail.com"
 						>sailingarchitects@gmail.com</a
 					>
-					·
-					<a href="tel:+48601671182">+48 601 671 182</a>
-				</p>
+				</div>
 			</div>
 			<a class="footer__cta" href={resolve('/book')}>Zarezerwuj koję →</a>
 		</div>
@@ -81,7 +60,25 @@
 		margin-bottom: 16px;
 	}
 
-	.footer__logo span {
+	.footer__mark {
+		width: 58px;
+		height: 58px;
+		display: grid;
+		place-items: center;
+		background: rgba(245, 240, 232, 0.96);
+		border: 1px solid rgba(196, 146, 58, 0.5);
+		overflow: hidden;
+		flex: 0 0 auto;
+	}
+
+	.footer__mark img {
+		width: 88%;
+		height: 88%;
+		object-fit: contain;
+		display: block;
+	}
+
+	.footer__logo > span:last-child {
 		font-family: var(--font-serif);
 		font-size: 18px;
 		color: var(--color-warm-white);
@@ -98,19 +95,40 @@
 
 	.footer__contact {
 		font-family: var(--font-sans);
-		font-size: 12px;
-		color: rgba(196, 146, 58, 0.5);
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 8px 14px;
 		margin: 0;
 	}
 
+	.footer__contact p {
+		width: 100%;
+		font-size: 10px;
+		letter-spacing: 2px;
+		text-transform: uppercase;
+		color: var(--color-brass-text);
+		margin: 0 0 2px;
+	}
+
+	.footer__contact strong {
+		font-size: 14px;
+		color: var(--color-warm-white);
+	}
+
 	.footer__contact a {
-		color: inherit;
+		font-size: 13px;
+		color: rgba(245, 240, 232, 0.82);
 		text-decoration: none;
-		transition: color 200ms ease;
+		border-bottom: 1px solid rgba(196, 146, 58, 0.35);
+		transition:
+			color 200ms ease,
+			border-color 200ms ease;
 	}
 
 	.footer__contact a:hover {
-		color: var(--color-brass);
+		color: var(--color-brass-text);
+		border-bottom-color: var(--color-brass-text);
 	}
 
 	.footer__cta {

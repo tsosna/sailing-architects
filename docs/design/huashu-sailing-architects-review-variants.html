@@ -1,0 +1,1245 @@
+<!doctype html>
+<html lang="pl">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Huashu Design Review · Sailing Architects</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap"
+			rel="stylesheet"
+		/>
+		<style>
+			:root {
+				--color-navy: #0d1b2e;
+				--color-navy-mid: #0f1f35;
+				--color-navy-light: #162840;
+				--color-navy-deep: #07111e;
+				--color-brass: #c4923a;
+				--color-brass-light: #d4aa5a;
+				--color-warm-white: #f5f0e8;
+				--color-cream: #ede5d8;
+				--radius: 2px;
+				--eyebrow-opacity: 1;
+				--contact-scale: 1;
+				--panel-contrast: 1;
+				--section-gap: 40px;
+				--font-serif: 'Playfair Display', Georgia, serif;
+				--font-sans: 'DM Sans', system-ui, sans-serif;
+			}
+
+			* {
+				box-sizing: border-box;
+			}
+
+			body {
+				margin: 0;
+				background:
+					linear-gradient(180deg, rgba(7, 17, 30, 0.6), rgba(13, 27, 46, 0)),
+					var(--color-navy);
+				color: var(--color-warm-white);
+				font-family: var(--font-sans);
+			}
+
+			a {
+				color: inherit;
+			}
+
+			button,
+			input,
+			select {
+				font: inherit;
+			}
+
+			.shell {
+				max-width: 1180px;
+				margin: 0 auto;
+				padding: 48px 32px 96px;
+			}
+
+			.header {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) auto;
+				gap: 32px;
+				align-items: end;
+				padding-bottom: 36px;
+				border-bottom: 1px solid rgba(196, 146, 58, 0.16);
+			}
+
+			.brand {
+				display: flex;
+				align-items: center;
+				gap: 14px;
+				margin-bottom: 28px;
+			}
+
+			.brand-mark {
+				width: 40px;
+				height: 40px;
+				border: 1px solid var(--color-brass);
+				display: grid;
+				place-items: center;
+				color: var(--color-brass-light);
+				font-size: 13px;
+				font-weight: 700;
+				letter-spacing: 1px;
+			}
+
+			.brand span {
+				font-family: var(--font-serif);
+				font-size: 20px;
+			}
+
+			.kicker,
+			.eyebrow,
+			.score-label,
+			.variant-label,
+			.tweak-label {
+				font-size: 11px;
+				letter-spacing: 2.8px;
+				text-transform: uppercase;
+				color: var(--color-brass-light);
+				opacity: var(--eyebrow-opacity);
+			}
+
+			h1,
+			h2,
+			h3 {
+				font-family: var(--font-serif);
+				font-weight: 400;
+				margin: 0;
+			}
+
+			h1 {
+				max-width: 780px;
+				font-size: clamp(44px, 7vw, 92px);
+				line-height: 0.98;
+				margin-top: 12px;
+			}
+
+			h1 em {
+				color: var(--color-brass-light);
+				font-style: italic;
+			}
+
+			.header-copy {
+				max-width: 620px;
+				color: rgba(245, 240, 232, 0.66);
+				font-size: 15px;
+				line-height: 1.75;
+				margin: 24px 0 0;
+			}
+
+			.header-note {
+				max-width: 320px;
+				border-left: 3px solid var(--color-brass);
+				padding: 18px 0 18px 20px;
+				color: rgba(245, 240, 232, 0.72);
+				line-height: 1.65;
+				font-size: 13px;
+			}
+
+			.header-note strong {
+				display: block;
+				color: var(--color-warm-white);
+				font-size: 15px;
+				margin-bottom: 6px;
+			}
+
+			.review {
+				margin-top: var(--section-gap);
+				display: grid;
+				grid-template-columns: 0.9fr 1.1fr;
+				gap: 1px;
+				background: rgba(196, 146, 58, 0.16);
+			}
+
+			.review-summary,
+			.review-detail {
+				background: var(--color-navy-mid);
+				padding: 32px;
+			}
+
+			.review-summary {
+				border-top: 3px solid var(--color-brass);
+			}
+
+			.overall {
+				display: flex;
+				align-items: baseline;
+				gap: 14px;
+				margin-top: 18px;
+			}
+
+			.overall strong {
+				font-family: var(--font-serif);
+				font-size: 72px;
+				font-weight: 400;
+				line-height: 1;
+				color: var(--color-brass-light);
+			}
+
+			.overall span {
+				color: rgba(245, 240, 232, 0.5);
+			}
+
+			.review-summary p {
+				color: rgba(245, 240, 232, 0.68);
+				line-height: 1.75;
+				margin: 22px 0 0;
+			}
+
+			.score-grid {
+				display: grid;
+				gap: 1px;
+				background: rgba(196, 146, 58, 0.12);
+			}
+
+			.score-row {
+				display: grid;
+				grid-template-columns: 170px 56px 1fr;
+				gap: 18px;
+				align-items: center;
+				background: var(--color-navy);
+				padding: 16px 18px;
+			}
+
+			.score {
+				color: var(--color-brass-light);
+				font-family: var(--font-serif);
+				font-size: 24px;
+			}
+
+			.score-row p {
+				margin: 0;
+				color: rgba(245, 240, 232, 0.62);
+				font-size: 13px;
+				line-height: 1.55;
+			}
+
+			.quick {
+				margin-top: var(--section-gap);
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 1px;
+				background: rgba(196, 146, 58, 0.16);
+			}
+
+			.quick-card {
+				background: var(--color-navy-deep);
+				padding: 26px;
+				min-height: 180px;
+			}
+
+			.quick-card strong {
+				display: block;
+				font-family: var(--font-serif);
+				font-size: 22px;
+				font-weight: 400;
+				margin: 10px 0 12px;
+			}
+
+			.quick-card p {
+				margin: 0;
+				color: rgba(245, 240, 232, 0.64);
+				font-size: 13px;
+				line-height: 1.65;
+			}
+
+			.variants-head {
+				margin: calc(var(--section-gap) + 16px) 0 20px;
+				display: flex;
+				justify-content: space-between;
+				align-items: end;
+				gap: 24px;
+			}
+
+			.variants-head h2 {
+				font-size: clamp(32px, 4vw, 52px);
+				line-height: 1.05;
+			}
+
+			.variant-tabs {
+				display: flex;
+				gap: 1px;
+				background: rgba(196, 146, 58, 0.18);
+			}
+
+			.variant-tab {
+				border: 0;
+				border-radius: 0;
+				background: var(--color-navy-mid);
+				color: rgba(245, 240, 232, 0.58);
+				padding: 12px 18px;
+				cursor: pointer;
+				text-transform: uppercase;
+				font-size: 11px;
+				letter-spacing: 1.6px;
+			}
+
+			.variant-tab[aria-selected='true'] {
+				background: var(--color-brass);
+				color: var(--color-navy);
+				font-weight: 700;
+			}
+
+			.variant-stage {
+				background: rgba(196, 146, 58, 0.16);
+				padding: 1px;
+			}
+
+			.variant {
+				display: none;
+				background: var(--color-navy);
+				min-height: 680px;
+			}
+
+			.variant.is-active {
+				display: block;
+			}
+
+			.mock-nav {
+				height: 64px;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 0 32px;
+				border-bottom: 1px solid rgba(196, 146, 58, 0.13);
+				background: rgba(7, 17, 30, 0.74);
+			}
+
+			.mock-brand {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				font-family: var(--font-serif);
+			}
+
+			.mock-logo {
+				width: 32px;
+				height: 32px;
+				border: 1px solid var(--color-brass);
+				display: grid;
+				place-items: center;
+				color: var(--color-brass-light);
+				font: 700 11px var(--font-sans);
+				letter-spacing: 1px;
+			}
+
+			.mock-links {
+				display: flex;
+				align-items: center;
+				gap: 24px;
+				color: rgba(245, 240, 232, 0.58);
+				font-size: 11px;
+				letter-spacing: 1.6px;
+				text-transform: uppercase;
+			}
+
+			.mock-cta {
+				background: var(--color-brass);
+				color: var(--color-navy);
+				padding: 10px 20px;
+				font-weight: 700;
+			}
+
+			.hero-grid {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+				gap: 1px;
+				background: rgba(196, 146, 58, 0.14);
+			}
+
+			.hero-copy,
+			.login-shell,
+			.side-contact,
+			.booking-card {
+				background: var(--color-navy);
+			}
+
+			.hero-copy {
+				min-height: 520px;
+				padding: 72px 48px 48px;
+				display: flex;
+				flex-direction: column;
+				justify-content: end;
+				background:
+					linear-gradient(
+						140deg,
+						rgba(22, 40, 64, 0.92),
+						rgba(13, 27, 46, 0.94)
+					),
+					repeating-linear-gradient(
+						45deg,
+						rgba(196, 146, 58, 0.08) 0,
+						rgba(196, 146, 58, 0.08) 1px,
+						transparent 1px,
+						transparent 18px
+					);
+			}
+
+			.hero-title {
+				font-size: clamp(42px, 6vw, 74px);
+				line-height: 1;
+				margin: 14px 0 16px;
+			}
+
+			.hero-lead {
+				max-width: 500px;
+				margin: 0 0 30px;
+				color: rgba(245, 240, 232, 0.68);
+				line-height: 1.7;
+			}
+
+			.contact-bar {
+				transform: scale(var(--contact-scale));
+				transform-origin: left center;
+				display: inline-grid;
+				grid-template-columns: auto auto auto;
+				align-items: center;
+				gap: 1px;
+				background: rgba(196, 146, 58, 0.22);
+				max-width: 100%;
+			}
+
+			.contact-bar > * {
+				background: var(--color-navy-deep);
+				padding: 14px 18px;
+				min-height: 52px;
+				display: flex;
+				align-items: center;
+			}
+
+			.contact-bar strong {
+				color: var(--color-brass-light);
+				letter-spacing: 2px;
+				text-transform: uppercase;
+				font-size: 11px;
+			}
+
+			.contact-bar a {
+				text-decoration: none;
+				color: var(--color-warm-white);
+				font-weight: 600;
+				white-space: nowrap;
+			}
+
+			.login-shell {
+				padding: 36px;
+				min-height: 520px;
+				display: flex;
+				align-items: center;
+				background:
+					linear-gradient(
+						180deg,
+						rgba(196, 146, 58, calc(0.08 * var(--panel-contrast))),
+						rgba(7, 17, 30, 0)
+					),
+					var(--color-navy-mid);
+			}
+
+			.login-card {
+				width: 100%;
+				border: 1px solid rgba(196, 146, 58, calc(0.3 * var(--panel-contrast)));
+				border-top: 3px solid var(--color-brass);
+				background: var(--color-navy-deep);
+				box-shadow: 0 24px 70px
+					rgba(0, 0, 0, calc(0.24 * var(--panel-contrast)));
+				padding: 28px;
+				border-radius: var(--radius);
+			}
+
+			.login-card h3 {
+				font-size: 30px;
+				margin: 10px 0 8px;
+			}
+
+			.login-card p {
+				margin: 0 0 22px;
+				color: rgba(245, 240, 232, 0.62);
+				font-size: 13px;
+				line-height: 1.6;
+			}
+
+			.field {
+				display: grid;
+				gap: 8px;
+				margin-bottom: 14px;
+			}
+
+			.field label {
+				font-size: 11px;
+				letter-spacing: 1.4px;
+				text-transform: uppercase;
+				color: rgba(245, 240, 232, 0.68);
+			}
+
+			.field input {
+				height: 44px;
+				border: 1px solid rgba(196, 146, 58, 0.32);
+				background: var(--color-navy-light);
+				color: var(--color-warm-white);
+				border-radius: var(--radius);
+				padding: 0 14px;
+			}
+
+			.primary-button {
+				width: 100%;
+				height: 46px;
+				border: 0;
+				border-radius: var(--radius);
+				background: var(--color-brass);
+				color: var(--color-navy);
+				font-weight: 700;
+				letter-spacing: 1.8px;
+				text-transform: uppercase;
+				margin-top: 8px;
+			}
+
+			.variant-b .hero-grid {
+				grid-template-columns: 92px minmax(0, 1fr) minmax(320px, 420px);
+			}
+
+			.side-contact {
+				padding: 28px 18px;
+				writing-mode: vertical-rl;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 26px;
+				background: var(--color-brass);
+				color: var(--color-navy);
+				font-weight: 700;
+				letter-spacing: 1px;
+				transform: scale(var(--contact-scale));
+				transform-origin: left top;
+			}
+
+			.variant-b .hero-copy {
+				background:
+					linear-gradient(120deg, rgba(7, 17, 30, 0.8), rgba(13, 27, 46, 0.95)),
+					radial-gradient(
+						circle at 82% 20%,
+						rgba(196, 146, 58, 0.12),
+						transparent 34%
+					);
+			}
+
+			.route-card {
+				margin-top: 34px;
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 1px;
+				max-width: 560px;
+				background: rgba(196, 146, 58, 0.16);
+			}
+
+			.route-card div {
+				background: rgba(7, 17, 30, 0.64);
+				padding: 16px;
+			}
+
+			.route-card b {
+				display: block;
+				font-family: var(--font-serif);
+				font-size: 22px;
+				font-weight: 400;
+				color: var(--color-warm-white);
+			}
+
+			.route-card span {
+				font-size: 10px;
+				letter-spacing: 1.6px;
+				text-transform: uppercase;
+				color: var(--color-brass-light);
+			}
+
+			.variant-c .hero-grid {
+				grid-template-columns: minmax(0, 1fr);
+			}
+
+			.variant-c .hero-copy {
+				min-height: 300px;
+				padding-bottom: 40px;
+			}
+
+			.booking-stack {
+				display: grid;
+				grid-template-columns: minmax(260px, 0.7fr) minmax(320px, 1fr);
+				gap: 1px;
+				background: rgba(196, 146, 58, 0.16);
+			}
+
+			.booking-card {
+				padding: 34px;
+				background: var(--color-navy-mid);
+			}
+
+			.booking-card h3 {
+				font-size: 34px;
+				margin: 12px 0 24px;
+			}
+
+			.manifest-row {
+				display: flex;
+				justify-content: space-between;
+				gap: 18px;
+				border-top: 1px solid rgba(196, 146, 58, 0.16);
+				padding: 15px 0;
+				color: rgba(245, 240, 232, 0.58);
+				font-size: 13px;
+			}
+
+			.manifest-row strong {
+				color: var(--color-warm-white);
+				text-align: right;
+			}
+
+			.concierge-card {
+				margin-top: 28px;
+				background: var(--color-navy-deep);
+				border-left: 3px solid var(--color-brass);
+				padding: 18px;
+			}
+
+			.concierge-card a {
+				display: block;
+				text-decoration: none;
+				color: var(--color-warm-white);
+				font-weight: 600;
+				margin-top: 8px;
+			}
+
+			.variant-c .login-shell {
+				min-height: auto;
+				align-items: stretch;
+			}
+
+			.variant-c .login-card {
+				max-width: 520px;
+				margin: auto;
+			}
+
+			.tweaks {
+				position: fixed;
+				right: 20px;
+				bottom: 20px;
+				z-index: 50;
+				width: 310px;
+				background: #f5f0e8;
+				color: #07111e;
+				border: 1px solid rgba(7, 17, 30, 0.18);
+				box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+				border-radius: 2px;
+				font-family: var(--font-sans);
+			}
+
+			.tweaks.is-collapsed {
+				width: auto;
+			}
+
+			.tweaks-toggle {
+				width: 100%;
+				border: 0;
+				background: #07111e;
+				color: #f5f0e8;
+				padding: 12px 16px;
+				text-align: left;
+				cursor: pointer;
+				letter-spacing: 1.6px;
+				text-transform: uppercase;
+				font-size: 11px;
+				font-weight: 700;
+			}
+
+			.tweaks-body {
+				padding: 16px;
+				display: grid;
+				gap: 14px;
+			}
+
+			.tweaks.is-collapsed .tweaks-body {
+				display: none;
+			}
+
+			.tweak {
+				display: grid;
+				gap: 7px;
+			}
+
+			.tweak-label {
+				color: rgba(7, 17, 30, 0.68);
+				letter-spacing: 1.4px;
+			}
+
+			.tweak select,
+			.tweak input[type='range'] {
+				width: 100%;
+			}
+
+			.tweak select {
+				height: 36px;
+				border: 1px solid rgba(7, 17, 30, 0.2);
+				background: white;
+				border-radius: 2px;
+				padding: 0 10px;
+			}
+
+			.tweak-value {
+				font-size: 12px;
+				color: rgba(7, 17, 30, 0.62);
+			}
+
+			.reset {
+				border: 1px solid rgba(7, 17, 30, 0.2);
+				background: transparent;
+				padding: 9px 12px;
+				border-radius: 2px;
+				cursor: pointer;
+			}
+
+			@media (max-width: 860px) {
+				.shell {
+					padding: 32px 18px 120px;
+				}
+
+				.header,
+				.review,
+				.quick,
+				.hero-grid,
+				.variant-b .hero-grid,
+				.booking-stack {
+					grid-template-columns: 1fr;
+				}
+
+				.variants-head {
+					align-items: start;
+					flex-direction: column;
+				}
+
+				.variant-tabs {
+					width: 100%;
+				}
+
+				.variant-tab {
+					flex: 1;
+				}
+
+				.score-row {
+					grid-template-columns: 1fr;
+				}
+
+				.contact-bar {
+					grid-template-columns: 1fr;
+					width: 100%;
+					transform: none;
+				}
+
+				.side-contact {
+					writing-mode: horizontal-tb;
+					transform: none;
+				}
+
+				.tweaks {
+					right: 12px;
+					left: 12px;
+					bottom: 12px;
+					width: auto;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<main class="shell">
+			<header class="header">
+				<div>
+					<div class="brand">
+						<div class="brand-mark">SA</div>
+						<span>Sailing Architects</span>
+					</div>
+					<div class="kicker">Huashu Design · expert review + variants</div>
+					<h1>
+						Trzy poprawki, które powinny być <em>widoczne bez szukania</em>
+					</h1>
+					<p class="header-copy">
+						Ocena dotyczy trzech wskazanych problemów: kontakt do Michała,
+						kontrast eyebrow oraz odróżnienie Clerk login od tła. Poniżej są
+						warianty decyzyjne, nie patch produkcyjny.
+					</p>
+				</div>
+				<aside class="header-note">
+					<strong>Założenie projektowe</strong>
+					Nautyczny premium, ostrzejsza architektura, radius 2px, bez
+					dekoracyjnego przeładowania. Brass ma prowadzić wzrok, nie znikać.
+				</aside>
+			</header>
+
+			<section class="review" aria-labelledby="review-title">
+				<div class="review-summary">
+					<div class="eyebrow">Expert review</div>
+					<h2 id="review-title">
+						Aktualny kierunek jest dobry, ale zbyt cichy tam, gdzie ma
+						sprzedawać zaufanie.
+					</h2>
+					<div class="overall">
+						<strong>6.7</strong>
+						<span>/10 · dobre fundamenty, wymagane korekty hierarchii</span>
+					</div>
+					<p>
+						Styl premium jest spójny z marką, lecz trzy elementy krytyczne dla
+						konwersji nie mają wystarczającego priorytetu: człowiek do kontaktu,
+						etykiety orientacyjne oraz modal logowania w procesie płatności.
+					</p>
+				</div>
+				<div class="review-detail">
+					<div class="score-grid">
+						<div class="score-row">
+							<div class="score-label">Filozofia</div>
+							<div class="score">7.5</div>
+							<p>
+								Navy/brass i serif wspierają premium nautical, ale ciche dane
+								kontaktowe osłabiają butikowy, osobisty charakter.
+							</p>
+						</div>
+						<div class="score-row">
+							<div class="score-label">Hierarchia</div>
+							<div class="score">5.8</div>
+							<p>
+								CTA jest widoczne, lecz kontakt i logowanie nie tworzą jasnych
+								punktów wejścia. Eyebrow przy opacity 0.6 bywa dekoracją zamiast
+								sygnałem.
+							</p>
+						</div>
+						<div class="score-row">
+							<div class="score-label">Craft</div>
+							<div class="score">7.0</div>
+							<p>
+								System odstępów i ostre krawędzie są stabilne. Do poprawy:
+								kontrast małych napisów oraz warstwowanie panelu Clerk.
+							</p>
+						</div>
+						<div class="score-row">
+							<div class="score-label">Funkcja</div>
+							<div class="score">6.2</div>
+							<p>
+								Użytkownik może zarezerwować koję, ale w momencie wątpliwości
+								musi szukać kontaktu, a logowanie wygląda jak część tła.
+							</p>
+						</div>
+						<div class="score-row">
+							<div class="score-label">Oryginalność</div>
+							<div class="score">6.8</div>
+							<p>
+								Jest potencjał na własny język: manifest, kapitanat, sygnał
+								portowy. Obecnie część UI jest jeszcze zbyt typowa.
+							</p>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="quick" aria-label="Quick wins">
+				<div class="quick-card">
+					<div class="variant-label">Fix 01</div>
+					<strong>Kontakt jako sygnał zaufania</strong>
+					<p>
+						Numer i e-mail powinny wejść do hero lub pierwszego kroku booking
+						flow jako element pierwszego rzędu, nie dopiero FAQ/stopka.
+					</p>
+				</div>
+				<div class="quick-card">
+					<div class="variant-label">Fix 02</div>
+					<strong>Eyebrow bez opacity 0.6</strong>
+					<p>
+						Dla małego tekstu użyć brass-light, pełnej nieprzezroczystości,
+						większej wagi albo jasnego mikro-tła.
+					</p>
+				</div>
+				<div class="quick-card">
+					<div class="variant-label">Fix 03</div>
+					<strong>Clerk jako osobny panel</strong>
+					<p>
+						Logowanie musi dostać własną warstwę: border-top brass, navy-deep
+						tło, inputy navy-light i cień tylko jako funkcjonalna separacja.
+					</p>
+				</div>
+			</section>
+
+			<div class="variants-head">
+				<div>
+					<div class="eyebrow">Three HTML directions</div>
+					<h2>Warianty do akceptacji</h2>
+				</div>
+				<div class="variant-tabs" role="tablist" aria-label="Warianty">
+					<button
+						class="variant-tab"
+						type="button"
+						role="tab"
+						aria-selected="true"
+						data-variant="a"
+					>
+						A · Signal bar
+					</button>
+					<button
+						class="variant-tab"
+						type="button"
+						role="tab"
+						aria-selected="false"
+						data-variant="b"
+					>
+						B · Port rail
+					</button>
+					<button
+						class="variant-tab"
+						type="button"
+						role="tab"
+						aria-selected="false"
+						data-variant="c"
+					>
+						C · Manifest
+					</button>
+				</div>
+			</div>
+
+			<section class="variant-stage">
+				<article class="variant variant-a is-active" data-panel="a">
+					<nav class="mock-nav">
+						<div class="mock-brand">
+							<div class="mock-logo">SA</div>
+							Sailing Architects
+						</div>
+						<div class="mock-links">
+							<span>Jacht</span><span>Trasa</span><span>Kajuty</span
+							><span class="mock-cta">Rezerwuj</span>
+						</div>
+					</nav>
+					<div class="hero-grid">
+						<section class="hero-copy">
+							<div class="eyebrow">Jesień 2026 · Sail Adventure</div>
+							<h3 class="hero-title">Palma de Mallorca<br />Cabo Verde</h3>
+							<p class="hero-lead">
+								Najbardziej konserwatywny wariant: kontakt siedzi pod CTA jako
+								mocny, liniowy sygnał. Pasuje do obecnej architektury strony.
+							</p>
+							<div class="contact-bar">
+								<strong>Michał</strong>
+								<a href="tel:+48601671182">+48 601 671 182</a>
+								<a href="mailto:sailingarchitects@gmail.com"
+									>sailingarchitects@gmail.com</a
+								>
+							</div>
+						</section>
+						<aside class="login-shell">
+							<div class="login-card">
+								<div class="eyebrow">Krok 1</div>
+								<h3>Logowanie</h3>
+								<p>
+									Panel ma własny pokład wizualny: ciemniejszy navy, brass
+									top-line, jaśniejsze inputy.
+								</p>
+								<div class="field">
+									<label>Email</label><input value="anna@example.com" />
+								</div>
+								<div class="field">
+									<label>Hasło</label><input type="password" value="password" />
+								</div>
+								<button class="primary-button">Dalej</button>
+							</div>
+						</aside>
+					</div>
+				</article>
+
+				<article class="variant variant-b" data-panel="b">
+					<nav class="mock-nav">
+						<div class="mock-brand">
+							<div class="mock-logo">SA</div>
+							Sailing Architects
+						</div>
+						<div class="mock-links">
+							<span>Trasa</span><span>Cennik</span
+							><span class="mock-cta">Wybierz koję</span>
+						</div>
+					</nav>
+					<div class="hero-grid">
+						<aside class="side-contact">
+							<span>Michał</span>
+							<span>+48 601 671 182</span>
+							<span>sailingarchitects@gmail.com</span>
+						</aside>
+						<section class="hero-copy">
+							<div class="eyebrow">
+								Concierge rail · kontakt zawsze przy krawędzi
+							</div>
+							<h3 class="hero-title">
+								Atlantic crossing<br />with a human signal
+							</h3>
+							<p class="hero-lead">
+								Najbardziej charakterystyczny wariant. Pionowy rail robi z
+								kontaktu stały element marki, dobry dla landing page i długiego
+								scrolla.
+							</p>
+							<div class="route-card">
+								<div><span>Etapy</span><b>4</b></div>
+								<div><span>Miejsca</span><b>10</b></div>
+								<div><span>Kontakt</span><b>24h</b></div>
+							</div>
+						</section>
+						<aside class="login-shell">
+							<div class="login-card">
+								<div class="eyebrow">Bezpieczny dostęp</div>
+								<h3>Konto załogi</h3>
+								<p>
+									Clerk jest zamknięty w panelu, który czyta się jak instrument
+									nawigacyjny, nie jak przypadkowy embed.
+								</p>
+								<div class="field">
+									<label>Email</label><input value="anna@example.com" />
+								</div>
+								<div class="field">
+									<label>Kod lub hasło</label
+									><input type="password" value="password" />
+								</div>
+								<button class="primary-button">Kontynuuj</button>
+							</div>
+						</aside>
+					</div>
+				</article>
+
+				<article class="variant variant-c" data-panel="c">
+					<nav class="mock-nav">
+						<div class="mock-brand">
+							<div class="mock-logo">SA</div>
+							Sailing Architects
+						</div>
+						<div class="mock-links">
+							<span>Panel</span><span class="mock-cta">Zapłać</span>
+						</div>
+					</nav>
+					<div class="hero-grid">
+						<section class="hero-copy">
+							<div class="eyebrow">Booking-first · manifest załogi</div>
+							<h3 class="hero-title">Rezerwacja jako manifest pokładowy</h3>
+							<p class="hero-lead">
+								Najlepszy wariant dla kroku logowania: kontakt, etap i koja
+								stoją obok Clerk, więc użytkownik nie traci kontekstu
+								transakcji.
+							</p>
+						</section>
+						<div class="booking-stack">
+							<aside class="booking-card">
+								<div class="eyebrow">Rezerwujesz</div>
+								<h3>Sail Adventure 2026</h3>
+								<div class="manifest-row">
+									<span>Termin</span><strong>18–29 października</strong>
+								</div>
+								<div class="manifest-row">
+									<span>Koja</span><strong>A1</strong>
+								</div>
+								<div class="manifest-row">
+									<span>Razem</span><strong>8 900 zł</strong>
+								</div>
+								<div class="concierge-card">
+									<div class="eyebrow">Kontakt do organizatora</div>
+									<strong>Michał</strong>
+									<a href="tel:+48601671182">+48 601 671 182</a>
+									<a href="mailto:sailingarchitects@gmail.com"
+										>sailingarchitects@gmail.com</a
+									>
+								</div>
+							</aside>
+							<aside class="login-shell">
+								<div class="login-card">
+									<div class="eyebrow">Krok 1</div>
+									<h3>Wejdź na pokład</h3>
+									<p>
+										Najmocniejsze odróżnienie modala, z pełnym kontekstem
+										rezerwacji po lewej.
+									</p>
+									<div class="field">
+										<label>Email</label><input value="anna@example.com" />
+									</div>
+									<div class="field">
+										<label>Hasło</label
+										><input type="password" value="password" />
+									</div>
+									<button class="primary-button">
+										Zaloguj i przejdź dalej
+									</button>
+								</div>
+							</aside>
+						</div>
+					</div>
+				</article>
+			</section>
+		</main>
+
+		<div class="tweaks" id="tweaks">
+			<button class="tweaks-toggle" type="button" id="tweaksToggle">
+				Tweaks panel
+			</button>
+			<div class="tweaks-body">
+				<label class="tweak">
+					<span class="tweak-label">Wariant</span>
+					<select id="variantSelect">
+						<option value="a">A · Signal bar</option>
+						<option value="b">B · Port rail</option>
+						<option value="c">C · Manifest</option>
+					</select>
+				</label>
+				<label class="tweak">
+					<span class="tweak-label">Eyebrow opacity</span>
+					<input
+						id="eyebrowOpacity"
+						type="range"
+						min="0.6"
+						max="1"
+						step="0.05"
+					/>
+					<span class="tweak-value" id="eyebrowValue"></span>
+				</label>
+				<label class="tweak">
+					<span class="tweak-label">Contact scale</span>
+					<input
+						id="contactScale"
+						type="range"
+						min="0.9"
+						max="1.16"
+						step="0.02"
+					/>
+					<span class="tweak-value" id="contactValue"></span>
+				</label>
+				<label class="tweak">
+					<span class="tweak-label">Clerk panel contrast</span>
+					<input
+						id="panelContrast"
+						type="range"
+						min="0.75"
+						max="1.4"
+						step="0.05"
+					/>
+					<span class="tweak-value" id="panelValue"></span>
+				</label>
+				<label class="tweak">
+					<span class="tweak-label">Section gap</span>
+					<input id="sectionGap" type="range" min="28" max="64" step="4" />
+					<span class="tweak-value" id="gapValue"></span>
+				</label>
+				<button class="reset" type="button" id="resetTweaks">Reset</button>
+			</div>
+		</div>
+
+		<script>
+			const defaults = {
+				variant: 'a',
+				eyebrowOpacity: 1,
+				contactScale: 1,
+				panelContrast: 1,
+				sectionGap: 40,
+				collapsed: false
+			}
+
+			const storageKey = 'sailing-architects-huashu-tweaks'
+			const state = loadState()
+
+			const root = document.documentElement
+			const tabs = Array.from(document.querySelectorAll('.variant-tab'))
+			const panels = Array.from(document.querySelectorAll('[data-panel]'))
+			const tweaks = document.getElementById('tweaks')
+			const variantSelect = document.getElementById('variantSelect')
+			const eyebrowOpacity = document.getElementById('eyebrowOpacity')
+			const contactScale = document.getElementById('contactScale')
+			const panelContrast = document.getElementById('panelContrast')
+			const sectionGap = document.getElementById('sectionGap')
+
+			function loadState() {
+				try {
+					return {
+						...defaults,
+						...JSON.parse(localStorage.getItem(storageKey))
+					}
+				} catch {
+					return { ...defaults }
+				}
+			}
+
+			function saveState() {
+				localStorage.setItem(storageKey, JSON.stringify(state))
+			}
+
+			function applyState() {
+				root.style.setProperty('--eyebrow-opacity', state.eyebrowOpacity)
+				root.style.setProperty('--contact-scale', state.contactScale)
+				root.style.setProperty('--panel-contrast', state.panelContrast)
+				root.style.setProperty('--section-gap', `${state.sectionGap}px`)
+
+				variantSelect.value = state.variant
+				eyebrowOpacity.value = state.eyebrowOpacity
+				contactScale.value = state.contactScale
+				panelContrast.value = state.panelContrast
+				sectionGap.value = state.sectionGap
+
+				document.getElementById('eyebrowValue').textContent =
+					state.eyebrowOpacity
+				document.getElementById('contactValue').textContent =
+					`${Math.round(state.contactScale * 100)}%`
+				document.getElementById('panelValue').textContent =
+					`${Math.round(state.panelContrast * 100)}%`
+				document.getElementById('gapValue').textContent =
+					`${state.sectionGap}px`
+
+				tabs.forEach((tab) => {
+					const selected = tab.dataset.variant === state.variant
+					tab.setAttribute('aria-selected', selected ? 'true' : 'false')
+				})
+				panels.forEach((panel) => {
+					panel.classList.toggle(
+						'is-active',
+						panel.dataset.panel === state.variant
+					)
+				})
+				tweaks.classList.toggle('is-collapsed', state.collapsed)
+			}
+
+			function update(patch) {
+				Object.assign(state, patch)
+				saveState()
+				applyState()
+			}
+
+			tabs.forEach((tab) => {
+				tab.addEventListener('click', () =>
+					update({ variant: tab.dataset.variant })
+				)
+			})
+
+			variantSelect.addEventListener('change', (event) =>
+				update({ variant: event.target.value })
+			)
+			eyebrowOpacity.addEventListener('input', (event) =>
+				update({ eyebrowOpacity: Number(event.target.value) })
+			)
+			contactScale.addEventListener('input', (event) =>
+				update({ contactScale: Number(event.target.value) })
+			)
+			panelContrast.addEventListener('input', (event) =>
+				update({ panelContrast: Number(event.target.value) })
+			)
+			sectionGap.addEventListener('input', (event) =>
+				update({ sectionGap: Number(event.target.value) })
+			)
+			document
+				.getElementById('tweaksToggle')
+				.addEventListener('click', () =>
+					update({ collapsed: !state.collapsed })
+				)
+			document.getElementById('resetTweaks').addEventListener('click', () => {
+				Object.assign(state, defaults)
+				saveState()
+				applyState()
+			})
+
+			applyState()
+		</script>
+	</body>
+</html>

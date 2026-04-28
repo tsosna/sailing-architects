@@ -12,6 +12,16 @@
 		voyageSegments.find((s) => s.id === selectedSegment) ?? voyageSegments[0]
 	)
 	const totalPrice = $derived(segment.price * selectedBerths.length)
+	const selectedBerthsLabel = $derived(
+		selectedBerths.length === 1 ? 'koję' : 'koje'
+	)
+	const totalPriceFormatted = $derived(totalPrice.toLocaleString('pl-PL'))
+	const selectionEyebrow = $derived(
+		['Wybrano', selectedBerths.length, selectedBerthsLabel].join(' ')
+	)
+	const selectionSummary = $derived(
+		`${selectedBerths.join(', ')} · ${segment.name} · ${totalPriceFormatted} zł`
+	)
 
 	function toggleBerth(id: string) {
 		if (selectedBerths.includes(id)) {
@@ -74,15 +84,8 @@
 		{#if selectedBerths.length > 0}
 			<div class="banner" aria-live="polite">
 				<div class="banner__copy">
-					<p class="banner__eyebrow">
-						Wybrano {selectedBerths.length}
-						{selectedBerths.length === 1 ? 'koję' : 'koje'}
-					</p>
-					<p class="banner__title">
-						{selectedBerths.join(', ')} · {segment.name} · {totalPrice.toLocaleString(
-							'pl-PL'
-						)} zł
-					</p>
+					<p class="banner__eyebrow">{selectionEyebrow}</p>
+					<p class="banner__title">{selectionSummary}</p>
 				</div>
 				<a
 					class="banner__cta"
@@ -110,7 +113,7 @@
 		font-size: 11px;
 		letter-spacing: 4px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.6);
+		color: var(--color-brass-text);
 		margin: 0 0 12px;
 	}
 
@@ -166,11 +169,11 @@
 		font-size: 10px;
 		letter-spacing: 1px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.3);
+		color: var(--color-brass-text-soft);
 	}
 
 	.segments__btn--active .segments__dates {
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 	}
 
 	.segments__name {
@@ -187,11 +190,11 @@
 	.segments__price {
 		font-family: var(--font-serif);
 		font-size: 18px;
-		color: rgba(196, 146, 58, 0.4);
+		color: var(--color-brass-text-soft);
 	}
 
 	.segments__btn--active .segments__price {
-		color: var(--color-brass);
+		color: var(--color-brass-text);
 	}
 
 	.banner {
@@ -215,7 +218,7 @@
 		font-size: 9px;
 		letter-spacing: 2px;
 		text-transform: uppercase;
-		color: rgba(196, 146, 58, 0.5);
+		color: var(--color-brass-text-soft);
 		margin: 0 0 4px;
 	}
 
