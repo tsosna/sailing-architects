@@ -11,6 +11,7 @@ SvelteKit + Convex + Wuchale + Stripe + Tailwind CSS v4.
 | Styling      | Tailwind CSS v4 (CSS-first, `@theme` in `app.css`)               |
 | i18n         | [Wuchale](https://wuchale.dev) — zero-code-change, PO files      |
 | Payments     | [Stripe](https://stripe.com) — Payment Intents + webhook         |
+| Email        | [Brevo](https://www.brevo.com/) — transactional email via API    |
 | Deploy       | Vercel                                                           |
 
 ## Getting started
@@ -64,6 +65,8 @@ pnpm dev              # dev server
 pnpm build            # production build
 pnpm check            # TypeScript + Svelte type check
 pnpm lint             # Prettier + ESLint
+pnpm email:test -- --to you@example.com
+pnpm email:handoff -- --to you@example.com --subject "Handoff" --html-file report.html
 npx convex dev        # Convex backend dev mode
 npx wuchale           # extract/update i18n strings
 ```
@@ -79,6 +82,7 @@ src/
 ├── lib/
 │   ├── components/                 # Svelte components
 │   └── server/
+│       ├── email.ts                # Brevo transactional email adapter
 │       └── stripe.ts               # Stripe singleton client
 └── routes/
     ├── +layout.svelte              # setupConvex here
@@ -92,3 +96,4 @@ src/
 - Convex functions live in `src/convex/` (not root `convex/`) — required by SvelteKit's module resolution
 - Wuchale auto-extracts strings from `.svelte` files — no manual `m.*` wrappers needed
 - Never use `process.env.*` — always `$env/static/private` or `$env/static/public`
+- Server email uses Brevo env vars: `BREVO_API_KEY`, `BREVO_FROM_EMAIL`, `CONTACT_EMAIL`

@@ -432,3 +432,45 @@ Sesja obejmowała dopracowanie designu Sailing Architects na bazie huashu-design
 - Czy rozmiar logo ustawiony w aktualnym kodzie odpowiada wartościom ustawianym ręcznie w Tweaks panel?
 - Czy `a.jpg` ma zostać użyte gdzieś jako social proof / materiał promocyjny, czy całkowicie wypada z landing page?
 - Czy kontakt do Michała ma być dodatkowo powtórzony w sticky barze na mobile?
+
+## Sesja 2026-04-29 — Brevo transactional email adapter
+
+Sesja przygotowała backendową integrację transactional email przez Brevo dla Sailing Architects, bez budowania jeszcze formularza kontaktowego ani automacji cron.
+
+### Zmiany
+
+- **Env vars** (`.env.example`): dodano `BREVO_API_KEY`, `BREVO_FROM_EMAIL`, `CONTACT_EMAIL`.
+- **Adapter serwerowy** (`src/lib/server/email.ts`): dodano `sendTransactionalEmail({ to, subject, html, text?, replyTo? })` korzystające z Brevo Transactional Email API (`/v3/smtp/email`) oraz wrappery `sendContactEmail(...)` i `sendDailyReportEmail(...)`.
+- **Obsługa błędów** (`src/lib/server/email.ts`): adapter rzuca czytelne błędy dla brakujących envów i zwraca `messageId`/response z Brevo bez logowania sekretów.
+- **Skrypty Node** (`scripts/brevo-mail.mjs`, `scripts/send-handoff-report.mjs`, `scripts/send-test-email.mjs`): dodano wspólny fetch wrapper Brevo oraz CLI do wysyłki raportu HTML przez `--to`, `--subject`, `--html-file` i prosty testowy mail przez `--to`.
+- **Package scripts** (`package.json`): dodano `pnpm email:handoff` i `pnpm email:test`; oba czytają lokalne `.env` przez `node --env-file=.env`.
+- **README** (`README.md`): dopisano Brevo do stacku, komendy testowe i informację o env vars.
+
+### Decyzje
+
+- **Brevo zamiast Resend/Postmark** — wybrano zgodnie z zakresem sesji i potrzebą transactional email dla raportów handoff oraz późniejszych prostych maili systemowych/kontaktowych.
+- **Fetch wrapper zamiast oficjalnego SDK Brevo** — Brevo endpoint do wysyłki transactional email jest prosty, a natywny `fetch` działa zarówno w SvelteKit server runtime, jak i w skryptach Node. Dzięki temu nie dodano nowego runtime dependency.
+- **`$env/static/private` w module SvelteKit** — sekrety (`BREVO_API_KEY`) i adresy konfiguracyjne są dostępne tylko po stronie serwera.
+- **Skrypty nie importują `$env/static/private`** — działają poza SvelteKit runtime, więc czytają env z `process.env`; package scripts uruchamiają je przez `node --env-file=.env`.
+
+### Wnioski
+
+- Node skrypty i kod SvelteKit potrzebują osobnych sposobów dostępu do env: `$env/static/private` w `src/lib/server/email.ts`, `process.env` w `scripts/*.mjs`.
+- `pnpm check` wymaga, żeby zmienne używane przez `$env/static/private` istniały lokalnie w `.env` już podczas `svelte-kit sync`; w tej sesji dodano lokalne puste placeholdery Brevo do ignorowanego `.env`, bez commitowania sekretów.
+- Test wysyłki wymaga realnych wartości `BREVO_API_KEY` i `BREVO_FROM_EMAIL`; bez nich skrypty kończą się kontrolowanym błędem.
+- Brevo API response może zawierać `messageId`; adapter zwraca go do diagnostyki zamiast wypisywać payload z sekretami.
+- `pnpm check` przechodzi; `pnpm lint` nadal pada wyłącznie na znanych plikach formatowania: `skills-lock.json` i `src/convex/_generated/*`.
+
+### Następne kroki
+
+#### Next
+
+- Ustawić `BREVO_API_KEY`, `BREVO_FROM_EMAIL`, `CONTACT_EMAIL` lokalnie i w Vercel env.
+- Wysłać ręczny test: `pnpm email:test -- --to adres@example.com`.
+- Wysłać testowy raport HTML: `pnpm email:handoff -- --to adres@example.com --subject "Sailing Architects handoff" --html-file path/to/report.html`.
+
+#### Later / Open questions
+
+- Podpiąć `sendContactEmail(...)` pod przyszły formularz kontaktowy.
+- Podpiąć `sendDailyReportEmail(...)` pod automatyczny raport z `docs/handoff.md`, jeśli taka automatyzacja zostanie ustalona.
+- Potwierdzić docelowego nadawcę i konfigurację domeny w Brevo przed produkcyjną wysyłką.

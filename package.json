@@ -11,7 +11,9 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check .",
-		"format": "prettier --write ."
+		"format": "prettier --write .",
+		"email:handoff": "node --env-file=.env scripts/send-handoff-report.mjs",
+		"email:test": "node --env-file=.env scripts/send-test-email.mjs"
 	},
 	"pnpm": {
 		"onlyBuiltDependencies": [
