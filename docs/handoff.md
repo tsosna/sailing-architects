@@ -445,10 +445,12 @@ Sesja przygotowała backendową integrację transactional email przez Brevo dla 
 - **Skrypty Node** (`scripts/brevo-mail.mjs`, `scripts/send-handoff-report.mjs`, `scripts/send-test-email.mjs`): dodano wspólny fetch wrapper Brevo oraz CLI do wysyłki raportu HTML przez `--to`, `--subject`, `--html-file` i prosty testowy mail przez `--to`.
 - **Package scripts** (`package.json`): dodano `pnpm email:handoff` i `pnpm email:test`; oba czytają lokalne `.env` przez `node --env-file=.env`.
 - **README** (`README.md`): dopisano Brevo do stacku, komendy testowe i informację o env vars.
+- **Testy ręczne**: `pnpm email:test` wysłał wiadomość przez Brevo; test na iCloud miał w logach Brevo statusy `Sent`, `Delivered` i `First opening`, ale użytkownik uznał wynik za niewiarygodny. Drugi test na Gmail (`CONTACT_EMAIL=tomek.sosinski@gmail.com`) zadziałał poprawnie.
 
 ### Decyzje
 
 - **Brevo zamiast Resend/Postmark** — wybrano zgodnie z zakresem sesji i potrzebą transactional email dla raportów handoff oraz późniejszych prostych maili systemowych/kontaktowych.
+- **Brevo traktować jako adapter przygotowany, nie ostateczny kierunek** — po testach użytkownik zaznaczył, że wysyłka e-mail może pójść „w inną stronę”. Kod jest użyteczny jako warstwa abstrakcji, ale decyzja o finalnym providerze/dostarczalności pozostaje otwarta.
 - **Fetch wrapper zamiast oficjalnego SDK Brevo** — Brevo endpoint do wysyłki transactional email jest prosty, a natywny `fetch` działa zarówno w SvelteKit server runtime, jak i w skryptach Node. Dzięki temu nie dodano nowego runtime dependency.
 - **`$env/static/private` w module SvelteKit** — sekrety (`BREVO_API_KEY`) i adresy konfiguracyjne są dostępne tylko po stronie serwera.
 - **Skrypty nie importują `$env/static/private`** — działają poza SvelteKit runtime, więc czytają env z `process.env`; package scripts uruchamiają je przez `node --env-file=.env`.
@@ -459,18 +461,61 @@ Sesja przygotowała backendową integrację transactional email przez Brevo dla 
 - `pnpm check` wymaga, żeby zmienne używane przez `$env/static/private` istniały lokalnie w `.env` już podczas `svelte-kit sync`; w tej sesji dodano lokalne puste placeholdery Brevo do ignorowanego `.env`, bez commitowania sekretów.
 - Test wysyłki wymaga realnych wartości `BREVO_API_KEY` i `BREVO_FROM_EMAIL`; bez nich skrypty kończą się kontrolowanym błędem.
 - Brevo API response może zawierać `messageId`; adapter zwraca go do diagnostyki zamiast wypisywać payload z sekretami.
+- Logi Brevo mogą pokazywać dostarczenie/otwarcie, ale nie rozstrzygają subiektywnego UX po stronie skrzynki odbiorczej; Gmail był praktycznym potwierdzeniem działania w tej sesji, iCloud pozostał podejrzany.
 - `pnpm check` przechodzi; `pnpm lint` nadal pada wyłącznie na znanych plikach formatowania: `skills-lock.json` i `src/convex/_generated/*`.
 
 ### Następne kroki
 
 #### Next
 
-- Ustawić `BREVO_API_KEY`, `BREVO_FROM_EMAIL`, `CONTACT_EMAIL` lokalnie i w Vercel env.
-- Wysłać ręczny test: `pnpm email:test -- --to adres@example.com`.
-- Wysłać testowy raport HTML: `pnpm email:handoff -- --to adres@example.com --subject "Sailing Architects handoff" --html-file path/to/report.html`.
+- Przed dalszą rozbudową maili zdecydować, czy zostajemy przy Brevo, czy przechodzimy na inny kierunek/providera.
+- Jeśli Brevo zostaje: ustawić `BREVO_API_KEY`, `BREVO_FROM_EMAIL`, `CONTACT_EMAIL` w Vercel env i zrobić test produkcyjny na Gmail.
+- Jeśli zmieniamy providera: zachować publiczne API `sendTransactionalEmail(...)` jako punkt wymiany adaptera.
 
 #### Later / Open questions
 
 - Podpiąć `sendContactEmail(...)` pod przyszły formularz kontaktowy.
 - Podpiąć `sendDailyReportEmail(...)` pod automatyczny raport z `docs/handoff.md`, jeśli taka automatyzacja zostanie ustalona.
 - Potwierdzić docelowego nadawcę i konfigurację domeny w Brevo przed produkcyjną wysyłką.
+
+## Sesja 2026-04-29 17:15 — Logo i booking CTA flow
+
+Sesja dopracowała wizualny detal logo/favikony oraz mechanikę przycisków `Rezerwuj` / `Zarezerwuj` tak, żeby wybór koi, etap i wejście do `/book` były spójne.
+
+### Zmiany
+
+- **Logo i favicon** (`static/images/brand/logo.png`, `static/favicon.png`): znak przemalowano z granatu na brass `#c4923a`, zostawiając transparentne tło. `static/favicon.png` zmniejszono do `512x512`.
+- **Tło logo w UI** (`src/lib/components/site-nav/site-nav.svelte`, `src/lib/components/site-footer/site-footer.svelte`): usunięto jasne tło z wrapperów `.brand__mark` i `.footer__mark`; została subtelna złota ramka.
+- **Mobile hero/nav** (`src/lib/components/site-nav/site-nav.svelte`, `src/routes/[[lang=lang]]/+page.svelte`): na mobile ukryto tekst `Sailing Architects` w belce menu i ustawiono hero na ok. `18px` pod nav (`padding-top: 82px`), żeby `Jesień 2026` nie nakładało się na menu.
+- **Booking-first flow** (`src/routes/[[lang=lang]]/book/+page.svelte`): `/book` bez `berths` startuje od wyboru koi; `/book?...&berths=...` startuje od panelu logowania/rezerwacji. Dodano krok `Koje` przed `Konto`, więc płatność przesunęła się na krok 5, a sukces na krok 6.
+- **Wspólny stan wyboru koi** (`src/lib/state/booking-selection.svelte.ts`): dodano frontowy stan `bookingSelection` dla `selectedSegment` i `selectedBerths`, używany przez `CabinsSection`, `PricingSection` i `SiteNav`.
+- **CTA rezerwacji** (`src/lib/components/cabins-section/cabins-section.svelte`, `src/lib/components/pricing-section/pricing-section.svelte`, `src/lib/components/site-nav/site-nav.svelte`): `Rezerwuj` w menu i `Zarezerwuj` w cenniku uwzględniają wybrane koje tylko wtedy, gdy klik dotyczy aktualnego etapu; URL budowany jest przez `URLSearchParams`, więc `berths=E1%2CE2` jest spójne.
+- **Panel użytkownika** (`src/lib/components/site-nav/site-nav.svelte`, `src/routes/[[lang=lang]]/dashboard/+layout.server.ts`, `src/routes/[[lang=lang]]/book/+page.svelte`): `Panel` prowadzi do `/book?auth=signin&next=dashboard`; po zalogowaniu bez wybranych koi użytkownik przechodzi do `/dashboard`.
+- **Synchronizacja trasa → plan kajutowy** (`src/lib/components/route-section/route-section.svelte`, `src/lib/components/cabins-section/cabins-section.svelte`): klik w mapę lub `01/02/03/04` ustawia `?segment=...` bez przewijania z sekcji `TRASA REJSU`; `PLAN KAJUTOWY` przełącza etap po dojściu do sekcji, ale nadal pozwala lokalnie zmieniać etapy.
+
+### Decyzje
+
+- **Auth dopiero po intencji rezerwacji** — logowanie nie pojawia się po samym kliknięciu `/book`, jeśli nie ma wybranych koi. Wyjątek: `Panel`, bo tam intencją jest wejście do konta.
+- **`bookingSelection` jako lekki stan frontowy** — wybrano wspólny stan zamiast przekazywania propsów między sekcjami, bo `SiteNav`, `PricingSection` i `CabinsSection` muszą widzieć tę samą intencję rezerwacji.
+- **URL jako kontrakt wejścia do `/book`** — `segment` bez `berths` oznacza wybór koi, a `segment + berths` oznacza przejście do panelu logowania/rezerwacji.
+- **Trasa nie przewija do kajut** — klik w trasie tylko synchronizuje etap przez `?segment=...`; użytkownik zostaje w sekcji `TRASA REJSU`.
+
+### Wnioski
+
+- Samo wygenerowanie URL z `berths=...` nie wystarczało: `/book` musiał też interpretować obecność `berths` jako sygnał startu od kroku `Konto`.
+- Ręczne składanie query stringów dało niespójność `E1,E2` vs `E1%2CE2`; `URLSearchParams` powinien być używany do linków bookingowych.
+- Synchronizacja URL → UI w `CabinsSection` wymaga pamiętania ostatnio zastosowanego `segmentParam`, żeby lokalna zmiana etapu w planie kajut nie była natychmiast nadpisywana przez stary query param.
+- `pnpm check` przechodzi; `pnpm lint` nadal pada wyłącznie na znanych plikach formatowania: `skills-lock.json` i `src/convex/_generated/*`.
+
+### Następne kroki
+
+#### Next
+
+- Przetestować ręcznie flow: wybór koi w `PLAN KAJUTOWY` → `Rezerwuj` w menu → `/book?...&berths=...` → auth; analogicznie `Zarezerwuj` w cenniku dla tego samego i innego etapu.
+- Sprawdzić mobile po zmianach logo/nav/hero: czy brass logo bez tła jest czytelne i czy `Jesień 2026` ma właściwy odstęp od menu.
+- Zdecydować, czy zmiany logo/booking flow commitować razem, czy rozdzielić na dwa commity.
+
+#### Blocked / Later / Open questions
+
+- `pnpm lint` nadal wymaga decyzji, co zrobić z `skills-lock.json` i `src/convex/_generated/*`: sformatować, dodać do `.prettierignore`, albo zostawić jako znany dług.
+- Potwierdzić finalnie, czy route-section ma również wizualnie zaznaczać, że zmieniła etap w planie kajutowym, bez przewijania użytkownika.

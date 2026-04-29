@@ -31,6 +31,8 @@ msgid "Cztery etapy przez Atlantyk. Jacht Jeanneau Sun Odyssey 519. Październik
 msgstr ""
 
 #: src/routes/[[lang=lang]]/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Wybierz koję"
 msgstr ""
 
@@ -94,11 +96,13 @@ msgid "Kliknij koję na planie lub użyj listy. Szary oznacza zajęte, mosiądz 
 msgstr ""
 
 #: src/lib/components/cabins-section/cabins-section.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Wybierz etap rejsu"
 msgstr ""
 
 #. 0: seg.price.toLocaleString('pl-PL')
 #. 0: priceFormatted
+#. 0: seg.price.toLocaleString('pl-PL')
 #. 0: totalPriceFormatted
 #. 0: pricePerBerthFormatted
 #. 0: totalPriceFormatted
@@ -107,10 +111,12 @@ msgstr ""
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "{0} zł"
 msgstr ""
 
 #: src/lib/components/cabins-section/cabins-section.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Wybrano"
 msgstr ""
 
@@ -967,6 +973,7 @@ msgstr ""
 msgid "← Strona główna"
 msgstr ""
 
+#: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Panel użytkownika"
 msgstr ""
@@ -1139,6 +1146,7 @@ msgstr ""
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Koje"
 msgstr ""
@@ -1233,4 +1241,52 @@ msgstr ""
 
 #: src/lib/components/vessel-section/vessel-section.svelte
 msgid "Katedra w Palmie na Majorce"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Wybór koi"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Wybierz koję na planie lub z listy, aby kontynuować."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Najpierw wybierz etap i miejsce na planie jachtu. Logowanie pojawi się dopiero po kliknięciu „Kontynuuj rezerwację”."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Kontynuuj rezerwację →"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Krok 5"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Wejdź do panelu"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Po zalogowaniu"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Twoje rezerwacje"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Zaloguj się do panelu"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Po zalogowaniu przejdziesz do swoich rezerwacji i danych załogi."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Możesz przejść do panelu."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Przejdź do panelu →"
 msgstr ""

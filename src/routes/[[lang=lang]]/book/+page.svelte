@@ -9,7 +9,9 @@
 		type StripeElements
 	} from '@stripe/stripe-js'
 	import { PUBLIC_STRIPE_PUBLISHABLE_KEY } from '$env/static/public'
+	import { useQuery } from 'convex-svelte'
 	import { BookingInput } from '$components/booking-input'
+	import { BoatPlan } from '$components/boat-plan'
 	import { StepIndicator } from '$components/step-indicator'
 	import { findCabinByBerth } from '$lib/data/cabins'
 	import { voyageSegments } from '$lib/data/voyage-segments'
@@ -17,11 +19,12 @@
 	import { api } from '$convex/api'
 
 	const STEPS = [
-		{ id: 1, label: 'Konto' },
-		{ id: 2, label: 'Dane załogi' },
-		{ id: 3, label: 'Potwierdzenie' },
-		{ id: 4, label: 'Płatność' },
-		{ id: 5, label: 'Gotowe' }
+		{ id: 1, label: 'Koje' },
+		{ id: 2, label: 'Konto' },
+		{ id: 3, label: 'Dane załogi' },
+		{ id: 4, label: 'Potwierdzenie' },
+		{ id: 5, label: 'Płatność' },
+		{ id: 6, label: 'Gotowe' }
 	] as const
 
 	const NATIONALITY_OPTIONS = [
@@ -56,28 +59,66 @@
 	const isSignedIn = $derived(!!ctx.auth.userId)
 	const userEmail = $derived(ctx.user?.primaryEmailAddress?.emailAddress ?? '')
 
-	const segmentParam = $derived(page.url.searchParams.get('segment'))
-	const berthsParam = $derived(page.url.searchParams.get('berths'))
+	const initialSegmentParam = page.url.searchParams.get('segment')
+	const initialBerthsParam = page.url.searchParams.get('berths')
+	const initialAuthParam = page.url.searchParams.get('auth')
+	const initialBerths = initialBerthsParam
+		? initialBerthsParam
+				.split(',')
+				.map((b) => b.trim())
+				.filter(Boolean)
+		: []
+
+	let selectedSegment = $state(initialSegmentParam ?? voyageSegments[0].id)
+	let selectedBerths = $state(initialBerths)
 
 	const segment = $derived(
-		voyageSegments.find((s) => s.id === segmentParam) ?? voyageSegments[0]
+		voyageSegments.find((s) => s.id === selectedSegment) ?? voyageSegments[0]
 	)
-	const berths = $derived(
-		berthsParam
-			? berthsParam
-					.split(',')
-					.map((b) => b.trim())
-					.filter(Boolean)
-			: ['A1']
-	)
+	const berths = $derived(selectedBerths)
+	const panelLoginMode = $derived(berths.length === 0)
 	const berthDetails = $derived(
 		berths.map((id) => ({ id, cabin: findCabinByBerth(id) }))
 	)
 	const totalPrice = $derived(segment.price * berths.length)
 	const totalPriceFormatted = $derived(totalPrice.toLocaleString('pl-PL'))
 	const pricePerBerthFormatted = $derived(segment.price.toLocaleString('pl-PL'))
+	const selectedBerthsLabel = $derived(
+		selectedBerths.length === 1 ? 'koję' : 'koje'
+	)
+	const selectionEyebrow = $derived(
+		selectedBerths.length > 0
+			? ['Wybrano', selectedBerths.length, selectedBerthsLabel].join(' ')
+			: 'Wybór koi'
+	)
+	const selectionSummary = $derived(
+		selectedBerths.length > 0
+			? `${selectedBerths.join(', ')} · ${segment.name} · ${totalPriceFormatted} zł`
+			: 'Wybierz koję na planie lub z listy, aby kontynuować.'
+	)
 
-	let step = $state(1)
+	const statusQuery = useQuery(api.queries.berthStatusesBySlug, () => ({
+		slug: selectedSegment
+	}))
+	type BerthStatus = 'taken' | 'captain' | 'complimentary'
+	const berthStatuses = $derived(
+		new Map<string, BerthStatus>(
+			(statusQuery.data ?? []).map(
+				({ berthId, status }: { berthId: string; status: string }) => [
+					berthId,
+					status as BerthStatus
+				]
+			)
+		)
+	)
+
+	let step = $state(
+		initialAuthParam === 'signin' ||
+			initialAuthParam === 'signup' ||
+			initialBerths.length > 0
+			? 2
+			: 1
+	)
 	type AuthMode = 'signin' | 'signup'
 
 	let selectedAuthMode = $state<AuthMode>('signin')
@@ -97,6 +138,48 @@
 
 	const signInUrl = $derived(authUrl('signin'))
 	const signUpUrl = $derived(authUrl('signup'))
+
+	function bookingUrl(): string {
+		const params = new URLSearchParams(page.url.searchParams)
+		params.set('segment', selectedSegment)
+		params.delete('auth')
+
+		if (selectedBerths.length > 0) {
+			params.set('berths', selectedBerths.join(','))
+		} else {
+			params.delete('berths')
+		}
+
+		const query = params.toString()
+		return `${page.url.pathname}${query ? `?${query}` : ''}`
+	}
+
+	async function syncBookingUrl() {
+		await goto(bookingUrl(), {
+			replaceState: true,
+			noScroll: true,
+			keepFocus: true
+		})
+	}
+
+	function selectSegment(id: string) {
+		selectedSegment = id
+		selectedBerths = []
+	}
+
+	function toggleBerth(id: string) {
+		if (selectedBerths.includes(id)) {
+			selectedBerths = selectedBerths.filter((b) => b !== id)
+		} else {
+			selectedBerths = [...selectedBerths, id]
+		}
+	}
+
+	async function continueFromSelection() {
+		if (selectedBerths.length === 0) return
+		await syncBookingUrl()
+		step = isSignedIn ? 3 : 2
+	}
 
 	async function setAuthMode(mode: AuthMode) {
 		selectedAuthMode = mode
@@ -223,7 +306,7 @@
 
 	/** Fetch PaymentIntent + init Stripe when entering step 4. */
 	$effect(() => {
-		if (step !== 4 || clientSecret) return
+		if (step !== 5 || clientSecret) return
 
 		intentLoading = true
 		intentError = null
@@ -296,15 +379,26 @@
 			paymentError = stripeErr.message ?? 'Płatność nie powiodła się'
 			paymentLoading = false
 		} else {
-			step = 5
+			step = 6
 			paymentLoading = false
 		}
 	}
 
 	async function next() {
-		if (step === 1 && !isSignedIn) return
+		if (step === 1) {
+			await continueFromSelection()
+			return
+		}
 
 		if (step === 2) {
+			if (!isSignedIn) return
+			if (panelLoginMode) {
+				await goto(resolve('/dashboard'))
+				return
+			}
+		}
+
+		if (step === 3) {
 			const result = validate()
 			if (!result.valid) {
 				errors = result.errors
@@ -328,7 +422,7 @@
 					dietaryRequirements: crew.diet || undefined,
 					medicalNotes: crew.medical || undefined
 				})
-				step = 3
+				step = 4
 			} catch (err) {
 				saveError = err instanceof Error ? err.message : 'Błąd zapisu danych'
 			} finally {
@@ -337,10 +431,20 @@
 			return
 		}
 
-		step = Math.min(step + 1, 5)
+		step = Math.min(step + 1, 6)
 	}
 
 	function back() {
+		if (step === 2 && panelLoginMode) {
+			void goto(resolve('/'))
+			return
+		}
+
+		if (step === 3 && isSignedIn) {
+			step = 1
+			return
+		}
+
 		if (step > 1) step--
 	}
 
@@ -370,6 +474,67 @@
 		<StepIndicator current={step} steps={STEPS} />
 
 		{#if step === 1}
+			<section class="step step--selection">
+				<p class="eyebrow">Krok 1</p>
+				<h2 class="title">Wybierz koję</h2>
+				<p class="lead">
+					Najpierw wybierz etap i miejsce na planie jachtu. Logowanie pojawi się
+					dopiero po kliknięciu „Kontynuuj rezerwację”.
+				</p>
+
+				<div
+					class="booking-segments"
+					role="tablist"
+					aria-label="Wybierz etap rejsu"
+				>
+					{#each voyageSegments as seg (seg.id)}
+						<button
+							type="button"
+							role="tab"
+							aria-selected={selectedSegment === seg.id}
+							class="booking-segments__btn"
+							class:booking-segments__btn--active={selectedSegment === seg.id}
+							onclick={() => selectSegment(seg.id)}
+						>
+							<span class="booking-segments__dates">{seg.dates}</span>
+							<span class="booking-segments__name">{seg.name}</span>
+							<span class="booking-segments__price"
+								>{seg.price.toLocaleString('pl-PL')} zł</span
+							>
+						</button>
+					{/each}
+				</div>
+
+				<BoatPlan
+					{selectedBerths}
+					{berthStatuses}
+					onToggleBerth={toggleBerth}
+				/>
+
+				<div
+					class="selection-banner"
+					class:selection-banner--empty={selectedBerths.length === 0}
+					aria-live="polite"
+				>
+					<div class="selection-banner__copy">
+						<p class="selection-banner__eyebrow">{selectionEyebrow}</p>
+						<p class="selection-banner__title">{selectionSummary}</p>
+					</div>
+					<button
+						type="button"
+						class="selection-banner__cta"
+						disabled={selectedBerths.length === 0}
+						onclick={continueFromSelection}
+					>
+						{selectedBerths.length > 0
+							? 'Kontynuuj rezerwację →'
+							: 'Wybierz koję'}
+					</button>
+				</div>
+			</section>
+		{/if}
+
+		{#if step === 2}
 			<section class="step step--auth">
 				<p class="eyebrow">Booking-first</p>
 				<h2 class="title">Rezerwacja jako manifest pokładowy</h2>
@@ -380,25 +545,31 @@
 
 				<div class="auth-layout">
 					<aside class="auth-summary" aria-label="Szczegóły rezerwacji">
-						<p class="auth-summary__eyebrow">Rezerwujesz</p>
-						<p class="auth-summary__title">Sail Adventure 2026</p>
+						<p class="auth-summary__eyebrow">
+							{panelLoginMode ? 'Panel użytkownika' : 'Rezerwujesz'}
+						</p>
+						<p class="auth-summary__title">
+							{panelLoginMode ? 'Wejdź do panelu' : 'Sail Adventure 2026'}
+						</p>
 						<dl class="auth-summary__rows">
 							<div>
 								<dt>Etap</dt>
-								<dd>{segment.name}</dd>
+								<dd>{panelLoginMode ? 'Po zalogowaniu' : segment.name}</dd>
 							</div>
 							<div>
 								<dt>Termin</dt>
-								<dd>{segment.dates}</dd>
+								<dd>{panelLoginMode ? 'Twoje rezerwacje' : segment.dates}</dd>
 							</div>
-							<div>
-								<dt>{berths.length === 1 ? 'Koja' : 'Koje'}</dt>
-								<dd>{berths.join(', ')}</dd>
-							</div>
-							<div>
-								<dt>Razem</dt>
-								<dd>{totalPriceFormatted} zł</dd>
-							</div>
+							{#if !panelLoginMode}
+								<div>
+									<dt>{berths.length === 1 ? 'Koja' : 'Koje'}</dt>
+									<dd>{berths.join(', ')}</dd>
+								</div>
+								<div>
+									<dt>Razem</dt>
+									<dd>{totalPriceFormatted} zł</dd>
+								</div>
+							{/if}
 						</dl>
 						<div class="auth-contact">
 							<p>Kontakt do organizatora</p>
@@ -417,15 +588,25 @@
 
 					<div class="auth-panel">
 						<div class="auth-panel__intro">
-							<p class="auth-panel__eyebrow">Krok 1</p>
-							<h3>Wejdź na pokład</h3>
-							<p>Konto załogi zabezpiecza dane rezerwacji i płatności.</p>
+							<p class="auth-panel__eyebrow">Krok 2</p>
+							<h3>
+								{panelLoginMode ? 'Zaloguj się do panelu' : 'Wejdź na pokład'}
+							</h3>
+							<p>
+								{panelLoginMode
+									? 'Po zalogowaniu przejdziesz do swoich rezerwacji i danych załogi.'
+									: 'Konto załogi zabezpiecza dane rezerwacji i płatności.'}
+							</p>
 						</div>
 						{#if isSignedIn}
 							<div class="signed-in" role="status">
 								<p class="signed-in__eyebrow">Sesja aktywna</p>
 								<p class="signed-in__title">Zalogowano jako {userEmail}</p>
-								<p class="signed-in__hint">Możesz przejść dalej.</p>
+								<p class="signed-in__hint">
+									{panelLoginMode
+										? 'Możesz przejść do panelu.'
+										: 'Możesz przejść dalej.'}
+								</p>
 							</div>
 						{:else}
 							<div class="auth-tabs" role="tablist">
@@ -467,7 +648,8 @@
 								type="button"
 								class="btn btn--primary"
 								disabled={!isSignedIn}
-								onclick={next}>Dalej →</button
+								onclick={next}
+								>{panelLoginMode ? 'Przejdź do panelu →' : 'Dalej →'}</button
 							>
 						</div>
 					</div>
@@ -475,9 +657,9 @@
 			</section>
 		{/if}
 
-		{#if step === 2}
+		{#if step === 3}
 			<section class="step">
-				<p class="eyebrow">Krok 2</p>
+				<p class="eyebrow">Krok 3</p>
 				<h2 class="title">Dane załogi</h2>
 				<p class="lead">
 					Wymagane przez kapitana i władze portowe. Dane przechowywane
@@ -605,9 +787,9 @@
 			</section>
 		{/if}
 
-		{#if step === 3}
+		{#if step === 4}
 			<section class="step">
-				<p class="eyebrow">Krok 3</p>
+				<p class="eyebrow">Krok 4</p>
 				<h2 class="title">Potwierdzenie rezerwacji</h2>
 
 				<div class="confirm">
@@ -636,9 +818,9 @@
 			</section>
 		{/if}
 
-		{#if step === 4}
+		{#if step === 5}
 			<section class="step">
-				<p class="eyebrow">Krok 4</p>
+				<p class="eyebrow">Krok 5</p>
 				<h2 class="title">Płatność</h2>
 
 				<div class="pay">
@@ -710,7 +892,7 @@
 			</section>
 		{/if}
 
-		{#if step === 5}
+		{#if step === 6}
 			<section class="step step--success">
 				<div class="success__check" aria-hidden="true">✓</div>
 				<p class="eyebrow">Rezerwacja potwierdzona</p>
@@ -780,6 +962,11 @@
 		max-width: 920px;
 	}
 
+	.step--selection {
+		max-width: 1100px;
+		margin: 0 auto;
+	}
+
 	.step--success {
 		text-align: center;
 		max-width: 480px;
@@ -825,6 +1012,143 @@
 	.lead--auth {
 		margin: -12px 0 28px;
 		color: rgba(245, 240, 232, 0.64);
+	}
+
+	.booking-segments {
+		display: flex;
+		gap: 1px;
+		margin-bottom: 48px;
+		background: rgba(196, 146, 58, 0.1);
+		flex-wrap: wrap;
+	}
+
+	.booking-segments__btn {
+		flex: 1;
+		min-width: 160px;
+		padding: 16px 20px;
+		background: var(--color-navy);
+		border: none;
+		border-bottom: 2px solid transparent;
+		cursor: pointer;
+		text-align: left;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		transition:
+			background-color 150ms ease,
+			border-color 150ms ease;
+	}
+
+	.booking-segments__btn--active {
+		background: rgba(196, 146, 58, 0.12);
+		border-bottom-color: var(--color-brass);
+	}
+
+	.booking-segments__dates {
+		font-family: var(--font-sans);
+		font-size: 10px;
+		letter-spacing: 1px;
+		text-transform: uppercase;
+		color: var(--color-brass-text-soft);
+	}
+
+	.booking-segments__btn--active .booking-segments__dates {
+		color: var(--color-brass-text);
+	}
+
+	.booking-segments__name {
+		font-family: var(--font-sans);
+		font-size: 13px;
+		font-weight: 500;
+		color: rgba(245, 240, 232, 0.4);
+	}
+
+	.booking-segments__btn--active .booking-segments__name {
+		color: var(--color-warm-white);
+	}
+
+	.booking-segments__price {
+		font-family: var(--font-serif);
+		font-size: 18px;
+		color: var(--color-brass-text-soft);
+	}
+
+	.booking-segments__btn--active .booking-segments__price {
+		color: var(--color-brass-text);
+	}
+
+	.selection-banner {
+		margin-top: 48px;
+		display: flex;
+		align-items: center;
+		gap: 24px;
+		flex-wrap: wrap;
+	}
+
+	.selection-banner__copy {
+		flex: 1;
+		min-width: 240px;
+		padding: 20px 24px;
+		background: rgba(196, 146, 58, 0.07);
+		border: 1px solid rgba(196, 146, 58, 0.25);
+	}
+
+	.selection-banner--empty .selection-banner__copy {
+		background: rgba(255, 255, 255, 0.03);
+		border-color: rgba(196, 146, 58, 0.16);
+	}
+
+	.selection-banner__eyebrow {
+		font-family: var(--font-sans);
+		font-size: 9px;
+		letter-spacing: 2px;
+		text-transform: uppercase;
+		color: var(--color-brass-text-soft);
+		margin: 0 0 4px;
+	}
+
+	.selection-banner__title {
+		font-family: var(--font-serif);
+		font-size: 20px;
+		color: var(--color-warm-white);
+		margin: 0;
+	}
+
+	.selection-banner--empty .selection-banner__title {
+		font-family: var(--font-sans);
+		font-size: 13px;
+		line-height: 1.6;
+		color: rgba(245, 240, 232, 0.52);
+	}
+
+	.selection-banner__cta {
+		padding: 18px 42px;
+		background: var(--color-brass);
+		border: none;
+		color: var(--color-navy);
+		font-family: var(--font-sans);
+		font-weight: 700;
+		font-size: 13px;
+		letter-spacing: 2px;
+		text-transform: uppercase;
+		cursor: pointer;
+		border-radius: 0;
+		white-space: nowrap;
+		text-decoration: none;
+		display: inline-flex;
+		align-items: center;
+		transition:
+			background-color 200ms ease,
+			opacity 200ms ease;
+	}
+
+	.selection-banner__cta:hover:not(:disabled) {
+		background: var(--color-brass-light);
+	}
+
+	.selection-banner__cta:disabled {
+		cursor: not-allowed;
+		opacity: 0.48;
 	}
 
 	.signed-in {

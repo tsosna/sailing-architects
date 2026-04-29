@@ -1,4 +1,8 @@
 <script lang="ts">
+	import { goto } from '$app/navigation'
+	import { resolve } from '$app/paths'
+	import { voyageSegments } from '$lib/data/voyage-segments'
+
 	type Stage = {
 		num: string
 		from: string
@@ -7,6 +11,7 @@
 		days: number
 		price: number
 		desc: string
+		segmentId: string
 	}
 
 	const stages: readonly Stage[] = [
@@ -17,6 +22,7 @@
 			dates: '4–11.10.2026',
 			days: 7,
 			price: 1800,
+			segmentId: voyageSegments[0].id,
 			desc: 'Start wyprawy. Żegluga wzdłuż wschodniego wybrzeża Hiszpanii, przez Cieśninę Gibraltarską — jedną z najważniejszych morskich bram świata.'
 		},
 		{
@@ -26,6 +32,7 @@
 			dates: '12–21.10.2026',
 			days: 9,
 			price: 2300,
+			segmentId: voyageSegments[1].id,
 			desc: 'Kurs na południe-zachód. Pierwsze etapy oceaniczne. Madera — zielona perła Atlantyku, wulkaniczne klify, tarasowe winnice, historyczne Funchal.'
 		},
 		{
@@ -35,6 +42,7 @@
 			dates: '22–31.10.2026',
 			days: 9,
 			price: 2300,
+			segmentId: voyageSegments[2].id,
 			desc: 'Wyspy Kanaryjskie. Teneryfa oferuje majestatyczny wulkan Teide, turkusowe plaże i doskonałą kuchnię — idealny odpoczynek przed ostatnim etapem.'
 		},
 		{
@@ -44,6 +52,7 @@
 			dates: '1–14.11.2026',
 			days: 13,
 			price: 3200,
+			segmentId: voyageSegments[3].id,
 			desc: 'Finał — prawdziwy ocean. Pasaty, wieloryby i delfiny. Cabo Verde to esencja egzotyki: afrykańskie rytmy, oceaniczna przestrzeń, wulkaniczne krajobrazy.'
 		}
 	]
@@ -59,6 +68,15 @@
 	let activeStage = $state(0)
 	const stage = $derived(stages[activeStage])
 	const priceFormatted = $derived(stage.price.toLocaleString('pl-PL'))
+
+	function selectStage(index: number) {
+		activeStage = index
+		void goto(`${resolve('/')}?segment=${stages[index].segmentId}#route`, {
+			replaceState: true,
+			noScroll: true,
+			keepFocus: true
+		})
+	}
 </script>
 
 <section id="route" class="route">
@@ -81,11 +99,11 @@
 						<g
 							class="map__port"
 							class:map__port--active={activeStage === port.stage}
-							onclick={() => (activeStage = port.stage)}
+							onclick={() => selectStage(port.stage)}
 							onkeydown={(e) => {
 								if (e.key === 'Enter' || e.key === ' ') {
 									e.preventDefault()
-									activeStage = port.stage
+									selectStage(port.stage)
 								}
 							}}
 							role="button"
@@ -132,7 +150,7 @@
 							aria-selected={activeStage === i}
 							class="selector__btn"
 							class:selector__btn--active={activeStage === i}
-							onclick={() => (activeStage = i)}
+							onclick={() => selectStage(i)}
 						>
 							{st.num}
 						</button>

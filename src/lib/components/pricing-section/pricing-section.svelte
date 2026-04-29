@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths'
 	import { voyageSegments } from '$lib/data/voyage-segments'
+	import { bookingSelection } from '$lib/state/booking-selection.svelte'
 
 	const includes = [
 		'Koja na jachcie',
@@ -16,6 +17,10 @@
 		'Ubezpieczenie turystyczne (~250 zł/os)',
 		'Napoje i wycieczki lądowe'
 	]
+
+	function bookingHref(segmentId: string) {
+		return bookingSelection.bookingPath(resolve('/book'), segmentId)
+	}
 </script>
 
 <section id="pricing" class="pricing">
@@ -38,7 +43,7 @@
 						>
 					</p>
 					<p class="card__per">za osobę · 1 koja</p>
-					<a class="card__cta" href={resolve('/book')}>Zarezerwuj</a>
+					<a class="card__cta" href={bookingHref(seg.id)}>Zarezerwuj</a>
 				</article>
 			{/each}
 		</div>

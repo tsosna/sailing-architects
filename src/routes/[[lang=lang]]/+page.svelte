@@ -340,6 +340,16 @@
 	}
 
 	@media (max-width: 720px) {
+		.hero {
+			min-height: auto;
+			justify-content: flex-start;
+			padding: 82px 0 56px;
+		}
+
+		.hero__inner {
+			padding: 0 20px;
+		}
+
 		.hero__contact {
 			grid-template-columns: 1fr;
 			width: 100%;

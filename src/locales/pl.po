@@ -31,6 +31,8 @@ msgid "Cztery etapy przez Atlantyk. Jacht Jeanneau Sun Odyssey 519. Październik
 msgstr "Cztery etapy przez Atlantyk. Jacht Jeanneau Sun Odyssey 519. Październik–Listopad 2026. Wybierz swoją koję i dołącz do załogi."
 
 #: src/routes/[[lang=lang]]/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Wybierz koję"
 msgstr "Wybierz koję"
 
@@ -94,11 +96,13 @@ msgid "Kliknij koję na planie lub użyj listy. Szary oznacza zajęte, mosiądz 
 msgstr "Kliknij koję na planie lub użyj listy. Szary oznacza zajęte, mosiądz — dostępne, złoty — wybrane."
 
 #: src/lib/components/cabins-section/cabins-section.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Wybierz etap rejsu"
 msgstr "Wybierz etap rejsu"
 
 #. 0: seg.price.toLocaleString('pl-PL')
 #. 0: priceFormatted
+#. 0: seg.price.toLocaleString('pl-PL')
 #. 0: totalPriceFormatted
 #. 0: pricePerBerthFormatted
 #. 0: totalPriceFormatted
@@ -107,10 +111,12 @@ msgstr "Wybierz etap rejsu"
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "{0} zł"
 msgstr "{0} zł"
 
 #: src/lib/components/cabins-section/cabins-section.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Wybrano"
 msgstr "Wybrano"
 
@@ -967,6 +973,7 @@ msgstr "Panel · Sailing Architects"
 msgid "← Strona główna"
 msgstr "← Strona główna"
 
+#: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Panel użytkownika"
 msgstr "Panel użytkownika"
@@ -1139,6 +1146,7 @@ msgstr "Ustaw C1 = kapitan (migracja)"
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Koje"
 msgstr "Koje"
@@ -1234,3 +1242,51 @@ msgstr "Uczestniczka rejsu na pokładzie"
 #: src/lib/components/vessel-section/vessel-section.svelte
 msgid "Katedra w Palmie na Majorce"
 msgstr "Katedra w Palmie na Majorce"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Wybór koi"
+msgstr "Wybór koi"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Wybierz koję na planie lub z listy, aby kontynuować."
+msgstr "Wybierz koję na planie lub z listy, aby kontynuować."
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Najpierw wybierz etap i miejsce na planie jachtu. Logowanie pojawi się dopiero po kliknięciu „Kontynuuj rezerwację”."
+msgstr "Najpierw wybierz etap i miejsce na planie jachtu. Logowanie pojawi się dopiero po kliknięciu „Kontynuuj rezerwację”."
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Kontynuuj rezerwację →"
+msgstr "Kontynuuj rezerwację →"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Krok 5"
+msgstr "Krok 5"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Wejdź do panelu"
+msgstr "Wejdź do panelu"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Po zalogowaniu"
+msgstr "Po zalogowaniu"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Twoje rezerwacje"
+msgstr "Twoje rezerwacje"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Zaloguj się do panelu"
+msgstr "Zaloguj się do panelu"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Po zalogowaniu przejdziesz do swoich rezerwacji i danych załogi."
+msgstr "Po zalogowaniu przejdziesz do swoich rezerwacji i danych załogi."
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Możesz przejść do panelu."
+msgstr "Możesz przejść do panelu."
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Przejdź do panelu →"
+msgstr "Przejdź do panelu →"

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths'
+	import { bookingSelection } from '$lib/state/booking-selection.svelte'
 
 	let scrolled = $state(false)
 
@@ -18,6 +19,8 @@
 		['Kajuty', `${resolve('/')}#cabins`],
 		['Cennik', `${resolve('/')}#pricing`]
 	] as const
+
+	const reserveHref = $derived(bookingSelection.bookingPath(resolve('/book')))
 </script>
 
 <nav class="site-nav" class:site-nav--scrolled={scrolled}>
@@ -32,8 +35,11 @@
 		{#each links as [label, href] (href)}
 			<a class="link" {href}>{label}</a>
 		{/each}
-		<a class="btn btn--ghost" href={resolve('/dashboard')}>Panel</a>
-		<a class="btn btn--primary" href={resolve('/book')}>Rezerwuj</a>
+		<a
+			class="btn btn--ghost"
+			href={`${resolve('/book')}?auth=signin&next=dashboard`}>Panel</a
+		>
+		<a class="btn btn--primary" href={reserveHref}>Rezerwuj</a>
 	</div>
 </nav>
 
@@ -78,8 +84,9 @@
 		height: 46px;
 		display: grid;
 		place-items: center;
-		background: rgba(245, 240, 232, 0.96);
-		border: 1px solid rgba(196, 146, 58, 0.48);
+		background: transparent;
+		border: 1px solid rgba(196, 146, 58, 0.28);
+		box-shadow: inset 0 0 0 1px rgba(196, 146, 58, 0.08);
 		overflow: hidden;
 		flex: 0 0 auto;
 	}
@@ -163,9 +170,15 @@
 		.site-nav {
 			padding: 0 20px;
 		}
+
+		.brand > span:last-child {
+			display: none;
+		}
+
 		.cluster {
 			gap: 16px;
 		}
+
 		.link {
 			display: none;
 		}

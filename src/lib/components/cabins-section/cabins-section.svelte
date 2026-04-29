@@ -1,39 +1,40 @@
 <script lang="ts">
 	import { resolve } from '$app/paths'
+	import { page } from '$app/state'
 	import { useQuery } from 'convex-svelte'
 	import { BoatPlan } from '$components/boat-plan'
 	import { voyageSegments } from '$lib/data/voyage-segments'
+	import { bookingSelection } from '$lib/state/booking-selection.svelte'
 	import { api } from '$convex/api'
 
-	let selectedSegment = $state<string>(voyageSegments[0].id)
-	let selectedBerths = $state<string[]>([])
+	const segmentParam = $derived(page.url.searchParams.get('segment'))
+	let appliedSegmentParam = $state<string | null>(null)
 
 	const segment = $derived(
-		voyageSegments.find((s) => s.id === selectedSegment) ?? voyageSegments[0]
+		voyageSegments.find((s) => s.id === bookingSelection.selectedSegment) ??
+			voyageSegments[0]
 	)
-	const totalPrice = $derived(segment.price * selectedBerths.length)
+	const totalPrice = $derived(
+		segment.price * bookingSelection.selectedBerths.length
+	)
 	const selectedBerthsLabel = $derived(
-		selectedBerths.length === 1 ? 'koję' : 'koje'
+		bookingSelection.selectedBerths.length === 1 ? 'koję' : 'koje'
 	)
 	const totalPriceFormatted = $derived(totalPrice.toLocaleString('pl-PL'))
 	const selectionEyebrow = $derived(
-		['Wybrano', selectedBerths.length, selectedBerthsLabel].join(' ')
+		[
+			'Wybrano',
+			bookingSelection.selectedBerths.length,
+			selectedBerthsLabel
+		].join(' ')
 	)
 	const selectionSummary = $derived(
-		`${selectedBerths.join(', ')} · ${segment.name} · ${totalPriceFormatted} zł`
+		`${bookingSelection.selectedBerths.join(', ')} · ${segment.name} · ${totalPriceFormatted} zł`
 	)
-
-	function toggleBerth(id: string) {
-		if (selectedBerths.includes(id)) {
-			selectedBerths = selectedBerths.filter((b) => b !== id)
-		} else {
-			selectedBerths = [...selectedBerths, id]
-		}
-	}
 
 	// Live berth statuses from Convex — falls back to empty map while loading
 	const statusQuery = useQuery(api.queries.berthStatusesBySlug, () => ({
-		slug: selectedSegment
+		slug: bookingSelection.selectedSegment
 	}))
 	type BerthStatus = 'taken' | 'captain' | 'complimentary'
 	const berthStatuses = $derived(
@@ -46,9 +47,19 @@
 	)
 
 	function selectSegment(id: string) {
-		selectedSegment = id
-		selectedBerths = []
+		bookingSelection.selectSegment(id)
+		appliedSegmentParam = segmentParam
 	}
+
+	$effect(() => {
+		if (!segmentParam) return
+		if (segmentParam === appliedSegmentParam) return
+		if (!voyageSegments.some((s) => s.id === segmentParam)) return
+		if (bookingSelection.selectedSegment === segmentParam) return
+
+		bookingSelection.selectSegment(segmentParam)
+		appliedSegmentParam = segmentParam
+	})
 </script>
 
 <section id="cabins" class="cabins">
@@ -65,9 +76,10 @@
 				<button
 					type="button"
 					role="tab"
-					aria-selected={selectedSegment === seg.id}
+					aria-selected={bookingSelection.selectedSegment === seg.id}
 					class="segments__btn"
-					class:segments__btn--active={selectedSegment === seg.id}
+					class:segments__btn--active={bookingSelection.selectedSegment ===
+						seg.id}
 					onclick={() => selectSegment(seg.id)}
 				>
 					<span class="segments__dates">{seg.dates}</span>
@@ -79,9 +91,13 @@
 			{/each}
 		</div>
 
-		<BoatPlan {selectedBerths} {berthStatuses} onToggleBerth={toggleBerth} />
+		<BoatPlan
+			selectedBerths={bookingSelection.selectedBerths}
+			{berthStatuses}
+			onToggleBerth={bookingSelection.toggleBerth.bind(bookingSelection)}
+		/>
 
-		{#if selectedBerths.length > 0}
+		{#if bookingSelection.selectedBerths.length > 0}
 			<div class="banner" aria-live="polite">
 				<div class="banner__copy">
 					<p class="banner__eyebrow">{selectionEyebrow}</p>
@@ -89,8 +105,7 @@
 				</div>
 				<a
 					class="banner__cta"
-					href={`${resolve('/book')}?segment=${selectedSegment}&berths=${selectedBerths.join(',')}`}
-					>Rezerwuj →</a
+					href={bookingSelection.bookingPath(resolve('/book'))}>Rezerwuj →</a
 				>
 			</div>
 		{/if}
