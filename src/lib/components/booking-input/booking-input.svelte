@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { HTMLInputAttributes } from 'svelte/elements'
+
 	type Option = { value: string; label: string }
 
 	type Props = {
@@ -8,6 +10,10 @@
 		required?: boolean
 		hint?: string
 		error?: string
+		placeholder?: string
+		inputmode?: HTMLInputAttributes['inputmode']
+		autocomplete?: HTMLInputAttributes['autocomplete']
+		maxlength?: HTMLInputAttributes['maxlength']
 		options?: ReadonlyArray<Option>
 		oninput?: () => void
 	}
@@ -19,6 +25,10 @@
 		required = false,
 		hint,
 		error,
+		placeholder,
+		inputmode,
+		autocomplete,
+		maxlength,
 		options,
 		oninput
 	}: Props = $props()
@@ -52,6 +62,10 @@
 			class="field__input"
 			class:field__input--error={error}
 			{type}
+			{placeholder}
+			{inputmode}
+			{autocomplete}
+			{maxlength}
 			bind:value
 			{oninput}
 		/>

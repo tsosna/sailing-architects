@@ -57,6 +57,7 @@
 					],
 					['Data urodzenia', profileData.dateOfBirth],
 					['Narodowość', profileData.nationality],
+					['Telefon żeglarza', profileData.phone ?? '—'],
 					[
 						'Typ dokumentu',
 						profileData.docType === 'passport' ? 'Paszport' : 'Dowód osobisty'

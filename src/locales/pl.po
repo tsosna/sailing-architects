@@ -591,6 +591,7 @@ msgstr "Dowód osobisty"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Wybierz..."
 msgstr "Wybierz..."
 
@@ -734,9 +735,8 @@ msgstr "Typ dokumentu"
 msgid "Numer dokumentu"
 msgstr "Numer dokumentu"
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Wymagane do rejestru jachtu"
-msgstr "Wymagane do rejestru jachtu"
+#~ msgid "Wymagane do rejestru jachtu"
+#~ msgstr "Wymagane do rejestru jachtu"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
@@ -1027,14 +1027,11 @@ msgstr "Profil nie został jeszcze uzupełniony."
 msgid "Dokumenty do pobrania"
 msgstr "Dokumenty do pobrania"
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Pole wymagane"
-msgstr "Pole wymagane"
+#~ msgid "Pole wymagane"
+#~ msgstr "Pole wymagane"
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Wybierz opcję"
-msgstr "Wybierz opcję"
+#~ msgid "Wybierz opcję"
+#~ msgstr "Wybierz opcję"
 
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Wyloguj"
@@ -1290,3 +1287,115 @@ msgstr "Możesz przejść do panelu."
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Przejdź do panelu →"
 msgstr "Przejdź do panelu →"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Austria"
+msgstr "Austria"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Belgia"
+msgstr "Belgia"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Chorwacja"
+msgstr "Chorwacja"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Czechy"
+msgstr "Czechy"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Dania"
+msgstr "Dania"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Estonia"
+msgstr "Estonia"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Finlandia"
+msgstr "Finlandia"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Francja"
+msgstr "Francja"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Grecja"
+msgstr "Grecja"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Hiszpania"
+msgstr "Hiszpania"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Holandia"
+msgstr "Holandia"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Irlandia"
+msgstr "Irlandia"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Litwa"
+msgstr "Litwa"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Łotwa"
+msgstr "Łotwa"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Norwegia"
+msgstr "Norwegia"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Portugalia"
+msgstr "Portugalia"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Słowacja"
+msgstr "Słowacja"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Słowenia"
+msgstr "Słowenia"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Szwecja"
+msgstr "Szwecja"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Węgry"
+msgstr "Węgry"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Włochy"
+msgstr "Włochy"
+
+#~ msgid "Podaj datę w formacie dd/mm/rrrr"
+#~ msgstr "Podaj datę w formacie dd/mm/rrrr"
+
+#~ msgid "Wybierz narodowość"
+#~ msgstr "Wybierz narodowość"
+
+#~ msgid "Polski dowód ma format ABC123456"
+#~ msgstr "Polski dowód ma format ABC123456"
+
+#~ msgid "Użyj 5–15 liter i cyfr, bez spacji"
+#~ msgstr "Użyj 5–15 liter i cyfr, bez spacji"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Litery i cyfry"
+msgstr "Litery i cyfry"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Bez spacji i znaków specjalnych"
+msgstr "Bez spacji i znaków specjalnych"
+
+#~ msgid "Podaj datę w formacie dd/mm/yyyy"
+#~ msgstr "Podaj datę w formacie dd/mm/yyyy"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Telefon żeglarza"
+msgstr "Telefon żeglarza"

@@ -3,3 +3,5 @@ node_modules
 build
 locales/
 pnpm-lock.yaml
+skills-lock.json
+src/convex/_generated/

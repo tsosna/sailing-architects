@@ -15,6 +15,11 @@
 	import { StepIndicator } from '$components/step-indicator'
 	import { findCabinByBerth } from '$lib/data/cabins'
 	import { voyageSegments } from '$lib/data/voyage-segments'
+	import {
+		crewProfileSchema,
+		getCrewProfileErrors,
+		type CrewProfileData
+	} from '$lib/schemas/crew-profile'
 	import { SignIn, SignUp, useClerkContext } from 'svelte-clerk'
 	import { api } from '$convex/api'
 
@@ -28,9 +33,31 @@
 	] as const
 
 	const NATIONALITY_OPTIONS = [
+		{ value: '', label: 'Wybierz...' },
 		{ value: 'PL', label: 'Polska' },
+		{ value: 'AT', label: 'Austria' },
+		{ value: 'BE', label: 'Belgia' },
+		{ value: 'HR', label: 'Chorwacja' },
+		{ value: 'CZ', label: 'Czechy' },
+		{ value: 'DK', label: 'Dania' },
+		{ value: 'EE', label: 'Estonia' },
+		{ value: 'FI', label: 'Finlandia' },
+		{ value: 'FR', label: 'Francja' },
 		{ value: 'DE', label: 'Niemcy' },
-		{ value: 'UK', label: 'Wielka Brytania' },
+		{ value: 'GR', label: 'Grecja' },
+		{ value: 'ES', label: 'Hiszpania' },
+		{ value: 'NL', label: 'Holandia' },
+		{ value: 'IE', label: 'Irlandia' },
+		{ value: 'LT', label: 'Litwa' },
+		{ value: 'LV', label: 'Łotwa' },
+		{ value: 'NO', label: 'Norwegia' },
+		{ value: 'PT', label: 'Portugalia' },
+		{ value: 'SK', label: 'Słowacja' },
+		{ value: 'SI', label: 'Słowenia' },
+		{ value: 'SE', label: 'Szwecja' },
+		{ value: 'HU', label: 'Węgry' },
+		{ value: 'GB', label: 'Wielka Brytania' },
+		{ value: 'IT', label: 'Włochy' },
 		{ value: 'other', label: 'Inna' }
 	]
 
@@ -154,6 +181,8 @@
 		return `${page.url.pathname}${query ? `?${query}` : ''}`
 	}
 
+	const authRedirectUrl = $derived(bookingUrl())
+
 	async function syncBookingUrl() {
 		await goto(bookingUrl(), {
 			replaceState: true,
@@ -245,11 +274,25 @@
 		})
 	})
 
+	$effect(() => {
+		if (!isSignedIn || step !== 2) return
+
+		if (panelLoginMode && page.url.searchParams.get('next') === 'dashboard') {
+			void goto(resolve('/dashboard'))
+			return
+		}
+
+		if (!panelLoginMode) {
+			step = 3
+		}
+	})
+
 	let crew = $state({
 		firstName: '',
 		lastName: '',
 		dob: '',
-		nationality: 'PL',
+		nationality: '',
+		phone: '',
 		docType: 'passport',
 		docNumber: '',
 		emergencyName: '',
@@ -268,22 +311,16 @@
 
 	type CrewField = keyof typeof crew
 
-	function validate(): { valid: boolean; errors: Record<string, string> } {
-		const next: Record<string, string> = {}
-		const requiredText: ReadonlyArray<CrewField> = [
-			'firstName',
-			'lastName',
-			'dob',
-			'docNumber',
-			'emergencyName',
-			'emergencyPhone'
-		]
-		for (const f of requiredText) {
-			if (!crew[f].trim()) next[f] = 'Pole wymagane'
+	function validate():
+		| { valid: true; data: CrewProfileData }
+		| { valid: false; errors: Record<string, string> } {
+		const result = crewProfileSchema.safeParse(crew)
+
+		if (result.success) {
+			return { valid: true, data: result.data }
 		}
-		if (!crew.swimming) next.swimming = 'Wybierz opcję'
-		if (!crew.experience) next.experience = 'Wybierz opcję'
-		return { valid: Object.keys(next).length === 0, errors: next }
+
+		return { valid: false, errors: getCrewProfileErrors(result.error) }
 	}
 
 	function clearError(field: CrewField) {
@@ -409,18 +446,19 @@
 			try {
 				await convex.mutation(api.mutations.upsertCrewProfile, {
 					userId: ctx.auth.userId!,
-					firstName: crew.firstName,
-					lastName: crew.lastName,
-					dateOfBirth: crew.dob,
-					nationality: crew.nationality,
-					docType: crew.docType as 'passport' | 'id',
-					docNumber: crew.docNumber,
-					emergencyContactName: crew.emergencyName,
-					emergencyContactPhone: crew.emergencyPhone,
-					swimmingAbility: crew.swimming,
-					sailingExperience: crew.experience,
-					dietaryRequirements: crew.diet || undefined,
-					medicalNotes: crew.medical || undefined
+					firstName: result.data.firstName,
+					lastName: result.data.lastName,
+					dateOfBirth: result.data.dob,
+					nationality: result.data.nationality,
+					phone: result.data.phone,
+					docType: result.data.docType,
+					docNumber: result.data.docNumber,
+					emergencyContactName: result.data.emergencyName,
+					emergencyContactPhone: result.data.emergencyPhone,
+					swimmingAbility: result.data.swimming,
+					sailingExperience: result.data.experience,
+					dietaryRequirements: result.data.diet || undefined,
+					medicalNotes: result.data.medical || undefined
 				})
 				step = 4
 			} catch (err) {
@@ -635,9 +673,21 @@
 							<div class="clerk-host" onclickcapture={handleClerkModeClick}>
 								{#key authMode}
 									{#if authMode === 'signin'}
-										<SignIn {signUpUrl} />
+										<SignIn
+											{signUpUrl}
+											forceRedirectUrl={authRedirectUrl}
+											fallbackRedirectUrl={authRedirectUrl}
+											signUpForceRedirectUrl={authRedirectUrl}
+											signUpFallbackRedirectUrl={authRedirectUrl}
+										/>
 									{:else}
-										<SignUp {signInUrl} />
+										<SignUp
+											{signInUrl}
+											forceRedirectUrl={authRedirectUrl}
+											fallbackRedirectUrl={authRedirectUrl}
+											signInForceRedirectUrl={authRedirectUrl}
+											signInFallbackRedirectUrl={authRedirectUrl}
+										/>
 									{/if}
 								{/key}
 							</div>
@@ -683,16 +733,32 @@
 					/>
 					<BookingInput
 						label="Data urodzenia"
-						type="date"
 						bind:value={crew.dob}
 						required
+						placeholder="dd/mm/yyyy"
+						inputmode="numeric"
+						autocomplete="bday"
+						maxlength={10}
 						error={errors.dob}
 						oninput={() => clearError('dob')}
 					/>
 					<BookingInput
 						label="Narodowość"
 						bind:value={crew.nationality}
+						required
 						options={NATIONALITY_OPTIONS}
+						error={errors.nationality}
+						oninput={() => clearError('nationality')}
+					/>
+					<BookingInput
+						label="Telefon żeglarza"
+						type="tel"
+						bind:value={crew.phone}
+						required
+						placeholder="+48 600 000 000"
+						autocomplete="tel"
+						error={errors.phone}
+						oninput={() => clearError('phone')}
 					/>
 
 					<div class="form__divider">
@@ -703,12 +769,18 @@
 						label="Typ dokumentu"
 						bind:value={crew.docType}
 						options={DOC_TYPE_OPTIONS}
+						oninput={() => clearError('docNumber')}
 					/>
 					<BookingInput
 						label="Numer dokumentu"
 						bind:value={crew.docNumber}
 						required
-						hint="Wymagane do rejestru jachtu"
+						placeholder={crew.docType === 'id' && crew.nationality === 'PL'
+							? 'ABC123456'
+							: 'Litery i cyfry'}
+						autocomplete="off"
+						maxlength={15}
+						hint="Bez spacji i znaków specjalnych"
 						error={errors.docNumber}
 						oninput={() => clearError('docNumber')}
 					/>

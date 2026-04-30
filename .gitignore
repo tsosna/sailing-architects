@@ -34,6 +34,9 @@ src/locales/.wuchale/
 .claude/settings.json
 .claude/settings.local.json
 
+# Codex generated session bootstrap
+docs/codex-session-context.md
+
 # Local design skills
 .agents/skills/huashu-design/
 .claude/skills/huashu-design

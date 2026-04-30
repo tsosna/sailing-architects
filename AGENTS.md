@@ -4,6 +4,8 @@
 
 - **pnpm** only (not npm, yarn, or bun)
 - One-off CLI: `pnpx`
+- Codex context bootstrap: `pnpm codex:start` writes `docs/codex-session-context.md`
+- Codex session capture: `pnpm codex:stop -- ...`; `pnpm codex:compact -- ...` before manual compaction
 - After code changes: `pnpm check` and `pnpm lint`
 - Dev: `pnpm dev`
 - Build: `pnpm build`
@@ -15,6 +17,20 @@
 - Single quotes
 - No trailing commas
 - Prettier plugins: `prettier-plugin-svelte`, `prettier-plugin-tailwindcss`
+
+---
+
+## Codex Session Context
+
+Codex does not receive Claude Code `SessionStart`, `PreCompact`, or `SessionEnd` hooks automatically.
+
+At the beginning of substantial work:
+
+1. Read `CODEX.md` for the Codex-specific workflow.
+2. If `docs/codex-session-context.md` exists, read it as the manual equivalent of Claude Code's startup context.
+3. If it does not exist, tell the user to run `pnpm codex:start` or run it yourself before continuing.
+4. Use the `Knowledge Base Index` inside that file to decide which full wiki articles to read on demand.
+5. On `close session`, follow the shutdown procedure in `CLAUDE.md`, then use `pnpm codex:stop -- ...` if the summary should be written to the shared daily log.
 
 ---
 

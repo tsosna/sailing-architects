@@ -50,6 +50,7 @@ export default defineSchema({
 		lastName: v.string(),
 		dateOfBirth: v.string(),
 		nationality: v.string(),
+		phone: v.optional(v.string()),
 		docType: v.union(v.literal('passport'), v.literal('id')),
 		docNumber: v.string(),
 		emergencyContactName: v.string(),
