@@ -519,3 +519,58 @@ Sesja dopracowała wizualny detal logo/favikony oraz mechanikę przycisków `Rez
 
 - `pnpm lint` nadal wymaga decyzji, co zrobić z `skills-lock.json` i `src/convex/_generated/*`: sformatować, dodać do `.prettierignore`, albo zostawić jako znany dług.
 - Potwierdzić finalnie, czy route-section ma również wizualnie zaznaczać, że zmieniła etap w planie kajutowym, bez przewijania użytkownika.
+
+## Sesja 2026-04-30 17:15 — Zod crew validation i booking auth
+
+Sesja dopięła booking flow po Google OAuth, walidację formularza danych załogi przez Zod oraz telefon żeglarza zapisany w Convex. Zrobiono checkpoint commitem f5894d8.
+
+### Zmiany
+
+- Naprawiono powrót z Clerk Google OAuth do /book?segment=...&berths=... przez forceRedirectUrl/fallbackRedirectUrl oraz automatyczne przejście z kroku Konto do Dane załogi po zalogowaniu.
+- Dodano zod ^4.3.6 i src/lib/schemas/crew-profile.ts; /book używa crewProfileSchema.safeParse zamiast ręcznej walidacji.
+- Dodano pole Telefon żeglarza w formularzu, Convex mutation upsertCrewProfile i dashboard; w schema crewProfiles.phone jest optional dla kompatybilności istniejących rekordów.
+
+### Decyzje
+
+- Nie dodawano jeszcze sveltekit-superforms; Zod wszedł teraz jako wspólny schemat walidacji, a Superforms zostaje na większy refactor formularzy/dashboardu.
+
+### Wnioski
+
+- Przy schema change w Convex trzeba odświeżyć wygenerowane bindingi przez pnpm exec convex codegen; w sandboxie codegen może paść na Sentry DNS i wymagać eskalacji sieciowej.
+- Wuchale przenosi komunikaty walidacji z kodu Svelte do .po, ale stringi w czystych modułach TS Zod nie są automatycznie ekstrahowane, więc ewentualne tłumaczenie błędów Zod wymaga osobnego podejścia.
+
+### Następne kroki
+
+- Po kompaktowaniu przetestować ręcznie booking: wybór 2 koi etap 1 → Google login → formularz danych załogi → walidacje daty, telefonu i dokumentu → zapis profilu.
+- Zdecydować czy kolejnym krokiem jest dashboard użytkownika na realnych danych, edycja profilu załogi, czy refactor formularzy pod sveltekit-superforms.
+
+## Sesja 2026-04-30 19:35 — Booking holds, transakcyjność i PDF potwierdzenia
+
+Checkpoint przed kompaktowaniem po pracy nad booking flow Sailing Architects. Od ostatniego checkpointu najważniejsze były kwestie spójności procesu płatności: tymczasowe holdy miejsc, wygasanie blokad, obsługa porzuconych płatności oraz PDF potwierdzenia.
+
+### Zmiany
+
+- Dodano 15-minutowe holdy miejsc: berths.status ma teraz held, bookings mają holdExpiresAt, a createBooking ustawia miejsca na held zamiast taken do czasu sukcesu Stripe.
+- Webhook payment_intent.succeeded potwierdza booking i zamienia held na taken; payment_failed/canceled zwalnia miejsca; dodano też obsługę późnego sukcesu po wygaśnięciu, jeśli miejsca nadal są wolne.
+- Dodano Convex cron src/convex/crons.ts wywołujący internal mutations.expireCheckoutHolds co minutę, żeby pending bookingi po holdExpiresAt zmieniały się na expired i zwalniały koje.
+- UI pokazuje cofający się licznik blokady w kroku płatności oraz dashboardzie; BoatPlan/Cabins/Admin znają status held.
+- Po zgłoszeniu wiszącego procesu płatności dodano timeouty i czytelne błędy: frontend abortuje create-intent po 20 s, endpoint ma timeouty 15 s na Stripe/Convex i zawsze zwraca JSON { message }.
+- Dodano PDF potwierdzenia rezerwacji: zależność pdfkit, endpoint /api/booking-confirmation/[bookingRef], query bookingConfirmationByRef oraz przyciski Pobierz PDF/Pobierz potwierdzenie w /book i dashboardzie.
+- Rozszerzono formularz danych załogi o Miejsce urodzenia i zapis birthPlace w Convex/Profile/Dashboard.
+
+### Decyzje
+
+- Status taken oznacza teraz wyłącznie opłacone miejsce; stan tymczasowy checkoutu to held z holdExpiresAt.
+- @types/pdfkit przeniesiono do devDependencies, a pdfkit zostaje runtime dependency dla endpointu PDF.
+
+### Wnioski
+
+- Convex mutacje są atomowe, ale proces biznesowy Stripe+booking wymaga jawnego timeoutu/holda i sprzątania wygasłych pendingów, inaczej można zostawić zablokowane koje bez płatności.
+- Ostrzeżenie Clerk o development keys nie było przyczyną wiszącego flow; problemem było czekanie create-intent bez limitu i bez widocznego błędu UI.
+
+### Następne kroki
+
+- Przetestować ręcznie cały flow: wybór koi -> Google auth -> dane załogi -> płatność testowa BLIK -> krok 6 -> pobranie PDF -> dashboard PDF.
+- Zweryfikować webhook Stripe lokalnie/na preview, bo bez poprawnego payment_intent.succeeded rezerwacja może zostać pending/held do wygaśnięcia.
+- Rozważyć później przeniesienie userId z query paramu PDF na server-side auth/Clerk/Convex auth, żeby endpoint potwierdzenia nie ufał jawnie przekazanemu userId.
+- Przed commitem sprawdzić/omówić szeroki zestaw niecommitowanych zmian: docs/handoff.md, package.json/pnpm-lock, Convex schema/mutations/queries/crons, /book, dashboard, endpoint PDF, locale.

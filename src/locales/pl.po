@@ -190,7 +190,7 @@ msgstr "B"
 msgid "C"
 msgstr "C"
 
-#. 0: berth.id; 1: state === 'captain' ? 'kapitan' \\: state === 'complimentary' ? 'bezpłatna' \\: state === 'taken' ? 'zajęta' \\: state === 'selected' ? 'wybrana' \\: 'dostępna'
+#. 0: berth.id; 1: state === 'captain' ? 'kapitan' \\: state === 'complimentary' ? 'bezpłatna' \\: state === 'held' ? 'czasowo zablokowana' \\: state === 'taken' ? 'zajęta' \\: state === 'selected' ? 'wybrana' \\: 'dostępna'
 #: src/lib/components/boat-plan/boat-plan.svelte
 msgid "Koja {0} — {1}"
 msgstr "Koja {0} — {1}"
@@ -545,7 +545,6 @@ msgid "Konto"
 msgstr "Konto"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
-#: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Dane załogi"
 msgstr "Dane załogi"
@@ -691,7 +690,6 @@ msgid "Rejestracja"
 msgstr "Rejestracja"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
-#: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Dalej →"
 msgstr "Dalej →"
 
@@ -699,9 +697,8 @@ msgstr "Dalej →"
 msgid "Krok 2"
 msgstr "Krok 2"
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Wymagane przez kapitana i władze portowe. Dane przechowywane bezpiecznie, widoczne tylko dla organizatora."
-msgstr "Wymagane przez kapitana i władze portowe. Dane przechowywane bezpiecznie, widoczne tylko dla organizatora."
+#~ msgid "Wymagane przez kapitana i władze portowe. Dane przechowywane bezpiecznie, widoczne tylko dla organizatora."
+#~ msgstr "Wymagane przez kapitana i władze portowe. Dane przechowywane bezpiecznie, widoczne tylko dla organizatora."
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Imię"
@@ -783,7 +780,6 @@ msgstr "Informacje istotne dla bezpieczeństwa"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
-#: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "← Wróć"
 msgstr "← Wróć"
 
@@ -862,6 +858,7 @@ msgid "Mój panel"
 msgstr "Mój panel"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "↓ Pobierz PDF"
 msgstr "↓ Pobierz PDF"
 
@@ -875,7 +872,6 @@ msgstr "ukończone"
 
 #: src/routes/[[lang=lang]]/admin/+page.svelte
 #: src/routes/[[lang=lang]]/admin/+page.svelte
-#: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Błąd"
 msgstr "Błąd"
 
@@ -884,6 +880,8 @@ msgstr "Błąd"
 msgid "DM Sans, system-ui, sans-serif"
 msgstr "DM Sans, system-ui, sans-serif"
 
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Błąd inicjalizacji płatności"
 msgstr "Błąd inicjalizacji płatności"
@@ -987,9 +985,8 @@ msgstr "Cześć, {0}"
 msgid "Sekcje panelu"
 msgstr "Sekcje panelu"
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Rezerwacja potwierdzona · Płatność zrealizowana"
-msgstr "Rezerwacja potwierdzona · Płatność zrealizowana"
+#~ msgid "Rezerwacja potwierdzona · Płatność zrealizowana"
+#~ msgstr "Rezerwacja potwierdzona · Płatność zrealizowana"
 
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Brak aktywnej rezerwacji."
@@ -1003,6 +1000,7 @@ msgstr "Cała trasa rejsu"
 msgid "Porty na trasie"
 msgstr "Porty na trasie"
 
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "↓ Pobierz potwierdzenie"
 msgstr "↓ Pobierz potwierdzenie"
@@ -1399,3 +1397,90 @@ msgstr "Bez spacji i znaków specjalnych"
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Telefon żeglarza"
 msgstr "Telefon żeglarza"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Miejsce urodzenia"
+msgstr "Miejsce urodzenia"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Miasto"
+msgstr "Miasto"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Wygasła"
+msgstr "Wygasła"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Anulowana"
+msgstr "Anulowana"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Blokada miejsc"
+msgstr "Blokada miejsc"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Rezerwacja wstępna · miejsca zablokowane jeszcze <0/>"
+msgstr "Rezerwacja wstępna · miejsca zablokowane jeszcze <0/>"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Blokada miejsc wygasła"
+msgstr "Blokada miejsc wygasła"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Rezerwacja anulowana"
+msgstr "Rezerwacja anulowana"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Rezerwacja potwierdzona · płatność zrealizowana"
+msgstr "Rezerwacja potwierdzona · płatność zrealizowana"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Miejsca zablokowane na"
+msgstr "Miejsca zablokowane na"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Czas blokady minął. Wróć do wyboru koi i rozpocznij płatność od nowa."
+msgstr "Czas blokady minął. Wróć do wyboru koi i rozpocznij płatność od nowa."
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "AbortError"
+msgstr "AbortError"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Inicjalizacja płatności trwa zbyt długo. Spróbuj ponownie za chwilę."
+msgstr "Inicjalizacja płatności trwa zbyt długo. Spróbuj ponownie za chwilę."
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "E-mail żeglarza"
+msgstr "E-mail żeglarza"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Dane załogi opcjonalnie"
+msgstr "Dane załogi opcjonalnie"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Możesz uzupełnić je teraz albo wrócić do nich po płatności w panelu. Na tym etapie zapisujemy dane kontaktowe konta załogi."
+msgstr "Możesz uzupełnić je teraz albo wrócić do nich po płatności w panelu. Na tym etapie zapisujemy dane kontaktowe konta załogi."
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Uzupełnię później"
+msgstr "Uzupełnię później"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Zapisz i wróć →"
+msgstr "Zapisz i wróć →"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Dane żeglarzy możesz uzupełnić po płatności."
+msgstr "Dane żeglarzy możesz uzupełnić po płatności."
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Dla każdej wybranej koi utworzymy osobną kartę uczestnika w panelu."
+msgstr "Dla każdej wybranej koi utworzymy osobną kartę uczestnika w panelu."
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Uzupełnij teraz"
+msgstr "Uzupełnij teraz"

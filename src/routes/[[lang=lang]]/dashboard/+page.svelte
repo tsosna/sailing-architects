@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths'
+	import { onMount } from 'svelte'
 	import { useQuery } from 'convex-svelte'
 	import { useClerkContext, SignOutButton } from 'svelte-clerk'
 	import { api } from '$convex/api'
@@ -20,6 +21,95 @@
 
 	const bookingData = $derived(bookingQuery.data)
 	const profileData = $derived(profileQuery.data)
+	const confirmationPdfUrl = $derived(
+		bookingData && userId
+			? resolve(
+					`/api/booking-confirmation/${encodeURIComponent(bookingData.bookingRef)}?userId=${encodeURIComponent(userId)}`
+				)
+			: null
+	)
+	let now = $state(Date.now())
+	const holdRemainingMs = $derived(
+		bookingData?.status === 'pending' && bookingData.holdExpiresAt
+			? Math.max(0, bookingData.holdExpiresAt - now)
+			: null
+	)
+	const holdRemainingLabel = $derived(
+		holdRemainingMs === null ? '' : formatRemaining(holdRemainingMs)
+	)
+	const bookingStatusLabel = $derived(
+		bookingData?.status === 'confirmed'
+			? 'Potwierdzona'
+			: bookingData?.status === 'expired'
+				? 'Wygasła'
+				: bookingData?.status === 'cancelled'
+					? 'Anulowana'
+					: 'Oczekuje na płatność'
+	)
+
+	function formatRemaining(ms: number): string {
+		const totalSeconds = Math.max(0, Math.ceil(ms / 1000))
+		const minutes = Math.floor(totalSeconds / 60)
+		const seconds = totalSeconds % 60
+		return `${minutes}:${String(seconds).padStart(2, '0')}`
+	}
+
+	function formatGrosze(grosze: number): string {
+		return (grosze / 100).toLocaleString('pl-PL', {
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 2
+		})
+	}
+
+	function formatDueDate(timestamp: number | undefined): string {
+		if (!timestamp) return ''
+		return new Date(timestamp).toLocaleDateString('pl-PL', {
+			day: '2-digit',
+			month: '2-digit',
+			year: 'numeric'
+		})
+	}
+
+	const paymentStatusLabels: Record<string, string> = {
+		unpaid: 'Nieopłacona',
+		deposit_paid: 'Zaliczka opłacona',
+		partially_paid: 'Częściowo opłacona',
+		paid: 'Opłacona',
+		overdue: 'Po terminie',
+		cancelled: 'Anulowana'
+	}
+
+	function paymentRowStatusLabel(status: string): string {
+		switch (status) {
+			case 'paid':
+				return 'Opłacone'
+			case 'processing':
+				return 'Przetwarzanie'
+			case 'failed':
+				return 'Nieudane'
+			case 'cancelled':
+				return 'Anulowane'
+			case 'overdue':
+				return 'Po terminie'
+			default:
+				return 'Oczekuje'
+		}
+	}
+
+	function isPayablePaymentRow(status: string): boolean {
+		return status === 'pending' || status === 'failed' || status === 'overdue'
+	}
+
+	onMount(() => {
+		now = Date.now()
+		const interval = window.setInterval(() => {
+			now = Date.now()
+		}, 1000)
+
+		return () => {
+			window.clearInterval(interval)
+		}
+	})
 
 	// ── Derived display data from Convex (falls back to placeholders) ─────
 	const bookingRows = $derived<ReadonlyArray<readonly [string, string]>>(
@@ -34,12 +124,10 @@
 						bookingData.berths.map((b) => b.berthId).join(', ') || '—'
 					],
 					['Liczba miejsc', String(bookingData.berths.length)],
-					[
-						'Status',
-						bookingData.status === 'confirmed'
-							? 'Potwierdzona'
-							: 'Oczekuje na płatność'
-					],
+					['Status', bookingStatusLabel],
+					...(holdRemainingMs !== null
+						? [['Blokada miejsc', holdRemainingLabel] as const]
+						: []),
 					[
 						'Cena',
 						`${((bookingData.segment?.pricePerBerth ?? 0) * bookingData.berths.length).toLocaleString('pl-PL')} zł`
@@ -55,7 +143,9 @@
 						'Imię i nazwisko',
 						`${profileData.firstName} ${profileData.lastName}`
 					],
+					['E-mail żeglarza', profileData.email ?? '—'],
 					['Data urodzenia', profileData.dateOfBirth],
+					['Miejsce urodzenia', profileData.birthPlace ?? '—'],
 					['Narodowość', profileData.nationality],
 					['Telefon żeglarza', profileData.phone ?? '—'],
 					[
@@ -139,12 +229,28 @@
 
 		{#if tab === 'booking'}
 			<div id="panel-booking" role="tabpanel">
-				<div class="status">
-					<span class="status__dot" aria-hidden="true"></span>
-					<span class="status__text"
-						>Rezerwacja potwierdzona · Płatność zrealizowana</span
+				{#if bookingData}
+					<div
+						class="status"
+						class:status--pending={bookingData.status === 'pending'}
+						class:status--expired={bookingData.status === 'expired' ||
+							bookingData.status === 'cancelled'}
 					>
-				</div>
+						<span class="status__dot" aria-hidden="true"></span>
+						<span class="status__text">
+							{#if bookingData.status === 'pending' && holdRemainingMs !== null}
+								Rezerwacja wstępna · miejsca zablokowane jeszcze
+								<strong>{holdRemainingLabel}</strong>
+							{:else if bookingData.status === 'expired'}
+								Blokada miejsc wygasła
+							{:else if bookingData.status === 'cancelled'}
+								Rezerwacja anulowana
+							{:else}
+								Rezerwacja potwierdzona · płatność zrealizowana
+							{/if}
+						</span>
+					</div>
+				{/if}
 
 				<article class="voyage">
 					<header class="voyage__header">
@@ -164,6 +270,76 @@
 						<p class="voyage__empty">Brak aktywnej rezerwacji.</p>
 					{/if}
 				</article>
+
+				{#if bookingData?.payments?.length}
+					<section class="payments">
+						<header class="payments__header">
+							<p class="payments__title">Harmonogram płatności</p>
+							{#if bookingData.totalAmount}
+								<p class="payments__totals">
+									{formatGrosze(bookingData.paidAmount ?? 0)} /
+									{formatGrosze(bookingData.totalAmount)}
+									{(bookingData.currency ?? 'pln').toUpperCase()}
+									<span
+										class="payments__badge"
+										class:payments__badge--paid={bookingData.paymentStatus ===
+											'paid'}
+										class:payments__badge--partial={bookingData.paymentStatus ===
+											'deposit_paid' ||
+											bookingData.paymentStatus === 'partially_paid'}
+									>
+										{paymentStatusLabels[
+											bookingData.paymentStatus ?? 'unpaid'
+										] ?? bookingData.paymentStatus}
+									</span>
+								</p>
+							{/if}
+						</header>
+						<ul class="payments__list">
+							{#each bookingData.payments.filter((p) => p.kind !== 'full') as payment (payment._id)}
+								<li
+									class="payments__row"
+									class:payments__row--paid={payment.status === 'paid'}
+								>
+									<div class="payments__row-main">
+										<p class="payments__row-label">{payment.label}</p>
+										{#if payment.dueAt}
+											<p class="payments__row-due">
+												Termin {formatDueDate(payment.dueAt)}
+											</p>
+										{/if}
+									</div>
+									<div class="payments__row-amount">
+										<p class="payments__row-value">
+											{formatGrosze(payment.amount)} zł
+										</p>
+										<p
+											class="payments__row-status"
+											class:payments__row-status--paid={payment.status ===
+												'paid'}
+											class:payments__row-status--processing={payment.status ===
+												'processing'}
+											class:payments__row-status--failed={payment.status ===
+												'failed' || payment.status === 'overdue'}
+										>
+											{paymentRowStatusLabel(payment.status)}
+										</p>
+									</div>
+									{#if isPayablePaymentRow(payment.status) && bookingData.status === 'confirmed'}
+										<a
+											class="payments__row-pay btn btn--ghost"
+											href={resolve(
+												`/dashboard/pay/${encodeURIComponent(payment._id)}`
+											)}
+										>
+											Zapłać
+										</a>
+									{/if}
+								</li>
+							{/each}
+						</ul>
+					</section>
+				{/if}
 
 				<section class="timeline">
 					<p class="timeline__title">Cała trasa rejsu</p>
@@ -189,9 +365,15 @@
 				</section>
 
 				<div class="actions">
-					<button type="button" class="btn btn--primary" disabled
-						>↓ Pobierz potwierdzenie</button
-					>
+					{#if confirmationPdfUrl && bookingData?.status === 'confirmed'}
+						<a class="btn btn--primary" href={confirmationPdfUrl}
+							>↓ Pobierz potwierdzenie</a
+						>
+					{:else}
+						<button type="button" class="btn btn--primary" disabled
+							>↓ Pobierz potwierdzenie</button
+						>
+					{/if}
 					<button type="button" class="btn btn--ghost" disabled
 						>Kontakt z organizatorem</button
 					>
@@ -412,6 +594,32 @@
 		letter-spacing: 0.5px;
 	}
 
+	.status__text strong {
+		color: var(--color-brass-text);
+		font-family: var(--font-serif);
+		font-size: 18px;
+		font-weight: 400;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.status--pending {
+		background: rgba(196, 146, 58, 0.08);
+		border-color: rgba(196, 146, 58, 0.28);
+	}
+
+	.status--pending .status__dot {
+		background: var(--color-brass);
+	}
+
+	.status--expired {
+		background: rgba(239, 68, 68, 0.08);
+		border-color: rgba(239, 68, 68, 0.25);
+	}
+
+	.status--expired .status__dot {
+		background: #ef4444;
+	}
+
 	.voyage {
 		border: 1px solid rgba(196, 146, 58, 0.2);
 		margin-bottom: 32px;
@@ -475,6 +683,137 @@
 		font-weight: 500;
 		color: var(--color-warm-white);
 		margin: 0;
+	}
+
+	.payments {
+		margin-bottom: 40px;
+		padding: 24px;
+		background: rgba(255, 255, 255, 0.02);
+		border-left: 2px solid rgba(196, 146, 58, 0.4);
+	}
+
+	.payments__header {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 12px;
+		margin-bottom: 18px;
+	}
+
+	.payments__title {
+		font-family: var(--font-sans);
+		font-size: 11px;
+		letter-spacing: 2px;
+		text-transform: uppercase;
+		color: var(--color-brass-text);
+		margin: 0;
+	}
+
+	.payments__totals {
+		font-family: var(--font-serif);
+		font-size: 16px;
+		color: var(--color-warm-white);
+		margin: 0;
+		display: inline-flex;
+		align-items: center;
+		gap: 12px;
+	}
+
+	.payments__badge {
+		font-family: var(--font-sans);
+		font-size: 9px;
+		letter-spacing: 1.6px;
+		text-transform: uppercase;
+		padding: 4px 10px;
+		border: 1px solid rgba(245, 240, 232, 0.25);
+		color: rgba(245, 240, 232, 0.7);
+	}
+
+	.payments__badge--partial {
+		border-color: rgba(196, 146, 58, 0.5);
+		color: var(--color-brass-text);
+		background: rgba(196, 146, 58, 0.08);
+	}
+
+	.payments__badge--paid {
+		border-color: rgba(80, 160, 80, 0.5);
+		color: #b6e1a4;
+		background: rgba(80, 160, 80, 0.1);
+	}
+
+	.payments__list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 1px;
+		background: rgba(196, 146, 58, 0.1);
+	}
+
+	.payments__row {
+		display: grid;
+		grid-template-columns: 1fr auto auto;
+		align-items: center;
+		gap: 16px;
+		padding: 14px 16px;
+		background: var(--color-navy);
+	}
+
+	.payments__row--paid {
+		opacity: 0.7;
+	}
+
+	.payments__row-label {
+		font-family: var(--font-sans);
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--color-warm-white);
+		margin: 0;
+	}
+
+	.payments__row-due {
+		font-family: var(--font-sans);
+		font-size: 11px;
+		color: var(--color-brass-text-soft);
+		margin: 4px 0 0;
+	}
+
+	.payments__row-amount {
+		text-align: right;
+	}
+
+	.payments__row-value {
+		font-family: var(--font-serif);
+		font-size: 18px;
+		color: var(--color-brass-text);
+		margin: 0;
+	}
+
+	.payments__row-status {
+		font-family: var(--font-sans);
+		font-size: 9px;
+		letter-spacing: 1.6px;
+		text-transform: uppercase;
+		color: rgba(245, 240, 232, 0.5);
+		margin: 4px 0 0;
+	}
+
+	.payments__row-status--paid {
+		color: #b6e1a4;
+	}
+
+	.payments__row-status--processing {
+		color: var(--color-brass-text);
+	}
+
+	.payments__row-status--failed {
+		color: #ef4444;
+	}
+
+	.payments__row-pay {
+		justify-self: end;
 	}
 
 	.timeline {

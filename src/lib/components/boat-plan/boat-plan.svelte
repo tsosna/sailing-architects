@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { cabins, findCabinByBerth } from '$lib/data/cabins'
 
-	type BerthStatus = 'taken' | 'captain' | 'complimentary'
+	type BerthStatus = 'held' | 'taken' | 'captain' | 'complimentary'
 	type BerthState =
 		| 'available'
 		| 'hovered'
 		| 'selected'
+		| 'held'
 		| 'taken'
 		| 'captain'
 		| 'complimentary'
@@ -38,6 +39,7 @@
 
 	function berthFill(id: string): string {
 		switch (berthState(id)) {
+			case 'held':
 			case 'taken':
 				return 'rgba(13,27,46,0.55)'
 			case 'captain':
@@ -55,6 +57,7 @@
 
 	function berthStroke(id: string): string {
 		switch (berthState(id)) {
+			case 'held':
 			case 'taken':
 				return '#3a4a5c'
 			case 'captain':
@@ -70,6 +73,7 @@
 		switch (berthState(id)) {
 			case 'selected':
 				return '#fff'
+			case 'held':
 			case 'taken':
 				return '#3a4a5c'
 			case 'captain':
@@ -487,7 +491,7 @@
 					state === 'selected'
 						? 0
 						: -1}
-					aria-label={`Koja ${berth.id} — ${state === 'captain' ? 'kapitan' : state === 'complimentary' ? 'bezpłatna' : state === 'taken' ? 'zajęta' : state === 'selected' ? 'wybrana' : 'dostępna'}`}
+					aria-label={`Koja ${berth.id} — ${state === 'captain' ? 'kapitan' : state === 'complimentary' ? 'bezpłatna' : state === 'held' ? 'czasowo zablokowana' : state === 'taken' ? 'zajęta' : state === 'selected' ? 'wybrana' : 'dostępna'}`}
 					aria-pressed={state === 'selected'}
 					aria-disabled={state !== 'available' &&
 						state !== 'hovered' &&
@@ -509,7 +513,7 @@
 						stroke-width={state === 'selected' ? 3 : 1.6}
 						rx="0"
 					/>
-					{#if state === 'taken'}
+					{#if state === 'held' || state === 'taken'}
 						<line
 							x1={berth.x + 6}
 							y1={berth.y + 6}
@@ -640,6 +644,7 @@
 										class="berth-btn"
 										class:berth-btn--selected={state === 'selected'}
 										class:berth-btn--taken={state === 'taken'}
+										class:berth-btn--held={state === 'held'}
 										class:berth-btn--captain={state === 'captain'}
 										class:berth-btn--complimentary={state === 'complimentary'}
 										aria-pressed={state === 'selected'}
@@ -832,7 +837,9 @@
 		border-radius: 0;
 	}
 
-	.berth-btn:hover:not(.berth-btn--taken):not(.berth-btn--selected) {
+	.berth-btn:hover:not(.berth-btn--held):not(.berth-btn--taken):not(
+			.berth-btn--selected
+		) {
 		background: rgba(196, 146, 58, 0.15);
 	}
 
@@ -841,6 +848,7 @@
 		color: #fff;
 	}
 
+	.berth-btn--held,
 	.berth-btn--taken {
 		background: rgba(13, 27, 46, 0.5);
 		border-color: #3a4a5c;

@@ -36,11 +36,13 @@ export const crewProfileSchema = z
 	.object({
 		firstName: z.string().trim().min(1, 'Pole wymagane'),
 		lastName: z.string().trim().min(1, 'Pole wymagane'),
+		email: z.string().trim().email('Podaj poprawny adres e-mail'),
 		dob: z
 			.string()
 			.trim()
 			.min(1, 'Pole wymagane')
 			.refine(isPastDate, 'Podaj datę w formacie dd/mm/yyyy'),
+		birthPlace: z.string().trim().min(1, 'Pole wymagane'),
 		nationality: z.string().min(1, 'Wybierz narodowość'),
 		phone: z
 			.string()

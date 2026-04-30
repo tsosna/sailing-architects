@@ -312,6 +312,7 @@
 		border-color: rgba(196, 146, 58, 0.2);
 	}
 
+	.berth-card--held,
 	.berth-card--taken {
 		background: rgba(13, 27, 46, 0.5);
 		border-color: #3a4a5c;

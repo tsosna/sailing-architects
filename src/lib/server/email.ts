@@ -19,6 +19,7 @@ export type SendTransactionalEmailInput = {
 	html: string
 	text?: string
 	replyTo?: EmailRecipient
+	attachments?: Array<{ name: string; content: string }>
 }
 
 export type SendContactEmailInput = {
@@ -117,7 +118,8 @@ export async function sendTransactionalEmail({
 	subject,
 	html,
 	text,
-	replyTo
+	replyTo,
+	attachments
 }: SendTransactionalEmailInput): Promise<SendTransactionalEmailResult> {
 	assertEmailEnv()
 
@@ -127,7 +129,8 @@ export async function sendTransactionalEmail({
 		subject,
 		htmlContent: html,
 		...(text ? { textContent: text } : {}),
-		...(replyTo ? { replyTo: toBrevoRecipient(replyTo) } : {})
+		...(replyTo ? { replyTo: toBrevoRecipient(replyTo) } : {}),
+		...(attachments?.length ? { attachment: attachments } : {})
 	}
 
 	const response = await fetch(BREVO_TRANSACTIONAL_EMAIL_URL, {
@@ -223,5 +226,50 @@ export async function sendDailyReportEmail({
 		subject,
 		html,
 		text
+	})
+}
+
+export async function sendBookingConfirmationEmail({
+	to,
+	name,
+	bookingRef,
+	pdf,
+	filename
+}: {
+	to: string
+	name: string
+	bookingRef: string
+	pdf: Buffer
+	filename: string
+}) {
+	const safeName = name.trim() || 'Żeglarzu'
+
+	return sendTransactionalEmail({
+		to: { email: to, name: safeName },
+		subject: `Potwierdzenie rezerwacji ${bookingRef} · Sailing Architects`,
+		text: [
+			`Cześć ${safeName},`,
+			'',
+			`Twoja rezerwacja ${bookingRef} została potwierdzona.`,
+			'W załączniku znajdziesz potwierdzenie PDF.',
+			'',
+			'Do zobaczenia na pokładzie,',
+			'Sailing Architects'
+		].join('\n'),
+		html: `
+			<div style="font-family: Arial, sans-serif; max-width: 640px; color: #0d1b2e;">
+				<h2 style="margin: 0 0 16px;">Potwierdzenie rezerwacji</h2>
+				<p style="margin: 0 0 12px;">Cześć ${escapeHtml(safeName)},</p>
+				<p style="margin: 0 0 12px;">Twoja rezerwacja <strong>${escapeHtml(bookingRef)}</strong> została potwierdzona.</p>
+				<p style="margin: 0 0 18px;">W załączniku znajdziesz potwierdzenie PDF.</p>
+				<p style="margin: 0; color: #607089;">Do zobaczenia na pokładzie,<br />Sailing Architects</p>
+			</div>
+		`,
+		attachments: [
+			{
+				name: filename,
+				content: pdf.toString('base64')
+			}
+		]
 	})
 }

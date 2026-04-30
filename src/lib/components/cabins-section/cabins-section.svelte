@@ -36,7 +36,7 @@
 	const statusQuery = useQuery(api.queries.berthStatusesBySlug, () => ({
 		slug: bookingSelection.selectedSegment
 	}))
-	type BerthStatus = 'taken' | 'captain' | 'complimentary'
+	type BerthStatus = 'held' | 'taken' | 'captain' | 'complimentary'
 	const berthStatuses = $derived(
 		new Map(
 			(statusQuery.data ?? []).map(({ berthId, status }) => [

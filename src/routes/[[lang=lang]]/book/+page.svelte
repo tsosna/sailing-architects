@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation'
 	import { resolve } from '$app/paths'
 	import { page } from '$app/state'
+	import { onMount } from 'svelte'
 	import { useConvexClient } from 'convex-svelte'
 	import {
 		loadStripe,
@@ -26,7 +27,7 @@
 	const STEPS = [
 		{ id: 1, label: 'Koje' },
 		{ id: 2, label: 'Konto' },
-		{ id: 3, label: 'Dane załogi' },
+		{ id: 3, label: 'Dane załogi opcjonalnie' },
 		{ id: 4, label: 'Potwierdzenie' },
 		{ id: 5, label: 'Płatność' },
 		{ id: 6, label: 'Gotowe' }
@@ -127,7 +128,10 @@
 	const statusQuery = useQuery(api.queries.berthStatusesBySlug, () => ({
 		slug: selectedSegment
 	}))
-	type BerthStatus = 'taken' | 'captain' | 'complimentary'
+	const planQuery = useQuery(api.queries.activePaymentPlanBySlug, () => ({
+		slug: selectedSegment
+	}))
+	type BerthStatus = 'held' | 'taken' | 'captain' | 'complimentary'
 	const berthStatuses = $derived(
 		new Map<string, BerthStatus>(
 			(statusQuery.data ?? []).map(
@@ -182,7 +186,6 @@
 	}
 
 	const authRedirectUrl = $derived(bookingUrl())
-
 	async function syncBookingUrl() {
 		await goto(bookingUrl(), {
 			replaceState: true,
@@ -283,14 +286,19 @@
 		}
 
 		if (!panelLoginMode) {
-			step = 3
+			if (!crew.email && userEmail) {
+				crew.email = userEmail
+			}
+			step = 4
 		}
 	})
 
 	let crew = $state({
 		firstName: '',
 		lastName: '',
+		email: ctx.user?.primaryEmailAddress?.emailAddress ?? '',
 		dob: '',
+		birthPlace: '',
 		nationality: '',
 		phone: '',
 		docType: 'passport',
@@ -330,69 +338,216 @@
 		}
 	}
 
+	// ── Payment plan + selection ────────────────────────────────────────
+	type PaymentOption = {
+		id: string
+		label: string
+		amount: number // grosze
+		amountFormatted: string
+		sortOrders: number[]
+	}
+
+	function formatGrosze(grosze: number): string {
+		return (grosze / 100).toLocaleString('pl-PL', {
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 2
+		})
+	}
+
+	const paymentOptions: PaymentOption[] = $derived.by(() => {
+		const totalGrosze = segment.price * berths.length * 100
+		const plan = planQuery.data
+		if (!plan || !plan.items || plan.items.length === 0) {
+			return [
+				{
+					id: 'full',
+					label: 'Całość',
+					amount: totalGrosze,
+					amountFormatted: formatGrosze(totalGrosze),
+					sortOrders: [1]
+				}
+			]
+		}
+
+		const items = [...plan.items].sort((a, b) => a.sortOrder - b.sortOrder)
+		const options: PaymentOption[] = []
+		const labels: string[] = []
+		let cumulative = 0
+		for (const item of items) {
+			labels.push(item.label)
+			cumulative += item.amountPerBerth * berths.length
+			options.push({
+				id: `prefix-${item.sortOrder}`,
+				label: labels.join(' + '),
+				amount: cumulative,
+				amountFormatted: formatGrosze(cumulative),
+				sortOrders: items
+					.filter((it) => it.sortOrder <= item.sortOrder)
+					.map((it) => it.sortOrder)
+			})
+		}
+
+		if (cumulative !== totalGrosze) {
+			const allOrders = items.map((it) => it.sortOrder)
+			allOrders.push(items.length + 1)
+			labels.push('Dopłata końcowa')
+			options.push({
+				id: 'prefix-balance',
+				label: labels.join(' + '),
+				amount: totalGrosze,
+				amountFormatted: formatGrosze(totalGrosze),
+				sortOrders: allOrders
+			})
+		}
+
+		if (plan.allowFullPayment) {
+			options.push({
+				id: 'full',
+				label: 'Całość',
+				amount: totalGrosze,
+				amountFormatted: formatGrosze(totalGrosze),
+				sortOrders: [0]
+			})
+		}
+
+		return options
+	})
+
+	let selectedPaymentOptionId = $state<string | null>(null)
+	const selectedPaymentOption = $derived<PaymentOption | null>(
+		paymentOptions.find((o) => o.id === selectedPaymentOptionId) ??
+			paymentOptions[0] ??
+			null
+	)
+
 	// ── Stripe state ─────────────────────────────────────────────────────
 	let stripeInstance = $state<Stripe | null>(null)
 	let stripeElements = $state<StripeElements | null>(null)
 	let paymentMountRef = $state<HTMLElement | null>(null)
 	let clientSecret = $state<string | null>(null)
 	let createdBookingRef = $state<string | null>(null)
+	const confirmationPdfUrl = $derived(
+		createdBookingRef && ctx.auth.userId
+			? resolve(
+					`/api/booking-confirmation/${encodeURIComponent(createdBookingRef)}?userId=${encodeURIComponent(ctx.auth.userId)}`
+				)
+			: null
+	)
+	let holdExpiresAt = $state<number | null>(null)
+	let now = $state(Date.now())
 	let intentLoading = $state(false)
 	let intentError = $state<string | null>(null)
 	let paymentLoading = $state(false)
 	let paymentError = $state<string | null>(null)
+	const holdRemainingMs = $derived(
+		holdExpiresAt ? Math.max(0, holdExpiresAt - now) : null
+	)
+	const holdExpired = $derived(holdRemainingMs !== null && holdRemainingMs <= 0)
+	const holdRemainingLabel = $derived(
+		holdRemainingMs === null ? '' : formatRemaining(holdRemainingMs)
+	)
 
-	/** Fetch PaymentIntent + init Stripe when entering step 4. */
-	$effect(() => {
-		if (step !== 5 || clientSecret) return
+	function formatRemaining(ms: number): string {
+		const totalSeconds = Math.max(0, Math.ceil(ms / 1000))
+		const minutes = Math.floor(totalSeconds / 60)
+		const seconds = totalSeconds % 60
+		return `${minutes}:${String(seconds).padStart(2, '0')}`
+	}
+
+	async function paymentIntentError(response: Response): Promise<Error> {
+		const contentType = response.headers.get('content-type') ?? ''
+		if (contentType.includes('application/json')) {
+			const data = (await response.json().catch(() => null)) as {
+				message?: string
+			} | null
+			return new Error(data?.message ?? 'Błąd inicjalizacji płatności')
+		}
+
+		const message = await response.text().catch(() => '')
+		return new Error(message || 'Błąd inicjalizacji płatności')
+	}
+
+	onMount(() => {
+		now = Date.now()
+		const interval = window.setInterval(() => {
+			now = Date.now()
+		}, 1000)
+
+		return () => {
+			window.clearInterval(interval)
+		}
+	})
+
+	/** Initiate Stripe PaymentIntent for the chosen payment option. */
+	async function initiatePayment() {
+		if (clientSecret || intentLoading) return
+		const option = selectedPaymentOption
+		if (!option) {
+			intentError = 'Wybierz, ile chcesz zapłacić teraz'
+			return
+		}
 
 		intentLoading = true
 		intentError = null
+		const controller = new AbortController()
+		const timeout = window.setTimeout(() => {
+			controller.abort()
+		}, 20000)
 
-		fetch('/api/stripe/create-intent', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				segmentSlug: segment.id,
-				berthIds: berths,
-				userId: ctx.auth.userId
+		try {
+			const response = await fetch('/api/stripe/create-intent', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				signal: controller.signal,
+				body: JSON.stringify({
+					segmentSlug: segment.id,
+					berthIds: berths,
+					userId: ctx.auth.userId,
+					buyerEmail: userEmail || undefined,
+					selectedSortOrders: option.sortOrders
+				})
 			})
-		})
-			.then((r) => {
-				if (!r.ok)
-					return r
-						.json()
-						.then((d) => Promise.reject(new Error(d.message ?? 'Błąd')))
-				return r.json()
-			})
-			.then(async ({ clientSecret: cs, bookingRef }) => {
-				clientSecret = cs
-				createdBookingRef = bookingRef
-				stripeInstance = await loadStripe(PUBLIC_STRIPE_PUBLISHABLE_KEY)
-				if (stripeInstance) {
-					stripeElements = stripeInstance.elements({
-						clientSecret: cs,
-						appearance: {
-							theme: 'night',
-							variables: {
-								colorPrimary: '#c4923a',
-								colorBackground: '#0f1f35',
-								colorText: '#f5f0e8',
-								colorDanger: '#ef4444',
-								fontFamily: 'DM Sans, system-ui, sans-serif',
-								borderRadius: '0px'
-							}
+			if (!response.ok) {
+				throw await paymentIntentError(response)
+			}
+			const {
+				clientSecret: cs,
+				bookingRef,
+				holdExpiresAt: expiresAt
+			} = await response.json()
+			clientSecret = cs
+			createdBookingRef = bookingRef
+			holdExpiresAt = expiresAt
+			stripeInstance = await loadStripe(PUBLIC_STRIPE_PUBLISHABLE_KEY)
+			if (stripeInstance) {
+				stripeElements = stripeInstance.elements({
+					clientSecret: cs,
+					appearance: {
+						theme: 'night',
+						variables: {
+							colorPrimary: '#c4923a',
+							colorBackground: '#0f1f35',
+							colorText: '#f5f0e8',
+							colorDanger: '#ef4444',
+							fontFamily: 'DM Sans, system-ui, sans-serif',
+							borderRadius: '0px'
 						}
-					})
-				}
-			})
-			.catch((err: unknown) => {
+					}
+				})
+			}
+		} catch (err: unknown) {
+			if (err instanceof DOMException && err.name === 'AbortError') {
+				intentError =
+					'Inicjalizacja płatności trwa zbyt długo. Spróbuj ponownie za chwilę.'
+			} else {
 				intentError =
 					err instanceof Error ? err.message : 'Błąd inicjalizacji płatności'
-			})
-			.finally(() => {
-				intentLoading = false
-			})
-	})
+			}
+		} finally {
+			window.clearTimeout(timeout)
+			intentLoading = false
+		}
+	}
 
 	/** Mount PaymentElement when both DOM ref and StripeElements are ready. */
 	$effect(() => {
@@ -405,7 +560,7 @@
 	})
 
 	async function submitPayment() {
-		if (!stripeInstance || !stripeElements) return
+		if (!stripeInstance || !stripeElements || holdExpired) return
 		paymentLoading = true
 		paymentError = null
 		const { error: stripeErr } = await stripeInstance.confirmPayment({
@@ -433,6 +588,11 @@
 				await goto(resolve('/dashboard'))
 				return
 			}
+			if (!crew.email && userEmail) {
+				crew.email = userEmail
+			}
+			step = 4
+			return
 		}
 
 		if (step === 3) {
@@ -448,7 +608,9 @@
 					userId: ctx.auth.userId!,
 					firstName: result.data.firstName,
 					lastName: result.data.lastName,
+					email: result.data.email,
 					dateOfBirth: result.data.dob,
+					birthPlace: result.data.birthPlace,
 					nationality: result.data.nationality,
 					phone: result.data.phone,
 					docType: result.data.docType,
@@ -479,11 +641,29 @@
 		}
 
 		if (step === 3 && isSignedIn) {
-			step = 1
+			step = 4
+			return
+		}
+
+		if (step === 4 && isSignedIn && !panelLoginMode) {
+			step = 2
 			return
 		}
 
 		if (step > 1) step--
+	}
+
+	function openCrewStep() {
+		if (!crew.email && userEmail) {
+			crew.email = userEmail
+		}
+		step = 3
+	}
+
+	function skipCrewStep() {
+		errors = {}
+		saveError = null
+		step = 4
 	}
 
 	const confirmRows = $derived([
@@ -712,8 +892,8 @@
 				<p class="eyebrow">Krok 3</p>
 				<h2 class="title">Dane załogi</h2>
 				<p class="lead">
-					Wymagane przez kapitana i władze portowe. Dane przechowywane
-					bezpiecznie, widoczne tylko dla organizatora.
+					Możesz uzupełnić je teraz albo wrócić do nich po płatności w panelu.
+					Na tym etapie zapisujemy dane kontaktowe konta załogi.
 				</p>
 
 				<div class="form">
@@ -732,6 +912,16 @@
 						oninput={() => clearError('lastName')}
 					/>
 					<BookingInput
+						label="E-mail żeglarza"
+						type="email"
+						bind:value={crew.email}
+						required
+						placeholder="adres@email.pl"
+						autocomplete="email"
+						error={errors.email}
+						oninput={() => clearError('email')}
+					/>
+					<BookingInput
 						label="Data urodzenia"
 						bind:value={crew.dob}
 						required
@@ -741,6 +931,15 @@
 						maxlength={10}
 						error={errors.dob}
 						oninput={() => clearError('dob')}
+					/>
+					<BookingInput
+						label="Miejsce urodzenia"
+						bind:value={crew.birthPlace}
+						required
+						placeholder="Miasto"
+						autocomplete="off"
+						error={errors.birthPlace}
+						oninput={() => clearError('birthPlace')}
 					/>
 					<BookingInput
 						label="Narodowość"
@@ -844,8 +1043,8 @@
 				{/if}
 
 				<div class="actions">
-					<button type="button" class="btn btn--ghost" onclick={back}
-						>← Wróć</button
+					<button type="button" class="btn btn--ghost" onclick={skipCrewStep}
+						>Uzupełnię później</button
 					>
 					<button
 						type="button"
@@ -853,7 +1052,7 @@
 						disabled={savingProfile}
 						onclick={next}
 					>
-						{savingProfile ? 'Zapisywanie…' : 'Dalej →'}
+						{savingProfile ? 'Zapisywanie…' : 'Zapisz i wróć →'}
 					</button>
 				</div>
 			</section>
@@ -879,6 +1078,18 @@
 					</dl>
 				</div>
 
+				<div class="crew-reminder">
+					<p class="crew-reminder__title">
+						Dane żeglarzy możesz uzupełnić po płatności.
+					</p>
+					<p class="crew-reminder__copy">
+						Dla każdej wybranej koi utworzymy osobną kartę uczestnika w panelu.
+					</p>
+					<button type="button" class="btn btn--ghost" onclick={openCrewStep}>
+						Uzupełnij teraz
+					</button>
+				</div>
+
 				<div class="actions">
 					<button type="button" class="btn btn--ghost" onclick={back}
 						>← Wróć</button
@@ -901,8 +1112,51 @@
 							🔒 Płatność obsługiwana przez Stripe. Twoje dane są bezpieczne.
 						</div>
 
+						{#if !clientSecret}
+							<fieldset class="pay-options">
+								<legend class="pay-options__legend">Co płacisz teraz?</legend>
+								{#each paymentOptions as option (option.id)}
+									<label class="pay-options__row">
+										<input
+											type="radio"
+											name="payment-option"
+											value={option.id}
+											checked={selectedPaymentOption?.id === option.id}
+											onchange={() => (selectedPaymentOptionId = option.id)}
+											disabled={intentLoading}
+										/>
+										<span class="pay-options__label">{option.label}</span>
+										<span class="pay-options__amount"
+											>{option.amountFormatted} zł</span
+										>
+									</label>
+								{/each}
+							</fieldset>
+						{/if}
+
+						{#if holdRemainingMs !== null}
+							<div
+								class="pay__hold"
+								class:pay__hold--expired={holdExpired}
+								role="status"
+								aria-live="polite"
+							>
+								<span class="pay__hold-label">
+									{holdExpired
+										? 'Blokada miejsc wygasła'
+										: 'Miejsca zablokowane na'}
+								</span>
+								<strong>{holdRemainingLabel}</strong>
+							</div>
+						{/if}
+
 						{#if intentError}
 							<p class="error-msg" role="alert">{intentError}</p>
+						{:else if holdExpired}
+							<p class="error-msg" role="alert">
+								Czas blokady minął. Wróć do wyboru koi i rozpocznij płatność od
+								nowa.
+							</p>
 						{:else if intentLoading}
 							<div class="pay__loading" aria-live="polite">
 								Inicjalizacja płatności…
@@ -934,6 +1188,12 @@
 								<span>Razem</span>
 								<span>{totalPriceFormatted} zł</span>
 							</div>
+							{#if selectedPaymentOption && selectedPaymentOption.amount !== totalPrice * 100}
+								<div class="pay__summary-row pay__summary-row--installment">
+									<span>Teraz</span>
+									<span>{selectedPaymentOption.amountFormatted} zł</span>
+								</div>
+							{/if}
 						</div>
 					</aside>
 				</div>
@@ -943,23 +1203,36 @@
 						type="button"
 						class="btn btn--ghost"
 						onclick={back}
-						disabled={paymentLoading}
+						disabled={paymentLoading || intentLoading}
 					>
 						← Wróć
 					</button>
-					<button
-						type="button"
-						class="btn btn--primary"
-						disabled={paymentLoading ||
-							!!intentError ||
-							intentLoading ||
-							!stripeElements}
-						onclick={submitPayment}
-					>
-						{paymentLoading
-							? 'Przetwarzanie…'
-							: `Zapłać ${totalPriceFormatted} zł →`}
-					</button>
+					{#if !clientSecret}
+						<button
+							type="button"
+							class="btn btn--primary"
+							disabled={intentLoading || !selectedPaymentOption}
+							onclick={initiatePayment}
+						>
+							{intentLoading
+								? 'Inicjalizacja…'
+								: `Zapłać ${selectedPaymentOption?.amountFormatted ?? ''} zł →`}
+						</button>
+					{:else}
+						<button
+							type="button"
+							class="btn btn--primary"
+							disabled={paymentLoading ||
+								!!intentError ||
+								holdExpired ||
+								!stripeElements}
+							onclick={submitPayment}
+						>
+							{paymentLoading
+								? 'Przetwarzanie…'
+								: `Potwierdź ${selectedPaymentOption?.amountFormatted ?? ''} zł →`}
+						</button>
+					{/if}
 				</div>
 			</section>
 		{/if}
@@ -985,9 +1258,14 @@
 				</p>
 				<div class="actions actions--center">
 					<a class="btn btn--primary" href={resolve('/dashboard')}>Mój panel</a>
-					<button type="button" class="btn btn--ghost" disabled
-						>↓ Pobierz PDF</button
-					>
+					{#if confirmationPdfUrl}
+						<a class="btn btn--ghost" href={confirmationPdfUrl}>↓ Pobierz PDF</a
+						>
+					{:else}
+						<button type="button" class="btn btn--ghost" disabled
+							>↓ Pobierz PDF</button
+						>
+					{/if}
 				</div>
 			</section>
 		{/if}
@@ -1637,6 +1915,30 @@
 		text-align: right;
 	}
 
+	.crew-reminder {
+		max-width: 480px;
+		margin-top: 16px;
+		padding: 20px 24px;
+		border: 1px solid rgba(196, 146, 58, 0.18);
+		background: rgba(245, 240, 232, 0.04);
+	}
+
+	.crew-reminder__title {
+		font-family: var(--font-sans);
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--color-warm-white);
+		margin: 0 0 6px;
+	}
+
+	.crew-reminder__copy {
+		font-family: var(--font-sans);
+		font-size: 13px;
+		line-height: 1.6;
+		color: rgba(245, 240, 232, 0.64);
+		margin: 0 0 16px;
+	}
+
 	.pay {
 		display: flex;
 		gap: 40px;
@@ -1660,6 +1962,41 @@
 		font-family: var(--font-sans);
 		font-size: 12px;
 		color: rgba(245, 240, 232, 0.5);
+	}
+
+	.pay__hold {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px;
+		padding: 14px 16px;
+		background: rgba(196, 146, 58, 0.1);
+		border: 1px solid rgba(196, 146, 58, 0.32);
+		font-family: var(--font-sans);
+	}
+
+	.pay__hold-label {
+		font-size: 11px;
+		letter-spacing: 1px;
+		text-transform: uppercase;
+		color: rgba(245, 240, 232, 0.55);
+	}
+
+	.pay__hold strong {
+		font-family: var(--font-serif);
+		font-size: 28px;
+		font-weight: 400;
+		color: var(--color-brass-text);
+		font-variant-numeric: tabular-nums;
+	}
+
+	.pay__hold--expired {
+		background: rgba(239, 68, 68, 0.08);
+		border-color: rgba(239, 68, 68, 0.28);
+	}
+
+	.pay__hold--expired strong {
+		color: #ef4444;
 	}
 
 	.pay__loading {
@@ -1763,6 +2100,72 @@
 		letter-spacing: 0;
 		color: var(--color-brass-text);
 		text-transform: none;
+	}
+
+	.pay__summary-row--installment {
+		border-top: 1px dashed rgba(196, 146, 58, 0.25);
+		padding-top: 12px;
+		margin-top: 4px;
+		font-size: 12px;
+		font-weight: 600;
+		letter-spacing: 1px;
+		text-transform: uppercase;
+		color: var(--color-brass);
+	}
+
+	.pay__summary-row--installment > span:last-child {
+		font-family: var(--font-serif);
+		font-size: 18px;
+		font-weight: 400;
+		letter-spacing: 0;
+		text-transform: none;
+	}
+
+	.pay-options {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		border: 1px solid rgba(196, 146, 58, 0.18);
+		padding: 16px;
+		margin: 0 0 16px;
+	}
+
+	.pay-options__legend {
+		font-size: 11px;
+		font-weight: 700;
+		letter-spacing: 1.4px;
+		text-transform: uppercase;
+		color: var(--color-brass-text);
+		padding: 0 6px;
+	}
+
+	.pay-options__row {
+		display: grid;
+		grid-template-columns: 20px 1fr auto;
+		align-items: center;
+		gap: 12px;
+		padding: 10px 8px;
+		cursor: pointer;
+		font-size: 14px;
+	}
+
+	.pay-options__row:hover {
+		background: rgba(196, 146, 58, 0.06);
+	}
+
+	.pay-options__row input[type='radio'] {
+		accent-color: var(--color-brass);
+		cursor: pointer;
+	}
+
+	.pay-options__label {
+		color: var(--color-warm-white);
+	}
+
+	.pay-options__amount {
+		font-family: var(--font-serif);
+		font-size: 16px;
+		color: var(--color-brass-text);
 	}
 
 	.success__check {
