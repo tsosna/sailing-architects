@@ -652,3 +652,46 @@ Przygotowano i wysłano raport prac za 2026-04-30 oraz dopięto mechanizm automa
 ### Następne kroki
 
 - Ustawić uruchamianie email:handoff:yesterday w cron/scheduler oraz rozwiązać pnpm lint dla pliku dashboard/crew/[participantId].
+
+## Sesja 2026-05-01 12:10 — Booking roadmap checkpoint (Etapy 1-7)
+
+Checkpoint dla nowych sesji Codex, żeby nie zaczynały analizy booking flow od zera i rozumiały sekwencję zmian przed dalszą pracą nad Etapem 8.
+
+### Zmiany
+
+- **Etapy 1-3 są zamkniętym fundamentem modelu danych i płatności.**
+  - Etap 1: dodano `bookingParticipants`, rozdzielono kupującego (`buyerUserId`, `buyerEmail`) od żeglarzy, pojawił się `dataStatus` oraz mutacje/query pod uczestników.
+  - Etap 2: checkout nie wymaga już kompletnych danych żeglarzy przed płatnością; booking może powstać i zostać opłacony bez pełnej załogi.
+  - Etap 3: dodano model płatności ratalnych (`paymentPlans`, `paymentPlanItems`, `bookingPayments`) oraz statusy finansowe na bookingu.
+- **Etap 4 jest pierwszym etapem, od którego booking flow naprawdę zmienia zachowanie użytkownika, i jest już wdrożony.**
+  - Checkout obsługuje zaliczkę / całość przez `bookingPayments`.
+  - Po pierwszej wpłacie booking staje się aktywny, a koje przechodzą do `taken`.
+  - Dashboard pokazuje harmonogram płatności, a raty można opłacać z panelu.
+- **Etap 5 jest wdrożony.**
+  - Dashboard ma listę uczestników per koja.
+  - Jest osobna strona edycji `/dashboard/crew/[participantId]`.
+  - Są checklisty postępu: dane załogi i płatności.
+- **Etap 6 jest wdrożony.**
+  - PDF pokazuje harmonogram płatności i aktualny status finansowy.
+  - Maile rozróżniają zaliczkę, ratę i pełną płatność.
+  - Email tracking działa per `bookingPayments`.
+- **Etap 7 jest wdrożony.**
+  - Są crony i maile przypominające o brakujących danych uczestników oraz o nadchodzących / zaległych ratach.
+  - Convex reminders używają envów Brevo po stronie Convex deployment.
+
+### Decyzje
+
+- Dla rozumienia historii systemu należy traktować Etapy 1-3 jako warstwę fundamentu, a Etap 4 jako początek właściwego user-facing flow dla zaliczek i rat.
+- Obecny stan projektu po booking refactorze to: **Etapy 1-7 ukończone, kolejnym logicznym krokiem jest Etap 8 (migracje, porządki, testy E2E).**
+- Nowe sesje Codex nie powinny proponować ponownego projektowania modeli `bookingParticipants` ani `bookingPayments`, chyba że pojawi się nowy wymóg biznesowy.
+
+### Wnioski
+
+- Najważniejsze ryzyko dla nowej sesji to fałszywe założenie, że checkout nadal działa w modelu „pełna płatność + komplet danych załogi przed zakupem”. To już jest nieaktualne.
+- Najważniejsze źródła prawdy dla booking flow są teraz rozproszone między Convex schema/mutations, Stripe endpointami, dashboardem uczestników/płatności oraz mailami/reminders; trzeba analizować je jako jeden system.
+- Jeśli trzeba szybko wejść w temat, zaczynaj analizę od Etapu 4, ale pamiętaj, że Etapy 1-3 tłumaczą, skąd wzięły się obecne modele danych i statusy.
+
+### Następne kroki
+
+- Przy kolejnej dużej sesji bookingowej rozpocząć od Etapu 8: migracje legacy / cleanup / pełne testy E2E i domknięcie jakości flow.
+- Przed kolejnymi zmianami w booking flow sprawdzić, czy aktualne decyzje z Etapów 4-7 nie pokrywają już proponowanego rozwiązania.

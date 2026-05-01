@@ -17,6 +17,12 @@ const dailyRoot =
 	'/Volumes/HomeX-MacMini/tomeksosinskiminiEx/Workspace/claude-memory-compiler/daily'
 const outputPath = join(projectRoot, 'docs/codex-session-context.md')
 
+function stripGeneratedLine(text) {
+	return text
+		.replace(/^Generated: .*$/m, 'Generated: <normalized>')
+		.trim()
+}
+
 function readText(path) {
 	if (!existsSync(path)) {
 		return `_Missing: ${path}_\n`
@@ -88,9 +94,20 @@ const context = [
 ].join('\n')
 
 mkdirSync(dirname(outputPath), { recursive: true })
-writeFileSync(outputPath, `${context}\n`)
+const nextContent = `${context}\n`
+const previousContent = existsSync(outputPath)
+	? readFileSync(outputPath, 'utf8')
+	: ''
+const changed =
+	stripGeneratedLine(previousContent) !== stripGeneratedLine(nextContent)
 
-console.log(`Codex session context written to ${outputPath}`)
+if (changed) {
+	writeFileSync(outputPath, nextContent)
+	console.log(`Codex session context updated: ${outputPath}`)
+} else {
+	console.log(`Codex session context unchanged: ${outputPath}`)
+}
+
 console.log('')
 console.log('Next step in the Codex panel:')
 console.log(
