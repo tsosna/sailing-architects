@@ -10,28 +10,92 @@ import {
 	type BrevoSendResult
 } from './_brevo'
 
-function ctaButton(href: string, label: string): string {
-	return `
-		<p style="margin: 18px 0;">
-			<a
-				href="${escapeHtml(href)}"
-				style="display: inline-block; padding: 12px 24px; background: #c4923a; color: #0d1b2e; text-decoration: none; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; font-size: 12px;"
-			>
-				${escapeHtml(label)}
-			</a>
-		</p>`
+export type AdminCopyInput = {
+	to: string
+	subject: string
+	context: string // e.g. "Adhoc monit płatności · SA-2026-0142"
+	summary: string // short single-line summary
 }
 
-function shell(heading: string, name: string, body: string): string {
+/**
+ * Lightweight notification for an admin/operator that an adhoc reminder
+ * has been dispatched. Uses the same navy/brass shell so the tone stays
+ * consistent across operational emails.
+ */
+export async function sendAdminCopyEmail(
+	input: AdminCopyInput
+): Promise<BrevoSendResult> {
+	const html = `
+		<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#07111e;font-family:Arial,Helvetica,sans-serif;">
+			<tr><td align="center" style="padding:32px 16px;">
+				<table role="presentation" width="640" cellspacing="0" cellpadding="0" style="max-width:640px;width:100%;background:#0d1b2e;border:1px solid rgba(196,146,58,0.28);">
+					<tr><td style="padding:26px 32px;border-bottom:1px solid rgba(196,146,58,0.18);">
+						<p style="margin:0 0 8px;color:#d4aa5a;font-size:11px;letter-spacing:2px;text-transform:uppercase;">Sailing Architects · Admin alert</p>
+						<h1 style="margin:0;color:#f5f0e8;font-family:Georgia,serif;font-weight:400;font-size:22px;line-height:1.2;">${escapeHtml(input.context)}</h1>
+					</td></tr>
+					<tr><td style="padding:22px 32px;color:#ede5d8;font-size:14px;line-height:1.7;">
+						<p style="margin:0;">${escapeHtml(input.summary)}</p>
+					</td></tr>
+				</table>
+			</td></tr>
+		</table>
+	`
+	return brevoSend({
+		to: { email: input.to },
+		subject: input.subject,
+		html
+	})
+}
+
+function ctaButton(href: string, label: string): string {
 	return `
-		<div style="font-family: Arial, sans-serif; max-width: 640px; color: #0d1b2e;">
-			<h2 style="margin: 0 0 16px;">${escapeHtml(heading)}</h2>
-			<p style="margin: 0 0 12px;">Cześć ${escapeHtml(name)},</p>
-			${body}
-			<p style="margin: 0; color: #607089;">
-				Pozdrawiamy,<br />Sailing Architects
-			</p>
-		</div>
+		<table role="presentation" cellspacing="0" cellpadding="0" style="margin: 22px 0 8px;">
+			<tr>
+				<td bgcolor="#c4923a" style="background:#c4923a;padding:12px 26px;">
+					<a
+						href="${escapeHtml(href)}"
+						style="color:#0d1b2e;text-decoration:none;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-size:12px;font-family:Arial,Helvetica,sans-serif;"
+					>${escapeHtml(label)}</a>
+				</td>
+			</tr>
+		</table>`
+}
+
+function shell(opts: {
+	eyebrow: string
+	heading: string
+	greetingName: string
+	bodyHtml: string
+	footerNote?: string
+}): string {
+	const safeName = opts.greetingName.trim() || 'Żeglarzu'
+	return `
+		<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#07111e;font-family:Arial,Helvetica,sans-serif;">
+			<tr>
+				<td align="center" style="padding:32px 16px;">
+					<table role="presentation" width="640" cellspacing="0" cellpadding="0" style="max-width:640px;width:100%;background:#0d1b2e;border:1px solid rgba(196,146,58,0.28);">
+						<tr>
+							<td style="padding:30px 32px 22px;border-bottom:1px solid rgba(196,146,58,0.18);">
+								<p style="margin:0 0 10px;color:#d4aa5a;font-size:11px;letter-spacing:2px;text-transform:uppercase;">${escapeHtml(opts.eyebrow)}</p>
+								<h1 style="margin:0;color:#f5f0e8;font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:26px;line-height:1.2;">${escapeHtml(opts.heading)}</h1>
+							</td>
+						</tr>
+						<tr>
+							<td style="padding:24px 32px 4px;color:#ede5d8;font-size:14px;line-height:1.7;">
+								<p style="margin:0 0 14px;">Cześć ${escapeHtml(safeName)},</p>
+								${opts.bodyHtml}
+							</td>
+						</tr>
+						<tr>
+							<td style="padding:18px 32px 30px;color:rgba(245,240,232,0.66);font-size:12px;line-height:1.6;">
+								<p style="margin:0;">Pozdrawiamy,<br />Sailing Architects</p>
+								${opts.footerNote ? `<p style="margin:14px 0 0;color:rgba(245,240,232,0.5);">${escapeHtml(opts.footerNote)}</p>` : ''}
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
 	`
 }
 
@@ -57,22 +121,21 @@ export async function sendCrewDataReminderEmail(
 			? `Brakuje danych żeglarza dla koi ${input.berthLabel}`
 			: `Dane żeglarza dla koi ${input.berthLabel} są niekompletne`
 
-	const html = shell(
+	const html = shell({
+		eyebrow: 'Sailing Architects · Dane załogi',
 		heading,
-		safeName,
-		`
-			<div style="margin: 0 0 18px; padding: 14px 18px; border-left: 3px solid #c4923a; background: #f7efdc;">
-				<p style="margin: 4px 0;">Numer rezerwacji: ${escapeHtml(input.bookingRef)}</p>
-				<p style="margin: 4px 0;">Koja: <strong>${escapeHtml(input.berthLabel)}</strong></p>
-				<p style="margin: 4px 0;">
-					Kapitan potrzebuje kompletnych danych każdego uczestnika
-					(dokument tożsamości, kontakt alarmowy, doświadczenie żeglarskie).
-					Wpisz brakujące informacje w panelu — zajmie to chwilę.
-				</p>
-			</div>
+		greetingName: safeName,
+		bodyHtml: `
+			<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 16px;background:#0f1f35;border:1px solid rgba(196,146,58,0.18);">
+				<tr><td style="padding:14px 18px;color:#ede5d8;font-size:14px;line-height:1.7;">
+					<p style="margin:0 0 6px;color:rgba(245,240,232,0.66);font-size:12px;">Numer rezerwacji: <strong style="color:#f5f0e8;">${escapeHtml(input.bookingRef)}</strong></p>
+					<p style="margin:0 0 6px;color:rgba(245,240,232,0.66);font-size:12px;">Koja: <strong style="color:#f5f0e8;">${escapeHtml(input.berthLabel)}</strong></p>
+				</td></tr>
+			</table>
+			<p style="margin:0 0 14px;">Kapitan potrzebuje kompletnych danych każdego uczestnika — dokument tożsamości, kontakt alarmowy i doświadczenie żeglarskie. Wpisanie ich w panelu zajmie chwilę.</p>
 			${ctaButton(link, 'Uzupełnij dane')}
 		`
-	)
+	})
 	const text = [
 		`Cześć ${safeName},`,
 		'',
@@ -140,17 +203,22 @@ export async function sendPaymentReminderEmail(
 				'Płatność można zrealizować bezpośrednio z panelu.'
 			]
 
-	const html = shell(
+	const html = shell({
+		eyebrow: input.overdue
+			? 'Sailing Architects · Zaległa rata'
+			: 'Sailing Architects · Termin raty',
 		heading,
-		safeName,
-		`
-			<div style="margin: 0 0 18px; padding: 14px 18px; border-left: 3px solid ${input.overdue ? '#ef4444' : '#c4923a'}; background: ${input.overdue ? '#fdecec' : '#f7efdc'};">
-				<p style="margin: 4px 0;">Numer rezerwacji: ${escapeHtml(input.bookingRef)}</p>
-				${intro.map((line) => `<p style="margin: 4px 0;">${line}</p>`).join('')}
-			</div>
+		greetingName: safeName,
+		bodyHtml: `
+			<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 16px;background:#0f1f35;border:1px solid rgba(196,146,58,0.18);${input.overdue ? 'border-left:3px solid #e46d5f;' : 'border-left:3px solid #c4923a;'}">
+				<tr><td style="padding:14px 18px;color:#ede5d8;font-size:14px;line-height:1.7;">
+					<p style="margin:0 0 6px;color:rgba(245,240,232,0.66);font-size:12px;">Numer rezerwacji: <strong style="color:#f5f0e8;">${escapeHtml(input.bookingRef)}</strong></p>
+					${intro.map((line) => `<p style="margin:6px 0 0;color:#ede5d8;">${line}</p>`).join('')}
+				</td></tr>
+			</table>
 			${ctaButton(link, 'Otwórz panel')}
 		`
-	)
+	})
 	const textIntro = input.overdue
 		? `Termin raty ${input.paymentLabel} minął${dueStr ? ` (${dueStr})` : ''}. Prosimy o wpłatę ${amountStr}.`
 		: `Zbliża się termin raty ${input.paymentLabel}${dueStr ? ` (${dueStr})` : ''}. Kwota: ${amountStr}.`

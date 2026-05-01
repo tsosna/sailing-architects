@@ -70,6 +70,8 @@ msgstr ""
 #~ msgid "SA"
 #~ msgstr ""
 
+#: src/lib/components/admin/booking-drawer.svelte
+#: src/lib/components/admin/booking-drawer.svelte
 #: src/lib/components/site-footer/site-footer.svelte
 #: src/lib/components/site-nav/site-nav.svelte
 msgid "Sailing Architects"
@@ -133,6 +135,7 @@ msgstr ""
 msgid "Rezerwuj →"
 msgstr ""
 
+#: src/lib/components/admin/booking-drawer.svelte
 #: src/lib/components/boat-plan/boat-plan.svelte
 #: src/lib/components/route-section/route-section.svelte
 msgid "Enter"
@@ -562,6 +565,8 @@ msgstr ""
 msgid "Potwierdzenie"
 msgstr ""
 
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+#: src/routes/[[lang=lang]]/admin/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Płatność"
@@ -643,7 +648,6 @@ msgstr ""
 msgid "Czas trwania"
 msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
@@ -870,10 +874,8 @@ msgstr ""
 msgid "ukończone"
 msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "Błąd"
-msgstr ""
+#~ msgid "Błąd"
+#~ msgstr ""
 
 #: src/routes/+layout.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
@@ -918,6 +920,7 @@ msgstr ""
 msgid "Żeglarz"
 msgstr ""
 
+#: src/routes/[[lang=lang]]/admin/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Ref"
 msgstr ""
@@ -952,6 +955,7 @@ msgstr ""
 msgid "Plan trasy szczegółowy"
 msgstr ""
 
+#: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Rezerwacja"
 msgstr ""
@@ -964,7 +968,6 @@ msgstr ""
 msgid "Panel · Sailing Architects"
 msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "← Strona główna"
 msgstr ""
@@ -1050,80 +1053,60 @@ msgstr ""
 msgid "SKP"
 msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "Koja i imię gościa są wymagane"
-msgstr ""
+#~ msgid "Koja i imię gościa są wymagane"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "Ustawi C1 jako \"kapitan\" na wszystkich etapach. Kontynuować?"
-msgstr ""
+#~ msgid "Ustawi C1 jako \"kapitan\" na wszystkich etapach. Kontynuować?"
+#~ msgstr ""
 
-#. 0: result.updated
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "Zaktualizowano: {0} koj"
-msgstr ""
+#~ msgid "Zaktualizowano: {0} koj"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "Błąd migracji"
-msgstr ""
+#~ msgid "Błąd migracji"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "Admin · Sailing Architects"
-msgstr ""
+#~ msgid "Admin · Sailing Architects"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "Panel administracyjny"
-msgstr ""
+#~ msgid "Panel administracyjny"
+#~ msgstr ""
 
-#. 0: voyageSegments.find((s) => s.id === selectedSegment)?.name
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "Koje · {0}"
-msgstr ""
+#~ msgid "Koje · {0}"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "Anuluj"
-msgstr ""
+#~ msgid "Anuluj"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "Nowa rezerwacja bezpłatna"
-msgstr ""
+#~ msgid "Nowa rezerwacja bezpłatna"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "— wybierz —"
-msgstr ""
+#~ msgid "— wybierz —"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "Imię i nazwisko gościa"
-msgstr ""
+#~ msgid "Imię i nazwisko gościa"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "Uwagi (opcjonalnie)"
-msgstr ""
+#~ msgid "Uwagi (opcjonalnie)"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "Rezerwacja zapisana."
-msgstr ""
+#~ msgid "Rezerwacja zapisana."
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Zapisuję…"
 msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "Zarezerwuj bezpłatnie"
-msgstr ""
+#~ msgid "Zarezerwuj bezpłatnie"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "Narzędzia migracji"
-msgstr ""
+#~ msgid "Narzędzia migracji"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "Jeśli baza danych była seedowana przed Block 2 — uruchom migrację, aby ustawić C1 jako \"kapitan\" na wszystkich etapach."
-msgstr ""
+#~ msgid "Jeśli baza danych była seedowana przed Block 2 — uruchom migrację, aby ustawić C1 jako \"kapitan\" na wszystkich etapach."
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "Ustaw C1 = kapitan (migracja)"
-msgstr ""
+#~ msgid "Ustaw C1 = kapitan (migracja)"
+#~ msgstr ""
 
 #~ msgid "Wybrane ({0})"
 #~ msgstr ""
@@ -1134,6 +1117,8 @@ msgstr ""
 #~ msgid "{0} · {1} · {2} zł"
 #~ msgstr ""
 
+#: src/lib/components/admin/booking-drawer.svelte
+#: src/routes/[[lang=lang]]/admin/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
@@ -1173,6 +1158,7 @@ msgstr ""
 msgid "Michał"
 msgstr ""
 
+#: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Szczegóły rezerwacji"
 msgstr ""
@@ -1531,6 +1517,7 @@ msgstr ""
 msgid "Po terminie"
 msgstr ""
 
+#: src/routes/[[lang=lang]]/admin/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Opłacone"
 msgstr ""
@@ -1539,10 +1526,12 @@ msgstr ""
 msgid "Przetwarzanie"
 msgstr ""
 
+#: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Nieudane"
 msgstr ""
 
+#: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Anulowane"
 msgstr ""
@@ -1551,6 +1540,7 @@ msgstr ""
 msgid "Oczekuje"
 msgstr ""
 
+#: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Harmonogram płatności"
 msgstr ""
@@ -1564,14 +1554,18 @@ msgstr ""
 msgid "Zapłać"
 msgstr ""
 
+#: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Komplet"
 msgstr ""
 
+#: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Niekompletne"
 msgstr ""
 
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+#: src/routes/[[lang=lang]]/admin/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Brak danych"
 msgstr ""
@@ -1640,4 +1634,366 @@ msgstr ""
 #. 0: paymentsTotal
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "{0} opłacone"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Admin · Sprzedaż i alerty"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Operations Console"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Sprzedaż, płatności i kompletność załogi"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Segmenty rejsu"
+msgstr ""
+
+#. 0: error.message
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Nie udało się pobrać danych: {0}"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Wczytuję panel operacyjny…"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Brak danych dla tego segmentu."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Sprzedane"
+msgstr ""
+
+#. 0: data.kpi.sellableBerths > 0 ? Math.round((data.kpi.soldBerths / data.kpi.sellableBerths) * 100) \\: 0
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "{0}% miejsc"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Wpłacono"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "PLN brutto"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Do wpłaty"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "w ratach"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Zaległe"
+msgstr ""
+
+#. 0: data.alerts.filter((a) => a.kind === 'payment_overdue').length
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "{0} rat"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "uczestników"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Held"
+msgstr ""
+
+#. 0: formatHoldCountdown(data.kpi.nextHoldExpiresAt)
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "{0} do wygaśnięcia"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Specjalne"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "complimentary"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Sales Board"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Rezerwacje, płatności i następna akcja operacyjna."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Wszystkie"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Do przypomnienia"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Oczekuje wpłaty"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Brak rezerwacji w tym widoku."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Kupujący"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Dane"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Następna akcja"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Otwórz"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Alert Queue"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Priorytety do ręcznej reakcji kapitana."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Brak aktywnych alertów. Czysto."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Pilne"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Checkout"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Info"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Opłacono"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "W trakcie"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Czeka"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Brak"
+msgstr ""
+
+#. 0: p.label
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Monit płatności · {0}"
+msgstr ""
+
+#. 0: part.berthLabel
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Prośba o dane · Koja {0}"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Potwierdzenie rezerwacji wysłane"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Monit wysłany. Kopia poszła do operatora."
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Monit wysłany."
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Brak adresu odbiorcy — uzupełnij dane uczestnika lub kupującego."
+msgstr ""
+
+#. 0: result.reason
+#. 0: result.reason
+#: src/lib/components/admin/booking-drawer.svelte
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Nie udało się wysłać: {0}"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Błąd wysyłki"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Prośba wysłana. Kopia poszła do operatora."
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Prośba wysłana."
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Cześć,"
+msgstr ""
+
+#. 0: formatPLN(args.amount)
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Kwota do zapłaty: {0}."
+msgstr ""
+
+#. 0: link
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Płatność można zrealizować w panelu: {0}"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Pozdrawiamy,"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Można je uzupełnić tu:"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Skopiowano do schowka."
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Nie udało się skopiować — zaznacz ręcznie."
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Escape"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Zamknij"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Wczytuję…"
+msgstr ""
+
+#. 0: detail.error.message
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Nie udało się wczytać rezerwacji: {0}"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Wczytuję szczegóły…"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Segment"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Pozostało"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Snapshot przepisany z planu segmentu przy tworzeniu bookingu."
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Brak harmonogramu."
+msgstr ""
+
+#. 0: payment.reminderCount ?? 0; 1: formatDateTime( payment.lastReminderSentAt )
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "· monity: {0}, ostatnio {1}"
+msgstr ""
+
+#. 0: formatPLN(payment.amount); 1: formatDate( payment.dueAt )
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "{0} · termin {1} <0/>"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Wysyłam…"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Wyślij monit"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Kopiuj WhatsApp"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Uczestnicy"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Dane załogi powiązane z kojami."
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Brak uczestników w tej rezerwacji."
+msgstr ""
+
+#. 0: participant.berthLabel; 1: participant.firstName || participant.lastName ? `${participant.firstName ?? ''} ${participant.lastName ?? ''}`.trim() \\: 'brak imienia'
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Koja {0} · {1}"
+msgstr ""
+
+#. 0: participant.reminderCount ?? 0; 1: formatDateTime( participant.lastReminderSentAt )
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "· prośby: {0}, ostatnio {1}"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Wyślij prośbę"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Historia kontaktu"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Operacyjna oś monitów (bez pełnego audit logu)."
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Jeszcze nie wysłano żadnej wiadomości."
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Ustawienia wysyłki"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Dotyczą monitów wysyłanych z tego drawera."
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Wyślij kopię do operatora (HANDOFF_REPORT_TO)"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Otwórz rezerwację"
 msgstr ""

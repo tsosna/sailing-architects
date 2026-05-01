@@ -10,6 +10,7 @@
 
 import type * as _brevo from "../_brevo.js";
 import type * as _emails from "../_emails.js";
+import type * as admin from "../admin.js";
 import type * as crons from "../crons.js";
 import type * as http from "../http.js";
 import type * as mutations from "../mutations.js";
@@ -26,6 +27,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   _brevo: typeof _brevo;
   _emails: typeof _emails;
+  admin: typeof admin;
   crons: typeof crons;
   http: typeof http;
   mutations: typeof mutations;
