@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { resolve } from '$app/paths'
 	import { onMount } from 'svelte'
-	import { useQuery } from 'convex-svelte'
+	import { useConvexClient, useQuery } from 'convex-svelte'
 	import { useClerkContext, SignOutButton } from 'svelte-clerk'
 	import { api } from '$convex/api'
+	import type { Id } from '$convex/dataModel'
 
 	type Tab = 'booking' | 'profile' | 'docs'
 
@@ -15,12 +16,22 @@
 
 	// ── Convex queries ────────────────────────────────────────────────────
 	const bookingQuery = useQuery(api.queries.bookingByUser, () => ({ userId }))
-	const profileQuery = useQuery(api.queries.crewProfileByUser, () => ({
-		userId
-	}))
+	const convex = useConvexClient()
 
 	const bookingData = $derived(bookingQuery.data)
-	const profileData = $derived(profileQuery.data)
+	const participants = $derived(bookingData?.participants ?? [])
+	const participantsCompleted = $derived(
+		participants.filter((p) => p.dataStatus === 'complete').length
+	)
+	const participantsTotal = $derived(participants.length)
+	const paymentsTotal = $derived(
+		(bookingData?.payments ?? []).filter((p) => p.kind !== 'full').length
+	)
+	const paymentsPaid = $derived(
+		(bookingData?.payments ?? []).filter(
+			(p) => p.kind !== 'full' && p.status === 'paid'
+		).length
+	)
 	const confirmationPdfUrl = $derived(
 		bookingData && userId
 			? resolve(
@@ -136,30 +147,52 @@
 			: []
 	)
 
-	const profile = $derived<ReadonlyArray<readonly [string, string]>>(
-		profileData
-			? [
-					[
-						'Imię i nazwisko',
-						`${profileData.firstName} ${profileData.lastName}`
-					],
-					['E-mail żeglarza', profileData.email ?? '—'],
-					['Data urodzenia', profileData.dateOfBirth],
-					['Miejsce urodzenia', profileData.birthPlace ?? '—'],
-					['Narodowość', profileData.nationality],
-					['Telefon żeglarza', profileData.phone ?? '—'],
-					[
-						'Typ dokumentu',
-						profileData.docType === 'passport' ? 'Paszport' : 'Dowód osobisty'
-					],
-					['Numer dokumentu', profileData.docNumber],
-					['Kontakt alarmowy', profileData.emergencyContactName],
-					['Tel. alarmowy', profileData.emergencyContactPhone],
-					['Umiejętności pływackie', profileData.swimmingAbility],
-					['Doświadczenie', profileData.sailingExperience]
-				]
-			: []
-	)
+	function participantStatusLabel(status: string): string {
+		switch (status) {
+			case 'complete':
+				return 'Komplet'
+			case 'incomplete':
+				return 'Niekompletne'
+			default:
+				return 'Brak danych'
+		}
+	}
+
+	function participantDisplayName(p: {
+		firstName?: string
+		lastName?: string
+	}): string {
+		const name = `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim()
+		return name.length > 0 ? name : 'Dane nieuzupełnione'
+	}
+
+	const invitedEmailRefs: Record<string, HTMLInputElement | null> = {}
+	let invitedEmailSaving = $state<Record<string, boolean>>({})
+	let invitedEmailErrors = $state<Record<string, string>>({})
+	let invitedEmailSaved = $state<Record<string, boolean>>({})
+
+	async function saveInvitedEmail(participantId: Id<'bookingParticipants'>) {
+		const input = invitedEmailRefs[participantId]
+		const trimmed = (input?.value ?? '').trim()
+		invitedEmailSaving = { ...invitedEmailSaving, [participantId]: true }
+		invitedEmailErrors = { ...invitedEmailErrors, [participantId]: '' }
+		invitedEmailSaved = { ...invitedEmailSaved, [participantId]: false }
+		try {
+			await convex.mutation(api.mutations.upsertBookingParticipant, {
+				userId,
+				participantId,
+				...(trimmed ? { invitedEmail: trimmed } : {})
+			})
+			invitedEmailSaved = { ...invitedEmailSaved, [participantId]: true }
+		} catch (err) {
+			invitedEmailErrors = {
+				...invitedEmailErrors,
+				[participantId]: err instanceof Error ? err.message : 'Błąd zapisu'
+			}
+		} finally {
+			invitedEmailSaving = { ...invitedEmailSaving, [participantId]: false }
+		}
+	}
 
 	// Timeline ports — static for Sail Adventure 2026
 	const ports = [
@@ -250,6 +283,50 @@
 							{/if}
 						</span>
 					</div>
+				{/if}
+
+				{#if bookingData && (participantsTotal > 0 || paymentsTotal > 0)}
+					<section class="checklists" aria-label="Stan rezerwacji">
+						{#if participantsTotal > 0}
+							<button
+								type="button"
+								class="checklist"
+								class:checklist--complete={participantsCompleted ===
+									participantsTotal}
+								onclick={() => (tab = 'profile')}
+							>
+								<p class="checklist__label">Dane załogi</p>
+								<p class="checklist__value">
+									<strong>{participantsCompleted}</strong>
+									<span class="checklist__divider">/</span>
+									<span>{participantsTotal} uzupełnione</span>
+								</p>
+								<p class="checklist__hint">
+									{participantsCompleted === participantsTotal
+										? 'Wszyscy uczestnicy gotowi'
+										: 'Otwórz zakładkę „Dane załogi"'}
+								</p>
+							</button>
+						{/if}
+						{#if paymentsTotal > 0}
+							<div
+								class="checklist"
+								class:checklist--complete={bookingData.paymentStatus === 'paid'}
+							>
+								<p class="checklist__label">Płatności</p>
+								<p class="checklist__value">
+									<strong>{paymentsPaid}</strong>
+									<span class="checklist__divider">/</span>
+									<span>{paymentsTotal} opłacone</span>
+								</p>
+								<p class="checklist__hint">
+									{paymentStatusLabels[bookingData.paymentStatus ?? 'unpaid'] ??
+										bookingData.paymentStatus ??
+										'Nieopłacona'}
+								</p>
+							</div>
+						{/if}
+					</section>
 				{/if}
 
 				<article class="voyage">
@@ -384,23 +461,102 @@
 		{#if tab === 'profile'}
 			<div id="panel-profile" role="tabpanel">
 				<p class="lead">
-					Dane wymagane przez kapitana. Możesz je aktualizować do 30 dni przed
-					rejsem.
+					Dane wymagane przez kapitana — osobno dla każdej koi. Możesz je
+					aktualizować do 30 dni przed rejsem.
 				</p>
-				{#if profile.length}
-					<div class="profile">
-						{#each profile as [label, value] (label)}
-							<div class="profile__card">
-								<p class="profile__label">{label}</p>
-								<p class="profile__value">{value}</p>
-							</div>
+				{#if participants.length === 0}
+					<p class="voyage__empty">
+						Brak uczestników. Po opłaceniu rezerwacji pojawią się tu karty per
+						koja.
+					</p>
+				{:else}
+					<p class="crew-progress">
+						Uzupełnione: <strong
+							>{participantsCompleted} / {participantsTotal}</strong
+						>
+					</p>
+					<div class="crew-cards">
+						{#each participants as participant (participant._id)}
+							<article
+								class="crew-card"
+								class:crew-card--complete={participant.dataStatus ===
+									'complete'}
+								class:crew-card--incomplete={participant.dataStatus ===
+									'incomplete'}
+							>
+								<header class="crew-card__header">
+									<div>
+										<p class="crew-card__berth">
+											Koja {participant.berthLabel}
+										</p>
+										<p class="crew-card__name">
+											{participantDisplayName(participant)}
+										</p>
+									</div>
+									<span
+										class="status-badge"
+										class:status-badge--complete={participant.dataStatus ===
+											'complete'}
+										class:status-badge--incomplete={participant.dataStatus ===
+											'incomplete'}
+									>
+										{participantStatusLabel(participant.dataStatus)}
+									</span>
+								</header>
+
+								<div class="crew-card__invite">
+									<label class="crew-card__field">
+										<span class="crew-card__field-label"
+											>E-mail zaproszenia</span
+										>
+										<input
+											class="crew-card__field-input"
+											type="email"
+											placeholder="adres@email.pl"
+											autocomplete="email"
+											value={participant.invitedEmail ?? ''}
+											bind:this={invitedEmailRefs[participant._id]}
+										/>
+									</label>
+									<div class="crew-card__invite-actions">
+										<button
+											type="button"
+											class="btn btn--ghost btn--small"
+											disabled={!!invitedEmailSaving[participant._id]}
+											onclick={() => saveInvitedEmail(participant._id)}
+										>
+											{invitedEmailSaving[participant._id]
+												? 'Zapisuję…'
+												: 'Zapisz e-mail'}
+										</button>
+										{#if invitedEmailSaved[participant._id]}
+											<span class="crew-card__success" role="status"
+												>Zapisano</span
+											>
+										{/if}
+									</div>
+									{#if invitedEmailErrors[participant._id]}
+										<p class="crew-card__error" role="alert">
+											{invitedEmailErrors[participant._id]}
+										</p>
+									{/if}
+								</div>
+
+								<div class="crew-card__actions">
+									<a
+										class="btn btn--primary btn--small"
+										href={resolve(
+											`/dashboard/crew/${encodeURIComponent(participant._id)}`
+										)}
+									>
+										{participant.dataStatus === 'missing'
+											? 'Uzupełnij'
+											: 'Edytuj'}
+									</a>
+								</div>
+							</article>
 						{/each}
 					</div>
-					<button type="button" class="btn btn--outline" disabled
-						>Edytuj dane</button
-					>
-				{:else}
-					<p class="voyage__empty">Profil nie został jeszcze uzupełniony.</p>
 				{/if}
 			</div>
 		{/if}
@@ -943,18 +1099,6 @@
 		border-color: var(--color-brass);
 	}
 
-	.btn--outline {
-		padding: 12px 28px;
-		background: none;
-		border: 1px solid rgba(196, 146, 58, 0.35);
-		color: var(--color-brass-text);
-		margin-top: 28px;
-	}
-
-	.btn--outline:hover:not(:disabled) {
-		background: rgba(196, 146, 58, 0.06);
-	}
-
 	.btn:disabled {
 		opacity: 0.55;
 		cursor: not-allowed;
@@ -968,33 +1112,229 @@
 		margin: 0 0 32px;
 	}
 
-	.profile {
+	.checklists {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-		gap: 20px;
-		max-width: 600px;
+		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+		gap: 16px;
+		margin-bottom: 32px;
 	}
 
-	.profile__card {
-		padding: 14px 16px;
-		background: rgba(255, 255, 255, 0.03);
-		border-left: 2px solid rgba(196, 146, 58, 0.2);
-	}
-
-	.profile__label {
+	.checklist {
+		text-align: left;
+		background: rgba(255, 255, 255, 0.02);
+		border: 1px solid rgba(196, 146, 58, 0.18);
+		border-left-width: 2px;
+		border-left-color: rgba(196, 146, 58, 0.5);
+		padding: 18px 20px;
 		font-family: var(--font-sans);
-		font-size: 9px;
+		cursor: default;
+		display: block;
+		width: 100%;
+	}
+
+	button.checklist {
+		cursor: pointer;
+		transition: border-color 200ms ease;
+	}
+
+	button.checklist:hover {
+		border-color: var(--color-brass);
+	}
+
+	.checklist--complete {
+		border-left-color: rgba(80, 160, 80, 0.6);
+	}
+
+	.checklist__label {
+		font-size: 10px;
 		letter-spacing: 2px;
 		text-transform: uppercase;
 		color: var(--color-brass-text-soft);
-		margin: 0 0 4px;
+		margin: 0 0 8px;
 	}
 
-	.profile__value {
-		font-family: var(--font-sans);
-		font-size: 13px;
+	.checklist__value {
+		font-family: var(--font-serif);
+		font-size: 22px;
 		color: var(--color-warm-white);
 		margin: 0;
+		display: flex;
+		align-items: baseline;
+		gap: 6px;
+	}
+
+	.checklist__value strong {
+		color: var(--color-brass-text);
+		font-weight: 400;
+	}
+
+	.checklist__divider {
+		color: var(--color-brass-text-soft);
+		font-size: 18px;
+	}
+
+	.checklist__value > span:last-child {
+		font-family: var(--font-sans);
+		font-size: 12px;
+		color: rgba(245, 240, 232, 0.6);
+		letter-spacing: 0;
+		text-transform: none;
+	}
+
+	.checklist__hint {
+		font-size: 11px;
+		color: rgba(245, 240, 232, 0.5);
+		margin: 8px 0 0;
+	}
+
+	.crew-progress {
+		font-family: var(--font-sans);
+		font-size: 13px;
+		color: rgba(245, 240, 232, 0.7);
+		margin: 0 0 24px;
+	}
+
+	.crew-progress strong {
+		font-family: var(--font-serif);
+		font-size: 16px;
+		color: var(--color-brass-text);
+		letter-spacing: 0;
+	}
+
+	.crew-cards {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+		gap: 20px;
+	}
+
+	.crew-card {
+		background: rgba(255, 255, 255, 0.02);
+		border-left: 2px solid rgba(196, 146, 58, 0.25);
+		padding: 24px;
+		display: flex;
+		flex-direction: column;
+		gap: 18px;
+	}
+
+	.crew-card--complete {
+		border-left-color: rgba(80, 160, 80, 0.5);
+	}
+
+	.crew-card--incomplete {
+		border-left-color: rgba(196, 146, 58, 0.6);
+	}
+
+	.crew-card__header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 12px;
+		flex-wrap: wrap;
+	}
+
+	.crew-card__berth {
+		font-family: var(--font-sans);
+		font-size: 11px;
+		letter-spacing: 2px;
+		text-transform: uppercase;
+		color: var(--color-brass-text);
+		margin: 0 0 6px;
+	}
+
+	.crew-card__name {
+		font-family: var(--font-serif);
+		font-size: 18px;
+		color: var(--color-warm-white);
+		margin: 0;
+	}
+
+	.status-badge {
+		font-family: var(--font-sans);
+		font-size: 9px;
+		letter-spacing: 1.6px;
+		text-transform: uppercase;
+		padding: 4px 10px;
+		border: 1px solid rgba(245, 240, 232, 0.25);
+		color: rgba(245, 240, 232, 0.7);
+	}
+
+	.status-badge--incomplete {
+		border-color: rgba(196, 146, 58, 0.5);
+		color: var(--color-brass-text);
+		background: rgba(196, 146, 58, 0.08);
+	}
+
+	.status-badge--complete {
+		border-color: rgba(80, 160, 80, 0.5);
+		color: #b6e1a4;
+		background: rgba(80, 160, 80, 0.1);
+	}
+
+	.crew-card__invite {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.crew-card__field {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+
+	.crew-card__field-label {
+		font-family: var(--font-sans);
+		font-size: 10px;
+		letter-spacing: 2px;
+		text-transform: uppercase;
+		color: var(--color-brass-text-soft);
+	}
+
+	.crew-card__field-input {
+		background: rgba(255, 255, 255, 0.04);
+		border: 1px solid rgba(196, 146, 58, 0.25);
+		padding: 10px 14px;
+		color: var(--color-warm-white);
+		font-family: var(--font-sans);
+		font-size: 14px;
+		outline: none;
+		width: 100%;
+		box-sizing: border-box;
+		border-radius: 0;
+		appearance: none;
+	}
+
+	.crew-card__field-input:focus-visible {
+		border-color: var(--color-brass);
+	}
+
+	.crew-card__invite-actions {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+
+	.crew-card__success {
+		font-family: var(--font-sans);
+		font-size: 11px;
+		color: #b6e1a4;
+	}
+
+	.crew-card__error {
+		font-family: var(--font-sans);
+		font-size: 12px;
+		color: #ef4444;
+		margin: 0;
+	}
+
+	.crew-card__actions {
+		display: flex;
+		justify-content: flex-end;
+	}
+
+	:global(.btn--small) {
+		font-size: 10px;
+		padding: 10px 18px;
 	}
 
 	.docs {

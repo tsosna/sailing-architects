@@ -104,14 +104,20 @@ msgstr "Wybierz etap rejsu"
 #. 0: priceFormatted
 #. 0: seg.price.toLocaleString('pl-PL')
 #. 0: totalPriceFormatted
+#. 0: option.amountFormatted
 #. 0: pricePerBerthFormatted
 #. 0: totalPriceFormatted
+#. 0: selectedPaymentOption.amountFormatted
+#. 0: formatGrosze(payment.amount)
 #: src/lib/components/cabins-section/cabins-section.svelte
 #: src/lib/components/route-section/route-section.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "{0} zł"
 msgstr "{0} zł"
 
@@ -218,9 +224,11 @@ msgstr "Legenda"
 #. 0: b
 #. 0: d.id
 #. 0: b
+#. 0: participant.berthLabel
 #: src/lib/components/boat-plan/boat-plan.svelte
 #: src/lib/components/boat-plan/boat-plan.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Koja {0}"
 msgstr "Koja {0}"
 
@@ -546,6 +554,7 @@ msgstr "Konto"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Dane załogi"
 msgstr "Dane załogi"
 
@@ -579,12 +588,10 @@ msgid "Inna"
 msgstr "Inna"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Paszport"
 msgstr "Paszport"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Dowód osobisty"
 msgstr "Dowód osobisty"
 
@@ -709,12 +716,10 @@ msgid "Nazwisko"
 msgstr "Nazwisko"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Data urodzenia"
 msgstr "Data urodzenia"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Narodowość"
 msgstr "Narodowość"
 
@@ -723,12 +728,10 @@ msgid "Dokument tożsamości"
 msgstr "Dokument tożsamości"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Typ dokumentu"
 msgstr "Typ dokumentu"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Numer dokumentu"
 msgstr "Numer dokumentu"
 
@@ -736,12 +739,10 @@ msgstr "Numer dokumentu"
 #~ msgstr "Wymagane do rejestru jachtu"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Kontakt alarmowy"
 msgstr "Kontakt alarmowy"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Imię i nazwisko"
 msgstr "Imię i nazwisko"
 
@@ -754,7 +755,6 @@ msgid "Profil żeglarski"
 msgstr "Profil żeglarski"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Umiejętności pływackie"
 msgstr "Umiejętności pływackie"
 
@@ -837,7 +837,7 @@ msgstr "Podsumowanie"
 msgid "Razem"
 msgstr "Razem"
 
-#. 0: totalPriceFormatted
+#. 0: selectedPaymentOption?.amountFormatted ?? ''
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Zapłać {0} zł →"
 msgstr "Zapłać {0} zł →"
@@ -934,13 +934,11 @@ msgstr "Potwierdzona"
 msgid "Oczekuje na płatność"
 msgstr "Oczekuje na płatność"
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Tel. alarmowy"
-msgstr "Tel. alarmowy"
+#~ msgid "Tel. alarmowy"
+#~ msgstr "Tel. alarmowy"
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Doświadczenie"
-msgstr "Doświadczenie"
+#~ msgid "Doświadczenie"
+#~ msgstr "Doświadczenie"
 
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Regulamin rejsu"
@@ -1009,17 +1007,14 @@ msgstr "↓ Pobierz potwierdzenie"
 msgid "Kontakt z organizatorem"
 msgstr "Kontakt z organizatorem"
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Dane wymagane przez kapitana. Możesz je aktualizować do 30 dni przed rejsem."
-msgstr "Dane wymagane przez kapitana. Możesz je aktualizować do 30 dni przed rejsem."
+#~ msgid "Dane wymagane przez kapitana. Możesz je aktualizować do 30 dni przed rejsem."
+#~ msgstr "Dane wymagane przez kapitana. Możesz je aktualizować do 30 dni przed rejsem."
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Edytuj dane"
-msgstr "Edytuj dane"
+#~ msgid "Edytuj dane"
+#~ msgstr "Edytuj dane"
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Profil nie został jeszcze uzupełniony."
-msgstr "Profil nie został jeszcze uzupełniony."
+#~ msgid "Profil nie został jeszcze uzupełniony."
+#~ msgstr "Profil nie został jeszcze uzupełniony."
 
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Dokumenty do pobrania"
@@ -1110,6 +1105,7 @@ msgid "Rezerwacja zapisana."
 msgstr "Rezerwacja zapisana."
 
 #: src/routes/[[lang=lang]]/admin/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Zapisuję…"
 msgstr "Zapisuję…"
 
@@ -1394,12 +1390,10 @@ msgstr "Bez spacji i znaków specjalnych"
 #~ msgstr "Podaj datę w formacie dd/mm/yyyy"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Telefon żeglarza"
 msgstr "Telefon żeglarza"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Miejsce urodzenia"
 msgstr "Miejsce urodzenia"
 
@@ -1411,6 +1405,7 @@ msgstr "Miasto"
 msgid "Wygasła"
 msgstr "Wygasła"
 
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Anulowana"
 msgstr "Anulowana"
@@ -1453,7 +1448,6 @@ msgid "Inicjalizacja płatności trwa zbyt długo. Spróbuj ponownie za chwilę.
 msgstr "Inicjalizacja płatności trwa zbyt długo. Spróbuj ponownie za chwilę."
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "E-mail żeglarza"
 msgstr "E-mail żeglarza"
 
@@ -1484,3 +1478,166 @@ msgstr "Dla każdej wybranej koi utworzymy osobną kartę uczestnika w panelu."
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Uzupełnij teraz"
 msgstr "Uzupełnij teraz"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Całość"
+msgstr "Całość"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Dopłata końcowa"
+msgstr "Dopłata końcowa"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Wybierz, ile chcesz zapłacić teraz"
+msgstr "Wybierz, ile chcesz zapłacić teraz"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Co płacisz teraz?"
+msgstr "Co płacisz teraz?"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Teraz"
+msgstr "Teraz"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Inicjalizacja…"
+msgstr "Inicjalizacja…"
+
+#. 0: selectedPaymentOption?.amountFormatted ?? ''
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Potwierdź {0} zł →"
+msgstr "Potwierdź {0} zł →"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Nieopłacona"
+msgstr "Nieopłacona"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Zaliczka opłacona"
+msgstr "Zaliczka opłacona"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Częściowo opłacona"
+msgstr "Częściowo opłacona"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Opłacona"
+msgstr "Opłacona"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Po terminie"
+msgstr "Po terminie"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Opłacone"
+msgstr "Opłacone"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Przetwarzanie"
+msgstr "Przetwarzanie"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Nieudane"
+msgstr "Nieudane"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Anulowane"
+msgstr "Anulowane"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Oczekuje"
+msgstr "Oczekuje"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Harmonogram płatności"
+msgstr "Harmonogram płatności"
+
+#. 0: formatDueDate(payment.dueAt)
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Termin {0}"
+msgstr "Termin {0}"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Zapłać"
+msgstr "Zapłać"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Komplet"
+msgstr "Komplet"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Niekompletne"
+msgstr "Niekompletne"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Brak danych"
+msgstr "Brak danych"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Dane nieuzupełnione"
+msgstr "Dane nieuzupełnione"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Błąd zapisu"
+msgstr "Błąd zapisu"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Dane wymagane przez kapitana — osobno dla każdej koi. Możesz je aktualizować do 30 dni przed rejsem."
+msgstr "Dane wymagane przez kapitana — osobno dla każdej koi. Możesz je aktualizować do 30 dni przed rejsem."
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Brak uczestników. Po opłaceniu rezerwacji pojawią się tu karty per koja."
+msgstr "Brak uczestników. Po opłaceniu rezerwacji pojawią się tu karty per koja."
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Uzupełnione: <0/>"
+msgstr "Uzupełnione: <0/>"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "E-mail zaproszenia"
+msgstr "E-mail zaproszenia"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Zapisz e-mail"
+msgstr "Zapisz e-mail"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Uzupełnij"
+msgstr "Uzupełnij"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Edytuj"
+msgstr "Edytuj"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Zapisano"
+msgstr "Zapisano"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Stan rezerwacji"
+msgstr "Stan rezerwacji"
+
+#. 0: participantsTotal
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "{0} uzupełnione"
+msgstr "{0} uzupełnione"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Wszyscy uczestnicy gotowi"
+msgstr "Wszyscy uczestnicy gotowi"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Otwórz zakładkę „Dane załogi\""
+msgstr "Otwórz zakładkę „Dane załogi\""
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Płatności"
+msgstr "Płatności"
+
+#. 0: paymentsTotal
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "{0} opłacone"
+msgstr "{0} opłacone"
