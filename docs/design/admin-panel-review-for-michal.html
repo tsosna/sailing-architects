@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pl">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Sailing Architects · Projekt panelu admina</title>
+	</head>
+	<body style="margin:0;background:#07111e;color:#f5f0e8;font-family:Arial,Helvetica,sans-serif;">
+		<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#07111e;">
+			<tr>
+				<td align="center" style="padding:32px 16px;">
+					<table role="presentation" width="720" cellspacing="0" cellpadding="0" style="max-width:720px;width:100%;background:#0d1b2e;border:1px solid rgba(196,146,58,0.28);">
+						<tr>
+							<td style="padding:34px 34px 26px;border-bottom:1px solid rgba(196,146,58,0.18);">
+								<p style="margin:0 0 10px;color:#d4aa5a;font-size:11px;letter-spacing:2px;text-transform:uppercase;">Sailing Architects · propozycja rozbudowy</p>
+								<h1 style="margin:0;color:#f5f0e8;font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:36px;line-height:1.08;">Panel admina dla sprzedaży, płatności i danych załogi</h1>
+								<p style="margin:18px 0 0;color:rgba(245,240,232,0.72);font-size:15px;line-height:1.7;">
+									Przygotowaliśmy koncepcję rozbudowy panelu administracyjnego tak, żeby kapitan widział aktualny stan sprzedaży, zaległe płatności, brakujące dane uczestników oraz mógł szybko wysyłać monity i alerty.
+								</p>
+							</td>
+						</tr>
+
+						<tr>
+							<td style="padding:26px 34px;border-bottom:1px solid rgba(196,146,58,0.14);">
+								<h2 style="margin:0 0 14px;color:#f5f0e8;font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:24px;">Co ma robić panel</h2>
+								<table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+									<tr>
+										<td style="padding:12px 0;color:#ede5d8;font-size:14px;line-height:1.6;border-top:1px solid rgba(196,146,58,0.1);"><strong style="color:#d4aa5a;">1. Sprzedaż i płatności</strong><br />Widok rezerwacji, sprzedanych miejsc, wpłat, zaległości i najbliższych terminów płatności.</td>
+									</tr>
+									<tr>
+										<td style="padding:12px 0;color:#ede5d8;font-size:14px;line-height:1.6;border-top:1px solid rgba(196,146,58,0.1);"><strong style="color:#d4aa5a;">2. Alerty dla kapitana</strong><br />Lista spraw wymagających reakcji: zaległa rata, brak danych uczestnika, wygasający checkout, korekta zgłoszona przez żeglarza.</td>
+									</tr>
+									<tr>
+										<td style="padding:12px 0;color:#ede5d8;font-size:14px;line-height:1.6;border-top:1px solid rgba(196,146,58,0.1);"><strong style="color:#d4aa5a;">3. Monity e-mail</strong><br />Wysyłka adhoc i automatyczna przez Brevo. Alerty trafiają też e-mailem do administratora/kapitana.</td>
+									</tr>
+									<tr>
+										<td style="padding:12px 0;color:#ede5d8;font-size:14px;line-height:1.6;border-top:1px solid rgba(196,146,58,0.1);"><strong style="color:#d4aa5a;">4. Dane załogi</strong><br />Admin może wpisać dane otrzymane telefonicznie, WhatsAppem lub mailem, a uczestnik potwierdza je później przez bezpieczny link.</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+
+						<tr>
+							<td style="padding:26px 34px;border-bottom:1px solid rgba(196,146,58,0.14);">
+								<h2 style="margin:0 0 14px;color:#f5f0e8;font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:24px;">Najważniejsze moduły</h2>
+								<ul style="margin:0;padding-left:20px;color:rgba(245,240,232,0.78);font-size:14px;line-height:1.8;">
+									<li><strong style="color:#f5f0e8;">Sales Board</strong> — tabela rezerwacji z informacją, kto zapłacił, kto zalega i jaka jest następna akcja.</li>
+									<li><strong style="color:#f5f0e8;">Alert Queue</strong> — kolejka zadań dla kapitana: co dziś wymaga kontaktu z uczestnikiem.</li>
+									<li><strong style="color:#f5f0e8;">Booking drawer</strong> — szybki podgląd konkretnej rezerwacji: raty, uczestnicy, historia kontaktu, akcje.</li>
+									<li><strong style="color:#f5f0e8;">Elastyczne raty</strong> — możliwość ustawienia np. zaliczki + 2 rat, zaliczki + 3 rat albo pełnej płatności.</li>
+									<li><strong style="color:#f5f0e8;">Miejsca specjalne</strong> — osobny moduł dla miejsca kapitana i rezerwacji complimentary.</li>
+								</ul>
+							</td>
+						</tr>
+
+						<tr>
+							<td style="padding:26px 34px;border-bottom:1px solid rgba(196,146,58,0.14);">
+								<h2 style="margin:0 0 14px;color:#f5f0e8;font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:24px;">Potwierdzanie danych żeglarzy</h2>
+								<p style="margin:0 0 12px;color:rgba(245,240,232,0.76);font-size:14px;line-height:1.7;">
+									Proponowany proces: admin uzupełnia dane uczestnika, system wysyła e-mail z unikalnym linkiem, a żeglarz na prostej stronie potwierdza poprawność danych albo zgłasza korektę.
+								</p>
+								<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#0f1f35;border:1px solid rgba(196,146,58,0.18);">
+									<tr>
+										<td style="padding:16px;color:#ede5d8;font-size:14px;line-height:1.65;">
+											<strong style="color:#d4aa5a;">Dlaczego tak:</strong><br />
+											admin może działać szybko, ale finalne dane są potwierdzone przez uczestnika. To zmniejsza ryzyko literówek w dokumentach, kontaktach alarmowych i informacjach medycznych.
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+
+						<tr>
+							<td style="padding:26px 34px;border-bottom:1px solid rgba(196,146,58,0.14);">
+								<h2 style="margin:0 0 14px;color:#f5f0e8;font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:24px;">Dostęp i bezpieczeństwo</h2>
+								<ul style="margin:0;padding-left:20px;color:rgba(245,240,232,0.78);font-size:14px;line-height:1.8;">
+									<li>Panel admina będzie zabezpieczony przez Clerk.</li>
+									<li>Produkcyjnie dostęp ma kapitan / operator z rolą admin.</li>
+									<li>Na środowisku dev dostęp ma też operator testowy.</li>
+									<li>Link do potwierdzania danych pokazuje tylko dane jednego uczestnika i ma ograniczony czas ważności.</li>
+								</ul>
+							</td>
+						</tr>
+
+						<tr>
+							<td style="padding:26px 34px;border-bottom:1px solid rgba(196,146,58,0.14);">
+								<h2 style="margin:0 0 14px;color:#f5f0e8;font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:24px;">Do decyzji / potwierdzenia</h2>
+								<ul style="margin:0;padding-left:20px;color:rgba(245,240,232,0.78);font-size:14px;line-height:1.8;">
+									<li>Czy kolejność priorytetów jest dobra: płatności, potem dane uczestników, potem miejsca specjalne?</li>
+									<li>Ile dni ważny ma być link do potwierdzenia danych: 7 czy 14?</li>
+									<li>Czy WhatsApp/SMS na start wystarczy jako ręcznie kopiowana wiadomość?</li>
+									<li>Czy alerty e-mail do kapitana mają przychodzić codziennie rano, czy natychmiast przy krytycznych zaległościach?</li>
+								</ul>
+							</td>
+						</tr>
+
+						<tr>
+							<td style="padding:26px 34px;">
+								<p style="margin:0;color:rgba(245,240,232,0.66);font-size:13px;line-height:1.7;">
+									W repozytorium przygotowany jest też klikalny prototyp HTML oraz pełniejszy opis funkcjonalny. Po akceptacji kierunku możemy przejść do implementacji etapami: najpierw bezpieczny dostęp i Sales Board, potem monity, automatyzacje oraz potwierdzanie danych żeglarzy.
+								</p>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</body>
+</html>

@@ -33,7 +33,14 @@ export function requireEnv(name) {
 	return value
 }
 
-export async function sendBrevoEmail({ to, subject, html, text, replyTo }) {
+export async function sendBrevoEmail({
+	to,
+	subject,
+	html,
+	text,
+	replyTo,
+	attachments
+}) {
 	const apiKey = requireEnv('BREVO_API_KEY')
 	const from = requireEnv('BREVO_FROM_EMAIL')
 
@@ -56,7 +63,8 @@ export async function sendBrevoEmail({ to, subject, html, text, replyTo }) {
 			subject,
 			htmlContent: html,
 			...(text ? { textContent: text } : {}),
-			...(replyTo ? { replyTo: { email: replyTo } } : {})
+			...(replyTo ? { replyTo: { email: replyTo } } : {}),
+			...(attachments?.length ? { attachment: attachments } : {})
 		})
 	})
 
