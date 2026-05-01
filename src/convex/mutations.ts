@@ -946,6 +946,99 @@ export const seedTestPaymentPlan = mutation({
 })
 
 /**
+ * One-time migration: for every booking that predates the bookingPayments
+ * schedule (Etap 3), insert a single `kind: 'full'` row mirroring its status
+ * and backfill totalAmount / paidAmount / paymentStatus / currency on the
+ * booking itself. Idempotent — bookings that already have any bookingPayments
+ * row are skipped.
+ *
+ * Run once from Convex dashboard after deploying the new schema.
+ */
+export const backfillLegacyBookingPayments = mutation({
+	args: { limit: v.optional(v.number()) },
+	handler: async (ctx, { limit }) => {
+		const bookings = await ctx.db
+			.query('bookings')
+			.order('desc')
+			.take(limit ?? 200)
+		let migratedBookings = 0
+		let insertedRows = 0
+		const now = Date.now()
+
+		for (const booking of bookings) {
+			const existing = await ctx.db
+				.query('bookingPayments')
+				.withIndex('by_booking', (q) => q.eq('bookingId', booking._id))
+				.first()
+			if (existing) continue
+
+			const segment = await ctx.db.get(booking.segmentId)
+			if (!segment) continue
+
+			const totalAmount = segment.pricePerBerth * booking.berthIds.length * 100
+			const currency = booking.currency ?? DEFAULT_CURRENCY
+			const buyerUserId = booking.buyerUserId ?? booking.userId
+
+			let rowStatus: 'paid' | 'pending' | 'cancelled' = 'pending'
+			let bookingPaymentStatus:
+				| 'unpaid'
+				| 'deposit_paid'
+				| 'partially_paid'
+				| 'paid'
+				| 'cancelled'
+			let paidAmount = 0
+			if (booking.status === 'confirmed') {
+				rowStatus = 'paid'
+				bookingPaymentStatus = 'paid'
+				paidAmount = totalAmount
+			} else if (
+				booking.status === 'cancelled' ||
+				booking.status === 'expired'
+			) {
+				rowStatus = 'cancelled'
+				bookingPaymentStatus = 'cancelled'
+			} else {
+				rowStatus = 'pending'
+				bookingPaymentStatus = 'unpaid'
+			}
+
+			await ctx.db.insert('bookingPayments', {
+				bookingId: booking._id,
+				buyerUserId,
+				segmentId: booking.segmentId,
+				label: 'Całość',
+				kind: 'full',
+				amount: totalAmount,
+				currency,
+				sortOrder: 1,
+				status: rowStatus,
+				stripePaymentIntentId: booking.stripePaymentIntentId,
+				paidAt: rowStatus === 'paid' ? booking.paidAt : undefined,
+				createdAt: booking._creationTime,
+				updatedAt: now,
+				reminderCount: 0
+			})
+			insertedRows++
+
+			await ctx.db.patch(booking._id, {
+				totalAmount,
+				paidAmount,
+				currency,
+				paymentStatus: bookingPaymentStatus,
+				...(booking.buyerUserId ? {} : { buyerUserId })
+			})
+			migratedBookings++
+		}
+
+		return {
+			scannedBookings: bookings.length,
+			migratedBookings,
+			insertedRows
+		}
+	}
+})
+
+/**
  * One-time migration: set C1 to captain on all existing segments.
  * Run from Convex dashboard after schema deploy.
  */
