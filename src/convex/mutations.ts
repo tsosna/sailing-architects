@@ -503,6 +503,10 @@ export const applyStripePayment = mutation({
 			}
 		}
 
+		const paymentEmailSentAt =
+			payments.find((p) => p.confirmationEmailSentAt)
+				?.confirmationEmailSentAt ?? null
+
 		const now = Date.now()
 		for (const payment of payments) {
 			if (payment.status !== 'paid') {
@@ -564,7 +568,37 @@ export const applyStripePayment = mutation({
 			totalAmount: totals.totalAmount,
 			paymentStatus: totals.paymentStatus,
 			isFirstPayment,
-			confirmationEmailSentAt: booking.confirmationEmailSentAt ?? null
+			confirmationEmailSentAt: booking.confirmationEmailSentAt ?? null,
+			paymentEmailSentAt
+		}
+	}
+})
+
+/**
+ * Mark per-payment confirmation email as sent (idempotent).
+ * Targets all bookingPayments rows attached to a single PaymentIntent so that
+ * Stripe webhook retries do not send the same payment confirmation twice.
+ */
+export const markPaymentEmailSent = mutation({
+	args: {
+		stripePaymentIntentId: v.string(),
+		sentAt: v.number(),
+		messageId: v.optional(v.string())
+	},
+	handler: async (ctx, { stripePaymentIntentId, sentAt, messageId }) => {
+		const payments = await ctx.db
+			.query('bookingPayments')
+			.withIndex('by_payment_intent', (q) =>
+				q.eq('stripePaymentIntentId', stripePaymentIntentId)
+			)
+			.collect()
+		for (const payment of payments) {
+			if (payment.confirmationEmailSentAt) continue
+			await ctx.db.patch(payment._id, {
+				confirmationEmailSentAt: sentAt,
+				confirmationEmailMessageId: messageId,
+				updatedAt: Date.now()
+			})
 		}
 	}
 })

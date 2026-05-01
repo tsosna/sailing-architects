@@ -132,7 +132,9 @@ export default defineSchema({
 		createdAt: v.number(),
 		updatedAt: v.number(),
 		reminderCount: v.optional(v.number()),
-		lastReminderSentAt: v.optional(v.number())
+		lastReminderSentAt: v.optional(v.number()),
+		confirmationEmailSentAt: v.optional(v.number()),
+		confirmationEmailMessageId: v.optional(v.string())
 	})
 		.index('by_booking', ['bookingId'])
 		.index('by_buyer_user', ['buyerUserId'])

@@ -10,6 +10,10 @@ type BookingConfirmationPayload = {
 		bookingRef: string
 		status: string
 		paidAt?: number
+		paymentStatus?: string
+		paidAmount?: number
+		totalAmount?: number
+		currency?: string
 	}
 	segment: {
 		name: string
@@ -31,14 +35,36 @@ type BookingConfirmationPayload = {
 		emergencyContactPhone: string
 	} | null
 	berths: Array<{ berthId: string }>
+	payments: Array<{
+		label: string
+		kind: string
+		amount: number
+		currency: string
+		status: string
+		dueAt?: number
+		paidAt?: number
+		sortOrder: number
+	}>
 }
 
 function sanitizeFilename(value: string): string {
 	return value.replace(/[^A-Z0-9-]/gi, '_')
 }
 
-function money(value: number): string {
-	return `${value.toLocaleString('pl-PL')} PLN`
+function money(value: number, currency = 'PLN'): string {
+	return `${value.toLocaleString('pl-PL')} ${currency.toUpperCase()}`
+}
+
+function moneyGrosze(grosze: number, currency = 'PLN'): string {
+	return `${(grosze / 100).toLocaleString('pl-PL', {
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2
+	})} ${currency.toUpperCase()}`
+}
+
+function formatDate(timestamp?: number): string {
+	if (!timestamp) return '-'
+	return new Date(timestamp).toLocaleDateString('pl-PL')
 }
 
 function statusLabel(status: string): string {
@@ -53,6 +79,40 @@ function statusLabel(status: string): string {
 			return 'Anulowana'
 		default:
 			return status
+	}
+}
+
+function paymentStatusLabel(status?: string): string {
+	switch (status) {
+		case 'paid':
+			return 'Opłacona w całości'
+		case 'deposit_paid':
+			return 'Zaliczka opłacona'
+		case 'partially_paid':
+			return 'Częściowo opłacona'
+		case 'overdue':
+			return 'Po terminie'
+		case 'cancelled':
+			return 'Anulowana'
+		default:
+			return 'Nieopłacona'
+	}
+}
+
+function paymentRowStatusLabel(status: string): string {
+	switch (status) {
+		case 'paid':
+			return 'Opłacone'
+		case 'processing':
+			return 'Przetwarzanie'
+		case 'failed':
+			return 'Nieudane'
+		case 'cancelled':
+			return 'Anulowane'
+		case 'overdue':
+			return 'Po terminie'
+		default:
+			return 'Oczekuje'
 	}
 }
 
@@ -86,7 +146,7 @@ export function bookingConfirmationFilename(bookingRef: string): string {
 export async function generateBookingConfirmationPdf(
 	confirmation: BookingConfirmationPayload
 ): Promise<Buffer> {
-	const { booking, segment, profile, berths } = confirmation
+	const { booking, segment, profile, berths, payments } = confirmation
 	if (!segment) throw new Error('Voyage segment not found')
 
 	const berthIds = berths.map((b) => b.berthId).join(', ')
@@ -95,6 +155,8 @@ export async function generateBookingConfirmationPdf(
 	const paidAt = booking.paidAt
 		? new Date(booking.paidAt).toLocaleDateString('pl-PL')
 		: '-'
+	const currency = booking.currency ?? 'pln'
+	const scheduledPayments = (payments ?? []).filter((p) => p.kind !== 'full')
 
 	const doc = new PDFDocument({
 		size: 'A4',
@@ -131,7 +193,8 @@ export async function generateBookingConfirmationPdf(
 		.text(`Wystawiono: ${issuedAt}`)
 		.moveDown(2)
 
-	writeRow(doc, 'Status', statusLabel(booking.status))
+	writeRow(doc, 'Status rezerwacji', statusLabel(booking.status))
+	writeRow(doc, 'Status płatności', paymentStatusLabel(booking.paymentStatus))
 	writeRow(doc, 'Rejs', 'Sail Adventure 2026')
 	writeRow(doc, 'Etap', segment.name)
 	writeRow(doc, 'Termin', segment.dates)
@@ -139,7 +202,37 @@ export async function generateBookingConfirmationPdf(
 	writeRow(doc, berths.length === 1 ? 'Koja' : 'Koje', berthIds || '-')
 	writeRow(doc, 'Cena za miejsce', money(segment.pricePerBerth))
 	writeRow(doc, 'Razem', money(total))
-	writeRow(doc, 'Data płatności', paidAt)
+	if (typeof booking.paidAmount === 'number') {
+		writeRow(doc, 'Wpłacono', moneyGrosze(booking.paidAmount, currency))
+	}
+	writeRow(doc, 'Pierwsza wpłata', paidAt)
+
+	if (scheduledPayments.length > 0) {
+		doc.moveDown(1.2).font('DejaVu-Bold').fontSize(13).fillColor('#0d1b2e')
+		doc.text('Harmonogram płatności')
+		doc.moveDown(0.4)
+
+		for (const payment of scheduledPayments) {
+			const amountStr = moneyGrosze(payment.amount, payment.currency)
+			const statusStr = paymentRowStatusLabel(payment.status)
+			const detailParts: string[] = [statusStr]
+			if (payment.status === 'paid' && payment.paidAt) {
+				detailParts.push(`opłacono ${formatDate(payment.paidAt)}`)
+			} else if (payment.dueAt) {
+				detailParts.push(`termin ${formatDate(payment.dueAt)}`)
+			}
+			doc
+				.font('DejaVu-Bold')
+				.fontSize(10)
+				.fillColor('#111827')
+				.text(`${payment.label} — ${amountStr}`, { continued: false })
+				.font('DejaVu')
+				.fontSize(9)
+				.fillColor('#6b7280')
+				.text(detailParts.join(' · '))
+				.moveDown(0.5)
+		}
+	}
 
 	doc.moveDown(1.2).font('DejaVu-Bold').fontSize(13).fillColor('#0d1b2e')
 	doc.text('Dane uczestnika')
