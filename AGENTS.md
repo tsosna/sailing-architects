@@ -9,6 +9,7 @@
 - After code changes: `pnpm check` and `pnpm lint`
 - Dev: `pnpm dev`
 - Build: `pnpm build`
+- Daily handoff report email (default on): `pnpm -s email:handoff:yesterday` uses `HANDOFF_REPORT_TO` from `.env` (no entries yesterday → no email)
 
 ## Formatting
 

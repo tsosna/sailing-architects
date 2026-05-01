@@ -16,6 +16,7 @@
 		"codex:stop": "node scripts/codex-session-stop.mjs",
 		"codex:compact": "node scripts/codex-session-stop.mjs",
 		"email:handoff": "node --env-file=.env scripts/send-handoff-report.mjs",
+		"email:handoff:yesterday": "node --env-file=.env scripts/send-yesterday-handoff-report.mjs",
 		"email:test": "node --env-file=.env scripts/send-test-email.mjs"
 	},
 	"pnpm": {

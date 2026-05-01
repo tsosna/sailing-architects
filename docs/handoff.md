@@ -574,3 +574,81 @@ Checkpoint przed kompaktowaniem po pracy nad booking flow Sailing Architects. Od
 - Zweryfikować webhook Stripe lokalnie/na preview, bo bez poprawnego payment_intent.succeeded rezerwacja może zostać pending/held do wygaśnięcia.
 - Rozważyć później przeniesienie userId z query paramu PDF na server-side auth/Clerk/Convex auth, żeby endpoint potwierdzenia nie ufał jawnie przekazanemu userId.
 - Przed commitem sprawdzić/omówić szeroki zestaw niecommitowanych zmian: docs/handoff.md, package.json/pnpm-lock, Convex schema/mutations/queries/crons, /book, dashboard, endpoint PDF, locale.
+
+## Sesja 2026-05-01 09:51 — Booking uczestnicy i płatności ratalne
+
+Checkpoint przed kompaktowaniem po dużej przebudowie booking flow: holdy miejsc, PDF z polskimi znakami, e-mail potwierdzenia, rozdzielenie kupującego od żeglarzy, opcjonalne dane załogi oraz model płatności ratalnych.
+
+### Zmiany
+
+- Dodano bookingParticipants jako osobne rekordy uczestników przypisane do bookingów i koi; nowe bookingi tworzą uczestników w stanie missing, a checkout nie wymaga już danych żeglarzy przed płatnością.
+- Naprawiono PDF przez osadzenie fontu DejaVuSans z dejavu-fonts-ttf oraz dodano wysyłkę potwierdzenia PDF przez Brevo po Stripe webhook, z fallbackiem na buyerEmail.
+- Dodano model płatności ratalnych: paymentPlans, paymentPlanItems i bookingPayments, plan admina per segment, harmonogram płatności per booking oraz mutacje do oznaczania wybranych rat jako processing/paid/failed.
+
+### Decyzje
+
+- PLN zostaje jedyną walutą na teraz; model paymentPlans ma jednak jawne currency, żeby późniejszy EUR można było dodać bez przebudowy całego schematu.
+- Etap 4, czyli UI i Stripe flow dla zaliczki / większej wpłaty / całości, nie został jeszcze rozpoczęty, bo użytkownik poprosił o checkpoint przed kompaktowaniem.
+
+### Wnioski
+
+- Po rozdzieleniu kupującego i żeglarzy e-mail potwierdzenia nie może zależeć od crewProfiles; buyerEmail musi być zapisany na booking już przy create-intent.
+- Dla rat jedna płatność Stripe może obejmować kilka pozycji harmonogramu, więc bookingPayments dostały stripePaymentIntentId i osobne mutacje markBookingPaymentsProcessing/confirmBookingPayments/cancelBookingPayments.
+
+### Następne kroki
+
+- Po kompaktowaniu rozpocząć Etap 4: pozwolić użytkownikowi wybrać w checkout/panelu, czy płaci zaliczkę, kilka rat, czy całość, a create-intent musi liczyć amount z wybranych bookingPayments.
+- Przed commitem przejrzeć szeroki zestaw zmian i pamiętać, że pnpm build wcześniej dochodził do adaptera Vercel, ale padał na lokalnym @vercel/nft QuickLook path.
+
+## Sesja 2026-05-01 10:55 — Raport handoff: automatyczna wysyłka
+
+Sesja domknęła wysyłkę raportu handoff dla klienta za 2026-04-30 oraz dopięła stabilny sposób uruchamiania automatycznej wysyłki raportu „z wczoraj” na przyszłość.
+
+### Zmiany
+
+- Przygotowano raport HTML za 2026-04-30 na podstawie wpisów w docs/handoff.md i wysłano go do msmolarski@jmsstudio.com przez Brevo (transactional email).
+- Dodano skrypt email:handoff:yesterday, który:
+  - liczy datę „wczoraj” lokalnie
+  - wysyła raport tylko wtedy, gdy są wpisy z tej daty
+  - generuje plik HTML w /private/tmp dla diagnostyki
+- Dodano krótki opis jak uruchamiać wysyłkę cyklicznie (cron/scheduler) w docs/handoff-email-automation.md.
+- Dodano draft do bazy wiedzy repo: docs/kb/daily-handoff-email-automation.md (wzorzec do użycia w kolejnych projektach).
+
+### Decyzje
+
+- Automatyzacja raportu ma działać w trybie „no-op”: nie wysyłać e-maila, jeśli brak wpisów z poprzedniego dnia.
+
+### Wnioski
+
+- W środowisku sandbox (agent/CI) wysyłka HTTP może paść na brak DNS/Internetu (np. ENOTFOUND api.brevo.com). Tę automatyzację trzeba uruchamiać na runnerze z dostępem do sieci albo w trybie poza sandboxem.
+
+### Następne kroki
+
+#### Next
+
+- Ustawić cykliczne uruchamianie email:handoff:yesterday (cron/scheduler) w docelowym środowisku.
+
+#### Blocked / Later / Open questions
+
+- pnpm lint nadal raportuje znane problemy formatowania w src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte (nie dotykane w tej sesji).
+
+## Sesja 2026-05-01 10:56 — Raport handoff: automatyczna wysyłka
+
+Przygotowano i wysłano raport prac za 2026-04-30 oraz dopięto mechanizm automatycznego wysyłania raportów z wczoraj.
+
+### Zmiany
+
+- Wysyłka raportu przez Brevo z gotowego HTML.
+- Dodano skrypt email:handoff:yesterday, który wysyła tylko jeśli są wpisy z wczoraj.
+
+### Decyzje
+
+- Automatyzacja ma nie wysyłać maila, gdy brak wpisów z poprzedniego dnia.
+
+### Wnioski
+
+- W sandboxie może nie być DNS/Internetu (ENOTFOUND api.brevo.com) — wysyłkę uruchamiać na runnerze z dostępem do sieci.
+
+### Następne kroki
+
+- Ustawić uruchamianie email:handoff:yesterday w cron/scheduler oraz rozwiązać pnpm lint dla pliku dashboard/crew/[participantId].
