@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Poradnik Załogi — Sailing Architects</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy: #0d1b2e;
+  --navy-mid: #0f1f35;
+  --navy-light: #162840;
+  --brass: #c4923a;
+  --warm-white: #f5f0e8;
+  --muted: rgba(245,240,232,0.45);
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --sidebar-w: 220px;
+  --content-max: 720px;
+}
+html { scroll-behavior: smooth; }
+body { background: var(--navy); color: var(--warm-white); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+::selection { background: rgba(196,146,58,0.28); }
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--navy); }
+::-webkit-scrollbar-thumb { background: rgba(196,146,58,0.25); }
+
+/* Phase badge */
+.phase-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid rgba(196,146,58,0.3);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(196,146,58,0.65);
+  font-family: var(--font-sans);
+  white-space: nowrap;
+}
+
+/* Checklist */
+.checklist-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(196,146,58,0.07);
+}
+.checklist-item:last-child { border-bottom: none; }
+.check-box {
+  width: 16px; height: 16px;
+  border: 1px solid rgba(196,146,58,0.4);
+  flex-shrink: 0;
+  margin-top: 1px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.check-box.checked { background: #c4923a; }
+.check-box.checked::after { content: '✓'; font-size: 9px; color: #0d1b2e; font-weight: 700; }
+
+/* Accordion */
+.qa-item { border-top: 1px solid rgba(196,146,58,0.1); }
+.qa-item:last-child { border-bottom: 1px solid rgba(196,146,58,0.1); }
+.qa-q {
+  width: 100%; padding: 18px 0; background: none; border: none;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 16px; cursor: pointer; text-align: left;
+}
+.qa-q-text {
+  font-family: var(--font-sans); font-size: 15px;
+  color: var(--warm-white); font-weight: 400; line-height: 1.45;
+}
+.qa-q-text.open { color: var(--brass); }
+.qa-icon {
+  color: var(--brass); font-size: 18px; flex-shrink: 0;
+  line-height: 1; margin-top: 2px;
+  transition: transform 0.2s;
+}
+.qa-a {
+  padding-bottom: 20px;
+  font-size: 14px; line-height: 1.8; color: rgba(245,240,232,0.58);
+}
+
+/* Sidebar nav */
+@media (max-width: 800px) {
+  .layout { flex-direction: column !important; }
+  .sidebar { position: static !important; width: 100% !important; border-right: none !important; border-bottom: 1px solid rgba(196,146,58,0.1) !important; padding: 16px 24px !important; }
+  .sidebar-nav { flex-direction: row !important; flex-wrap: wrap !important; gap: 8px !important; }
+  .sidebar-link { padding: 6px 12px !important; border-left: none !important; border: 1px solid rgba(196,146,58,0.2) !important; font-size: 11px !important; }
+  .sidebar-link.active { border-color: var(--brass) !important; background: rgba(196,146,58,0.08) !important; }
+  .main-content { padding: 32px 24px !important; }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="components/crew-guide.js"></script>
+
+<script type="text/babel">
+const { CREW_GUIDE } = window;
+
+// ── NAV ────────────────────────────────────────────────────
+function TopNav() {
+  return (
+    <nav style={{
+      position: 'sticky', top: 0, zIndex: 50,
+      background: 'rgba(13,27,46,0.97)', backdropFilter: 'blur(12px)',
+      borderBottom: '1px solid rgba(196,146,58,0.1)',
+      padding: '0 32px', height: '56px',
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <a href="Sailing Architects.html" style={{
+          fontFamily: 'var(--font-sans)', fontSize: '11px', letterSpacing: '1.5px',
+          color: 'rgba(196,146,58,0.55)', textDecoration: 'none', textTransform: 'uppercase',
+        }}>← Sailing Architects</a>
+        <span style={{ color: 'rgba(196,146,58,0.2)', fontSize: '12px' }}>/</span>
+        <span style={{ fontFamily: 'var(--font-sans)', fontSize: '12px', color: 'rgba(245,240,232,0.5)', letterSpacing: '0.5px' }}>Poradnik załogi</span>
+      </div>
+      <a href="Sailing Architects.html" style={{
+        padding: '8px 20px', background: '#c4923a', border: 'none',
+        color: '#0d1b2e', fontFamily: 'var(--font-sans)', fontSize: '11px',
+        fontWeight: '700', letterSpacing: '2px', textTransform: 'uppercase',
+        cursor: 'pointer', textDecoration: 'none', display: 'inline-block',
+      }}>Rezerwuj</a>
+    </nav>
+  );
+}
+
+// ── HERO informacyjny ───────────────────────────────────────
+function GuideHero() {
+  return (
+    <div style={{
+      background: 'linear-gradient(180deg, #0f1f35 0%, #0d1b2e 100%)',
+      borderBottom: '1px solid rgba(196,146,58,0.1)',
+      padding: '56px 40px 48px',
+    }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <span className="phase-badge" style={{ marginBottom: '20px', display: 'inline-block' }}>Sail Adventure 2026</span>
+        <h1 style={{
+          fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px, 4vw, 48px)',
+          fontWeight: '400', color: 'var(--warm-white)', margin: '0 0 12px', lineHeight: 1.1,
+        }}>Poradnik załogi</h1>
+        <p style={{
+          fontFamily: 'var(--font-serif)', fontSize: '18px', fontStyle: 'italic',
+          color: 'rgba(196,146,58,0.75)', margin: '0 0 20px',
+        }}>Palma de Mallorca → Cabo Verde · Październik–Listopad 2026</p>
+        <p style={{
+          fontFamily: 'var(--font-sans)', fontSize: '15px',
+          color: 'rgba(245,240,232,0.5)', lineHeight: '1.75', maxWidth: '540px', margin: '0 0 32px',
+        }}>
+          Wszystko, co powinieneś wiedzieć przed decyzją, po rezerwacji i tuż przed wyjazdem.
+          Przeczytaj spokojnie — ocean jest cierpliwy.
+        </p>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <div style={{ width: '32px', height: '32px', border: '1px solid rgba(196,146,58,0.3)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontFamily: 'var(--font-sans)', fontSize: '10px', fontWeight: '700', color: '#c4923a' }}>SA</span>
+            </div>
+            <div>
+              <p style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', color: 'var(--warm-white)', margin: 0 }}>Michał · Sailing Architects</p>
+              <p style={{ fontFamily: 'var(--font-sans)', fontSize: '10px', color: 'rgba(196,146,58,0.5)', margin: 0 }}>+48 601 671 182 · sailingarchitects@gmail.com</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── CHECKLIST ───────────────────────────────────────────────
+function Checklist({ data }) {
+  const [checked, setChecked] = React.useState(new Set());
+  const toggle = (i) => setChecked(prev => {
+    const n = new Set(prev);
+    n.has(i) ? n.delete(i) : n.add(i);
+    return n;
+  });
+  const done = checked.size;
+  const total = data.items.length;
+
+  return (
+    <div style={{ marginBottom: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+        <span className="phase-badge">{data.phase}</span>
+        <span style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', color: done === total ? '#c4923a' : 'rgba(245,240,232,0.3)' }}>
+          {done}/{total}
+        </span>
+      </div>
+      {/* Progress bar */}
+      <div style={{ height: '2px', background: 'rgba(196,146,58,0.12)', marginBottom: '16px' }}>
+        <div style={{ height: '2px', background: '#c4923a', width: `${(done/total)*100}%`, transition: 'width 0.3s ease' }} />
+      </div>
+      {data.items.map((item, i) => (
+        <div key={i} className="checklist-item" onClick={() => toggle(i)} style={{ cursor: 'pointer' }}>
+          <div className={`check-box ${checked.has(i) ? 'checked' : ''}`} />
+          <span style={{
+            fontFamily: 'var(--font-sans)', fontSize: '13px', lineHeight: '1.5',
+            color: checked.has(i) ? 'rgba(245,240,232,0.35)' : 'rgba(245,240,232,0.75)',
+            textDecoration: checked.has(i) ? 'line-through' : 'none',
+            transition: 'color 0.15s',
+          }}>{item}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Q&A SECTION ─────────────────────────────────────────────
+function QASection({ items }) {
+  const [open, setOpen] = React.useState(null);
+  return (
+    <div>
+      {items.map((item) => (
+        <div key={item.id} className="qa-item">
+          <button className="qa-q" onClick={() => setOpen(open === item.id ? null : item.id)}>
+            <span className={`qa-q-text ${open === item.id ? 'open' : ''}`}>{item.q}</span>
+            <span className="qa-icon" style={{ transform: open === item.id ? 'rotate(45deg)' : 'none' }}>+</span>
+          </button>
+          {open === item.id && (
+            <div className="qa-a">{item.a}</div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── SIDEBAR ─────────────────────────────────────────────────
+function Sidebar({ activeCategory, onSelect }) {
+  const sections = [
+    { id: 'checklists', label: 'Checklisty' },
+    ...CREW_GUIDE.categories,
+  ];
+  return (
+    <aside className="sidebar" style={{
+      width: 'var(--sidebar-w)', flexShrink: 0,
+      position: 'sticky', top: '56px', alignSelf: 'flex-start',
+      maxHeight: 'calc(100vh - 56px)', overflowY: 'auto',
+      borderRight: '1px solid rgba(196,146,58,0.1)',
+      padding: '32px 0',
+    }}>
+      <p style={{ fontFamily: 'var(--font-sans)', fontSize: '9px', letterSpacing: '2.5px', textTransform: 'uppercase', color: 'rgba(196,146,58,0.4)', padding: '0 24px', marginBottom: '12px' }}>Nawigacja</p>
+      <nav className="sidebar-nav" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        {sections.map(s => (
+          <a key={s.id} href={`#${s.id}`}
+            className={`sidebar-link ${activeCategory === s.id ? 'active' : ''}`}
+            onClick={() => onSelect(s.id)}
+            style={{
+              padding: '8px 24px',
+              borderLeft: `2px solid ${activeCategory === s.id ? '#c4923a' : 'transparent'}`,
+              background: activeCategory === s.id ? 'rgba(196,146,58,0.06)' : 'transparent',
+              fontFamily: 'var(--font-sans)', fontSize: '12px',
+              color: activeCategory === s.id ? '#c4923a' : 'rgba(245,240,232,0.5)',
+              textDecoration: 'none', display: 'block',
+              transition: 'all 0.15s',
+            }}
+          >{s.label}</a>
+        ))}
+      </nav>
+
+      {/* Contact block */}
+      <div style={{ margin: '32px 24px 0', padding: '16px', border: '1px solid rgba(196,146,58,0.15)', background: 'rgba(196,146,58,0.04)' }}>
+        <p style={{ fontFamily: 'var(--font-sans)', fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(196,146,58,0.5)', marginBottom: '8px' }}>Pytania?</p>
+        <p style={{ fontFamily: 'var(--font-sans)', fontSize: '12px', color: 'rgba(245,240,232,0.7)', marginBottom: '6px', lineHeight: 1.5 }}>Michał odpowiada w ciągu 24h.</p>
+        <a href="tel:+48601671182" style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', color: '#c4923a', textDecoration: 'none', display: 'block', marginBottom: '2px' }}>+48 601 671 182</a>
+        <a href="mailto:sailingarchitects@gmail.com" style={{ fontFamily: 'var(--font-sans)', fontSize: '10px', color: 'rgba(196,146,58,0.6)', textDecoration: 'none', display: 'block', lineHeight: 1.4 }}>sailingarchitects@gmail.com</a>
+      </div>
+    </aside>
+  );
+}
+
+// ── SECTION HEADER ──────────────────────────────────────────
+function SectionHeader({ label, title, phase }) {
+  return (
+    <div style={{ marginBottom: '32px', paddingBottom: '20px', borderBottom: '1px solid rgba(196,146,58,0.1)' }}>
+      {phase && <span className="phase-badge" style={{ display: 'inline-block', marginBottom: '10px' }}>{phase}</span>}
+      <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: '400', color: 'var(--warm-white)', margin: 0 }}>{title}</h2>
+    </div>
+  );
+}
+
+// ── MAIN APP ─────────────────────────────────────────────────
+function App() {
+  const [activeCategory, setActiveCategory] = React.useState('checklists');
+
+  // Grouped Q&A by category
+  const byCategory = {};
+  CREW_GUIDE.qa.forEach(q => {
+    if (!byCategory[q.category]) byCategory[q.category] = [];
+    byCategory[q.category].push(q);
+  });
+
+  return (
+    <div>
+      <TopNav />
+      <GuideHero />
+
+      <div className="layout" style={{ display: 'flex', minHeight: 'calc(100vh - 56px)' }}>
+        <Sidebar activeCategory={activeCategory} onSelect={setActiveCategory} />
+
+        <main className="main-content" style={{ flex: 1, padding: '48px 48px 80px', maxWidth: 'calc(var(--content-max) + 96px)' }}>
+
+          {/* ── CHECKLISTY ── */}
+          <section id="checklists" style={{ marginBottom: '72px' }}>
+            <SectionHeader title="Najważniejsze przed wypłynięciem" phase="Przegląd przed rejsem" />
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '14px', color: 'rgba(245,240,232,0.45)', lineHeight: '1.75', marginBottom: '40px', maxWidth: '540px' }}>
+              Trzy checklisty, trzy momenty. Odhaczaj pozycje — stan zapisuje się w przeglądarce.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1px', background: 'rgba(196,146,58,0.1)', marginBottom: '8px' }}>
+              {Object.values(CREW_GUIDE.checklists).map(cl => (
+                <div key={cl.title} style={{ background: 'var(--navy)', padding: '28px 24px' }}>
+                  <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '18px', fontWeight: '400', color: 'var(--warm-white)', margin: '0 0 20px' }}>{cl.title}</h3>
+                  <Checklist data={cl} />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ── KATEGORIE Q&A ── */}
+          {CREW_GUIDE.categories.map(cat => {
+            const items = byCategory[cat.id] || [];
+            if (!items.length) return null;
+            const firstPhase = items[0]?.phase;
+            return (
+              <section key={cat.id} id={cat.id} style={{ marginBottom: '64px' }}>
+                <SectionHeader title={cat.label} phase={firstPhase} />
+                <QASection items={items} />
+              </section>
+            );
+          })}
+
+          {/* ── FOOTER CTA ── */}
+          <div style={{ marginTop: '64px', padding: '40px', background: 'rgba(196,146,58,0.05)', border: '1px solid rgba(196,146,58,0.2)' }}>
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '2.5px', textTransform: 'uppercase', color: 'rgba(196,146,58,0.55)', marginBottom: '10px' }}>Gotowy/gotowa?</p>
+            <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '26px', fontWeight: '400', color: 'var(--warm-white)', margin: '0 0 8px' }}>Zostań częścią załogi.</h3>
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '14px', color: 'rgba(245,240,232,0.45)', lineHeight: '1.7', margin: '0 0 28px', maxWidth: '420px' }}>
+              Wybierz etap, wybierz koję, dołącz. Zostało jeszcze kilka miejsc na rejs 2026.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <a href="Sailing Architects.html" style={{
+                padding: '14px 36px', background: '#c4923a', border: 'none',
+                color: '#0d1b2e', fontFamily: 'var(--font-sans)', fontSize: '12px',
+                fontWeight: '700', letterSpacing: '2px', textTransform: 'uppercase',
+                cursor: 'pointer', textDecoration: 'none', display: 'inline-block',
+              }}>Wybierz koję →</a>
+              <a href="mailto:sailingarchitects@gmail.com" style={{
+                padding: '14px 24px', background: 'none', border: '1px solid rgba(196,146,58,0.3)',
+                color: 'rgba(245,240,232,0.6)', fontFamily: 'var(--font-sans)', fontSize: '12px',
+                letterSpacing: '2px', textTransform: 'uppercase', textDecoration: 'none',
+                display: 'inline-block',
+              }}>Napisz do Michała</a>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
