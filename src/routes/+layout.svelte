@@ -45,6 +45,15 @@
 			formFieldInputShowPasswordIcon: {
 				color: '#d4aa5a'
 			},
+			otpCodeFieldInput: {
+				backgroundColor: '#162840',
+				borderColor: 'rgba(212, 170, 90, 0.58)',
+				color: '#f5f0e8',
+				caretColor: '#d4aa5a'
+			},
+			identityPreviewEditButton: {
+				color: '#d4aa5a'
+			},
 			formButtonPrimary: {
 				backgroundColor: '#c4923a',
 				color: '#07111e',

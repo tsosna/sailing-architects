@@ -600,6 +600,41 @@ Checkpoint przed kompaktowaniem po dużej przebudowie booking flow: holdy miejsc
 - Po kompaktowaniu rozpocząć Etap 4: pozwolić użytkownikowi wybrać w checkout/panelu, czy płaci zaliczkę, kilka rat, czy całość, a create-intent musi liczyć amount z wybranych bookingPayments.
 - Przed commitem przejrzeć szeroki zestaw zmian i pamiętać, że pnpm build wcześniej dochodził do adaptera Vercel, ale padał na lokalnym @vercel/nft QuickLook path.
 
+## Sesja 2026-05-01 12:16 — Raport handoff dla klienta i automatyczna wysyłka
+
+Sesja przygotowała raport prac za 2026-04-30 i dopięła prosty mechanizm automatycznej wysyłki raportów „z wczoraj” (tylko jeśli są wpisy do raportowania).
+
+### Zmiany
+
+- Przygotowano HTML raportu „Raport prac — 2026-04-30” i wysłano go przez Brevo na `msmolarski@jmsstudio.com` (po ponowieniu wysyłki poza sandboxem).
+- Dodano skrypt `email:handoff:yesterday`, który:
+	- wyciąga wpisy z `docs/handoff.md` z poprzedniego dnia
+	- generuje krótki raport HTML po polsku bez technicznego żargonu
+	- wysyła e-mail tylko wtedy, gdy są realne wpisy do raportowania
+- Dodano krótką instrukcję uruchamiania cyklicznego (cron) w `docs/handoff-email-automation.md`.
+- Dodano draft artykułu do bazy wiedzy projektu: `docs/kb/daily-handoff-email-automation.md` (do promocji do knowledge-vault przy kolejnej okazji).
+
+### Decyzje
+
+- Raport dzienny ma być wysyłany wyłącznie wtedy, gdy w `docs/handoff.md` są wpisy z poprzedniego dnia.
+- Skrypt raportu ma budować treść biznesowo i prosto (bez nazw plików/komend/bibliotek), nawet jeśli wejściowe wpisy w handoff są techniczne.
+
+### Wnioski
+
+- W środowisku sandbox może nie być dostępu do DNS/Internetu (objaw: `ENOTFOUND api.brevo.com`) — automatyczna wysyłka musi działać na runnerze z dostępem do sieci.
+- `pnpm check` przechodzi, ale `pnpm lint` nadal wskazuje znane problemy formatowania w istniejącym pliku dashboardu (niezwiązane bezpośrednio z tą sesją).
+
+### Następne kroki
+
+#### Next
+
+- Ustalić gdzie ma działać harmonogram wysyłki (cron na maszynie / Vercel Cron / GitHub Actions) i wprowadzić zmienne środowiskowe Brevo w secrets danego środowiska.
+- Rozstrzygnąć, co robimy z `pnpm lint` (format lub wyjątek dla problematycznego pliku), żeby automatyzacje nie były blokowane.
+
+#### Blocked / Later / Open questions
+
+- Promocja artykułu `docs/kb/daily-handoff-email-automation.md` do `knowledge-vault/wiki/` (ponadprojektowy wzorzec dla kolejnych projektów).
+
 ## Sesja 2026-05-01 10:55 — Raport handoff: automatyczna wysyłka
 
 Sesja domknęła wysyłkę raportu handoff dla klienta za 2026-04-30 oraz dopięła stabilny sposób uruchamiania automatycznej wysyłki raportu „z wczoraj” na przyszłość.
@@ -695,3 +730,181 @@ Checkpoint dla nowych sesji Codex, żeby nie zaczynały analizy booking flow od 
 
 - Przy kolejnej dużej sesji bookingowej rozpocząć od Etapu 8: migracje legacy / cleanup / pełne testy E2E i domknięcie jakości flow.
 - Przed kolejnymi zmianami w booking flow sprawdzić, czy aktualne decyzje z Etapów 4-7 nie pokrywają już proponowanego rozwiązania.
+
+## Sesja 2026-05-01 — Etap 4-8 booking refactor + push main
+
+### Zmiany
+
+- **Etap 4**: `applyStripePayment` zastępuje `confirmBooking`/`confirmBookingPayments`; create-intent przyjmuje `selectedSortOrders[]`; nowy `/api/stripe/pay-installment` + standalone `/dashboard/pay/[paymentId]`; wybór „Co płacisz teraz?" w `/book` step 5 (kumulatywny prefix harmonogramu); `seedTestPaymentPlan` helper.
+- **Etap 5**: Lista kart uczestników w `/dashboard` tab „Dane załogi" (legacy crewProfile ukryty); standalone `/dashboard/crew/[participantId]` z reuse `crewProfileSchema` + „Skopiuj moje dane"; checklisty Dane załogi/Płatności w tabie Rezerwacja.
+- **Etap 6**: PDF dostał sekcję Harmonogram płatności; `sendPaymentConfirmationEmail({type: deposit/installment/fully-paid})`; per-payment email tracker (`confirmationEmailSentAt` na `bookingPayments` + `markPaymentEmailSent`); webhook klasyfikuje typ maila, PDF tylko dla deposit + fully-paid.
+- **Etap 7**: Convex Brevo helpers (`src/convex/_brevo.ts`, `_emails.ts`) + crons reminders (`markOverduePayments` daily, `sendCrewDataReminders`/`sendUpcomingPaymentReminders`/`sendOverduePaymentReminders` daily); throttle (crew 14d×3, upcoming 1×, overdue 3d×5); `REMINDERS_DRY_RUN` guard.
+- **Etap 8**: `backfillLegacyBookingPayments` idempotentna migracja istniejących bookings → 1 wiersz `kind:'full'` + uzupełnienie `totalAmount`/`paymentStatus`/`currency`; `docs/etap-test-checklist.md` (manualne E2E scenariusze).
+- **Commits**: `649e079` Etap 1-4, `5d6d7ca` Etap 5, `0ad408e` Etap 6-7, `ad743e2` Etap 8 → `git push origin main` zrobiony.
+
+### Decyzje
+
+- Wariant **2a** wybrany dla checkout: radio z prefix-z-planu zamiast custom kwoty; 2c (partial payments) jako future evolution (project memory zapisana).
+- Berths → `taken` już po zaliczce (semantyka: zarezerwowane), booking osobno trzyma `paymentStatus = deposit_paid`.
+- Email installment **bez PDF** (lekki mail), deposit/fully-paid z PDF — kompromis spam vs dokumentacja.
+- Convex env vars dla reminderów (`BREVO_*`, `PUBLIC_APP_URL`) ustawiane **osobno** od SvelteKit `.env` (przez `npx convex env set`).
+- Migracja legacy → jedna pozycja `kind:'full'` z paid jeśli booking confirmed (nie dorabiamy retroaktywnego harmonogramu).
+- Dla Etapu 5 legacy `crewProfiles` ukryte z UI dashboardu, ale prefilluje „Skopiuj moje dane" na stronie uczestnika.
+
+### Wnioski
+
+- **`$derived`** w Svelte 5 nie przyjmuje funkcji — dla złożonej derivacji używać **`$derived.by(() => {...})`**. Inaczej derived zawiera funkcję jako wartość. → kandydat na wiki
+- **BookingInput.oninput** jest `() => void` (bez args). Dla listy kart z dynamicznymi kluczami stanu w Svelte 5 najprostszy pattern: **uncontrolled input + `bind:this={refMap[id]}` + czytanie `.value` na save**. Omija problemy z `bind:value` do dynamicznie tworzonych kluczy `$state`. → kandydat na wiki
+- **Convex pliki z prefiksem `_`** są wykluczone z public API codegen (`api.ts`) — idealne na helpery internal modułów (`_brevo.ts`, `_emails.ts`). → kandydat na wiki
+- **Convex actions używają `process.env.*`** (Convex runtime), osobno od SvelteKit `$env/static/private`. Multi-runtime aplikacja wymaga ustawienia envów dwukrotnie. → kandydat na wiki
+- W Convex `internalQuery`/`runQuery` z tego samego pliku trzeba podać **explicit return type** na `await ctx.runQuery(...)`, żeby TS cycle-detection nie wywaliła. → kandydat na wiki
+- `cancelBooking` woła się tylko po `booking.stripePaymentIntentId` — przy rozdziale na booking PI vs installment PI ma to skutek uboczny: failure raty NIE anuluje bookingu (cancelBookingPayments markuje tylko ratę jako failed). Accidentalnie poprawne — webhook bezpiecznie woła oba.
+
+### Następne kroki
+
+#### Next
+
+- Push do `production` branch (z `main`) → automatyczny Vercel deploy.
+- `npx convex deploy` na prod + ustawić env vars w Convex Dashboard (`BREVO_API_KEY`, `BREVO_FROM_EMAIL`, `PUBLIC_APP_URL`).
+- Uruchomić jednorazowo `mutations:backfillLegacyBookingPayments` i `mutations:backfillBookingParticipants` z Convex Dashboard po deploy.
+- Manualny przebieg `docs/etap-test-checklist.md` na preview Vercel przed promote do prod.
+
+#### Blocked / Later / Open questions
+
+- Lokalizacja maili PL only — Wuchale nie sięga w server-side moduły.
+- `pnpm lint` nadal pada na pre-existing pliki (`docs/handoff.md`, design HTML, codex script) — nie blokuje, do uporządkowania.
+- Wariant 2c (custom kwota >= zaliczka + partial payments) — czeka na sygnał biznesowy.
+## Sesja 2026-05-01 16:30 — Admin console design handoff
+
+### Zmiany
+
+- Przygotowano projektowy handoff rozbudowy `/admin` jako centrum sprzedaży, płatności, alertów i kompletności danych załogi:
+  - `docs/design/admin-operations-console-spec.md`
+  - `docs/design/admin-crew-data-verification-spec.md`
+  - `docs/design/admin-implementation-prompts.md`
+  - `docs/design/huashu-admin-operations-console.html`
+- Rozszerzono prototyp Huashu o zakładki i moduły: Sales Board, Alert Queue, Automatyzacje, Dane załogi, Miejsca specjalne, drawer rezerwacji, monity adhoc, token flow potwierdzania danych i elastyczny harmonogram rat.
+- Przygotowano materiały review dla Michała:
+  - `docs/design/admin-panel-review-for-michal.html`
+  - `docs/design/admin-clickable-prototype-email.html`
+- Wysłano do `HANDOFF_REPORT_TO` dwa maile przez Brevo:
+  - opis biznesowy projektu panelu admina, message ID `<202605011235.93153449012@smtp-relay.mailin.fr>`
+  - klikalny prototyp HTML jako załącznik, message ID `<202605011240.30414070110@smtp-relay.mailin.fr>`
+- Dodano obsługę załączników do skryptów:
+  - `scripts/brevo-mail.mjs`
+  - `scripts/send-handoff-report.mjs`
+- Zrobiono commit `f79ca7f Add admin console design handoff`.
+
+### Decyzje
+
+- Produkcyjny dostęp do `/admin` ma być zabezpieczony przez Clerk role / metadata; produkcyjnie dostęp ma kapitan/operator, a w dev dodatkowo właściciel projektu jako operator testowy przez dev-only allowlist.
+- Brevo zostaje aktualnym providerem monitów i alertów.
+- Alerty admina mają być widoczne w panelu oraz wysyłane e-mailem do adresu analogicznego do `HANDOFF_REPORT_TO`.
+- WhatsApp/SMS na start pozostają jako ręcznie kopiowana treść, z możliwością późniejszej automatyzacji.
+- Harmonogram rat ma być elastyczny: admin wybiera szablon/liczbę pozycji, a plan segmentu jest przepisywany jako snapshot do bookingu.
+- Dane żeglarzy wpisane przez admina nie są automatycznie finalne; uczestnik potwierdza je przez bezpieczny link tokenowy albo zgłasza korektę.
+- Maile admin/crew/reminder mają stylistycznie bazować na mailach przygotowanych dla Michała: navy/brass, karta, inline styles, prosty język biznesowy, czytelne CTA.
+- `captain` i `complimentary` zostają modułem obok Sales Board, bez mieszania z normalną sprzedażą.
+- Pełny audit log zostaje na później.
+
+### Wnioski
+
+- Klikalny prototyp wysyłany mailem najlepiej przesyłać jako załącznik HTML z krótką instrukcją, bo klient pocztowy może blokować JS/CSS w podglądzie.
+- Prompty dla kolejnego implementera powinny mieć formę senior-level brief: cel, kontekst, gotchas, weryfikacja; nie przepisywać implementacji linijka po linijce.
+- `docs/design/huashu-admin-operations-console.html` jest wzorcem UI/UX, ale produkcyjna implementacja musi opierać się na realnych danych Convex i uprawnieniach Clerk.
+- Zmiany w `docs/handoff.md` istniały już przed commitem i nie zostały ujęte w commicie `f79ca7f`.
+
+### Następne kroki
+
+#### Next
+
+- Poczekać na feedback Michała do projektu panelu admina i ewentualnie doprecyzować UX/proces.
+- Implementację zacząć od Etapu 1 w `docs/design/admin-implementation-prompts.md`: bezpieczny access control `/admin` przez Clerk.
+- Następnie Etap 2: read-only Admin Overview z realnymi KPI, Sales Board i Alert Queue z Convex.
+
+#### Blocked / Later / Open questions
+
+- Ustalić ostatecznie długość ważności linku potwierdzającego dane żeglarza: 7 czy 14 dni.
+- Ustalić, czy alerty krytyczne do admina mają iść natychmiast, czy w rytmie dziennym.
+- Po obserwacji sprzedaży wrócić do decyzji o audit logu i automatyzacji WhatsApp/SMS.
+
+## Sesja 2026-05-01 16:31 — Admin console design handoff
+
+Sesja przygotowała design-first handoff rozbudowy /admin jako centrum sprzedaży, płatności, alertów i danych załogi oraz wysłała materiały review do Michała.
+
+### Zmiany
+- Dodano specy, prototyp Huashu i senior-level prompty wdrożeniowe dla etapów Admin Console.
+- Wysłano do HANDOFF_REPORT_TO mail z opisem panelu oraz drugi mail z klikalnym prototypem HTML jako załącznikiem.
+
+### Decyzje
+- Produkcyjny /admin ma być zabezpieczony przez Clerk role metadata; Brevo zostaje providerem monitów; raty są elastyczne i snapshotowane do bookingów.
+
+### Wnioski
+- Klikalny HTML lepiej wysyłać jako załącznik z instrukcją otwarcia w przeglądarce, bo klient pocztowy może blokować interakcje.
+
+### Następne kroki
+- Po feedbacku Michała rozpocząć implementację od Etapu 1 w docs/design/admin-implementation-prompts.md: access control /admin przez Clerk.
+
+## Sesja 2026-05-01 17:48 — Codex session
+
+### Zmiany
+- Brak skrótu zmian.
+
+### Decyzje
+- Brak nowych decyzji.
+
+### Wnioski
+- Brak nowych wniosków.
+
+### Następne kroki
+- Brak zapisanych kolejnych kroków.
+
+## Sesja 2026-05-02 — Admin Operations Console Etap 1-8
+
+### Zmiany
+
+- Etap 1 (commit `040cda2`): guard `/admin` (`src/lib/server/admin-guard.ts`) z Clerk `publicMetadata.role` jako autorytetem i dev-only `ADMIN_DEV_ALLOWLIST`. Forbidden state w `+error.svelte`.
+- Etap 2 (commit `040cda2`): `src/convex/admin.ts:overviewBySegment` agregujące KPI / Sales Board / Alert Queue z priorytetyzacją alertów. Admin shell `+layout@.svelte` z sidebar (4 zakładki).
+- Etap 3 (commit `040cda2`): `bookingDetailById` query, `sendAdhocPaymentReminder` / `sendAdhocCrewDataReminder` actions z opcjonalną kopią do operatora. Drawer rezerwacji (raty, uczestnicy, historia kontaktu, copy WhatsApp). Email shell przerobiony na navy/brass card.
+- Etap 4 (commit `e678991`): `/admin/automation` editor harmonogramów rat z 4 szablonami. Backend (`upsertSegmentPaymentPlan` + snapshot w `createBookingPaymentSchedule`) już istniał.
+- Etap 5 (commit `e678991`): rozszerzenie `bookingParticipants` o `confirmationStatus` + `adminEditedAt/By`. Mutacja `adminUpdateParticipantData`. Drawer dostaje inline edit form i KPI „Do potwierdzenia".
+- Etap 6 (commit `e678991`): tabela `crewConfirmationTokens` (SHA-256 hash, 14-dniowy expiry). `sendCrewConfirmationLink` action (Brevo). Public `/crew/confirm/[token]` z @-reset layoutu. Mutacje `confirmCrewDataByToken` i `requestCrewDataCorrectionByToken`.
+- Etap 7 (commit `e678991`): `/admin/special` przepisany do dwóch paneli (Captain read-only, Complimentary edytowalne). Migracja captain schowana w `<details>`.
+- Etap 8 (commit `e678991`): `docs/admin-e2e-checklist.md` (9 scenariuszy) + `docs/admin-post-mvp-decisions.md` (11 pozycji backloga).
+
+### Decyzje
+
+- Convex auth hardening świadomie odłożony do post-MVP — `adminUserId` przyjmowany jako string arg, weryfikacja przez SvelteKit guard. Trigger: drugi operator lub audyt.
+- WhatsApp = client-side clipboard (bez DB write). Audit log nie ma osobnej tabeli — historia kontaktu derywowana z `lastReminderSentAt` / `reminderCount`.
+- Edycja przez admina cofa `confirmed` → `drafted_by_admin` (rekomendacja MVP w specu) — kapitan widzi rozjazd „dane się zmieniły, uczestnik nie wie".
+- Token użyty dopiero po akcji (nie podglądzie) — pozwala uczestnikowi otworzyć link wielokrotnie.
+- Plan segmentu zmienia się tylko dla nowych bookingów. Snapshotowanie już istniało w `createBookingPaymentSchedule`.
+- Email shell przerobiony na navy/brass z table layout — crony też dostały nową stylistykę (one shell, jedna spójność).
+
+### Wnioski
+
+- **SvelteKit `+layout@.svelte` (@-reset)** to czysty sposób na pominięcie parent layout (np. SiteNav) bez restrukturyzacji folderów. Działa równie dobrze dla admin shell jak i public token confirmation page. Wzorzec ponadprojektowy — kandydat do `knowledge-vault/wiki/`.
+- Convex actions mają dostęp do `crypto.subtle` i `crypto.getRandomValues` bez `'use node'` directive — wystarczające do generacji i hashowania tokenów.
+- Reactive Convex query w drawer: po mutacji dane same się odświeżają. Nie trzeba ręcznego invalidate.
+- KPI grid 7→8 kolumn wymagało ręcznej zmiany `repeat(N, ...)` — `auto-fit/minmax` byłoby bardziej odporne na rozszerzenia.
+- Edit z bezpośrednim Editem na pliku z tabami: czasem nie matchuje wieloliniowego stringa przy spacjach/tabach — bezpieczniej anchor na unikalnej linii niż cały blok.
+- `prettier-plugin-svelte` formatuje `bind:value`/atrybuty inaczej niż ręczny styl — final pass `prettier --write` warto trzymać na koniec etapu, nie po każdej zmianie.
+
+### Następne kroki
+
+#### Next
+
+- Push commits (`040cda2`, `e678991`) do `production` + `npx convex deploy` (z migrowaną schemą: `bookingParticipants` rozszerzone, `crewConfirmationTokens` nowa tabela).
+- Ustawić Convex env: `npx convex env set HANDOFF_REPORT_TO ...` i `PUBLIC_APP_URL ...` na prod.
+- Manualny przebieg `docs/admin-e2e-checklist.md` na preview Vercel.
+- Odpalić `convex.mutations.seedTestPaymentPlan` z `s1` jeśli nie ma planu w prod.
+- Ustawić Clerk publicMetadata `role: admin` dla operatorów produkcyjnych.
+
+#### Blocked / Later / Open questions
+
+- Convex auth hardening (`auth.config.ts` + `ctx.auth.getUserIdentity`) — najwyższy priorytet z post-MVP backloga, czeka na drugiego operatora lub audyt.
+- Auto-wygaszający cron na confirmation tokens — lazy expiry działa, niski priorytet.
+- WhatsApp/SMS automation — czeka na operacyjną potrzebę.
+- Single source of truth dla `voyageSegments` (statyczne `src/lib/data/voyage-segments.ts` vs Convex) — czeka na pierwszą rozbieżność.
+- Niezwiązane z admin: Clerk OTP styling (`+layout.svelte`, `book/+page.svelte`) — diff nieskommitowany, do osobnego commita.
+

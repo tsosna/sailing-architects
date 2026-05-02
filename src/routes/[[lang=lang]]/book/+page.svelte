@@ -1827,6 +1827,31 @@
 		box-shadow: 0 0 0 1px rgba(212, 170, 90, 0.36);
 	}
 
+	.clerk-host :global(.cl-otpCodeFieldInput),
+	.clerk-host :global(.cl-verificationCodeFieldInput) {
+		background: var(--color-navy-light) !important;
+		border-color: rgba(212, 170, 90, 0.58) !important;
+		color: var(--color-warm-white) !important;
+		caret-color: var(--color-brass-text) !important;
+		width: 42px !important;
+		height: 52px !important;
+		text-align: center !important;
+		font-size: 20px !important;
+		line-height: 1 !important;
+		letter-spacing: 0 !important;
+	}
+
+	.clerk-host :global(.cl-otpCodeFieldInputs),
+	.clerk-host :global(.cl-verificationCodeFieldInputs) {
+		display: flex !important;
+		gap: 8px !important;
+		justify-content: center !important;
+	}
+
+	.clerk-host :global(.cl-identityPreviewEditButton) {
+		color: var(--color-brass-text) !important;
+	}
+
 	.clerk-host :global(.cl-formButtonPrimary) {
 		color: var(--color-navy-deep);
 		font-weight: 700;
