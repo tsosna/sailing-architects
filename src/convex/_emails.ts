@@ -10,6 +10,65 @@ import {
 	type BrevoSendResult
 } from './_brevo'
 
+export type CrewConfirmationInput = {
+	to: string
+	name: string
+	bookingRef: string
+	berthLabel: string
+	confirmUrl: string
+	expiresAt: number
+}
+
+export async function sendCrewConfirmationEmail(
+	input: CrewConfirmationInput
+): Promise<BrevoSendResult> {
+	const safeName = input.name.trim() || 'Żeglarzu'
+	const expiry = formatDate(input.expiresAt)
+	const subject = `Potwierdź dane uczestnika rejsu · ${input.bookingRef}`
+
+	const html = shell({
+		eyebrow: 'Sailing Architects · Potwierdzenie danych',
+		heading: 'Potwierdź dane uczestnika rejsu',
+		greetingName: safeName,
+		bodyHtml: `
+			<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 16px;background:#0f1f35;border:1px solid rgba(196,146,58,0.18);">
+				<tr><td style="padding:14px 18px;color:#ede5d8;font-size:14px;line-height:1.7;">
+					<p style="margin:0 0 6px;color:rgba(245,240,232,0.66);font-size:12px;">Numer rezerwacji: <strong style="color:#f5f0e8;">${escapeHtml(input.bookingRef)}</strong></p>
+					<p style="margin:0;color:rgba(245,240,232,0.66);font-size:12px;">Koja: <strong style="color:#f5f0e8;">${escapeHtml(input.berthLabel)}</strong></p>
+				</td></tr>
+			</table>
+			<p style="margin:0 0 14px;">Wpisaliśmy Twoje dane na podstawie kontaktu z organizatorem. Otwórz krótką stronę i potwierdź, że wszystko się zgadza — albo zgłoś poprawkę.</p>
+			${ctaButton(input.confirmUrl, 'Sprawdź i potwierdź dane')}
+			<p style="margin:8px 0 0;color:rgba(245,240,232,0.55);font-size:12px;">Link jest aktywny do ${escapeHtml(expiry)}. Pokazuje wyłącznie Twoje dane — nikt poza Tobą ich nie zobaczy.</p>
+		`,
+		footerNote:
+			'Jeżeli ten e-mail nie był do Ciebie, po prostu go zignoruj — link wygaśnie automatycznie.'
+	})
+
+	const text = [
+		`Cześć ${safeName},`,
+		'',
+		'Potwierdź dane uczestnika rejsu Sailing Architects.',
+		`Numer rezerwacji: ${input.bookingRef}`,
+		`Koja: ${input.berthLabel}`,
+		'',
+		'Otwórz link i potwierdź lub zgłoś poprawkę:',
+		input.confirmUrl,
+		'',
+		`Link aktywny do ${expiry}.`,
+		'',
+		'Pozdrawiamy,',
+		'Sailing Architects'
+	].join('\n')
+
+	return brevoSend({
+		to: { email: input.to, name: safeName },
+		subject,
+		html,
+		text
+	})
+}
+
 export type AdminCopyInput = {
 	to: string
 	subject: string

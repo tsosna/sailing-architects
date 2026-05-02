@@ -153,6 +153,26 @@ export default defineSchema({
 			v.literal('incomplete'),
 			v.literal('complete')
 		),
+		// Verification layer on top of dataStatus. `dataStatus` is "are required
+		// fields filled in?", `confirmationStatus` is "did the participant
+		// approve them?". They evolve independently — see admin-crew-data-verification-spec.md.
+		confirmationStatus: v.optional(
+			v.union(
+				v.literal('none'),
+				v.literal('drafted_by_admin'),
+				v.literal('sent'),
+				v.literal('confirmed'),
+				v.literal('correction_requested'),
+				v.literal('expired')
+			)
+		),
+		confirmationSentAt: v.optional(v.number()),
+		confirmationExpiresAt: v.optional(v.number()),
+		confirmedAt: v.optional(v.number()),
+		correctionRequestedAt: v.optional(v.number()),
+		correctionNote: v.optional(v.string()),
+		adminEditedAt: v.optional(v.number()),
+		adminEditedBy: v.optional(v.string()),
 		invitedEmail: v.optional(v.string()),
 		reminderCount: v.optional(v.number()),
 		lastReminderSentAt: v.optional(v.number()),
@@ -180,6 +200,20 @@ export default defineSchema({
 			'dataStatus',
 			'lastReminderSentAt'
 		]),
+
+	crewConfirmationTokens: defineTable({
+		participantId: v.id('bookingParticipants'),
+		bookingId: v.id('bookings'),
+		tokenHash: v.string(),
+		expiresAt: v.number(),
+		usedAt: v.optional(v.number()),
+		createdAt: v.number(),
+		createdByAdminUserId: v.string(),
+		sentToEmail: v.string(),
+		lastSentAt: v.optional(v.number())
+	})
+		.index('by_token_hash', ['tokenHash'])
+		.index('by_participant', ['participantId']),
 
 	crewProfiles: defineTable({
 		userId: v.string(), // Clerk user ID

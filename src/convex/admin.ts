@@ -98,6 +98,7 @@ export const overviewBySegment = query({
 		let pendingAmount = 0
 		let overdueAmount = 0
 		let missingDataCount = 0
+		let pendingConfirmationCount = 0
 
 		const heldBerths = berths.filter(
 			(b) => b.status === 'held' && (b.holdExpiresAt ?? 0) > now
@@ -151,6 +152,14 @@ export const overviewBySegment = query({
 				(p) => p.dataStatus !== 'complete'
 			)
 			missingDataCount += missingParticipants.length
+			const pendingConfirmation = participants.filter(
+				(p) =>
+					p.dataStatus === 'complete' &&
+					(p.confirmationStatus === 'drafted_by_admin' ||
+						p.confirmationStatus === 'expired' ||
+						p.confirmationStatus === 'correction_requested')
+			)
+			pendingConfirmationCount += pendingConfirmation.length
 
 			let paymentLabel: string
 			let paymentLevel: SalesRow['paymentLevel']
@@ -208,10 +217,7 @@ export const overviewBySegment = query({
 			let nextAction = 'Brak'
 			if (overduePayments.length > 0) {
 				nextAction = 'Monit płatności'
-			} else if (
-				missingParticipants.length > 0 &&
-				participants.length > 0
-			) {
+			} else if (missingParticipants.length > 0 && participants.length > 0) {
 				nextAction = 'Prośba o dane załogi'
 			} else if (dueSoonPayments.length > 0) {
 				nextAction = 'Reminder płatności'
@@ -240,10 +246,7 @@ export const overviewBySegment = query({
 			})
 
 			for (const p of overduePayments) {
-				const days = Math.max(
-					1,
-					Math.floor((now - (p.dueAt ?? now)) / DAY_MS)
-				)
+				const days = Math.max(1, Math.floor((now - (p.dueAt ?? now)) / DAY_MS))
 				alerts.push({
 					id: `payment-${p._id}`,
 					level: 'danger',
@@ -259,16 +262,12 @@ export const overviewBySegment = query({
 			}
 
 			for (const p of dueSoonPayments) {
-				const days = Math.max(
-					0,
-					Math.ceil(((p.dueAt ?? now) - now) / DAY_MS)
-				)
+				const days = Math.max(0, Math.ceil(((p.dueAt ?? now) - now) / DAY_MS))
 				alerts.push({
 					id: `payment-soon-${p._id}`,
 					level: 'warn',
 					kind: 'payment_due_soon',
-					title:
-						days <= 1 ? 'Rata wymagalna jutro' : `Rata za ${days} dni`,
+					title: days <= 1 ? 'Rata wymagalna jutro' : `Rata za ${days} dni`,
 					subtitle: `${booking.bookingRef} · ${formatPLN(p.amount)}`,
 					bookingRef: booking.bookingRef,
 					bookingId: booking._id,
@@ -291,6 +290,27 @@ export const overviewBySegment = query({
 					bookingId: booking._id,
 					priority: isMissing ? 500 : 100,
 					suggestedActions: ['send_reminder', 'copy_whatsapp', 'open_booking']
+				})
+			}
+
+			for (const part of pendingConfirmation) {
+				const status = part.confirmationStatus ?? 'drafted_by_admin'
+				const title =
+					status === 'correction_requested'
+						? 'Uczestnik zgłosił korektę'
+						: status === 'expired'
+							? 'Link potwierdzenia wygasł'
+							: 'Dane czekają na potwierdzenie uczestnika'
+				alerts.push({
+					id: `confirm-${part._id}`,
+					level: status === 'correction_requested' ? 'warn' : 'info',
+					kind: 'data_pending_confirmation',
+					title,
+					subtitle: `${booking.bookingRef} · Koja ${part.berthLabel}`,
+					bookingRef: booking.bookingRef,
+					bookingId: booking._id,
+					priority: status === 'correction_requested' ? 300 : 80,
+					suggestedActions: ['open_booking']
 				})
 			}
 		}
@@ -340,6 +360,7 @@ export const overviewBySegment = query({
 				pendingAmount,
 				overdueAmount,
 				missingDataCount,
+				pendingConfirmationCount,
 				heldCount: heldBerths.length,
 				nextHoldExpiresAt
 			},
@@ -351,9 +372,7 @@ export const overviewBySegment = query({
 
 function formatPLN(grosze: number): string {
 	const zlote = Math.round(grosze / 100)
-	const formatted = zlote
-		.toString()
-		.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+	const formatted = zlote.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
 	return `${formatted} PLN`
 }
 

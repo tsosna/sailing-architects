@@ -4,6 +4,7 @@
 	import type { Id } from '$convex/dataModel'
 	import { voyageSegments } from '$lib/data/voyage-segments'
 	import BookingDrawer from '$lib/components/admin/booking-drawer.svelte'
+	import type { PageData } from './$types'
 
 	type FilterKey =
 		| 'all'
@@ -13,6 +14,7 @@
 		| 'awaiting_confirmation'
 		| 'paid'
 
+	let { data: pageData }: { data: PageData } = $props()
 	let selectedSegment = $state(voyageSegments[0].id)
 	let activeFilter = $state<FilterKey>('all')
 	let openBookingId = $state<Id<'bookings'> | null>(null)
@@ -124,6 +126,11 @@
 		<div class="kpi" class:kpi--warn={data.kpi.missingDataCount > 0}>
 			<span>Brak danych</span>
 			<strong>{data.kpi.missingDataCount}</strong>
+			<em>uczestników</em>
+		</div>
+		<div class="kpi">
+			<span>Do potwierdzenia</span>
+			<strong>{data.kpi.pendingConfirmationCount}</strong>
 			<em>uczestników</em>
 		</div>
 		<div class="kpi">
@@ -263,6 +270,7 @@
 
 <BookingDrawer
 	bookingId={openBookingId}
+	adminUserId={pageData.admin.userId}
 	onclose={() => (openBookingId = null)}
 />
 
@@ -335,7 +343,7 @@
 
 	.kpi-grid {
 		display: grid;
-		grid-template-columns: repeat(7, minmax(118px, 1fr));
+		grid-template-columns: repeat(8, minmax(118px, 1fr));
 		gap: 1px;
 		background: var(--admin-line);
 		margin-bottom: 26px;
@@ -556,11 +564,7 @@
 	}
 
 	.alert[data-level='danger'] {
-		background: linear-gradient(
-			90deg,
-			var(--admin-danger-bg),
-			transparent 66%
-		);
+		background: linear-gradient(90deg, var(--admin-danger-bg), transparent 66%);
 	}
 
 	.alert[data-level='warn'] {

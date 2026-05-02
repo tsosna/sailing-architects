@@ -6,10 +6,11 @@
 
 	type Props = {
 		bookingId: Id<'bookings'> | null
+		adminUserId: string
 		onclose: () => void
 	}
 
-	const { bookingId, onclose }: Props = $props()
+	const { bookingId, adminUserId, onclose }: Props = $props()
 
 	const convex = useConvexClient()
 
@@ -21,6 +22,29 @@
 	let toast = $state<{ kind: 'ok' | 'err'; text: string } | null>(null)
 	let copiedAt = $state<number | null>(null)
 	let notifyAdmin = $state(true)
+
+	type ParticipantForm = {
+		invitedEmail: string
+		firstName: string
+		lastName: string
+		email: string
+		dateOfBirth: string
+		birthPlace: string
+		nationality: string
+		phone: string
+		docType: 'passport' | 'id' | ''
+		docNumber: string
+		emergencyContactName: string
+		emergencyContactPhone: string
+		swimmingAbility: string
+		sailingExperience: string
+		dietaryRequirements: string
+		medicalNotes: string
+	}
+
+	let editingParticipantId = $state<string | null>(null)
+	let editForm = $state<ParticipantForm | null>(null)
+	let savingParticipant = $state(false)
 
 	function formatPLN(grosze: number): string {
 		const zlote = (grosze / 100).toLocaleString('pl-PL', {
@@ -88,6 +112,125 @@
 		}
 	}
 
+	function confirmationBadge(status?: string): {
+		label: string
+		level: 'ok' | 'warn' | 'danger' | 'info'
+	} | null {
+		switch (status) {
+			case 'drafted_by_admin':
+				return { label: 'Robocze (admin)', level: 'warn' }
+			case 'sent':
+				return { label: 'Wysłane', level: 'info' }
+			case 'confirmed':
+				return { label: 'Potwierdzone', level: 'ok' }
+			case 'correction_requested':
+				return { label: 'Korekta', level: 'danger' }
+			case 'expired':
+				return { label: 'Link wygasł', level: 'warn' }
+			case 'none':
+			default:
+				return null
+		}
+	}
+
+	function startEdit(p: {
+		_id: string
+		invitedEmail?: string
+		firstName?: string
+		lastName?: string
+		email?: string
+		dateOfBirth?: string
+		birthPlace?: string
+		nationality?: string
+		phone?: string
+		docType?: 'passport' | 'id'
+		docNumber?: string
+		emergencyContactName?: string
+		emergencyContactPhone?: string
+		swimmingAbility?: string
+		sailingExperience?: string
+		dietaryRequirements?: string
+		medicalNotes?: string
+	}) {
+		editingParticipantId = p._id
+		editForm = {
+			invitedEmail: p.invitedEmail ?? '',
+			firstName: p.firstName ?? '',
+			lastName: p.lastName ?? '',
+			email: p.email ?? '',
+			dateOfBirth: p.dateOfBirth ?? '',
+			birthPlace: p.birthPlace ?? '',
+			nationality: p.nationality ?? '',
+			phone: p.phone ?? '',
+			docType: p.docType ?? '',
+			docNumber: p.docNumber ?? '',
+			emergencyContactName: p.emergencyContactName ?? '',
+			emergencyContactPhone: p.emergencyContactPhone ?? '',
+			swimmingAbility: p.swimmingAbility ?? '',
+			sailingExperience: p.sailingExperience ?? '',
+			dietaryRequirements: p.dietaryRequirements ?? '',
+			medicalNotes: p.medicalNotes ?? ''
+		}
+	}
+
+	function cancelEdit() {
+		editingParticipantId = null
+		editForm = null
+	}
+
+	async function saveParticipant() {
+		if (!editingParticipantId || !editForm) return
+		savingParticipant = true
+		toast = null
+		try {
+			const optional = (value: string): string | undefined =>
+				value.trim() ? value.trim() : undefined
+			const docTypeValue =
+				editForm.docType === 'passport' || editForm.docType === 'id'
+					? editForm.docType
+					: undefined
+			const result = await convex.mutation(
+				api.mutations.adminUpdateParticipantData,
+				{
+					participantId: editingParticipantId as Id<'bookingParticipants'>,
+					adminUserId,
+					invitedEmail: optional(editForm.invitedEmail),
+					firstName: optional(editForm.firstName),
+					lastName: optional(editForm.lastName),
+					email: optional(editForm.email),
+					dateOfBirth: optional(editForm.dateOfBirth),
+					birthPlace: optional(editForm.birthPlace),
+					nationality: optional(editForm.nationality),
+					phone: optional(editForm.phone),
+					docType: docTypeValue,
+					docNumber: optional(editForm.docNumber),
+					emergencyContactName: optional(editForm.emergencyContactName),
+					emergencyContactPhone: optional(editForm.emergencyContactPhone),
+					swimmingAbility: optional(editForm.swimmingAbility),
+					sailingExperience: optional(editForm.sailingExperience),
+					dietaryRequirements: optional(editForm.dietaryRequirements),
+					medicalNotes: optional(editForm.medicalNotes)
+				}
+			)
+			toast = {
+				kind: 'ok',
+				text:
+					result.dataStatus === 'complete'
+						? 'Dane zapisane. Status: robocze (admin) — wyślij link, gdy uczestnik ma potwierdzić.'
+						: 'Dane zapisane. Brak kompletu wymaganych pól — uczestnik nie zostanie poproszony o potwierdzenie.'
+			}
+			editingParticipantId = null
+			editForm = null
+		} catch (err) {
+			toast = {
+				kind: 'err',
+				text: err instanceof Error ? err.message : 'Nie udało się zapisać.'
+			}
+		} finally {
+			savingParticipant = false
+		}
+	}
+
 	type ContactEntry = {
 		key: string
 		when: number
@@ -144,10 +287,10 @@
 		busyId = paymentId
 		toast = null
 		try {
-			const result = await convex.action(
-				api.admin.sendAdhocPaymentReminder,
-				{ paymentId, notifyAdmin }
-			)
+			const result = await convex.action(api.admin.sendAdhocPaymentReminder, {
+				paymentId,
+				notifyAdmin
+			})
 			if (result.ok) {
 				toast = {
 					kind: 'ok',
@@ -174,14 +317,80 @@
 		}
 	}
 
-	async function sendCrewReminder(participantId: Id<'bookingParticipants'>) {
+	async function sendConfirmationLink(
+		participantId: Id<'bookingParticipants'>
+	) {
 		busyId = participantId
 		toast = null
 		try {
 			const result = await convex.action(
-				api.admin.sendAdhocCrewDataReminder,
-				{ participantId, notifyAdmin }
+				api.crewConfirmation.sendCrewConfirmationLink,
+				{ participantId, adminUserId }
 			)
+			if (result.ok) {
+				toast = {
+					kind: 'ok',
+					text: `Link wysłany na ${result.recipient}. Można też skopiować ręcznie z toasta poniżej.`
+				}
+				try {
+					await navigator.clipboard.writeText(result.confirmUrl)
+				} catch {
+					/* clipboard optional */
+				}
+			} else {
+				toast = {
+					kind: 'err',
+					text:
+						result.reason === 'recipient_unavailable'
+							? 'Brak adresu odbiorcy — uzupełnij e-mail uczestnika.'
+							: `Nie udało się wysłać linku: ${result.reason}`
+				}
+			}
+		} catch (err) {
+			toast = {
+				kind: 'err',
+				text: err instanceof Error ? err.message : 'Błąd wysyłki linku.'
+			}
+		} finally {
+			busyId = null
+		}
+	}
+
+	async function markConfirmedManually(
+		participantId: Id<'bookingParticipants'>
+	) {
+		if (
+			!confirm(
+				'Oznaczyć dane jako potwierdzone ręcznie (np. po telefonie)? Wszystkie istniejące linki potwierdzające zostaną unieważnione.'
+			)
+		)
+			return
+		busyId = participantId
+		toast = null
+		try {
+			await convex.mutation(api.crewConfirmation.adminMarkConfirmedManually, {
+				participantId,
+				adminUserId
+			})
+			toast = { kind: 'ok', text: 'Dane oznaczone jako potwierdzone.' }
+		} catch (err) {
+			toast = {
+				kind: 'err',
+				text: err instanceof Error ? err.message : 'Nie udało się oznaczyć.'
+			}
+		} finally {
+			busyId = null
+		}
+	}
+
+	async function sendCrewReminder(participantId: Id<'bookingParticipants'>) {
+		busyId = participantId
+		toast = null
+		try {
+			const result = await convex.action(api.admin.sendAdhocCrewDataReminder, {
+				participantId,
+				notifyAdmin
+			})
 			if (result.ok) {
 				toast = {
 					kind: 'ok',
@@ -281,32 +490,33 @@
 		aria-modal="true"
 		aria-label="Szczegóły rezerwacji"
 	>
-		<button
-			class="scrim"
-			type="button"
-			aria-label="Zamknij"
-			onclick={onclose}
+		<button class="scrim" type="button" aria-label="Zamknij" onclick={onclose}
 		></button>
 		<aside class="panel">
 			<header class="head">
 				<div>
-					<p class="eyebrow">{detail.data?.booking.bookingRef ?? 'Rezerwacja'}</p>
+					<p class="eyebrow">
+						{detail.data?.booking.bookingRef ?? 'Rezerwacja'}
+					</p>
 					<h2>
-						{detail.data?.buyer.name ??
-							detail.data?.buyer.email ??
-							'Wczytuję…'}
+						{detail.data?.buyer.name ?? detail.data?.buyer.email ?? 'Wczytuję…'}
 					</h2>
 					{#if detail.data?.buyer.email}
 						<p class="head-sub">{detail.data.buyer.email}</p>
 					{/if}
 				</div>
-				<button class="close" type="button" aria-label="Zamknij" onclick={onclose}
-					>×</button
+				<button
+					class="close"
+					type="button"
+					aria-label="Zamknij"
+					onclick={onclose}>×</button
 				>
 			</header>
 
 			{#if detail.error}
-				<p class="error">Nie udało się wczytać rezerwacji: {detail.error.message}</p>
+				<p class="error">
+					Nie udało się wczytać rezerwacji: {detail.error.message}
+				</p>
 			{:else if detail.isLoading || !detail.data}
 				<p class="loading">Wczytuję szczegóły…</p>
 			{:else}
@@ -335,7 +545,9 @@
 					<section class="block">
 						<div class="block-head">
 							<h3>Harmonogram płatności</h3>
-							<p>Snapshot przepisany z planu segmentu przy tworzeniu bookingu.</p>
+							<p>
+								Snapshot przepisany z planu segmentu przy tworzeniu bookingu.
+							</p>
 						</div>
 						{#if data.payments.length === 0}
 							<p class="empty-row">Brak harmonogramu.</p>
@@ -358,7 +570,9 @@
 											</span>
 										</div>
 										<div class="row-side">
-											<span class="badge badge--{badge.level}">{badge.label}</span>
+											<span class="badge badge--{badge.level}"
+												>{badge.label}</span
+											>
 											{#if payment.status !== 'paid' && payment.status !== 'cancelled'}
 												<button
 													class="mini mini--brass"
@@ -403,58 +617,244 @@
 							<ul class="rows">
 								{#each data.participants as participant (participant._id)}
 									{@const badge = dataBadge(participant.dataStatus)}
-									<li class="row">
-										<div class="row-main">
-											<strong
-												>Koja {participant.berthLabel} ·
-												{participant.firstName || participant.lastName
-													? `${participant.firstName ?? ''} ${participant.lastName ?? ''}`.trim()
-													: 'brak imienia'}</strong
-											>
-											<span>
-												{participant.invitedEmail ??
-													participant.email ??
-													'brak adresu uczestnika'}
-												{#if participant.lastReminderSentAt}
-													· prośby: {participant.reminderCount ?? 0}, ostatnio {formatDateTime(
-														participant.lastReminderSentAt
-													)}
-												{/if}
-											</span>
-										</div>
-										<div class="row-side">
-											<span class="badge badge--{badge.level}">{badge.label}</span>
-											{#if participant.dataStatus !== 'complete'}
-												<button
-													class="mini mini--brass"
-													type="button"
-													disabled={busyId === participant._id}
-													onclick={() => sendCrewReminder(participant._id)}
+									{@const confBadge = confirmationBadge(
+										participant.confirmationStatus
+									)}
+									{@const isEditing = editingParticipantId === participant._id}
+									<li class="row row--stacked">
+										<div class="row-line">
+											<div class="row-main">
+												<strong
+													>Koja {participant.berthLabel} ·
+													{participant.firstName || participant.lastName
+														? `${participant.firstName ?? ''} ${participant.lastName ?? ''}`.trim()
+														: 'brak imienia'}</strong
 												>
-													{busyId === participant._id
-														? 'Wysyłam…'
-														: 'Wyślij prośbę'}
-												</button>
-												<button
-													class="mini"
-													type="button"
-													onclick={() =>
-														copyText(
-															buildCrewWhatsapp({
-																bookingRef: data.booking.bookingRef,
-																berthLabel: participant.berthLabel,
-																participantId: participant._id,
-																dataStatus:
-																	participant.dataStatus as
+												<span>
+													{participant.invitedEmail ??
+														participant.email ??
+														'brak adresu uczestnika'}
+													{#if participant.lastReminderSentAt}
+														· prośby: {participant.reminderCount ?? 0}, ostatnio {formatDateTime(
+															participant.lastReminderSentAt
+														)}
+													{/if}
+													{#if participant.adminEditedAt}
+														· edycja admina: {formatDateTime(
+															participant.adminEditedAt
+														)}
+													{/if}
+													{#if participant.confirmationStatus === 'sent' && participant.confirmationExpiresAt}
+														· link aktywny do {formatDateTime(
+															participant.confirmationExpiresAt
+														)}
+													{/if}
+													{#if participant.confirmationStatus === 'confirmed' && participant.confirmedAt}
+														· potwierdzono {formatDateTime(
+															participant.confirmedAt
+														)}
+													{/if}
+												</span>
+												{#if participant.confirmationStatus === 'correction_requested' && participant.correctionNote}
+													<p class="correction-note">
+														Korekta od uczestnika: „{participant.correctionNote}"
+													</p>
+												{/if}
+											</div>
+											<div class="row-side">
+												<span class="badge badge--{badge.level}"
+													>{badge.label}</span
+												>
+												{#if confBadge}
+													<span class="badge badge--{confBadge.level}"
+														>{confBadge.label}</span
+													>
+												{/if}
+												{#if !isEditing}
+													<button
+														class="mini"
+														type="button"
+														onclick={() => startEdit(participant)}
+													>
+														{participant.dataStatus === 'missing'
+															? 'Wpisz dane'
+															: 'Edytuj dane'}
+													</button>
+												{/if}
+												{#if !isEditing && participant.dataStatus === 'complete' && participant.confirmationStatus !== 'confirmed'}
+													<button
+														class="mini mini--brass"
+														type="button"
+														disabled={busyId === participant._id}
+														onclick={() =>
+															sendConfirmationLink(participant._id)}
+													>
+														{busyId === participant._id
+															? 'Wysyłam…'
+															: participant.confirmationStatus === 'sent'
+																? 'Wyślij ponownie'
+																: 'Wyślij link do potwierdzenia'}
+													</button>
+													<button
+														class="mini"
+														type="button"
+														disabled={busyId === participant._id}
+														onclick={() =>
+															markConfirmedManually(participant._id)}
+													>
+														Potwierdź ręcznie
+													</button>
+												{/if}
+												{#if participant.dataStatus !== 'complete' && !isEditing}
+													<button
+														class="mini mini--brass"
+														type="button"
+														disabled={busyId === participant._id}
+														onclick={() => sendCrewReminder(participant._id)}
+													>
+														{busyId === participant._id
+															? 'Wysyłam…'
+															: 'Wyślij prośbę'}
+													</button>
+													<button
+														class="mini"
+														type="button"
+														onclick={() =>
+															copyText(
+																buildCrewWhatsapp({
+																	bookingRef: data.booking.bookingRef,
+																	berthLabel: participant.berthLabel,
+																	participantId: participant._id,
+																	dataStatus: participant.dataStatus as
 																		| 'missing'
 																		| 'incomplete'
-															})
-														)}
-												>
-													Kopiuj WhatsApp
-												</button>
-											{/if}
+																})
+															)}
+													>
+														Kopiuj WhatsApp
+													</button>
+												{/if}
+											</div>
 										</div>
+
+										{#if isEditing && editForm}
+											<form
+												class="edit-form"
+												onsubmit={(e) => {
+													e.preventDefault()
+													saveParticipant()
+												}}
+											>
+												<div class="edit-grid">
+													<label
+														><span>Imię</span><input
+															bind:value={editForm.firstName}
+														/></label
+													>
+													<label
+														><span>Nazwisko</span><input
+															bind:value={editForm.lastName}
+														/></label
+													>
+													<label
+														><span>Email uczestnika</span><input
+															type="email"
+															bind:value={editForm.email}
+														/></label
+													>
+													<label
+														><span>Email do zaproszenia</span><input
+															type="email"
+															bind:value={editForm.invitedEmail}
+														/></label
+													>
+													<label
+														><span>Data urodzenia</span><input
+															type="date"
+															bind:value={editForm.dateOfBirth}
+														/></label
+													>
+													<label
+														><span>Miejsce urodzenia</span><input
+															bind:value={editForm.birthPlace}
+														/></label
+													>
+													<label
+														><span>Narodowość (kod kraju)</span><input
+															bind:value={editForm.nationality}
+															placeholder="PL"
+														/></label
+													>
+													<label
+														><span>Telefon</span><input
+															bind:value={editForm.phone}
+														/></label
+													>
+													<label>
+														<span>Dokument</span>
+														<select bind:value={editForm.docType}>
+															<option value="">—</option>
+															<option value="passport">Paszport</option>
+															<option value="id">Dowód</option>
+														</select>
+													</label>
+													<label
+														><span>Numer dokumentu</span><input
+															bind:value={editForm.docNumber}
+														/></label
+													>
+													<label
+														><span>Kontakt alarmowy — imię</span><input
+															bind:value={editForm.emergencyContactName}
+														/></label
+													>
+													<label
+														><span>Kontakt alarmowy — telefon</span><input
+															bind:value={editForm.emergencyContactPhone}
+														/></label
+													>
+													<label
+														><span>Pływanie</span><input
+															bind:value={editForm.swimmingAbility}
+															placeholder="np. dobre"
+														/></label
+													>
+													<label
+														><span>Doświadczenie żeglarskie</span><input
+															bind:value={editForm.sailingExperience}
+															placeholder="np. RYA Day Skipper"
+														/></label
+													>
+													<label class="span-2"
+														><span>Dieta (opcjonalnie)</span><input
+															bind:value={editForm.dietaryRequirements}
+														/></label
+													>
+													<label class="span-2"
+														><span>Notatki medyczne (opcjonalnie)</span
+														><textarea
+															rows="2"
+															bind:value={editForm.medicalNotes}
+														></textarea></label
+													>
+												</div>
+												<div class="edit-actions">
+													<button
+														class="mini"
+														type="button"
+														onclick={cancelEdit}
+														disabled={savingParticipant}>Anuluj</button
+													>
+													<button
+														class="mini mini--brass"
+														type="submit"
+														disabled={savingParticipant}
+													>
+														{savingParticipant ? 'Zapisuję…' : 'Zapisz dane'}
+													</button>
+												</div>
+											</form>
+										{/if}
 									</li>
 								{/each}
 							</ul>
@@ -472,7 +872,9 @@
 							<ul class="history">
 								{#each contactHistory as entry (entry.key)}
 									<li>
-										<span class="history-date">{formatDateTime(entry.when)}</span>
+										<span class="history-date"
+											>{formatDateTime(entry.when)}</span
+										>
 										<span class="history-title">
 											{entry.title}
 											{#if entry.count > 0}
@@ -659,6 +1061,90 @@
 
 	.row:first-child {
 		border-top: 0;
+	}
+
+	.row--stacked {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.row-line {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 14px;
+		flex-wrap: wrap;
+	}
+
+	.correction-note {
+		margin: 8px 0 0;
+		padding: 8px 10px;
+		border-left: 3px solid var(--admin-danger, #e46d5f);
+		background: var(--admin-danger-bg, rgba(228, 109, 95, 0.12));
+		color: var(--admin-warm-white, #f5f0e8);
+		font-size: 12px;
+		line-height: 1.5;
+	}
+
+	.edit-form {
+		margin-top: 12px;
+		padding: 14px;
+		border: 1px solid rgba(196, 146, 58, 0.18);
+		background: rgba(7, 17, 30, 0.4);
+	}
+
+	.edit-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 10px;
+	}
+
+	.edit-grid label {
+		display: grid;
+		gap: 4px;
+		font-size: 11px;
+	}
+
+	.edit-grid label.span-2 {
+		grid-column: span 2;
+	}
+
+	.edit-grid label > span {
+		color: var(--admin-muted, rgba(245, 240, 232, 0.52));
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+	}
+
+	.edit-grid input,
+	.edit-grid select,
+	.edit-grid textarea {
+		min-height: 32px;
+		border: 1px solid var(--admin-line, rgba(196, 146, 58, 0.16));
+		background: var(--admin-navy-deep, #07111e);
+		color: var(--admin-warm-white, #f5f0e8);
+		padding: 6px 10px;
+		font-family: inherit;
+		font-size: 12px;
+	}
+
+	.edit-grid textarea {
+		resize: vertical;
+	}
+
+	.edit-actions {
+		display: flex;
+		gap: 8px;
+		justify-content: flex-end;
+		margin-top: 14px;
+	}
+
+	@media (max-width: 540px) {
+		.edit-grid {
+			grid-template-columns: 1fr;
+		}
+		.edit-grid label.span-2 {
+			grid-column: span 1;
+		}
 	}
 
 	.row-main strong {

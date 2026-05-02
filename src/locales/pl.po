@@ -592,6 +592,7 @@ msgstr "Wielka Brytania"
 msgid "Inna"
 msgstr "Inna"
 
+#: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Paszport"
 msgstr "Paszport"
@@ -711,14 +712,17 @@ msgstr "Krok 2"
 #~ msgid "Wymagane przez kapitana i władze portowe. Dane przechowywane bezpiecznie, widoczne tylko dla organizatora."
 #~ msgstr "Wymagane przez kapitana i władze portowe. Dane przechowywane bezpiecznie, widoczne tylko dla organizatora."
 
+#: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Imię"
 msgstr "Imię"
 
+#: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Nazwisko"
 msgstr "Nazwisko"
 
+#: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Data urodzenia"
 msgstr "Data urodzenia"
@@ -735,6 +739,7 @@ msgstr "Dokument tożsamości"
 msgid "Typ dokumentu"
 msgstr "Typ dokumentu"
 
+#: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Numer dokumentu"
 msgstr "Numer dokumentu"
@@ -750,6 +755,7 @@ msgstr "Kontakt alarmowy"
 msgid "Imię i nazwisko"
 msgstr "Imię i nazwisko"
 
+#: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Telefon"
 msgstr "Telefon"
@@ -762,6 +768,7 @@ msgstr "Profil żeglarski"
 msgid "Umiejętności pływackie"
 msgstr "Umiejętności pływackie"
 
+#: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Doświadczenie żeglarskie"
 msgstr "Doświadczenie żeglarskie"
@@ -1013,8 +1020,9 @@ msgstr "Kontakt z organizatorem"
 #~ msgid "Dane wymagane przez kapitana. Możesz je aktualizować do 30 dni przed rejsem."
 #~ msgstr "Dane wymagane przez kapitana. Możesz je aktualizować do 30 dni przed rejsem."
 
-#~ msgid "Edytuj dane"
-#~ msgstr "Edytuj dane"
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Edytuj dane"
+msgstr "Edytuj dane"
 
 #~ msgid "Profil nie został jeszcze uzupełniony."
 #~ msgstr "Profil nie został jeszcze uzupełniony."
@@ -1074,8 +1082,9 @@ msgstr "SKP"
 #~ msgid "Koje · {0}"
 #~ msgstr "Koje · {0}"
 
-#~ msgid "Anuluj"
-#~ msgstr "Anuluj"
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Anuluj"
+msgstr "Anuluj"
 
 #~ msgid "Nowa rezerwacja bezpłatna"
 #~ msgstr "Nowa rezerwacja bezpłatna"
@@ -1092,6 +1101,7 @@ msgstr "SKP"
 #~ msgid "Rezerwacja zapisana."
 #~ msgstr "Rezerwacja zapisana."
 
+#: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Zapisuję…"
 msgstr "Zapisuję…"
@@ -1379,6 +1389,7 @@ msgstr "Bez spacji i znaków specjalnych"
 msgid "Telefon żeglarza"
 msgstr "Telefon żeglarza"
 
+#: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Miejsce urodzenia"
 msgstr "Miejsce urodzenia"
@@ -1702,6 +1713,7 @@ msgid "{0} rat"
 msgstr "{0} rat"
 
 #: src/routes/[[lang=lang]]/admin/+page.svelte
+#: src/routes/[[lang=lang]]/admin/+page.svelte
 msgid "uczestników"
 msgstr "uczestników"
 
@@ -1932,6 +1944,7 @@ msgstr "{0} · termin {1} <0/>"
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/lib/components/admin/booking-drawer.svelte
+#: src/lib/components/admin/booking-drawer.svelte
 msgid "Wysyłam…"
 msgstr "Wysyłam…"
 
@@ -1997,3 +2010,149 @@ msgstr "Wyślij kopię do operatora (HANDOFF_REPORT_TO)"
 #: src/routes/[[lang=lang]]/admin/+page.svelte
 msgid "Otwórz rezerwację"
 msgstr "Otwórz rezerwację"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Robocze (admin)"
+msgstr "Robocze (admin)"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Wysłane"
+msgstr "Wysłane"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Potwierdzone"
+msgstr "Potwierdzone"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Korekta"
+msgstr "Korekta"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Link wygasł"
+msgstr "Link wygasł"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Dane zapisane. Status: robocze (admin) — wyślij link, gdy uczestnik ma potwierdzić."
+msgstr "Dane zapisane. Status: robocze (admin) — wyślij link, gdy uczestnik ma potwierdzić."
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Dane zapisane. Brak kompletu wymaganych pól — uczestnik nie zostanie poproszony o potwierdzenie."
+msgstr "Dane zapisane. Brak kompletu wymaganych pól — uczestnik nie zostanie poproszony o potwierdzenie."
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Nie udało się zapisać."
+msgstr "Nie udało się zapisać."
+
+#. 0: formatDateTime( participant.adminEditedAt )
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "· edycja admina: {0}"
+msgstr "· edycja admina: {0}"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Wpisz dane"
+msgstr "Wpisz dane"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Email uczestnika"
+msgstr "Email uczestnika"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Email do zaproszenia"
+msgstr "Email do zaproszenia"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Narodowość (kod kraju)"
+msgstr "Narodowość (kod kraju)"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Dokument"
+msgstr "Dokument"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Dowód"
+msgstr "Dowód"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Kontakt alarmowy — imię"
+msgstr "Kontakt alarmowy — imię"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Kontakt alarmowy — telefon"
+msgstr "Kontakt alarmowy — telefon"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Pływanie"
+msgstr "Pływanie"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Dieta (opcjonalnie)"
+msgstr "Dieta (opcjonalnie)"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Notatki medyczne (opcjonalnie)"
+msgstr "Notatki medyczne (opcjonalnie)"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Zapisz dane"
+msgstr "Zapisz dane"
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Do potwierdzenia"
+msgstr "Do potwierdzenia"
+
+#. 0: result.recipient
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Link wysłany na {0}. Można też skopiować ręcznie z toasta poniżej."
+msgstr "Link wysłany na {0}. Można też skopiować ręcznie z toasta poniżej."
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Brak adresu odbiorcy — uzupełnij e-mail uczestnika."
+msgstr "Brak adresu odbiorcy — uzupełnij e-mail uczestnika."
+
+#. 0: result.reason
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Nie udało się wysłać linku: {0}"
+msgstr "Nie udało się wysłać linku: {0}"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Błąd wysyłki linku."
+msgstr "Błąd wysyłki linku."
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Oznaczyć dane jako potwierdzone ręcznie (np. po telefonie)? Wszystkie istniejące linki potwierdzające zostaną unieważnione."
+msgstr "Oznaczyć dane jako potwierdzone ręcznie (np. po telefonie)? Wszystkie istniejące linki potwierdzające zostaną unieważnione."
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Dane oznaczone jako potwierdzone."
+msgstr "Dane oznaczone jako potwierdzone."
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Nie udało się oznaczyć."
+msgstr "Nie udało się oznaczyć."
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Wyślij ponownie"
+msgstr "Wyślij ponownie"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Wyślij link do potwierdzenia"
+msgstr "Wyślij link do potwierdzenia"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Potwierdź ręcznie"
+msgstr "Potwierdź ręcznie"
+
+#. 0: formatDateTime( participant.confirmationExpiresAt )
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "· link aktywny do {0}"
+msgstr "· link aktywny do {0}"
+
+#. 0: formatDateTime( participant.confirmedAt )
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "· potwierdzono {0}"
+msgstr "· potwierdzono {0}"
+
+#. 0: participant.correctionNote
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Korekta od uczestnika: „{0}\""
+msgstr "Korekta od uczestnika: „{0}\""

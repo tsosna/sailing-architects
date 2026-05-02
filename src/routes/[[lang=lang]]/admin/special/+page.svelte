@@ -10,26 +10,32 @@
 	let formGuestName = $state('')
 	let formNote = $state('')
 	let saving = $state(false)
-	let saveError = $state('')
-	let saveOk = $state(false)
+	let toast = $state<{ kind: 'ok' | 'err' | 'info'; text: string } | null>(null)
 
 	const berthsQuery = useQuery(api.queries.allBerthsBySlug, () => ({
 		slug: selectedSegment
 	}))
 
 	const berths = $derived(berthsQuery.data ?? [])
+	const captainBerths = $derived(berths.filter((b) => b.status === 'captain'))
+	const complimentaryBerths = $derived(
+		berths.filter((b) => b.status === 'complimentary')
+	)
 	const availableBerths = $derived(
 		berths.filter((b) => b.status === 'available')
 	)
+	const segmentMeta = $derived(
+		voyageSegments.find((s) => s.id === selectedSegment) ?? voyageSegments[0]
+	)
 
-	async function reserve() {
+	async function reserve(e: Event) {
+		e.preventDefault()
 		if (!formBerthId || !formGuestName.trim()) {
-			saveError = 'Koja i imię gościa są wymagane'
+			toast = { kind: 'err', text: 'Koja i imię gościa są wymagane.' }
 			return
 		}
 		saving = true
-		saveError = ''
-		saveOk = false
+		toast = null
 		try {
 			await convex.mutation(api.mutations.reserveComplimentary, {
 				segmentSlug: selectedSegment,
@@ -40,426 +46,513 @@
 			formBerthId = ''
 			formGuestName = ''
 			formNote = ''
-			saveOk = true
-		} catch (e) {
-			saveError = e instanceof Error ? e.message : 'Błąd'
+			toast = { kind: 'ok', text: 'Rezerwacja complimentary zapisana.' }
+		} catch (err) {
+			toast = {
+				kind: 'err',
+				text: err instanceof Error ? err.message : 'Nie udało się zapisać.'
+			}
 		} finally {
 			saving = false
 		}
 	}
 
 	async function cancel(berthId: string) {
+		if (
+			!confirm(
+				`Zwolnić koję ${berthId} z rezerwacji complimentary? Wróci na listę dostępnych.`
+			)
+		)
+			return
 		try {
 			await convex.mutation(api.mutations.cancelAdminBooking, {
 				segmentSlug: selectedSegment,
 				berthId
 			})
-		} catch (e) {
-			alert(e instanceof Error ? e.message : 'Błąd')
+			toast = { kind: 'ok', text: `Koja ${berthId} zwolniona.` }
+		} catch (err) {
+			toast = {
+				kind: 'err',
+				text: err instanceof Error ? err.message : 'Nie udało się zwolnić.'
+			}
 		}
 	}
 
+	let runningMigration = $state(false)
 	async function runMigration() {
 		if (
-			!confirm('Ustawi C1 jako "kapitan" na wszystkich etapach. Kontynuować?')
+			!confirm(
+				'Ustawi koje C1 jako "captain" na wszystkich segmentach. Operacja jednorazowa, idempotentna.'
+			)
 		)
 			return
+		runningMigration = true
 		try {
 			const result = await convex.mutation(
 				api.mutations.migrateCaptainBerths,
 				{}
 			)
-			alert(`Zaktualizowano: ${result.updated} koj`)
-		} catch (e) {
-			alert(e instanceof Error ? e.message : 'Błąd migracji')
+			toast = {
+				kind: 'ok',
+				text: `Migracja captain — zaktualizowano ${result.updated} koj.`
+			}
+		} catch (err) {
+			toast = {
+				kind: 'err',
+				text: err instanceof Error ? err.message : 'Błąd migracji.'
+			}
+		} finally {
+			runningMigration = false
 		}
 	}
 </script>
 
 <svelte:head>
-	<title>Admin · Sailing Architects</title>
+	<title>Admin · Miejsca specjalne</title>
 </svelte:head>
 
-<div class="admin">
-	<header class="admin__header">
-		<h1 class="admin__title">Panel administracyjny</h1>
-		<a href="/" class="admin__back">← Strona główna</a>
-	</header>
+<header class="topline">
+	<p class="eyebrow">Special seats</p>
+	<h1>Miejsca specjalne</h1>
+	<p class="lede">
+		Captain i complimentary trzymamy poza Sales Board, żeby nie mieszały się z
+		normalną sprzedażą i zaległościami. KPI „Specjalne" w sekcji „Sprzedaż i
+		alerty" liczy tylko complimentary — captain jest stałą blokadą.
+	</p>
+</header>
 
-	<!-- Segment picker -->
-	<div class="admin__segments">
-		{#each voyageSegments as seg (seg.id)}
-			<button
-				type="button"
-				class="seg-btn"
-				class:seg-btn--active={selectedSegment === seg.id}
-				onclick={() => {
-					selectedSegment = seg.id
-					formBerthId = ''
-					saveOk = false
-				}}
-			>
-				{seg.name}
-			</button>
-		{/each}
-	</div>
+<div class="segment-strip" aria-label="Segmenty rejsu">
+	{#each voyageSegments as seg (seg.id)}
+		<button
+			type="button"
+			class="segment"
+			data-active={selectedSegment === seg.id || undefined}
+			onclick={() => {
+				selectedSegment = seg.id
+				toast = null
+			}}
+		>
+			<strong>{seg.name}</strong>
+			<span>{seg.dates}</span>
+		</button>
+	{/each}
+</div>
 
-	<div class="admin__body">
-		<!-- Current berth statuses -->
-		<section class="admin__section">
-			<h2 class="admin__section-title">
-				Koje · {voyageSegments.find((s) => s.id === selectedSegment)?.name}
-			</h2>
-			<div class="berth-grid">
-				{#each berths as b (b._id)}
-					<div class="berth-card berth-card--{b.status}">
-						<span class="berth-card__id"
-							>{b.status === 'captain' ? '⚓' : ''}{b.berthId}</span
-						>
-						<span class="berth-card__status">{b.status}</span>
-						{#if b.guestName}
-							<span class="berth-card__guest">{b.guestName}</span>
-						{/if}
-						{#if b.note}
-							<span class="berth-card__note">{b.note}</span>
-						{/if}
-						{#if b.status === 'complimentary'}
-							<button
-								type="button"
-								class="berth-card__cancel"
-								onclick={() => cancel(b.berthId)}
-							>
-								Anuluj
-							</button>
-						{/if}
-					</div>
-				{/each}
+<div class="grid">
+	<section class="panel">
+		<div class="panel-head">
+			<div>
+				<h2>Captain</h2>
+				<p>Stała blokada koi kapitana — nie podlega rezerwacji.</p>
 			</div>
-		</section>
+		</div>
+		{#if berthsQuery.isLoading && !berthsQuery.data}
+			<p class="empty-row">Wczytuję koje…</p>
+		{:else if captainBerths.length === 0}
+			<p class="empty-row">
+				Brak oznaczonej koi kapitana dla {segmentMeta.name}. Użyj narzędzia
+				technicznego poniżej, jeśli baza nie była seedowana z Block 2.
+			</p>
+		{:else}
+			<ul class="rows">
+				{#each captainBerths as berth (berth._id)}
+					<li class="row">
+						<div class="row-main">
+							<strong>⚓ Koja {berth.berthId}</strong>
+							<span>Stała blokada · {segmentMeta.name}</span>
+						</div>
+						<span class="badge">Captain</span>
+					</li>
+				{/each}
+			</ul>
+		{/if}
+	</section>
 
-		<!-- Reserve complimentary form -->
-		<section class="admin__section">
-			<h2 class="admin__section-title">Nowa rezerwacja bezpłatna</h2>
-			<form
-				class="admin__form"
-				onsubmit={(e) => {
-					e.preventDefault()
-					reserve()
-				}}
-			>
-				<label class="field">
-					<span class="field__label">Koja</span>
-					<select class="field__input" bind:value={formBerthId} required>
+	<section class="panel">
+		<div class="panel-head">
+			<div>
+				<h2>Complimentary</h2>
+				<p>
+					Rezerwacje bezpłatne organizatora. Blokują koję, ale nie wchodzą do
+					paid revenue.
+				</p>
+			</div>
+		</div>
+		{#if complimentaryBerths.length === 0}
+			<p class="empty-row">
+				Brak rezerwacji complimentary dla {segmentMeta.name}.
+			</p>
+		{:else}
+			<ul class="rows">
+				{#each complimentaryBerths as berth (berth._id)}
+					<li class="row">
+						<div class="row-main">
+							<strong>Koja {berth.berthId} · {berth.guestName ?? 'Gość'}</strong
+							>
+							<span>{berth.note ?? 'Bez uwag'}</span>
+						</div>
+						<div class="row-side">
+							<span class="badge badge--warn">Complimentary</span>
+							<button
+								class="mini"
+								type="button"
+								onclick={() => cancel(berth.berthId)}>Zwolnij koję</button
+							>
+						</div>
+					</li>
+				{/each}
+			</ul>
+		{/if}
+
+		<form class="form" onsubmit={reserve}>
+			<h3>Dodaj complimentary</h3>
+			<div class="form-grid">
+				<label>
+					<span>Koja</span>
+					<select bind:value={formBerthId} required>
 						<option value="">— wybierz —</option>
 						{#each availableBerths as b (b._id)}
 							<option value={b.berthId}>{b.berthId}</option>
 						{/each}
 					</select>
 				</label>
-				<label class="field">
-					<span class="field__label">Imię i nazwisko gościa</span>
+				<label>
+					<span>Imię i nazwisko gościa</span>
 					<input
 						type="text"
-						class="field__input"
 						bind:value={formGuestName}
 						placeholder="np. Anna Kowalska"
 						required
 					/>
 				</label>
-				<label class="field">
-					<span class="field__label">Uwagi (opcjonalnie)</span>
+				<label class="span-2">
+					<span>Uwagi (opcjonalnie)</span>
 					<input
 						type="text"
-						class="field__input"
 						bind:value={formNote}
-						placeholder="np. żona kapitana"
+						placeholder="np. żona kapitana, partner medialny"
 					/>
 				</label>
-				{#if saveError}
-					<p class="admin__error">{saveError}</p>
-				{/if}
-				{#if saveOk}
-					<p class="admin__ok">Rezerwacja zapisana.</p>
-				{/if}
-				<button type="submit" class="admin__btn" disabled={saving}>
+			</div>
+			<div class="form-actions">
+				<button class="btn btn--primary" type="submit" disabled={saving}>
 					{saving ? 'Zapisuję…' : 'Zarezerwuj bezpłatnie'}
 				</button>
-			</form>
-		</section>
-
-		<!-- Migration tool -->
-		<section class="admin__section admin__section--tools">
-			<h2 class="admin__section-title">Narzędzia migracji</h2>
-			<p class="admin__hint">
-				Jeśli baza danych była seedowana przed Block 2 — uruchom migrację, aby
-				ustawić C1 jako "kapitan" na wszystkich etapach.
-			</p>
-			<button
-				type="button"
-				class="admin__btn admin__btn--secondary"
-				onclick={runMigration}
-			>
-				Ustaw C1 = kapitan (migracja)
-			</button>
-		</section>
-	</div>
+			</div>
+		</form>
+	</section>
 </div>
 
+{#if toast}
+	<p class="toast toast--{toast.kind}">{toast.text}</p>
+{/if}
+
+<details class="tools">
+	<summary>Narzędzia techniczne (jednorazowe migracje)</summary>
+	<div class="tools-body">
+		<p>
+			Operacje uruchamiane raz po seedowaniu. Idempotentne — można odpalić
+			ponownie bez efektów ubocznych.
+		</p>
+		<button
+			class="btn"
+			type="button"
+			onclick={runMigration}
+			disabled={runningMigration}
+		>
+			{runningMigration ? 'Migruję…' : 'Ustaw C1 = captain (migracja)'}
+		</button>
+	</div>
+</details>
+
 <style>
-	.admin {
-		min-height: 100vh;
-		background: var(--color-navy);
-		padding: 48px 40px;
-		font-family: var(--font-sans);
+	.topline {
+		margin-bottom: 24px;
 	}
-
-	.admin__header {
-		display: flex;
-		align-items: baseline;
-		justify-content: space-between;
-		margin-bottom: 40px;
+	.eyebrow {
+		margin: 0 0 9px;
+		color: var(--admin-brass-light);
+		font-size: 10px;
+		letter-spacing: 0.22em;
+		text-transform: uppercase;
 	}
-
-	.admin__title {
-		font-family: var(--font-serif);
-		font-size: 28px;
-		font-weight: 400;
-		color: var(--color-warm-white);
+	h1 {
 		margin: 0;
+		font-family: var(--font-serif, 'Playfair Display', serif);
+		font-weight: 400;
+		font-size: clamp(28px, 4vw, 44px);
+		line-height: 1.05;
+	}
+	.lede {
+		margin: 12px 0 0;
+		max-width: 640px;
+		color: var(--admin-muted);
+		font-size: 13px;
+		line-height: 1.6;
 	}
 
-	.admin__back {
-		font-size: 12px;
-		color: var(--color-brass-text-soft);
-		text-decoration: none;
-	}
-
-	.admin__back:hover {
-		color: var(--color-brass-text);
-	}
-
-	.admin__segments {
-		display: flex;
-		gap: 1px;
-		margin-bottom: 40px;
-		flex-wrap: wrap;
-	}
-
-	.seg-btn {
-		padding: 10px 20px;
-		background: rgba(255, 255, 255, 0.04);
-		border: 1px solid rgba(196, 146, 58, 0.15);
-		color: rgba(245, 240, 232, 0.5);
-		font-family: var(--font-sans);
-		font-size: 12px;
-		cursor: pointer;
-		transition: all 150ms ease;
-	}
-
-	.seg-btn--active {
-		background: rgba(196, 146, 58, 0.12);
-		border-color: var(--color-brass);
-		color: var(--color-warm-white);
-	}
-
-	.admin__body {
+	.segment-strip {
 		display: grid;
-		grid-template-columns: 1fr 360px;
-		gap: 40px;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 1px;
+		background: var(--admin-line);
+		margin-bottom: 24px;
+	}
+	.segment {
+		min-height: 74px;
+		background: var(--admin-navy-mid);
+		border: 0;
+		color: var(--admin-muted);
+		padding: 14px 16px;
+		text-align: left;
+		cursor: pointer;
+		font-family: inherit;
+	}
+	.segment[data-active] {
+		background: rgba(196, 146, 58, 0.1);
+		color: var(--admin-warm-white);
+		box-shadow: inset 0 -2px 0 var(--admin-brass);
+	}
+	.segment strong {
+		display: block;
+		font-size: 13px;
+		font-weight: 600;
+	}
+	.segment span {
+		display: block;
+		margin-top: 5px;
+		font-size: 11px;
+	}
+
+	.grid {
+		display: grid;
+		grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+		gap: 22px;
 		align-items: start;
 	}
-
-	@media (max-width: 900px) {
-		.admin__body {
+	@media (max-width: 1180px) {
+		.grid {
+			grid-template-columns: 1fr;
+		}
+		.segment-strip {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+	@media (max-width: 720px) {
+		.segment-strip {
 			grid-template-columns: 1fr;
 		}
 	}
 
-	.admin__section {
-		background: rgba(255, 255, 255, 0.03);
-		border: 1px solid rgba(196, 146, 58, 0.12);
-		padding: 28px;
+	.panel {
+		background: rgba(15, 31, 53, 0.82);
+		border: 1px solid var(--admin-line);
 	}
-
-	.admin__section--tools {
-		grid-column: 1 / -1;
+	.panel-head {
+		min-height: 58px;
+		padding: 16px 18px;
+		border-bottom: 1px solid var(--admin-line);
 	}
-
-	.admin__section-title {
-		font-family: var(--font-sans);
-		font-size: 11px;
-		letter-spacing: 3px;
-		text-transform: uppercase;
-		color: var(--color-brass-text);
-		margin: 0 0 20px;
+	.panel-head h2 {
+		margin: 0;
+		font-family: var(--font-serif, 'Playfair Display', serif);
+		font-weight: 400;
+		font-size: 22px;
 	}
-
-	.berth-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-		gap: 8px;
-	}
-
-	.berth-card {
-		padding: 12px 10px;
-		border: 1px solid rgba(196, 146, 58, 0.15);
-		display: flex;
-		flex-direction: column;
-		gap: 3px;
-	}
-
-	.berth-card--available {
-		border-color: rgba(196, 146, 58, 0.2);
-	}
-
-	.berth-card--held,
-	.berth-card--taken {
-		background: rgba(13, 27, 46, 0.5);
-		border-color: #3a4a5c;
-	}
-
-	.berth-card--captain {
-		background: rgba(8, 18, 36, 0.8);
-		border-color: rgba(196, 146, 58, 0.35);
-	}
-
-	.berth-card--complimentary {
-		background: rgba(196, 146, 58, 0.05);
-		border-color: rgba(196, 146, 58, 0.3);
-	}
-
-	.berth-card__id {
-		font-family: var(--font-serif);
-		font-size: 16px;
-		color: var(--color-warm-white);
-	}
-
-	.berth-card--taken .berth-card__id,
-	.berth-card--captain .berth-card__id {
-		color: rgba(245, 240, 232, 0.4);
-	}
-
-	.berth-card__status {
-		font-size: 9px;
-		letter-spacing: 1px;
-		text-transform: uppercase;
-		color: var(--color-brass-text-soft);
-	}
-
-	.berth-card__guest {
-		font-size: 11px;
-		color: rgba(245, 240, 232, 0.7);
-		margin-top: 2px;
-	}
-
-	.berth-card__note {
-		font-size: 10px;
-		color: rgba(245, 240, 232, 0.35);
-		font-style: italic;
-	}
-
-	.berth-card__cancel {
-		margin-top: 6px;
-		padding: 4px 8px;
-		background: transparent;
-		border: 1px solid rgba(196, 146, 58, 0.3);
-		color: var(--color-brass-text-soft);
-		font-size: 10px;
-		cursor: pointer;
-		font-family: var(--font-sans);
-		transition: all 150ms ease;
-	}
-
-	.berth-card__cancel:hover {
-		border-color: var(--color-brass);
-		color: var(--color-brass-text);
-	}
-
-	.admin__form {
-		display: flex;
-		flex-direction: column;
-		gap: 16px;
-	}
-
-	.field {
-		display: flex;
-		flex-direction: column;
-		gap: 6px;
-	}
-
-	.field__label {
-		font-size: 11px;
-		letter-spacing: 1px;
-		text-transform: uppercase;
-		color: var(--color-brass-text-soft);
-	}
-
-	.field__input {
-		padding: 10px 14px;
-		background: rgba(255, 255, 255, 0.05);
-		border: 1px solid rgba(196, 146, 58, 0.2);
-		color: var(--color-warm-white);
-		font-family: var(--font-sans);
-		font-size: 13px;
-		outline: none;
-		appearance: none;
-	}
-
-	.field__input:focus {
-		border-color: var(--color-brass);
-	}
-
-	.admin__btn {
-		padding: 12px 24px;
-		background: var(--color-brass);
-		border: none;
-		color: var(--color-navy);
-		font-family: var(--font-sans);
-		font-weight: 700;
+	.panel-head p {
+		margin: 4px 0 0;
+		color: var(--admin-muted);
 		font-size: 12px;
-		letter-spacing: 1.5px;
+	}
+
+	.rows {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 14px;
+		padding: 14px 18px;
+		border-top: 1px solid rgba(196, 146, 58, 0.08);
+	}
+	.row:first-child {
+		border-top: 0;
+	}
+	.row-main strong {
+		display: block;
+		font-size: 13px;
+		font-weight: 500;
+	}
+	.row-main span {
+		display: block;
+		margin-top: 4px;
+		color: var(--admin-muted);
+		font-size: 11px;
+	}
+	.row-side {
+		display: flex;
+		gap: 10px;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+
+	.badge {
+		display: inline-flex;
+		align-items: center;
+		min-height: 24px;
+		padding: 0 8px;
+		border: 1px solid var(--admin-line);
+		color: var(--admin-muted);
+		font-size: 10px;
+		font-weight: 700;
+		letter-spacing: 0.08em;
 		text-transform: uppercase;
+	}
+	.badge--warn {
+		background: var(--admin-warn-bg);
+		border-color: rgba(224, 179, 95, 0.34);
+		color: var(--admin-warn);
+	}
+
+	.mini {
+		min-height: 28px;
+		border: 1px solid var(--admin-line);
+		background: rgba(7, 17, 30, 0.48);
+		color: var(--admin-warm-white);
+		padding: 0 10px;
+		font-size: 11px;
 		cursor: pointer;
-		transition: background-color 150ms ease;
+		font-family: inherit;
 	}
 
-	.admin__btn:hover:not(:disabled) {
-		background: var(--color-brass-light);
+	.empty-row {
+		margin: 0;
+		padding: 22px 18px;
+		color: var(--admin-muted);
+		font-size: 12px;
+		text-align: center;
 	}
 
-	.admin__btn:disabled {
+	.form {
+		padding: 18px;
+		border-top: 1px solid var(--admin-line);
+	}
+	.form h3 {
+		margin: 0 0 14px;
+		font-family: var(--font-serif, 'Playfair Display', serif);
+		font-weight: 400;
+		font-size: 16px;
+	}
+	.form-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 12px;
+	}
+	.form-grid label {
+		display: grid;
+		gap: 4px;
+		font-size: 11px;
+	}
+	.form-grid label.span-2 {
+		grid-column: span 2;
+	}
+	.form-grid span {
+		color: var(--admin-muted);
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+	}
+	.form-grid input,
+	.form-grid select {
+		min-height: 34px;
+		border: 1px solid var(--admin-line);
+		background: var(--admin-navy-deep);
+		color: var(--admin-warm-white);
+		padding: 6px 10px;
+		font-family: inherit;
+		font-size: 12px;
+	}
+	.form-actions {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: 14px;
+	}
+
+	.btn {
+		min-height: 38px;
+		border: 1px solid var(--admin-line-strong);
+		background: rgba(245, 240, 232, 0.04);
+		color: var(--admin-warm-white);
+		padding: 0 14px;
+		font-size: 12px;
+		cursor: pointer;
+		font-family: inherit;
+	}
+	.btn:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
 	}
-
-	.admin__btn--secondary {
-		background: transparent;
-		border: 1px solid rgba(196, 146, 58, 0.4);
-		color: var(--color-brass-text-soft);
+	.btn--primary {
+		background: var(--admin-brass);
+		border-color: var(--admin-brass);
+		color: var(--admin-navy-deep);
+		font-weight: 700;
 	}
 
-	.admin__btn--secondary:hover {
-		border-color: var(--color-brass);
-		color: var(--color-brass-text);
-		background: transparent;
-	}
-
-	.admin__error {
+	.toast {
+		margin: 22px 0 0;
+		padding: 12px 16px;
+		border: 1px solid var(--admin-line);
 		font-size: 12px;
-		color: #e57373;
+	}
+	.toast--ok {
+		background: var(--admin-ok-bg);
+		border-color: rgba(138, 199, 164, 0.3);
+		color: var(--admin-ok);
+	}
+	.toast--err {
+		background: var(--admin-danger-bg);
+		border-color: rgba(228, 109, 95, 0.34);
+		color: var(--admin-danger);
+	}
+	.toast--info {
+		background: rgba(196, 146, 58, 0.08);
+		border-color: rgba(196, 146, 58, 0.3);
+		color: var(--admin-brass-light);
+	}
+
+	.tools {
+		margin-top: 28px;
+		border: 1px solid var(--admin-line);
+		background: rgba(7, 17, 30, 0.4);
+	}
+	.tools summary {
+		padding: 14px 18px;
+		font-size: 12px;
+		color: var(--admin-muted);
+		cursor: pointer;
+		letter-spacing: 0.05em;
+	}
+	.tools-body {
+		padding: 0 18px 18px;
+		display: grid;
+		gap: 12px;
+	}
+	.tools-body p {
 		margin: 0;
-	}
-
-	.admin__ok {
+		color: var(--admin-muted);
 		font-size: 12px;
-		color: var(--color-brass-text);
-		margin: 0;
-	}
-
-	.admin__hint {
-		font-size: 12px;
-		color: rgba(245, 240, 232, 0.4);
-		margin: 0 0 16px;
 		line-height: 1.6;
+	}
+
+	@media (max-width: 600px) {
+		.form-grid {
+			grid-template-columns: 1fr;
+		}
+		.form-grid label.span-2 {
+			grid-column: span 1;
+		}
 	}
 </style>

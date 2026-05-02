@@ -753,6 +753,70 @@ export const upsertBookingParticipant = mutation({
 })
 
 /**
+ * Admin: edit participant data captured from phone/WhatsApp/email.
+ * Sets adminEditedAt/By, recomputes dataStatus and transitions
+ * confirmationStatus to `drafted_by_admin` when required fields are filled.
+ * If the participant was already `confirmed`, an admin edit drops the status
+ * back to `drafted_by_admin` so the captain knows the participant must
+ * re-approve the changed data.
+ */
+export const adminUpdateParticipantData = mutation({
+	args: {
+		participantId: v.id('bookingParticipants'),
+		adminUserId: v.string(),
+		...participantProfileArgs
+	},
+	handler: async (ctx, args) => {
+		const participant = await ctx.db.get(args.participantId)
+		if (!participant) throw new Error('Participant not found')
+
+		const { participantId: _participantId, adminUserId, ...profilePatch } = args
+
+		const merged = { ...participant, ...profilePatch }
+		const dataStatus = participantDataStatus({
+			invitedEmail: merged.invitedEmail,
+			firstName: merged.firstName,
+			lastName: merged.lastName,
+			email: merged.email,
+			dateOfBirth: merged.dateOfBirth,
+			birthPlace: merged.birthPlace,
+			nationality: merged.nationality,
+			phone: merged.phone,
+			docType: merged.docType,
+			docNumber: merged.docNumber,
+			emergencyContactName: merged.emergencyContactName,
+			emergencyContactPhone: merged.emergencyContactPhone,
+			swimmingAbility: merged.swimmingAbility,
+			sailingExperience: merged.sailingExperience,
+			dietaryRequirements: merged.dietaryRequirements,
+			medicalNotes: merged.medicalNotes
+		})
+
+		const previousConfirmation = participant.confirmationStatus ?? 'none'
+		let confirmationStatus = previousConfirmation
+		if (dataStatus === 'complete') {
+			// New complete data → admin draft. If already `sent`, the previously
+			// dispatched link is now describing stale data; we drop back to
+			// `drafted_by_admin` so the operator must explicitly resend.
+			confirmationStatus = 'drafted_by_admin'
+		} else if (previousConfirmation !== 'none') {
+			// Data became incomplete again — clear any draft/sent state.
+			confirmationStatus = 'none'
+		}
+
+		await ctx.db.patch(participant._id, {
+			...profilePatch,
+			dataStatus,
+			confirmationStatus,
+			adminEditedAt: Date.now(),
+			adminEditedBy: adminUserId
+		})
+
+		return { participantId: participant._id, dataStatus, confirmationStatus }
+	}
+})
+
+/**
  * One-time compatibility migration for existing bookings.
  * Creates missing participant rows without copying legacy crewProfiles blindly.
  */

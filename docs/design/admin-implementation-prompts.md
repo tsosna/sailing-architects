@@ -57,6 +57,30 @@ Weryfikacja:
 - `pnpm check`; `pnpm lint` jeśli nie blokują go znane długi formatowania.
 ```
 
+Etap 1 — gotowe ✅                                                                                                                                                                   
+                                                                                                                                                                                       
+  Zmiany:                                     
+  - src/lib/server/admin-guard.ts:1 — requireAdmin(locals) + resolveAdmin(locals). Sprawdza publicMetadata.role === 'admin' (najpierw z sessionClaims, potem z                         
+  clerkClient.users.getUser jako autorytet). W dev fallback do ADMIN_DEV_ALLOWLIST (lista e-maili z env, ignorowana w produkcji).                                                      
+  - src/routes/[[lang=lang]]/admin/+layout.server.ts:1 — ładuje guard dla całego /admin. Anonimowy → redirect do sign-in. Zalogowany bez admina → error(403).                          
+  - src/routes/[[lang=lang]]/admin/+error.svelte:1 — czytelny forbidden state (navy/brass), CTA do /dashboard i /.                                                                     
+  - .env.example:9 — dopisany ADMIN_DEV_ALLOWLIST=.                                                                                                                                    
+                                                                                                                                                                                       
+  Decyzje:                                                                                                                                                                           
+  - Brak whitelisty user IDs zaszytej w kodzie — produkcja idzie wyłącznie przez publicMetadata.role w Clerk.                                                                          
+  - Helper jest reużywalny — gotowy do requireAdmin(locals) w server actions/loadach kolejnych etapów.                                                                               
+  - Dev allowlist celowo dev-only (gated import { dev } from '$app/environment'), więc nawet jeśli ktoś omyłkowo ustawi env w produkcji, nie obchodzi to wymogu roli.                  
+  - clerkClient.users.getUser — to jeden roundtrip per page load, akceptowalne dla operacyjnego /admin.                                                              
+                                                                                                                                                                                       
+  Weryfikacja:                                                                                                                                                                         
+  - pnpm check — 0 błędów, 0 ostrzeżeń.                                                                                                                                                
+  - Ręczna weryfikacja po Twojej stronie: aby zachować dev access dopisz w .env.local: ADMIN_DEV_ALLOWLIST=tomek.sosinski@gmail.com (albo nadaj sobie rolę admin w Clerk Dashboard →   
+  Users → publicMetadata: {"role":"admin"}).                                                                                                                                           
+                                                                                                                                                                                       
+  Gotcha do zapamiętania:                                                          
+  - Dotychczasowe Convex mutations admin (reserveComplimentary, cancelAdminBooking, migrateCaptainBerths) wciąż przyjmują wywołanie z dowolnego klienta — gating jest na poziomie      
+  SvelteKit (jedyna ścieżka UI). Twardszy gating na poziomie Convex (przez ctx.auth.getUserIdentity + Clerk JWT) to osobna decyzja, naturalnie wpada do Etap 8.          
+
 ## Etap 2 — Admin Overview: Sales Board + Alert Queue
 
 Cel: zbudować realny operacyjny overview dla sprzedaży i alertów, zamiast obecnego wąskiego panelu statusów koi.
@@ -97,6 +121,40 @@ Weryfikacja:
 - Booking z opłaconymi ratami i kompletem danych nie wpada do kolejki pilnej.
 - `pnpm check`.
 ```
+
+Etap 2 — gotowe ✅                                         
+                                              
+  Zmiany:                                     
+  - src/convex/admin.ts:1 — nowa query overviewBySegment(slug) agreguje bookings + bookingPayments + bookingParticipants + berths w jednym przebiegu. Zwraca: kpi (sprzedane, wpłacono,
+   do wpłaty, zaległe, brak danych, held, complimentary), bookings[] (Sales Board) i alerts[] posortowane po priority.                                                                 
+  - src/routes/[[lang=lang]]/admin/+layout@.svelte:1 — admin shell z bocznym sidebar (Sprzedaż / Automatyzacje / Dane załogi / Miejsca specjalne). Używa @-reset, więc nie ciągnie     
+  SiteNav z [[lang=lang]]/+layout.svelte. Tokeny --admin-* jako globalne CSS variables (przez :global(:root)).                                                                         
+  - src/routes/[[lang=lang]]/admin/+page.svelte:1 — Sales Board + Alert Queue. Segment strip, KPI grid (7 kart), filtrowana tabela rezerwacji, panel alertów z badge kind.             
+  Loading/error/empty states.                                                                                                                                                          
+  - src/routes/[[lang=lang]]/admin/special/+page.svelte:1 — przeniesiony stary content (formularz complimentary + migracja C1). Nadal działa, czeka na Etap 7.                         
+  - src/routes/[[lang=lang]]/admin/automation/+page.svelte:1, crew/+page.svelte:1 — placeholdery na Etap 4 i Etap 5/6.                                                                 
+                                                                                                                      
+  Decyzje:                                                                                                                                                                             
+  - Alert priority: overdue (1000+dni), missing data (500), pending confirmation (100), due soon (200+8-dni), hold expiring (60 lub 10). Sortowanie malejące — najpilniejsze na górze.
+  - Filtry tabeli pochodzą z flags zwracanych przez query, nie z tekstów w UI — możemy dowolnie przelabelować i działa dalej.                                                          
+  - KPI pendingAmount celowo wyklucza overdueAmount, żeby kapitan widział te dwie pozycje rozłącznie.                                                                                  
+  - Dane są realne z Convex (nie mock). Akcje na alertach/wierszach (Otwórz, Wyślij monit) są pasywne — Etap 3 doda drawer i ręczne monity.
+  - Stare narzędzia (complimentary form, migracja C1) zachowane pod /admin/special, żeby nie zerwać funkcjonalności przed Etap 7.                                                      
+  - npx convex codegen uruchomione lokalnie; api.admin.overviewBySegment jest w _generated/api.d.ts. Convex deployment dostał też nowy moduł.
+                                                                                                                                                                                       
+  Weryfikacja:                                                                                                                                                                         
+  - pnpm check — 0 błędów, 0 ostrzeżeń, 1735 plików.                                                                                                                                   
+  - Manualna weryfikacja po Twojej stronie (po pnpm dev + npx convex dev):                                                                                                             
+    - Segment z zaległą ratą → karta KPI „Zaległe" świeci na danger, alert „Rata zaległa N dni" na górze Alert Queue.                                                                  
+    - Segment z brakami danych → alert „Brak danych uczestnika" / „Niekompletne dane".                                                                                                 
+    - Segment w pełni opłacony i z kompletem danych → Alert Queue puste, „Brak aktywnych alertów. Czysto."                                                                             
+    - Filtry „Zaległe", „Do przypomnienia", „Brak danych" działają.                                                                                                                    
+                                                                                                                                                                                       
+  Gotcha:                                                                                                                                                                              
+  - bookings table nie ma indexu by_segment, więc query robi db.query('bookings').collect() i filtruje w JS. Akceptowalne dopóki bookings count jest niski. Performance audit do       
+  Etapu 8.                                                                                                                                                                             
+  - +layout@.svelte (z @-reset) — gdyby ktoś dodał +layout.ts (klient) lub kolejny +layout w segmencie, to ostrożnie z hierarchią. Server load +layout.server.ts i @-reset współpracują
+   bez problemu.                              
 
 ## Etap 3 — Booking Drawer i ręczne monity
 
@@ -143,6 +201,40 @@ Weryfikacja:
 - `pnpm check`.
 ```
 
+Etap 3 — gotowe ✅                                                               
+                                                                                                                                                                                       
+  Zmiany:                                                                          
+  - src/convex/_emails.ts — przerobiony shell() na navy/brass card (table layout, eyebrow + serif heading, ciemne tło #0d1b2e, brass CTA przyciskiem table-cell). Stylistyka 1:1 z     
+  mailem do Michała. Plus nowy sendAdminCopyEmail() dla powiadomień operacyjnych.                                                                                                      
+  - src/convex/admin.ts — dodane:                                                                                                                                                      
+    - bookingDetailById(bookingId) — booking + segment + berths + payments + participants + buyer (z crewProfiles).                                                                    
+    - _resolvePaymentAdhoc / _resolveParticipantAdhoc (internalQuery) — domykają wybór odbiorcy (uczestnik z invitedEmail, fallback do kupującego).
+    - sendAdhocPaymentReminder / sendAdhocCrewDataReminder (action) — wysyłka przez Brevo, bump reminderCount/lastReminderSentAt (re-using internal.reminders._mark*ReminderSent),     
+  opcjonalna kopia admina przez ADMIN_ALERT_EMAIL lub HANDOFF_REPORT_TO.                                                                                                               
+  - src/lib/components/admin/booking-drawer.svelte — drawer (scrim + 620px panel) z: detail strip, harmonogramem płatności (mini-akcje per rata), uczestnikami (mini-akcje per koja),  
+  operacyjną historią kontaktu, toggle „kopia do operatora", toast statusu, copy WhatsApp w schowku (client-only utility).                                                             
+  - src/routes/[[lang=lang]]/admin/+page.svelte — przyciski „Otwórz" w tabeli i „Otwórz rezerwację" w alertach (gdy alert ma bookingId); render <BookingDrawer>.                       
+                                        
+  Decyzje:                                                                                                                                                                             
+  - Brak nowego modelu „contact log" — operacyjna historia jest derywatą lastReminderSentAt + reminderCount z payments/participants i confirmationEmailSentAt z bookings. Spec wprost  
+  dopuszcza minimalne rozszerzenia, ale tu istniejące pola wystarczają.                                                                                                                
+  - WhatsApp copy nie zapisuje stanu w DB — client-only navigator.clipboard.writeText. „Kopia WhatsApp" to czynność operacyjna kapitana, nie zdarzenie systemu. Kapitan widzi w UI     
+  „Skopiowano do schowka" jako toast.                                                                                                                                                  
+  - Adhoc i cron używają tego samego template'u i mutacji licznika — żaden monit nie ucieka liczeniu i wszystko widać w panelu po wysyłce.                                             
+  - Kopia do admina wybiera priorytetowo ADMIN_ALERT_EMAIL jeśli jest ustawiony, w przeciwnym razie HANDOFF_REPORT_TO. Toggle domyślnie ON, łatwo wyłączyć przed wysłaniem.            
+                                                                                                                                                                                     
+  Weryfikacja:                                                                                                                                                                         
+  - npx convex codegen + pnpm check — 0 błędów, 0 ostrzeżeń.                       
+  - Po Twojej stronie: pnpm dev + npx convex dev → kliknij „Otwórz" w Sales Board → drawer pokazuje raty/uczestników → wciśnij „Wyślij monit" → toast „Monit wysłany.", w drawer przy  
+  racie pojawia się aktualizowany licznik. Sprawdź też Alert Queue → „Otwórz rezerwację".                                                                                            
+                                                                                                                                                                                       
+  Gotcha/uwagi do zapamiętania:                                                                                                                                                        
+  - Admin copy wymaga, żeby env był ustawiony w Convex deploymencie: npx convex env set HANDOFF_REPORT_TO <email> (Convex actions używają process.env, nie czytają lokalnego .env
+  automatycznie). Bez tego adminCopySent zwróci false.                                                                                                                                 
+  - Dotychczasowe crony (sendOverduePaymentReminders, sendCrewDataReminders, sendUpcomingPaymentReminders) automatycznie dostały nowy navy/brass shell — żaden cron nie wymagał zmian, 
+  ale przy najbliższej wysyłce stara stylistyka zniknie.                                                                                                                               
+  - Drawer scrim to <button> dla a11y (zamknięcie kliknięciem w ciemne tło). Escape nie jest wpięte — można dodać w razie potrzeby.         
+
 ## Etap 4 — Elastyczne harmonogramy rat
 
 Cel: umożliwić adminowi definiowanie planów płatności per segment z dowolną liczbą pozycji, a następnie snapshotowanie planu do bookingów.
@@ -186,6 +278,41 @@ Weryfikacja:
 - Zmiana planu segmentu nie zmienia starego bookingu.
 ```
 
+Etap 4 — gotowe ✅                                                        
+                                              
+  Zmiany:                                     
+  - src/routes/[[lang=lang]]/admin/automation/+page.svelte:1 — zastąpiony stub pełnym edytorem planów. Segment strip → form-grid (Szablon / Nazwa planu / Cena za koję / toggle „Pozwól
+   zapłacić całość") → edytowalna lista pozycji (Etykieta, Typ, Kwota / koja w PLN, Termin) z przyciskami ↑/↓/Usuń → dynamiczna suma planu (Valid/Pod/Ponad) → toast statusu zapisu.
+                                                                                                                                                                                       
+  Decyzje:                                                                                                                                                                             
+  - Backend już istniał (upsertSegmentPaymentPlan, activePaymentPlanBySlug, createBookingPaymentSchedule snapshotuje per booking) — tylko zbudowane UI.                                
+  - Templates:                                                                                                                                                                         
+    - Zaliczka + 2 raty → 30% deposit + 2 raty z reszty (last = balance żeby zaokrąglenia trafiły w nią)                                                                               
+    - Zaliczka + 3 raty → 30% deposit + 3 raty z reszty                                                                                                                                
+    - Całość teraz → jedna pozycja full na 100%                                    
+    - Własny plan → jedna pusta pozycja typu custom, admin buduje od zera                                                                                                              
+    - Daty domyślnie puste — admin uzupełnia per segment.                
+  - Suma vs cena: over blokuje zapis (mutacja i tak by odrzuciła), under przepuszcza z ostrzeżeniem ("różnica trafi do Dopłata końcowa") — odzwierciedla istniejącą logikę             
+  createBookingPaymentSchedule, która i tak doszywa balance jeśli plan jest niepełny. Nie chcemy dwukrotnej walidacji w UI i serwerze.                                    
+  - Po zapisie effect lastLoadedSegment = null powoduje że Convex reactive subscription odświeży lokalny formularz z autorytatywnego stanu serwera.                                    
+  - Pominąłem panel „Reguły monitów" z prototypu — Etap 4 ma zakres tylko harmonogramów rat. Reguły monitów wpadają do Etap 8 / decyzji po MVP.    
+  - Pominąłem opcjonalną „ręczną korekta snapshotu konkretnego bookingu" — spec oznacza ją jako opcjonalną. Edycja kwot na już istniejącym bookingu wprowadza ryzyka (np. nieaktualne  
+  PaymentIntenty) i nie jest na ścieżce krytycznej. Można dodać w drawer w Etap 8 jeśli realna potrzeba.                                                                               
+                                                                                                                                                                                       
+  Weryfikacja:                                                                                                                                                                         
+  - pnpm check — 0 błędów, 0 ostrzeżeń.                                                                                                                                                
+  - Po Twojej stronie:                                                                                                                                                                 
+    - Wybierz segment → szablon Zaliczka + 2 raty → suma równa cenie → zapisz → toast OK.                                                                                              
+    - Szablon Całość teraz → jedna pozycja, zapisz.                                                                                                                                    
+    - Stwórz nową rezerwację po zapisie → jej bookingPayments mają nowy harmonogram (snapshot).                                                                                        
+    - Zmień plan segmentu, otwórz starą rezerwację w drawerze → harmonogram pozostaje niezmieniony.                                                                                    
+                                                                                                                                                                                       
+  Gotcha:                                                                                                                                                                              
+  - Jeśli admin zmieni plan kiedy są aktywne bookingPayments z poprzedniego — istniejące rezerwacje pozostają nienaruszone (snapshot), ale ewentualne nowe wpłaty użytkowników i tak   
+  pójdą do snapshotów ich bookingów. To jest intencja spec'u.                                                                                                                          
+  - Pole „Cena za koję" w UI pochodzi ze statycznego voyageSegments (PLN), nie z Convex voyageSegments.pricePerBerth — obie wartości muszą się zgadzać. To istniejący stan rzeczy w
+  projekcie (statyczne segmenty są też używane w segment strip Etap 2). Zharmonizowanie tego do jednego źródła wpada do Etap 8.     
+
 ## Etap 5 — Admin edytuje dane uczestników
 
 Cel: admin może uzupełnić dane żeglarza otrzymane innymi kanałami, ale dane wymagają osobnego potwierdzenia przez uczestnika.
@@ -226,6 +353,37 @@ Weryfikacja:
 - Zwykły użytkownik nie może edytować danych przez admin mutation.
 - `pnpm check`.
 ```
+
+Etap 5 — gotowe ✅                                                        
+                                              
+  Zmiany:                              
+  - src/convex/schema.ts:171 — bookingParticipants rozszerzony o confirmationStatus (none / drafted_by_admin / sent / confirmed / correction_requested / expired) + adminEditedAt +    
+  adminEditedBy. Pozostałe pola tokenowe (sentAt/expiresAt/confirmedAt/correctionNote) zostawiam dla Etap 6.                                                                       
+  - src/convex/mutations.ts — nowy adminUpdateParticipantData(participantId, adminUserId, …profil). Przelicza dataStatus, ustawia adminEditedAt/By. Przejście statusu: complete →      
+  drafted_by_admin (także gdy ktoś poprawia już potwierdzone dane — pada do drafted_by_admin, czyli wymaga ponownego linku); incomplete/missing → none (kasuje stary draft/sent).      
+  - src/convex/admin.ts — overviewBySegment zwraca dodatkowo kpi.pendingConfirmationCount oraz nowe alerty data_pending_confirmation (priority 80 / 300 dla correction_requested).     
+  - src/lib/components/admin/booking-drawer.svelte — nowy prop adminUserId, badge confirmationStatus obok dataStatus, akcja „Edytuj dane" / „Wpisz dane" odsłaniająca inline form (16  
+  pól, nazwiska, emaile, dokument, kontakt alarmowy, doświadczenie, dieta, notatki medyczne). Po zapisie status w toast informuje, czy dane są kompletne.                              
+  - src/routes/[[lang=lang]]/admin/+page.svelte — przekazuje pageData.admin.userId do drawera (zmiana destrukturyzacji żeby uniknąć kolizji z data query); nowy KPI „Do potwierdzenia";
+   grid KPI z 7 → 8 kolumn.                                                                                                                                                            
+                                                                                                                                                                                       
+  Decyzje:                                                                         
+  - Edycja przez admina cofa confirmed do drafted_by_admin (rekomendacja MVP w specu) — kapitan zawsze widzi rozjazd "dane się zmieniły, uczestnik nie wie".                           
+  - confirmationStatus nie jest częścią dataStatus — to dwie ortogonalne miary. KPI „Brak danych" liczy tylko niekompletne; KPI „Do potwierdzenia" tylko kompletne ale jeszcze nie     
+  potwierdzone (lub po korekcie / wygasłe).                                                                                                                                       
+  - Form edycji jest „luźny" — nie używa crewProfileSchema z user-facing dashboardu. Powód: admin często wpisuje to, co dostał telefonicznie, nie chcemy go blokować Zod validation.   
+  Server-side participantDataStatus i tak weryfikuje kompletność.                                                                                                                      
+  - adminUserId jest przekazywany przez prop z layout server-load (pageData.admin.userId). Server-side mutation jeszcze nie weryfikuje go autorytatywnie (Convex bez Clerk JWT) — ten  
+  gap jest świadomie zostawiony do Etap 8.                                                                                                                                             
+                                                                                   
+  Weryfikacja:                                                                                                                                                                         
+  - pnpm check — 0 błędów, 0 ostrzeżeń, 1736 plików.                                                                                                                                   
+  - Po Twojej stronie:                                                                                                                                                                 
+    - Otwórz drawer → "Edytuj dane" → wypełnij komplet → Zapisz → toast „Status: robocze (admin)", badge Robocze (admin), alert „Dane czekają na potwierdzenie uczestnika" pojawia się 
+  w Alert Queue, KPI „Do potwierdzenia" rośnie.                                                                                                                                       
+    - Wpisz część pól → toast informuje o niekompletnych danych, badge zostaje Niekompletne, alert „Niekompletne dane uczestnika".                                                     
+    - Zwykły zalogowany user (non-admin) nie ma jak wywołać tej mutacji bo guard /admin zwraca 403 zanim klient załaduje page (warstwa SvelteKit; Etap 8 dorzuci hardening na poziomie
+  Convex).                       
 
 ## Etap 6 — Token confirmation flow dla żeglarzy
 
@@ -274,6 +432,54 @@ Weryfikacja:
 - `pnpm check`.
 ```
 
+Etap 6 — gotowe ✅                                        
+                                                                                                                                                                                       
+  Zmiany:                              
+  - src/convex/schema.ts — bookingParticipants rozszerzone o confirmationSentAt / confirmationExpiresAt / confirmedAt / correctionRequestedAt / correctionNote. Nowa tabela            
+  crewConfirmationTokens (participantId, bookingId, tokenHash, expiresAt, usedAt, createdByAdminUserId, sentToEmail) z indexami by_token_hash i by_participant.                        
+  - src/convex/_emails.ts — nowy sendCrewConfirmationEmail (navy/brass shell, eyebrow „Potwierdzenie danych", CTA „Sprawdź i potwierdź dane", info o expiry, footer „Jeśli e-mail nie
+  był do Ciebie, zignoruj").                                                                                                                                                           
+  - src/convex/crewConfirmation.ts (nowy):                                         
+    - sendCrewConfirmationLink (action) — generuje 32-bajtowy token (hex) przez crypto.getRandomValues, hashuje SHA-256, unieważnia poprzednie aktywne tokeny dla tego participanta,   
+  wstawia row z hashem + 14-dniowym expiresAt, patchuje participanta na confirmationStatus = sent. Wysyła Brevo e-mail z jawnym linkiem (token tylko w URL, nigdy w DB).               
+    - getCrewConfirmationByToken (public query) — hashuje token, weryfikuje row, sprawdza usedAt i expiresAt, zwraca tylko dane jednego uczestnika.                                    
+    - confirmCrewDataByToken / requestCrewDataCorrectionByToken (public mutations) — oznaczają token usedAt dopiero po akcji (nie po podglądzie); patchują participanta na confirmed   
+  lub correction_requested z notatką (max 2000 znaków).                                                                                                                                
+    - adminMarkConfirmedManually (admin mutation) — oznacza ręcznie po telefonie + spala wszystkie aktywne tokeny.
+  - src/routes/[[lang=lang]]/crew/confirm/[token]/+layout@.svelte — minimalny ciemny shell, @-reset (bez SiteNav, bez admin sidebar).                                                  
+  - src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte — read-only widok danych w 4 sekcjach (Dane osobowe / Dokument / Kontakt alarmowy / Doświadczenie i zdrowie), CTA       
+  „Potwierdzam, dane są poprawne" lub przejście do textarea „Co wymaga poprawy?". Stany: invalid (not_found/expired/already_used), already confirmed, ready, post-success.      
+  - src/lib/components/admin/booking-drawer.svelte — nowe akcje per uczestnik (gdy dataStatus = complete i nie potwierdzony): „Wyślij link do potwierdzenia" / „Wyślij ponownie" (po   
+  wysłaniu URL trafia też do schowka), „Potwierdź ręcznie" (z confirm() prompt, unieważnia tokeny). Drawer pokazuje też: link aktywny do (gdy sent), datę potwierdzenia, treść korekty 
+  od uczestnika w wyróżnionej notce.                                                                                                                                                   
+                                                                                                                                                                                       
+  Decyzje:                                                                                                                                                                             
+  - Token użyty dopiero po akcji (potwierdzeniu lub korekcie), nie po samym podglądzie — pozwala na ponowne otwarcie linku przez uczestnika, jeśli ktoś go zamknął w trakcie czytania. 
+  Spec wprost rekomendował to dla MVP.                                                                                                                                                 
+  - Wygaśnięcie 14 dni — zgodnie z rekomendacją MVP w specu.                                                                                                                           
+  - Korekta = krótki textarea (max 2000 znaków). Nie pozwalamy uczestnikowi edytować pól bezpośrednio — bezpieczniej, bo admin ma kontrolę nad tym, co finalnie trafia do DB.          
+  - Edycja przez admina po confirmed cofa do drafted_by_admin (Etap 5) — tu komplementarnie: ręczne potwierdzenie unieważnia outstanding tokeny, więc nie ma race condition „uczestnik 
+  kliknął stary link już po telefonie".                                                                                                                                                
+  - Token hashing: SHA-256 jest deterministyczne (lookup po hashu via index) i wystarczające — tokeny są jednorazowe i krótkoterminowe; pełna kryptografia (HMAC z secretem) nie dodaje
+   wartości operacyjnej dla tego use case.                                                                                                                                             
+  - E-mail uczestnika ma priorytet > invitedEmail > buyerEmail/crewProfile. Uczestnik powinien dostawać link na własny adres jeśli go ma; fallback do kupującego tylko gdy uczestnik
+  nie ma adresu.                                                                                                                                                                       
+                                           
+  Weryfikacja:                                                                                                                                                                         
+  - pnpm check — 0 błędów, 0 ostrzeżeń, 1740 plików (4 nowe).                                                                                                                          
+  - Po Twojej stronie:                                                                                                                                                                 
+    - Drawer → uczestnik z kompletem danych i drafted_by_admin → „Wyślij link do potwierdzenia" → toast „Link wysłany na…", URL w schowku, badge zmienia się na Wysłane.               
+    - Otwórz link w incognito → public page pokazuje dane → „Potwierdzam" → success state, drawer pokazuje Potwierdzone, alert z Alert Queue znika.                                    
+    - Inny scenariusz: „Chcę zgłosić poprawkę" → wpisz tekst → wyślij → drawer dostaje badge Korekta + cytat notki, alert „Uczestnik zgłosił korektę" pojawia się z priority 300.      
+    - „Potwierdź ręcznie" → potwierdza bez maila, unieważnia istniejące tokeny.                                                                                                  
+                                                                                                                                                                                       
+  Gotcha:                                                                          
+  - Wymaga PUBLIC_APP_URL ustawionego w Convex deployment env (npx convex env set PUBLIC_APP_URL https://...) — link generowany w action używa fallbacku z _brevo.ts. W dev URL może   
+  wskazywać na produkcję, jeśli env nie jest ustawiony lokalnie.                                                                                                                       
+  - Cron markOverduePayments z reminders.ts istnieje, ale nie ma cronu auto-wygasającego tokeny. Wygasłe tokeny są oznaczane lazy (przy próbie użycia w mutation) — alert dla admina   
+  pokazuje się dopiero gdy participant ma confirmationStatus = expired. Auto-wygaszający cron można dodać w Etap 8, jeśli realna potrzeba.                                             
+  - Public page działa też pod /pl/crew/confirm/... (matcher [[lang=lang]]) — link generowany przez panelUrl() jest pod „bare" path bez locale. Oba routy są tym samym page'em. 
+
 ## Etap 7 — Miejsca specjalne i porządki operacyjne
 
 Cel: utrzymać `captain` i `complimentary` poza głównym Sales Board, ale w jednym panelu operacyjnym.
@@ -310,6 +516,40 @@ Weryfikacja:
 - Complimentary berth blokuje koję, ale nie zwiększa paid revenue.
 - Sales Board i KPI pokazują to rozróżnienie czytelnie.
 ```
+
+Etap 7 — gotowe ✅                                    
+                                           
+  Zmiany:                                  
+  - src/routes/[[lang=lang]]/admin/special/+page.svelte:1 — przepisany od zera. Layout zgodny z resztą admina (sidebar dziedziczony z +layout@.svelte):                                
+    - Topline + lede tłumacząca, że captain/complimentary są poza Sales Board                                                                          
+    - Segment strip (taki sam jak w overview / automation)                                                                                                                             
+    - Panel Captain — read-only lista koi status='captain' z badge i komunikatem fallback gdy seed nie był uruchomiony                                                                 
+    - Panel Complimentary — lista rezerwacji bezpłatnych z „Zwolnij koję" + formularz „Dodaj complimentary" (koja z dropdown dostępnych, gość, uwagi)                                  
+    - Toast statusu (zastąpił alert())                                                                                                                                                 
+    - <details> „Narzędzia techniczne" — schowana migracja C1 (jednorazowa, idempotentna)                                                                                              
+                                                                                                                                                                                       
+  Decyzje:                                                                         
+  - Captain berths są read-only — nie ma admin UI do swapowania kapitana, bo to stała blokada per jacht. Zmiana jednostki kapitańskiej to operacja seedu, nie operacyjna.              
+  - Migration tool przeniesiony do <details> zamiast usuwania — jest idempotentny i nieuciążliwy schowany. Daje wyjście awaryjne na przypadek nowego seedu.              
+  - KPI complimentary już istnieje w overview (kpi.complimentaryBerths od Etap 2). KPI captain nie jest osobną metryką, bo to constanta — dlatego lede zwraca uwagę kapitana.          
+  - Panel widzi pojedynczy segment naraz — spójne z resztą admina i z allBerthsBySlug query (już istniało).                                                                            
+  - confirm() zamiast custom modala dla cancel/migrate — operacje awaryjne, niski koszt UX, wysoki próg pomyłki.                                                                       
+  - Cała wcześniejsza wersja (panel administracyjny z własnym headerem) była pre-Etap-2 leftover w /admin/special. Teraz layout jest jednolity.                                        
+                                                                                                                                                                                       
+  Weryfikacja:                                                                                                                                                                         
+  - pnpm check — 0 błędów, 0 ostrzeżeń, 1740 plików.                                                                                                                                   
+  - Po Twojej stronie:                                                                                                                                                                 
+    - /admin/special w sidebar admina → spójny styl, aktywna zakładka „Miejsca specjalne".
+    - Captain panel pokazuje koje status=captain (np. C1) jeśli były seedowane; jeśli nie — fallback z odsyłką do narzędzi technicznych.                                               
+    - „Dodaj complimentary" → wybierz dostępną koję → zapisz → toast OK, koja pojawia się na liście complimentary, znika z listy dostępnych.                                           
+    - „Zwolnij koję" → confirm → koja wraca do dostępnych, KPI „Specjalne" w overview maleje.                                                                                          
+    - „Narzędzia techniczne" rozwija migrację — wciśnij raz, idempotentne.                                                                                                             
+                                                                                                                                                                                       
+  Gotcha:                                                                                                                                                                              
+  - W overview KPI „Specjalne" (Etap 2) liczy complimentaryBerths, nie captain. Captain nie jest w nim widoczny celowo — bo to stała blokada, nie ruch. Jeśli chcesz osobnego widoku   
+  „captain count", łatwo dorzucić w kpi.                                                                                                                                            
+  - Migration tool jest publicznie dostępny przez Convex (mutation migrateCaptainBerths). SvelteKit guard chroni stronę, ale samej mutacji nie. Hardening Convex side pójdzie w Etap 8.
+                                                                                                                                                                                   
 
 ## Etap 8 — E2E, cleanup i decyzje po MVP
 
@@ -363,3 +603,37 @@ Weryfikacja:
 8. Etap 8 — E2E, cleanup, decyzje po MVP.
 
 Jeśli trzeba ograniczyć MVP, minimalny sensowny zakres to etapy 1-3 oraz read-only część etapu 5. Pełna wartość operacyjna pojawia się po etapach 4-6.
+
+Etap 8 — gotowe ✅                                                                                                                                                                   
+                                                                                                                                                                                       
+  Zmiany:                                                                                                                                                                              
+  - docs/admin-e2e-checklist.md (nowy) — manualna checklist dla 9 scenariuszy: guard /admin, KPI/Sales Board, zaległa rata → monit → state, admin edit → token → confirm, korekta →    
+  alert, wygasły link, plan zmiana nie modyfikuje istniejących bookingów, miejsca specjalne, hold expiring. Plus wymagania wstępne (Convex env, Clerk role, seed) i sanity checks.     
+  - docs/admin-post-mvp-decisions.md (nowy) — 11 pozycji backloga z trigger-driven priorytetami: Convex auth hardening, audit log, WhatsApp/SMS automation, auto-wygaszający cron      
+  tokenów, konfigurowalne reguły monitów, per-booking snapshot override, granularne role, eksport CSV, nightly admin alert, single source of truth dla voyageSegments. Plus jawna lista
+   „świadomie pomijane".                                                                                                                                                               
+  - Prettier --write na 8 plikach admina (admin.ts, crewConfirmation.ts, mutations.ts, booking-drawer.svelte, +page.svelte, automation/+page.svelte, special/+page.svelte,             
+  crew/confirm/[token]/+page.svelte) — zero zmian funkcjonalnych, tylko formatowanie.                                                                                                  
+                                                                                                                                                                                       
+  Audit cleanup:                                                                                                                                                                       
+  - Brak TODO/FIXME/MOCK w kodzie admina (src/convex/admin.ts, crewConfirmation.ts, src/lib/components/admin/, src/routes/[[lang=lang]]/admin/, src/routes/[[lang=lang]]/crew/).       
+  - Migracja captain (runMigration) jest schowana w <details> na /admin/special — dostępna gdy potrzeba, niewidoczna jako element głównego workflow kapitana.                          
+  - Wszystkie KPI / alerty / Sales Board zasilane są z overviewBySegment na żywych danych Convex; brak mocków.                                                                         
+  - confirm() używane tylko dla operacji destrukcyjnych z wysokim progiem pomyłki (Zwolnij koję, Migracja, Potwierdź ręcznie) — świadomie zostawione.                                  
+                                                                                                                                                                                       
+  Weryfikacja:                                                                                                                                                                         
+  - pnpm check — 0 błędów, 0 ostrzeżeń, 1740 plików.                                                                                                                                   
+  - pnpm lint — czysty po stronie admina. Pozostałe 5 warnings to pre-existing długi formatowania w plikach poza zakresem (3× HTML design prototypy w docs/design/, docs/handoff.md,   
+  scripts/codex-session-start.mjs). Wszystkie sprzed Etap 1.                                                                                                                        
+                                                                                                                                                                                       
+  Po-MVP / decyzje świadomie odłożone:                      
+  - Pełen audit log — zostaje na drugiego operatora.                                                                                                                                   
+  - WhatsApp/SMS automation — zostaje na codzienne 5+ wiadomości.                                                                                                                      
+  - Convex auth hardening (ctx.auth + Clerk JWT) — najwyższy priorytet z backloga, zostaje na drugiego operatora lub audyt.                                                            
+  - Reguły monitów konfigurowalne (panel z prototypu, świadomie pominięty w Etap 4).                                                                                                   
+  - Auto-wygaszający cron na confirmation tokens — lazy expiry działa wystarczająco.                                                                                                   
+                                                                                                                                                                                       
+  Status:                                                                                                                                                                              
+  - 8/8 etapów Admin Operations Console ukończone.                                                                                                                                     
+  - E2E checklist gotowe do manualnego runa.                                                                                                                                           
+  - Backlog post-MVP udokumentowany.                                                                                                              
