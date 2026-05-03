@@ -67,9 +67,8 @@ msgstr "Cennik"
 msgid "DM Sans, sans-serif"
 msgstr "DM Sans, sans-serif"
 
-#: src/lib/components/crew-guide-page/crew-guide-page.svelte
-msgid "SA"
-msgstr "SA"
+#~ msgid "SA"
+#~ msgstr "SA"
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/lib/components/admin/booking-drawer.svelte
@@ -79,9 +78,11 @@ msgid "Sailing Architects"
 msgstr "Sailing Architects"
 
 #: src/lib/components/site-nav/site-nav.svelte
+#: src/lib/components/site-nav/site-nav.svelte
 msgid "Panel"
 msgstr "Panel"
 
+#: src/lib/components/site-nav/site-nav.svelte
 #: src/lib/components/site-nav/site-nav.svelte
 msgid "Rezerwuj"
 msgstr "Rezerwuj"
@@ -277,9 +278,8 @@ msgstr "Wybrana"
 #~ msgid "Michał: +48 601 671 182 · sailingarchitects@gmail.com. Odpowiadamy w ciągu 24h."
 #~ msgstr "Michał: +48 601 671 182 · sailingarchitects@gmail.com. Odpowiadamy w ciągu 24h."
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "FAQ"
-msgstr "FAQ"
+#~ msgid "FAQ"
+#~ msgstr "FAQ"
 
 #~ msgid "Pytania i odpowiedzi"
 #~ msgstr "Pytania i odpowiedzi"
@@ -453,9 +453,7 @@ msgid "Boutique sailing trips. Łączymy pasję żeglowania z odkrywaniem świat
 msgstr "Boutique sailing trips. Łączymy pasję żeglowania z odkrywaniem świata."
 
 #: src/lib/components/crew-guide-page/crew-guide-page.svelte
-#: src/lib/components/crew-guide-page/crew-guide-page.svelte
 #: src/lib/components/site-footer/site-footer.svelte
-#: src/routes/[[lang=lang]]/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "sailingarchitects@gmail.com"
 msgstr "sailingarchitects@gmail.com"
@@ -1146,16 +1144,13 @@ msgstr "Cena za miejsce"
 msgid "{0} <0/> na etapie <1/> ({1}) {2}. Potwierdzenie zostanie wysłane e-mailem po zaksięgowaniu płatności."
 msgstr "{0} <0/> na etapie <1/> ({1}) {2}. Potwierdzenie zostanie wysłane e-mailem po zaksięgowaniu płatności."
 
-#: src/lib/components/crew-guide-page/crew-guide-page.svelte
 #: src/lib/components/site-footer/site-footer.svelte
 #: src/lib/components/site-footer/site-footer.svelte
-#: src/routes/[[lang=lang]]/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Kontakt do organizatora"
 msgstr "Kontakt do organizatora"
 
 #: src/lib/components/site-footer/site-footer.svelte
-#: src/routes/[[lang=lang]]/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Michał"
 msgstr "Michał"
@@ -1887,6 +1882,7 @@ msgid "Nie udało się skopiować — zaznacz ręcznie."
 msgstr "Nie udało się skopiować — zaznacz ręcznie."
 
 #: src/lib/components/admin/booking-drawer.svelte
+#: src/lib/components/site-nav/site-nav.svelte
 msgid "Escape"
 msgstr "Escape"
 
@@ -2149,18 +2145,16 @@ msgstr "· potwierdzono {0}"
 msgid "Korekta od uczestnika: „{0}\""
 msgstr "Korekta od uczestnika: „{0}\""
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Najczęstsze pytania"
-msgstr "Najczęstsze pytania"
+#~ msgid "Najczęstsze pytania"
+#~ msgstr "Najczęstsze pytania"
+
+#~ msgid "Krótki wybór. Pełny poradnik załogi — checklisty, kategorie i wszystkie odpowiedzi — czeka na osobnej stronie."
+#~ msgstr "Krótki wybór. Pełny poradnik załogi — checklisty, kategorie i wszystkie odpowiedzi — czeka na osobnej stronie."
+
+#~ msgid "Otwórz pełny poradnik załogi →"
+#~ msgstr "Otwórz pełny poradnik załogi →"
 
 #: src/lib/components/faq-section/faq-section.svelte
-msgid "Krótki wybór. Pełny poradnik załogi — checklisty, kategorie i wszystkie odpowiedzi — czeka na osobnej stronie."
-msgstr "Krótki wybór. Pełny poradnik załogi — checklisty, kategorie i wszystkie odpowiedzi — czeka na osobnej stronie."
-
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Otwórz pełny poradnik załogi →"
-msgstr "Otwórz pełny poradnik załogi →"
-
 #: src/lib/components/site-footer/site-footer.svelte
 msgid "Poradnik załogi →"
 msgstr "Poradnik załogi →"
@@ -2189,9 +2183,8 @@ msgstr "Palma de Mallorca → Cabo Verde · Październik–Listopad 2026"
 msgid "Wszystko, co warto wiedzieć przed decyzją, po rezerwacji i tuż przed wyjazdem. Czytaj spokojnie — ocean jest cierpliwy."
 msgstr "Wszystko, co warto wiedzieć przed decyzją, po rezerwacji i tuż przed wyjazdem. Czytaj spokojnie — ocean jest cierpliwy."
 
-#: src/lib/components/crew-guide-page/crew-guide-page.svelte
-msgid "Michał · Sailing Architects"
-msgstr "Michał · Sailing Architects"
+#~ msgid "Michał · Sailing Architects"
+#~ msgstr "Michał · Sailing Architects"
 
 #: src/lib/components/crew-guide-page/crew-guide-page.svelte
 msgid "Nawigacja po sekcjach poradnika"
@@ -2240,3 +2233,47 @@ msgstr "Wybierz koję →"
 #: src/lib/components/crew-guide-page/crew-guide-page.svelte
 msgid "Napisz do Michała"
 msgstr "Napisz do Michała"
+
+#: src/lib/components/site-nav/site-nav.svelte
+msgid "Poradnik"
+msgstr "Poradnik"
+
+#: src/lib/components/site-nav/site-nav.svelte
+msgid "Zamknij menu"
+msgstr "Zamknij menu"
+
+#: src/lib/components/site-nav/site-nav.svelte
+msgid "Otwórz menu"
+msgstr "Otwórz menu"
+
+#: src/lib/components/site-nav/site-nav.svelte
+msgid "Menu"
+msgstr "Menu"
+
+#: src/lib/components/site-nav/site-nav.svelte
+msgid "Język"
+msgstr "Język"
+
+#: src/lib/components/language-switcher/language-switcher.svelte
+msgid "Wybór języka"
+msgstr "Wybór języka"
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Przed wejściem na pokład"
+msgstr "Przed wejściem na pokład"
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Zanim wejdziesz na pokład"
+msgstr "Zanim wejdziesz na pokład"
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Masz więcej pytań?"
+msgstr "Masz więcej pytań?"
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Pełny poradnik: 27 pytań, checklisty dokumentów, pakowanie, życie na pokładzie."
+msgstr "Pełny poradnik: 27 pytań, checklisty dokumentów, pakowanie, życie na pokładzie."
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Czytaj poradnik załogi →"
+msgstr "Czytaj poradnik załogi →"

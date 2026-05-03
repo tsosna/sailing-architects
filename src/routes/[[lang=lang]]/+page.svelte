@@ -60,13 +60,6 @@
 						>Zobacz trasę</a
 					>
 				</div>
-				<div class="hero__contact" aria-label="Kontakt do organizatora">
-					<strong>Michał</strong>
-					<a href="tel:+48601671182">+48 601 671 182</a>
-					<a href="mailto:sailingarchitects@gmail.com"
-						>sailingarchitects@gmail.com</a
-					>
-				</div>
 			</div>
 
 			<div class="stats">
@@ -225,49 +218,6 @@
 		flex-wrap: wrap;
 	}
 
-	.hero__contact {
-		margin-top: 24px;
-		display: inline-grid;
-		grid-template-columns: auto auto auto;
-		align-items: center;
-		gap: 1px;
-		max-width: 100%;
-		background: rgba(196, 146, 58, 0.22);
-		font-family: var(--font-sans);
-		font-size: 13px;
-	}
-
-	.hero__contact > * {
-		min-height: 52px;
-		display: flex;
-		align-items: center;
-		background: rgba(7, 17, 30, 0.82);
-		padding: 14px 18px;
-	}
-
-	.hero__contact strong {
-		font-size: 11px;
-		font-weight: 700;
-		letter-spacing: 2px;
-		text-transform: uppercase;
-		color: var(--color-brass-light);
-	}
-
-	.hero__contact a {
-		color: var(--color-warm-white);
-		font-weight: 600;
-		text-decoration: none;
-		white-space: nowrap;
-		transition:
-			color 200ms ease,
-			background-color 200ms ease;
-	}
-
-	.hero__contact a:hover {
-		color: var(--color-brass-light);
-		background: var(--color-navy-deep);
-	}
-
 	.btn {
 		font-family: var(--font-sans);
 		text-transform: uppercase;
@@ -348,15 +298,6 @@
 
 		.hero__inner {
 			padding: 0 20px;
-		}
-
-		.hero__contact {
-			grid-template-columns: 1fr;
-			width: 100%;
-		}
-
-		.hero__contact > * {
-			min-height: 48px;
 		}
 	}
 </style>

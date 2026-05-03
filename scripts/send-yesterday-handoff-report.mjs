@@ -18,9 +18,20 @@ function getYesterdayLocal() {
 }
 
 function stripJargon(text) {
-	return text
+	const cleaned = text
 		.replace(/`([^`]+)`/g, '$1')
 		.replace(/\(([^)]*\/[^)]*)\)/g, '')
+		.replace(/\bcommit\s+[a-f0-9]{6,}\b/gi, '')
+		.replace(/\b(?:src|docs|scripts|convex|locales)\/[^\s,;)]*/g, '')
+		.replace(/\s+\/\s+/g, ' / ')
+		.replace(/\s{2,}/g, ' ')
+		.trim()
+
+	return cleaned
+		.replace(/\s*\/admin\b/gi, ' panel administracyjny')
+		.replace(/\s*\/crew\b/gi, ' panel załogi')
+		.replace(/\s*\/dashboard\b/gi, ' panel użytkownika')
+		.replace(/\s{2,}/g, ' ')
 		.replace(/\s{2,}/g, ' ')
 		.trim()
 }
@@ -70,6 +81,17 @@ function extractSessionsForDate(markdown, dateStr) {
 function pickHighlights(changeBullets) {
 	const highlights = []
 
+	const lower = changeBullets.map((b) => b.toLowerCase())
+	if (lower.some((b) => b.includes('admin operations console') || b.includes('panel administracyjny') || b.includes('etap 1'))) {
+		highlights.push(
+			'Dostarczono pierwszą wersję panelu administracyjnego do obsługi rezerwacji i komunikacji z załogą.'
+		)
+		highlights.push(
+			'Dodano m.in. podgląd kluczowych wskaźników, edycję danych uczestników oraz automatyczne linki do potwierdzania danych.'
+		)
+		return highlights
+	}
+
 	const rules = [
 		{
 			key: 'płatno',
@@ -101,6 +123,72 @@ function pickHighlights(changeBullets) {
 	}
 
 	return highlights
+}
+
+function normalizeChangeBullet(bullet) {
+	const text = stripJargon(bullet)
+	const lower = text.toLowerCase()
+
+	if (lower.includes('guard') || (lower.includes('role') && lower.includes('admin'))) {
+		return 'Dodaliśmy kontrolę dostępu do panelu administracyjnego (tylko dla uprawnionych operatorów).'
+	}
+
+	if (lower.includes('kpi') || lower.includes('sales board') || lower.includes('alert')) {
+		return 'Dodaliśmy widok podsumowania rezerwacji (wskaźniki, lista spraw do pilnej obsługi).'
+	}
+
+	if (lower.includes('drawer') || lower.includes('szczegó') || lower.includes('detail') || lower.includes('historia kontaktu') || lower.includes('whatsapp')) {
+		return 'Przygotowaliśmy widok szczegółów rezerwacji z historią kontaktu i gotowymi wiadomościami do klienta.'
+	}
+
+	if (lower.includes('harmonogram') || lower.includes('plan') || lower.includes('rat')) {
+		return 'Dodaliśmy edytor harmonogramu płatności (raty) i ustandaryzowane szablony planów.'
+	}
+
+	if (lower.includes('uczestnik') || lower.includes('participant') || lower.includes('confirmationstatus') || lower.includes('potwierd')) {
+		return 'Dodaliśmy możliwość potwierdzania i korygowania danych uczestników oraz ich statusu w panelu.'
+	}
+
+	if (lower.includes('token') || lower.includes('link') || lower.includes('expiry')) {
+		return 'Dodaliśmy bezpieczne linki dla załogi do potwierdzania danych (ważne czasowo).'
+	}
+
+	if (lower.includes('captain') || lower.includes('complimentary') || lower.includes('special')) {
+		return 'Uporządkowaliśmy obsługę specjalnych miejsc (np. kapitańskie, miejsca gratisowe) w panelu.'
+	}
+
+	if (lower.includes('checklist') || lower.includes('backlog') || lower.includes('post-mvp')) {
+		return 'Dopisaliśmy checklistę testów oraz listę dalszych decyzji i usprawnień po MVP.'
+	}
+
+	return text
+}
+
+function normalizeNextStepBullet(bullet) {
+	const text = stripJargon(bullet)
+	const lower = text.toLowerCase()
+
+	if (
+		lower.includes('env set') ||
+		lower.includes('handoff_report_to') ||
+		lower.includes('public_app_url')
+	) {
+		return 'Ustawić konfigurację na środowisku produkcyjnym (adres aplikacji i adres odbiorcy raportów).'
+	}
+
+	if (lower.includes('role') && lower.includes('admin')) {
+		return 'Ustalić listę osób, które mają mieć dostęp do panelu administracyjnego.'
+	}
+
+	if (lower.includes('manual') || lower.includes('checklist') || lower.includes('test')) {
+		return 'Przejść checklistę testów panelu administracyjnego przed wdrożeniem.'
+	}
+
+	if (lower.includes('deploy') || lower.includes('production') || lower.includes('push')) {
+		return 'Przygotować wdrożenie zmian na środowisko produkcyjne.'
+	}
+
+	return text
 }
 
 function buildHtml({ dateStr, summary, done, attention, nextStep }) {
@@ -159,17 +247,33 @@ async function main() {
 
 	const done = allChangeBullets.length
 		? allChangeBullets.slice(0, 8)
+				.map(normalizeChangeBullet)
+				.filter(Boolean)
+				.filter((value, index, array) => array.indexOf(value) === index)
 		: ['Drobne poprawki i porządki w obszarze rezerwacji.']
 	const summaryHints = pickHighlights(allChangeBullets)
 	const summary = summaryHints.length
 		? summaryHints.join(' ')
 		: 'Poniżej krótkie podsumowanie prac z wczoraj. Skupiliśmy się na stabilności procesu rezerwacji i dopracowaniu doświadczenia użytkownika.'
 
-	const nextStep = allNextBullets.length
-		? allNextBullets.slice(0, 2).join(' ')
+	const normalizedNext = allNextBullets
+		.map(normalizeNextStepBullet)
+		.filter(Boolean)
+		.filter((value, index, array) => array.indexOf(value) === index)
+	const nextStep = normalizedNext.length
+		? normalizedNext.slice(0, 2).join(' ')
 		: 'Wykonamy szybki test całego procesu od wyboru miejsc do potwierdzenia rezerwacji.'
 
 	const attention = []
+	if (
+		normalizedNext.some((item) =>
+			item.toLowerCase().includes('dostęp do panelu administracyjnego')
+		)
+	) {
+		attention.push(
+			'Potrzebujemy potwierdzenia, kto ma mieć dostęp do panelu administracyjnego.'
+		)
+	}
 
 	const html = buildHtml({ dateStr, summary, done, attention, nextStep })
 	const outPath = `/private/tmp/sailing-architects-handoff-${dateStr}.html`

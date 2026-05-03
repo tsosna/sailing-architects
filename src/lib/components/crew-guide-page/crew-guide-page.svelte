@@ -57,19 +57,6 @@
 			Wszystko, co warto wiedzieć przed decyzją, po rezerwacji i tuż przed
 			wyjazdem. Czytaj spokojnie — ocean jest cierpliwy.
 		</p>
-		<div class="hero__contact" aria-label="Kontakt do organizatora">
-			<span class="hero__avatar" aria-hidden="true">SA</span>
-			<div class="hero__contact-text">
-				<p class="hero__contact-name">Michał · Sailing Architects</p>
-				<p class="hero__contact-meta">
-					<a href="tel:+48601671182">+48 601 671 182</a>
-					<span aria-hidden="true">·</span>
-					<a href="mailto:sailingarchitects@gmail.com"
-						>sailingarchitects@gmail.com</a
-					>
-				</p>
-			</div>
-		</div>
 	</div>
 </header>
 
@@ -265,64 +252,6 @@
 		color: rgba(245, 240, 232, 0.55);
 		max-width: 540px;
 		margin: 0 0 32px;
-	}
-
-	.hero__contact {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		flex-wrap: wrap;
-	}
-
-	.hero__avatar {
-		width: 32px;
-		height: 32px;
-		border: 1px solid rgba(196, 146, 58, 0.3);
-		border-radius: 50%;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		font-family: var(--font-sans);
-		font-size: 10px;
-		font-weight: 700;
-		color: var(--color-brass);
-		flex: 0 0 auto;
-	}
-
-	.hero__contact-text {
-		min-width: 0;
-	}
-
-	.hero__contact-name {
-		font-family: var(--font-sans);
-		font-size: 11px;
-		color: var(--color-warm-white);
-		margin: 0;
-	}
-
-	.hero__contact-meta {
-		font-family: var(--font-sans);
-		font-size: 10px;
-		color: rgba(196, 146, 58, 0.6);
-		margin: 2px 0 0;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 6px;
-		align-items: center;
-	}
-
-	.hero__contact-meta a {
-		color: inherit;
-		text-decoration: none;
-		border-bottom: 1px solid rgba(196, 146, 58, 0.25);
-		transition:
-			color 200ms ease,
-			border-color 200ms ease;
-	}
-
-	.hero__contact-meta a:hover {
-		color: var(--color-brass-text);
-		border-bottom-color: var(--color-brass-text);
 	}
 
 	.layout {
@@ -709,53 +638,116 @@
 	}
 
 	@media (max-width: 800px) {
+		.hero {
+			padding: 96px 24px 32px;
+		}
+
+		.hero__title {
+			margin: 16px 0 10px;
+		}
+
+		.hero__lead {
+			margin-bottom: 24px;
+		}
+
 		.layout {
 			flex-direction: column;
 		}
 
 		.sidebar {
-			position: static;
+			position: sticky;
+			top: 64px;
+			z-index: 10;
 			width: 100%;
 			max-height: none;
 			border-right: none;
-			border-bottom: 1px solid rgba(196, 146, 58, 0.1);
-			padding: 16px 24px;
+			border-bottom: 1px solid rgba(196, 146, 58, 0.15);
+			padding: 12px 0;
+			background: rgba(13, 27, 46, 0.97);
+			backdrop-filter: blur(8px);
+			-webkit-backdrop-filter: blur(8px);
+			overflow: visible;
+		}
+
+		.sidebar__label {
+			display: none;
 		}
 
 		.sidebar__nav {
 			flex-direction: row;
-			flex-wrap: wrap;
-			gap: 8px;
+			flex-wrap: nowrap;
+			gap: 6px;
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+			scrollbar-width: none;
+			padding: 0 16px;
+		}
+
+		.sidebar__nav::-webkit-scrollbar {
+			display: none;
 		}
 
 		.sidebar__link {
-			padding: 6px 12px;
+			padding: 8px 14px;
 			border-left: none;
-			border: 1px solid rgba(196, 146, 58, 0.2);
+			border: 1px solid rgba(196, 146, 58, 0.18);
 			font-size: 11px;
+			white-space: nowrap;
+			flex-shrink: 0;
 		}
 
 		.sidebar__link--active {
 			border-color: var(--color-brass);
-			background: rgba(196, 146, 58, 0.08);
+			background: rgba(196, 146, 58, 0.1);
 		}
 
 		.sidebar__contact {
-			margin: 24px 0 0;
+			display: none;
 		}
 
 		.main {
-			padding: 32px 24px;
+			padding: 28px 20px 64px;
+		}
+
+		.section {
+			margin-bottom: 48px;
+		}
+
+		.section__header {
+			margin-bottom: 24px;
+		}
+
+		.checklists {
+			grid-template-columns: 1fr;
+		}
+
+		.qa__btn {
+			padding: 16px 0;
+			gap: 12px;
+		}
+
+		.qa__q {
+			font-size: 14px;
 		}
 
 		.cta {
-			padding: 28px 24px;
+			margin-top: 48px;
+			padding: 28px 20px;
+		}
+
+		.cta__actions {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.cta__actions .btn {
+			justify-content: center;
 		}
 	}
 
 	@media (max-width: 480px) {
 		.hero {
-			padding: 96px 24px 40px;
+			padding: 88px 20px 28px;
 		}
 	}
 </style>

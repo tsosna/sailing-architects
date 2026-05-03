@@ -1,6 +1,6 @@
 # AI Handoff — sailing-architects
 
-> Ostatnia aktualizacja: 2026-04-23
+> Ostatnia aktualizacja: 2026-05-03
 
 ---
 
@@ -952,4 +952,46 @@ Sesja przygotowała design-first handoff rozbudowy /admin jako centrum sprzedaż
 - Tłumaczenie EN poradnika — czeka na sygnał, że ktoś chce EN.
 - Persystencja checked-state checklist (localStorage / Convex) — czeka na sygnał.
 - Cron 14 dni przed rejsem z mailem zawierającym poradnik — świadomie poza zakresem tej sesji.
+
+## Sesja 2026-05-03 — Mobile nav, language switcher, FAQ redesign
+
+### Zmiany
+
+- Nowy `src/lib/components/language-switcher/language-switcher.svelte` (+ barrel) — przełącznik PL/EN czyta `page.url.pathname/search/hash` i `page.params.lang`, regex `^/(en|pl)(?=/|$)` strippuje istniejący prefix, dokleja `/en` lub zostawia goły. `data-sveltekit-reload`, by `loadLocale` w `[[lang=lang]]/+layout.ts` poprawnie podmienił locale.
+- `src/lib/components/site-nav/site-nav.svelte`: dodany hamburger (≤900px), pełne mobile menu (linki + Panel + Rezerwuj + LanguageSwitcher), Escape zamyka, klik w link zamyka. Link `Poradnik` dodany do nav. Język widoczny też na desktop, obok Panel/Rezerwuj.
+- `src/lib/components/faq-section/faq-section.svelte`: nagłówek przebudowany — eyebrow „Przed wejściem na pokład" + duży tytuł „Zanim wejdziesz na pokład" + outline button po prawej (kolumna na mobile). Pod akordeonem nowy bordered CTA box („Masz więcej pytań?" + opis + outline brass button). Max-width zwiększony z 720px do 1100px.
+- `src/lib/components/crew-guide-page/crew-guide-page.svelte`: mobile UX naprawiony — sidebar staje się sticky horizontal scroll (`flex-wrap: nowrap` + `overflow-x: auto`) pod nav (top: 64px), `sidebar__contact` ukryty na mobile, hero zmniejszony (88-96px góra), checklisty 1-kolumnowe, akordeony zwarte, CTA buttons full-width.
+- `src/routes/[[lang=lang]]/+page.svelte`: usunięty `<div class="hero__contact">` (Michał / +48 / email) z hero + powiązane style.
+- Wuchale auto-wyciągnął nowe stringi do `src/locales/{pl,en}.po` (Poradnik, Otwórz/Zamknij menu, Język, Wybór języka, Przed wejściem na pokład, Zanim wejdziesz na pokład, Masz więcej pytań?, Czytaj poradnik załogi →, Pełny poradnik: 27 pytań…). Stare entries (FAQ, Najczęstsze pytania, „Krótki wybór…", „Otwórz pełny poradnik załogi →", „Michał · Sailing Architects", „SA") zniknęły / zostały oznaczone jako obsolete.
+- Walidacja: `pnpm check` → 0 błędów / 0 ostrzeżeń (1747 plików).
+
+### Decyzje
+
+- Language switcher robiony lokalnie (nie reused `domy-modulowe`) — tamten projekt używa Paraglide, ten Wuchale; logika prefixu na poziomie stringa wystarcza, nie ma sensu wciągać helpera z innego stacku.
+- Mobile menu jako panel pod nav (top: 64px, krótki content), nie full-screen overlay — zgodne z preferencją „nie zasłaniać całego viewportu bez potrzeby".
+- Hamburger pojawia się od 900px (cluster z linkami chowa się), brand text chowa od 480px — żeby przy ~720-900px nie wpadać w stan, gdzie nav jest pusty.
+- Sidebar contact w `/poradnik` zostawiony na desktop (przydatny przy długim content), ukryty na mobile (`display: none`) — kontakt do organizatora jest też w footerze i w finalnym CTA.
+- Kontakt z hero strony głównej całkowicie usunięty (decyzja z drugiej tury) — był duplikatem footera, marketing-wise psuł hierarchię.
+- Outline button w FAQ header celowo używa `border 0.35` + warm-white text (zgodnie ze screenshotem), CTA box pod akordeonem ma `border 0.5` + brass text — żeby wizualnie były odrębne, nie konkurujące.
+
+### Wnioski
+
+- **Wuchale + SvelteKit `[[lang=lang]]` — przełącznik języka nie ma własnego helpera**: trzeba ręcznie regex-stripować prefix z `page.url.pathname` i ponownie nakładać. Wystarczy, ale jeśli ścieżek lang-prefix się rozrośnie, warto wydzielić helper `localeHref(target)`. `data-sveltekit-reload` na linku jest kluczowe — bez niego nawigacja klient-side ominie `loadLocale` w `+layout.ts` i interfejs nie zmieni języka aż do twardego refresha.
+- **`resolve('/...')` z grupy `[[lang=lang]]` zwraca ścieżkę bez prefixu** — wszystkie linki w nav/footer ignorują `params.lang`, więc klik z `/en/...` zabiera do PL. Pre-existing bug, nie naprawiony tu, do zaopiekowania osobno (pewnie helper `langHref(path)` w `$lib/i18n`).
+- **Sticky horizontal scroll sidebar pod fixed nav (`top: 64px`)** to dobry wzorzec na mobile dla kategorii sekcji — `flex-wrap: nowrap` + `overflow-x: auto` + `scrollbar-width: none` + `flex-shrink: 0` na pigułkach. Nie powoduje horizontal scroll całej strony, bo overflow jest na rodzicu, nie na body.
+- **Hamburger-mobile breakpoint 900px (nie 720)** — przy 720-900px desktop cluster z 5 linkami + lang + 2 buttonami nie mieści się czytelnie, lepiej przejść na hamburger wcześniej.
+- **Auto-ekstrakcja Wuchale przy hot reload działa cicho** — nowe stringi (np. `aria-label="Wybór języka"`) trafiły do `.po` automatycznie. Warto przejrzeć diff `pl.po`/`en.po` przed commitem, bo auto-ekstrakcja może dodać niechciane klucze.
+
+### Następne kroki
+
+#### Next
+
+- Manualna weryfikacja w przeglądarce (390px / 430px / 1440px, `/`, `/poradnik`, `/en/`, `/en/poradnik`) — niezrobiona, dev server nie był odpalany.
+- Tłumaczenia EN dla nowych stringów (`msgstr` w `src/locales/en.po`) — obecnie są kopiami PL.
+- Audyt `resolve(...)` → czy potrzebny helper `langHref(path)` honorujący `page.params.lang`.
+
+#### Blocked / Later / Open questions
+
+- Czy mobile menu ma blokować scroll body (gdyby content menu rosło > viewport)?
+- Czy sidebar contact w `/poradnik` desktop zostaje, czy też do usunięcia.
 
