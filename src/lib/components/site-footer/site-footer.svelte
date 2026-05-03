@@ -24,7 +24,12 @@
 					>
 				</div>
 			</div>
-			<a class="footer__cta" href={resolve('/book')}>Zarezerwuj koję →</a>
+			<div class="footer__actions">
+				<a class="footer__cta" href={resolve('/book')}>Zarezerwuj koję →</a>
+				<a class="footer__link" href={resolve('/poradnik')}
+					>Poradnik załogi →</a
+				>
+			</div>
 		</div>
 		<div class="footer__bottom">
 			<p>© 2026 Sailing Architects.</p>
@@ -132,6 +137,13 @@
 		border-bottom-color: var(--color-brass-text);
 	}
 
+	.footer__actions {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 14px;
+	}
+
 	.footer__cta {
 		padding: 16px 40px;
 		background: var(--color-brass);
@@ -155,6 +167,26 @@
 		background: var(--color-brass-light);
 	}
 
+	.footer__link {
+		font-family: var(--font-sans);
+		font-size: 11px;
+		letter-spacing: 2px;
+		text-transform: uppercase;
+		color: rgba(245, 240, 232, 0.6);
+		text-decoration: none;
+		border-bottom: 1px solid rgba(196, 146, 58, 0.3);
+		padding-bottom: 2px;
+		white-space: nowrap;
+		transition:
+			color 200ms ease,
+			border-color 200ms ease;
+	}
+
+	.footer__link:hover {
+		color: var(--color-brass-text);
+		border-bottom-color: var(--color-brass-text);
+	}
+
 	.footer__bottom {
 		border-top: 1px solid rgba(196, 146, 58, 0.08);
 		padding-top: 24px;
@@ -176,6 +208,10 @@
 			grid-template-columns: 1fr;
 			gap: 32px;
 			align-items: start;
+		}
+
+		.footer__actions {
+			align-items: flex-start;
 		}
 	}
 </style>

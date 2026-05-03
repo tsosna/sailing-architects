@@ -247,6 +247,7 @@ export type PaymentEmailInput = {
 		dueAt?: number
 	}>
 	panelUrl: string
+	guideUrl?: string
 	pdf?: Buffer
 	filename?: string
 }
@@ -358,13 +359,15 @@ export async function sendPaymentConfirmationEmail(input: PaymentEmailInput) {
 			)
 		}
 	}
-	textLines.push(
-		'',
-		`Otwórz panel: ${input.panelUrl}`,
-		'',
-		'Do zobaczenia na pokładzie,',
-		'Sailing Architects'
-	)
+	textLines.push('', `Otwórz panel: ${input.panelUrl}`)
+	if (input.guideUrl) {
+		textLines.push(
+			'',
+			'Poradnik załogi (checklisty + pełne Q&A):',
+			input.guideUrl
+		)
+	}
+	textLines.push('', 'Do zobaczenia na pokładzie,', 'Sailing Architects')
 
 	const remainingHtml =
 		remainingList.length > 0 && input.type !== 'fully-paid'
@@ -409,6 +412,15 @@ export async function sendPaymentConfirmationEmail(input: PaymentEmailInput) {
 					Otwórz panel
 				</a>
 			</p>
+			${
+				input.guideUrl
+					? `<p style="margin: 0 0 16px; font-size: 13px; color: #607089;">
+				Przed rejsem przejrzyj
+				<a href="${escapeHtml(input.guideUrl)}" style="color: #b58128;">poradnik załogi</a>
+				— checklisty, pakowanie i odpowiedzi na najczęstsze pytania.
+			</p>`
+					: ''
+			}
 			<p style="margin: 0; color: #607089;">
 				Do zobaczenia na pokładzie,<br />Sailing Architects
 			</p>

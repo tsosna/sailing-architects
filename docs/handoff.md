@@ -908,3 +908,48 @@ Sesja przygotowała design-first handoff rozbudowy /admin jako centrum sprzedaż
 - Single source of truth dla `voyageSegments` (statyczne `src/lib/data/voyage-segments.ts` vs Convex) — czeka na pierwszą rozbieżność.
 - Niezwiązane z admin: Clerk OTP styling (`+layout.svelte`, `book/+page.svelte`) — diff nieskommitowany, do osobnego commita.
 
+## Sesja 2026-05-03 — FAQ + Poradnik załogi
+
+### Zmiany
+
+- Nowy moduł `src/lib/data/crew-guide.ts`: 6 kategorii, 3 checklisty (dokumenty / pakowanie / płatności), 27 pytań, 7 oznaczonych `featured`. Eksporty + typy TS (`CrewGuideCategory`, `CrewGuideChecklist`, `CrewGuideQuestion`, `featuredCrewGuideQuestions`).
+- `src/lib/components/faq-section/faq-section.svelte` przebudowane: czyta `featuredCrewGuideQuestions` z modułu, lead „krótki wybór", CTA do `/poradnik`. Zachowany styl navy/brass akordeonu.
+- Nowa strona `/poradnik` (`src/routes/[[lang=lang]]/poradnik/+page.svelte`) + komponent `src/lib/components/crew-guide-page/crew-guide-page.svelte` (+ `index.ts` barrel): hero z badge, sticky sidebar (kategorie + blok kontaktowy), 3 checklisty z lokalnym checked-state + progress bar, sekcje Q&A pogrupowane kategoriami, akordeon z `aria-expanded` / `aria-controls`, finalny CTA. Mobile (≤800px): sidebar → poziomy pas pigułek.
+- `src/lib/components/site-footer/site-footer.svelte`: link „Poradnik załogi →" pod CTA rezerwacji.
+- `src/convex/_emails.ts/sendCrewDataReminderEmail`: linijka HTML i text z linkiem do `panelUrl('/poradnik')`.
+- `src/lib/server/email.ts`: opcjonalne `guideUrl?` w `PaymentEmailInput`, render dyskretnej linijki pod CTA panelu (HTML + text).
+- `src/routes/api/stripe/webhook/+server.ts`: webhook przekazuje `guideUrl: ${PUBLIC_APP_URL}/poradnik`.
+- Walidacja: `pnpm check` → 0 błędów / 0 ostrzeżeń (1745 plików).
+
+### Decyzje
+
+- `crew-guide.js` z handoff = kanoniczna baza redakcyjna. Jedyna korekta: `nie wykorzystana` → `niewykorzystana` (PL pisownia łączna).
+- Komponent `crew-guide-page` wydzielony osobno (nie inline w route) — strona ma 7 odrębnych sekcji (hero, sidebar, checklists, 6 kategorii, CTA), inline byłoby trudne w utrzymaniu.
+- Brak własnego sticky topbara dla `/poradnik` — istniejący `<SiteNav />` (fixed, 64px) z layoutu pełni rolę powrotu do strony głównej. Hero `padding-top: 120px`, żeby zmieścić fixed nav i nie konkurować wizualnie.
+- Sidebar staje się poziomym pasem pigułek na ≤800px (zgodnie z prototypem) — nie reusowałem istniejącego nav-a, bo treść (kategorie poradnika) inna.
+- Brak Tailwind klas — scoped CSS + tokeny z `app.css`, zgodnie z konwencją sąsiednich komponentów (faq-section, footer, hero).
+- `<SiteNav />` zostawiony bez zmian — priorytet rezerwacji nie ma być rozcieńczany. Footer + CTA w FAQ wystarczają.
+- `email.ts/guideUrl` opcjonalny w typie — żeby ewentualne inne callery nie pękły, choć Stripe webhook (jedyny obecny) zawsze go teraz wysyła.
+
+### Wnioski
+
+- **Svelte 5 reactivity dla `Record<K, Set<T>>`**: mutacja `Set` w miejscu (`state[k].add(x)`) NIE triggeruje reactivity, bo `$state` proxy widzi tylko zapisy na własnych kluczach obiektu, nie wewnątrz wartości. Trzeba przypisać nowy obiekt na zewnątrz: `state = { ...state, [k]: nextSet }`. Alternatywa: `SvelteSet`/`SvelteMap` z `svelte/reactivity`. Ponadprojektowy gotcha — promowane do `knowledge-vault/wiki/concepts/svelte5-state-nested-collections-reactivity.md`.
+- **Layout chain `[[lang=lang]]/+layout.svelte` automatycznie wstrzykuje `<SiteNav />`** — każda nowa public page dziedziczy fixed 64px nav. Wymaga `padding-top` w hero żeby uniknąć nakładek. Pułapka manifestuje się dopiero w przeglądarce, nie w `pnpm check`.
+- `$derived.by(() => { ... })` z `Map` pozwala zachłannie pogrupować listę w jednym wyrażeniu zamiast `forEach` + side-effect. Czyściej w runes.
+- Lokalny checked-state nie persystuje (refresh = reset). Świadomy minimalizm — gdyby trzeba, localStorage albo `+layout.ts` data load.
+- `/poradnik` jest publiczne (bez Clerk), pod `[[lang=lang]]` (PL/EN), ale bez ręcznych kluczy `.po` — Wuchale wyciągnie automatycznie, gdy będzie potrzeba EN.
+
+### Następne kroki
+
+#### Next
+
+- Manualna weryfikacja wizualna w `pnpm dev`: `/`, `/poradnik`, mobile 390px / desktop 1440px — brak poziomego scrolla, akordeony, linki `/book` + `/poradnik`.
+- Podmienić `Q&A-sailing-architects.md` na zaktualizowane pytania (gdyby kanoniczny dokument wymagał sync — na razie zostawione).
+- Po feedbacku: zdecydować czy `/poradnik` ma trafić do `<SiteNav />`.
+
+#### Blocked / Later / Open questions
+
+- Tłumaczenie EN poradnika — czeka na sygnał, że ktoś chce EN.
+- Persystencja checked-state checklist (localStorage / Convex) — czeka na sygnał.
+- Cron 14 dni przed rejsem z mailem zawierającym poradnik — świadomie poza zakresem tej sesji.
+

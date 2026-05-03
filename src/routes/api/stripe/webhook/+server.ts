@@ -121,6 +121,7 @@ export const POST: RequestHandler = async ({ request }) => {
 					thisPaymentAmount,
 					remainingPayments,
 					panelUrl: `${PUBLIC_APP_URL}/dashboard`,
+					guideUrl: `${PUBLIC_APP_URL}/poradnik`,
 					...(pdf && filename ? { pdf, filename } : {})
 				})
 				await convex.mutation(api.mutations.markPaymentEmailSent, {

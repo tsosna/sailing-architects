@@ -67,8 +67,9 @@ msgstr "Cennik"
 msgid "DM Sans, sans-serif"
 msgstr "DM Sans, sans-serif"
 
-#~ msgid "SA"
-#~ msgstr "SA"
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "SA"
+msgstr "SA"
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/lib/components/admin/booking-drawer.svelte
@@ -240,61 +241,48 @@ msgstr "Koja {0}"
 msgid "Wybrana"
 msgstr "Wybrana"
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Czy muszę mieć patent żeglarski?"
-msgstr "Czy muszę mieć patent żeglarski?"
+#~ msgid "Czy muszę mieć patent żeglarski?"
+#~ msgstr "Czy muszę mieć patent żeglarski?"
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Nie. Nie wymagamy patentu. Doświadczenie mile widziane, ale przyjmujemy osoby bez doświadczenia — pod warunkiem chęci do nauki i pracy w załodze."
-msgstr "Nie. Nie wymagamy patentu. Doświadczenie mile widziane, ale przyjmujemy osoby bez doświadczenia — pod warunkiem chęci do nauki i pracy w załodze."
+#~ msgid "Nie. Nie wymagamy patentu. Doświadczenie mile widziane, ale przyjmujemy osoby bez doświadczenia — pod warunkiem chęci do nauki i pracy w załodze."
+#~ msgstr "Nie. Nie wymagamy patentu. Doświadczenie mile widziane, ale przyjmujemy osoby bez doświadczenia — pod warunkiem chęci do nauki i pracy w załodze."
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Ile osób jest na jachcie?"
-msgstr "Ile osób jest na jachcie?"
+#~ msgid "Ile osób jest na jachcie?"
+#~ msgstr "Ile osób jest na jachcie?"
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Maksymalnie 10 uczestników + skipper. Każdy ma własną koje w jednej z 5 kajut. Wszystkie kajuty są dwuosobowe."
-msgstr "Maksymalnie 10 uczestników + skipper. Każdy ma własną koje w jednej z 5 kajut. Wszystkie kajuty są dwuosobowe."
+#~ msgid "Maksymalnie 10 uczestników + skipper. Każdy ma własną koje w jednej z 5 kajut. Wszystkie kajuty są dwuosobowe."
+#~ msgstr "Maksymalnie 10 uczestników + skipper. Każdy ma własną koje w jednej z 5 kajut. Wszystkie kajuty są dwuosobowe."
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Jak wygląda życie na pokładzie?"
-msgstr "Jak wygląda życie na pokładzie?"
+#~ msgid "Jak wygląda życie na pokładzie?"
+#~ msgstr "Jak wygląda życie na pokładzie?"
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Wachty nawigacyjne, wspólne gotowanie, zwiedzanie portów. Atmosfera jest luźna, ale wszyscy aktywnie uczestniczą w rejsie."
-msgstr "Wachty nawigacyjne, wspólne gotowanie, zwiedzanie portów. Atmosfera jest luźna, ale wszyscy aktywnie uczestniczą w rejsie."
+#~ msgid "Wachty nawigacyjne, wspólne gotowanie, zwiedzanie portów. Atmosfera jest luźna, ale wszyscy aktywnie uczestniczą w rejsie."
+#~ msgstr "Wachty nawigacyjne, wspólne gotowanie, zwiedzanie portów. Atmosfera jest luźna, ale wszyscy aktywnie uczestniczą w rejsie."
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Co wziąć na rejs?"
-msgstr "Co wziąć na rejs?"
+#~ msgid "Co wziąć na rejs?"
+#~ msgstr "Co wziąć na rejs?"
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Prześlemy pełną listę po rezerwacji. Podstawy: odzież sportowa, kurtka przeciwdeszczowa, obuwie z białą podeszwą, dokumenty tożsamości."
-msgstr "Prześlemy pełną listę po rezerwacji. Podstawy: odzież sportowa, kurtka przeciwdeszczowa, obuwie z białą podeszwą, dokumenty tożsamości."
+#~ msgid "Prześlemy pełną listę po rezerwacji. Podstawy: odzież sportowa, kurtka przeciwdeszczowa, obuwie z białą podeszwą, dokumenty tożsamości."
+#~ msgstr "Prześlemy pełną listę po rezerwacji. Podstawy: odzież sportowa, kurtka przeciwdeszczowa, obuwie z białą podeszwą, dokumenty tożsamości."
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Jaka jest polityka anulacji?"
-msgstr "Jaka jest polityka anulacji?"
+#~ msgid "Jaka jest polityka anulacji?"
+#~ msgstr "Jaka jest polityka anulacji?"
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Do 60 dni przed rejsem — pełny zwrot. 30–60 dni — 50% zwrotu. Poniżej 30 dni — brak zwrotu (można wskazać zastępstwo)."
-msgstr "Do 60 dni przed rejsem — pełny zwrot. 30–60 dni — 50% zwrotu. Poniżej 30 dni — brak zwrotu (można wskazać zastępstwo)."
+#~ msgid "Do 60 dni przed rejsem — pełny zwrot. 30–60 dni — 50% zwrotu. Poniżej 30 dni — brak zwrotu (można wskazać zastępstwo)."
+#~ msgstr "Do 60 dni przed rejsem — pełny zwrot. 30–60 dni — 50% zwrotu. Poniżej 30 dni — brak zwrotu (można wskazać zastępstwo)."
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Jak skontaktować się z organizatorem?"
-msgstr "Jak skontaktować się z organizatorem?"
+#~ msgid "Jak skontaktować się z organizatorem?"
+#~ msgstr "Jak skontaktować się z organizatorem?"
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Michał: +48 601 671 182 · sailingarchitects@gmail.com. Odpowiadamy w ciągu 24h."
-msgstr "Michał: +48 601 671 182 · sailingarchitects@gmail.com. Odpowiadamy w ciągu 24h."
+#~ msgid "Michał: +48 601 671 182 · sailingarchitects@gmail.com. Odpowiadamy w ciągu 24h."
+#~ msgstr "Michał: +48 601 671 182 · sailingarchitects@gmail.com. Odpowiadamy w ciągu 24h."
 
 #: src/lib/components/faq-section/faq-section.svelte
 msgid "FAQ"
 msgstr "FAQ"
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Pytania i odpowiedzi"
-msgstr "Pytania i odpowiedzi"
+#~ msgid "Pytania i odpowiedzi"
+#~ msgstr "Pytania i odpowiedzi"
 
 #: src/lib/components/pricing-section/pricing-section.svelte
 msgid "Koja na jachcie"
@@ -464,6 +452,8 @@ msgstr "Cena"
 msgid "Boutique sailing trips. Łączymy pasję żeglowania z odkrywaniem świata."
 msgstr "Boutique sailing trips. Łączymy pasję żeglowania z odkrywaniem świata."
 
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
 #: src/lib/components/site-footer/site-footer.svelte
 #: src/routes/[[lang=lang]]/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
@@ -807,6 +797,7 @@ msgstr "Potwierdzenie rezerwacji"
 msgid "Rejs"
 msgstr "Rejs"
 
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
@@ -1155,6 +1146,7 @@ msgstr "Cena za miejsce"
 msgid "{0} <0/> na etapie <1/> ({1}) {2}. Potwierdzenie zostanie wysłane e-mailem po zaksięgowaniu płatności."
 msgstr "{0} <0/> na etapie <1/> ({1}) {2}. Potwierdzenie zostanie wysłane e-mailem po zaksięgowaniu płatności."
 
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
 #: src/lib/components/site-footer/site-footer.svelte
 #: src/lib/components/site-footer/site-footer.svelte
 #: src/routes/[[lang=lang]]/+page.svelte
@@ -2156,3 +2148,95 @@ msgstr "· potwierdzono {0}"
 #: src/lib/components/admin/booking-drawer.svelte
 msgid "Korekta od uczestnika: „{0}\""
 msgstr "Korekta od uczestnika: „{0}\""
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Najczęstsze pytania"
+msgstr "Najczęstsze pytania"
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Krótki wybór. Pełny poradnik załogi — checklisty, kategorie i wszystkie odpowiedzi — czeka na osobnej stronie."
+msgstr "Krótki wybór. Pełny poradnik załogi — checklisty, kategorie i wszystkie odpowiedzi — czeka na osobnej stronie."
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Otwórz pełny poradnik załogi →"
+msgstr "Otwórz pełny poradnik załogi →"
+
+#: src/lib/components/site-footer/site-footer.svelte
+msgid "Poradnik załogi →"
+msgstr "Poradnik załogi →"
+
+#: src/routes/[[lang=lang]]/poradnik/+page.svelte
+msgid "Poradnik załogi — Sailing Architects"
+msgstr "Poradnik załogi — Sailing Architects"
+
+#: src/routes/[[lang=lang]]/poradnik/+page.svelte
+msgid "Pełny przewodnik dla uczestników rejsu Sailing Architects: checklisty, kategorie pytań i odpowiedzi, kontakt do organizatora."
+msgstr "Pełny przewodnik dla uczestników rejsu Sailing Architects: checklisty, kategorie pytań i odpowiedzi, kontakt do organizatora."
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Checklisty"
+msgstr "Checklisty"
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Poradnik załogi"
+msgstr "Poradnik załogi"
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Palma de Mallorca → Cabo Verde · Październik–Listopad 2026"
+msgstr "Palma de Mallorca → Cabo Verde · Październik–Listopad 2026"
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Wszystko, co warto wiedzieć przed decyzją, po rezerwacji i tuż przed wyjazdem. Czytaj spokojnie — ocean jest cierpliwy."
+msgstr "Wszystko, co warto wiedzieć przed decyzją, po rezerwacji i tuż przed wyjazdem. Czytaj spokojnie — ocean jest cierpliwy."
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Michał · Sailing Architects"
+msgstr "Michał · Sailing Architects"
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Nawigacja po sekcjach poradnika"
+msgstr "Nawigacja po sekcjach poradnika"
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Nawigacja"
+msgstr "Nawigacja"
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Pytania?"
+msgstr "Pytania?"
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Michał odpowiada w ciągu 24h."
+msgstr "Michał odpowiada w ciągu 24h."
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Przegląd przed rejsem"
+msgstr "Przegląd przed rejsem"
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Najważniejsze przed wypłynięciem"
+msgstr "Najważniejsze przed wypłynięciem"
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Trzy checklisty, trzy momenty. Odhaczaj pozycje — pomoże to ułożyć przygotowania w spokojnym tempie."
+msgstr "Trzy checklisty, trzy momenty. Odhaczaj pozycje — pomoże to ułożyć przygotowania w spokojnym tempie."
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Gotowy/gotowa?"
+msgstr "Gotowy/gotowa?"
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Zostań częścią załogi."
+msgstr "Zostań częścią załogi."
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Wybierz etap, wybierz koję, dołącz. Zostało jeszcze kilka miejsc na rejs 2026."
+msgstr "Wybierz etap, wybierz koję, dołącz. Zostało jeszcze kilka miejsc na rejs 2026."
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Wybierz koję →"
+msgstr "Wybierz koję →"
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Napisz do Michała"
+msgstr "Napisz do Michała"

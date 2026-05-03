@@ -67,8 +67,9 @@ msgstr ""
 msgid "DM Sans, sans-serif"
 msgstr ""
 
-#~ msgid "SA"
-#~ msgstr ""
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "SA"
+msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/lib/components/admin/booking-drawer.svelte
@@ -240,61 +241,48 @@ msgstr ""
 msgid "Wybrana"
 msgstr ""
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Czy muszę mieć patent żeglarski?"
-msgstr ""
+#~ msgid "Czy muszę mieć patent żeglarski?"
+#~ msgstr ""
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Nie. Nie wymagamy patentu. Doświadczenie mile widziane, ale przyjmujemy osoby bez doświadczenia — pod warunkiem chęci do nauki i pracy w załodze."
-msgstr ""
+#~ msgid "Nie. Nie wymagamy patentu. Doświadczenie mile widziane, ale przyjmujemy osoby bez doświadczenia — pod warunkiem chęci do nauki i pracy w załodze."
+#~ msgstr ""
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Ile osób jest na jachcie?"
-msgstr ""
+#~ msgid "Ile osób jest na jachcie?"
+#~ msgstr ""
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Maksymalnie 10 uczestników + skipper. Każdy ma własną koje w jednej z 5 kajut. Wszystkie kajuty są dwuosobowe."
-msgstr ""
+#~ msgid "Maksymalnie 10 uczestników + skipper. Każdy ma własną koje w jednej z 5 kajut. Wszystkie kajuty są dwuosobowe."
+#~ msgstr ""
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Jak wygląda życie na pokładzie?"
-msgstr ""
+#~ msgid "Jak wygląda życie na pokładzie?"
+#~ msgstr ""
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Wachty nawigacyjne, wspólne gotowanie, zwiedzanie portów. Atmosfera jest luźna, ale wszyscy aktywnie uczestniczą w rejsie."
-msgstr ""
+#~ msgid "Wachty nawigacyjne, wspólne gotowanie, zwiedzanie portów. Atmosfera jest luźna, ale wszyscy aktywnie uczestniczą w rejsie."
+#~ msgstr ""
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Co wziąć na rejs?"
-msgstr ""
+#~ msgid "Co wziąć na rejs?"
+#~ msgstr ""
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Prześlemy pełną listę po rezerwacji. Podstawy: odzież sportowa, kurtka przeciwdeszczowa, obuwie z białą podeszwą, dokumenty tożsamości."
-msgstr ""
+#~ msgid "Prześlemy pełną listę po rezerwacji. Podstawy: odzież sportowa, kurtka przeciwdeszczowa, obuwie z białą podeszwą, dokumenty tożsamości."
+#~ msgstr ""
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Jaka jest polityka anulacji?"
-msgstr ""
+#~ msgid "Jaka jest polityka anulacji?"
+#~ msgstr ""
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Do 60 dni przed rejsem — pełny zwrot. 30–60 dni — 50% zwrotu. Poniżej 30 dni — brak zwrotu (można wskazać zastępstwo)."
-msgstr ""
+#~ msgid "Do 60 dni przed rejsem — pełny zwrot. 30–60 dni — 50% zwrotu. Poniżej 30 dni — brak zwrotu (można wskazać zastępstwo)."
+#~ msgstr ""
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Jak skontaktować się z organizatorem?"
-msgstr ""
+#~ msgid "Jak skontaktować się z organizatorem?"
+#~ msgstr ""
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Michał: +48 601 671 182 · sailingarchitects@gmail.com. Odpowiadamy w ciągu 24h."
-msgstr ""
+#~ msgid "Michał: +48 601 671 182 · sailingarchitects@gmail.com. Odpowiadamy w ciągu 24h."
+#~ msgstr ""
 
 #: src/lib/components/faq-section/faq-section.svelte
 msgid "FAQ"
 msgstr ""
 
-#: src/lib/components/faq-section/faq-section.svelte
-msgid "Pytania i odpowiedzi"
-msgstr ""
+#~ msgid "Pytania i odpowiedzi"
+#~ msgstr ""
 
 #: src/lib/components/pricing-section/pricing-section.svelte
 msgid "Koja na jachcie"
@@ -464,6 +452,8 @@ msgstr ""
 msgid "Boutique sailing trips. Łączymy pasję żeglowania z odkrywaniem świata."
 msgstr ""
 
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
 #: src/lib/components/site-footer/site-footer.svelte
 #: src/routes/[[lang=lang]]/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
@@ -807,6 +797,7 @@ msgstr ""
 msgid "Rejs"
 msgstr ""
 
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
@@ -1155,6 +1146,7 @@ msgstr ""
 msgid "{0} <0/> na etapie <1/> ({1}) {2}. Potwierdzenie zostanie wysłane e-mailem po zaksięgowaniu płatności."
 msgstr ""
 
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
 #: src/lib/components/site-footer/site-footer.svelte
 #: src/lib/components/site-footer/site-footer.svelte
 #: src/routes/[[lang=lang]]/+page.svelte
@@ -2155,4 +2147,96 @@ msgstr ""
 #. 0: participant.correctionNote
 #: src/lib/components/admin/booking-drawer.svelte
 msgid "Korekta od uczestnika: „{0}\""
+msgstr ""
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Najczęstsze pytania"
+msgstr ""
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Krótki wybór. Pełny poradnik załogi — checklisty, kategorie i wszystkie odpowiedzi — czeka na osobnej stronie."
+msgstr ""
+
+#: src/lib/components/faq-section/faq-section.svelte
+msgid "Otwórz pełny poradnik załogi →"
+msgstr ""
+
+#: src/lib/components/site-footer/site-footer.svelte
+msgid "Poradnik załogi →"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/poradnik/+page.svelte
+msgid "Poradnik załogi — Sailing Architects"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/poradnik/+page.svelte
+msgid "Pełny przewodnik dla uczestników rejsu Sailing Architects: checklisty, kategorie pytań i odpowiedzi, kontakt do organizatora."
+msgstr ""
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Checklisty"
+msgstr ""
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Poradnik załogi"
+msgstr ""
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Palma de Mallorca → Cabo Verde · Październik–Listopad 2026"
+msgstr ""
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Wszystko, co warto wiedzieć przed decyzją, po rezerwacji i tuż przed wyjazdem. Czytaj spokojnie — ocean jest cierpliwy."
+msgstr ""
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Michał · Sailing Architects"
+msgstr ""
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Nawigacja po sekcjach poradnika"
+msgstr ""
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Nawigacja"
+msgstr ""
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Pytania?"
+msgstr ""
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Michał odpowiada w ciągu 24h."
+msgstr ""
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Przegląd przed rejsem"
+msgstr ""
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Najważniejsze przed wypłynięciem"
+msgstr ""
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Trzy checklisty, trzy momenty. Odhaczaj pozycje — pomoże to ułożyć przygotowania w spokojnym tempie."
+msgstr ""
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Gotowy/gotowa?"
+msgstr ""
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Zostań częścią załogi."
+msgstr ""
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Wybierz etap, wybierz koję, dołącz. Zostało jeszcze kilka miejsc na rejs 2026."
+msgstr ""
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Wybierz koję →"
+msgstr ""
+
+#: src/lib/components/crew-guide-page/crew-guide-page.svelte
+msgid "Napisz do Michała"
 msgstr ""

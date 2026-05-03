@@ -174,6 +174,7 @@ export async function sendCrewDataReminderEmail(
 	const link = panelUrl(
 		`/dashboard/crew/${encodeURIComponent(input.participantId)}`
 	)
+	const guideLink = panelUrl('/poradnik')
 	const subject = `Uzupełnij dane żeglarza dla koi ${input.berthLabel} · Sailing Architects`
 	const heading =
 		input.dataStatus === 'missing'
@@ -193,6 +194,7 @@ export async function sendCrewDataReminderEmail(
 			</table>
 			<p style="margin:0 0 14px;">Kapitan potrzebuje kompletnych danych każdego uczestnika — dokument tożsamości, kontakt alarmowy i doświadczenie żeglarskie. Wpisanie ich w panelu zajmie chwilę.</p>
 			${ctaButton(link, 'Uzupełnij dane')}
+			<p style="margin:18px 0 0;font-size:13px;color:rgba(245,240,232,0.55);">Przed rejsem przejrzyj <a href="${escapeHtml(guideLink)}" style="color:#d4aa5a;text-decoration:underline;">poradnik załogi</a> — checklisty, pakowanie i odpowiedzi na najczęstsze pytania.</p>
 		`
 	})
 	const text = [
@@ -204,6 +206,9 @@ export async function sendCrewDataReminderEmail(
 		'',
 		'Otwórz panel i uzupełnij dane:',
 		link,
+		'',
+		'Poradnik załogi (checklisty + pełne Q&A):',
+		guideLink,
 		'',
 		'Pozdrawiamy,',
 		'Sailing Architects'
