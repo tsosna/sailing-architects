@@ -21,8 +21,13 @@ function stripJargon(text) {
 	const cleaned = text
 		.replace(/`([^`]+)`/g, '$1')
 		.replace(/\(([^)]*\/[^)]*)\)/g, '')
+		.replace(/\$\{[^}]+\}/g, '')
+		.replace(/<[^>]+>/g, '')
 		.replace(/\bcommit\s+[a-f0-9]{6,}\b/gi, '')
 		.replace(/\b(?:src|docs|scripts|convex|locales)\/[^\s,;)]*/g, '')
+		.replace(/\bpnpm\b/gi, '')
+		.replace(/\bnpx\b/gi, '')
+		.replace(/\bnode\b/gi, '')
 		.replace(/\s+\/\s+/g, ' / ')
 		.replace(/\s{2,}/g, ' ')
 		.trim()
@@ -92,6 +97,22 @@ function pickHighlights(changeBullets) {
 		return highlights
 	}
 
+	if (lower.some((b) => b.includes('poradnik') || b.includes('crew guide'))) {
+		highlights.push(
+			'Dodaliśmy „Poradnik załogi” z checklistami i odpowiedziami na najczęstsze pytania.'
+		)
+		if (lower.some((b) => b.includes('mobile') || b.includes('menu') || b.includes('hamburger') || b.includes('język') || b.includes('language'))) {
+			highlights.push(
+				'Jednocześnie dopracowaliśmy nawigację na telefonach i przełącznik języka, żeby treści były łatwiej dostępne.'
+			)
+		} else {
+			highlights.push(
+				'Uspójniliśmy sekcję FAQ i dodaliśmy wyraźne przejście do pełnego poradnika.'
+			)
+		}
+		return highlights
+	}
+
 	const rules = [
 		{
 			key: 'płatno',
@@ -128,6 +149,38 @@ function pickHighlights(changeBullets) {
 function normalizeChangeBullet(bullet) {
 	const text = stripJargon(bullet)
 	const lower = text.toLowerCase()
+
+	if (lower.includes('walidacja') || lower.includes('0 błęd') || lower.includes('ostrzeż')) {
+		return null
+	}
+
+	if (lower.includes('poradnik') || lower.includes('crew guide') || lower.includes('checklist')) {
+		return 'Dodaliśmy „Poradnik załogi” z checklistami i odpowiedziami na najczęstsze pytania.'
+	}
+
+	if (lower.includes('faq') || lower.includes('najczęstsze pytania') || lower.includes('akordeon')) {
+		return 'Uspójniliśmy sekcję FAQ i dodaliśmy wyraźne przejście do pełnego poradnika.'
+	}
+
+	if (lower.includes('mobile') || lower.includes('hamburger') || lower.includes('menu') || lower.includes('nawig')) {
+		return 'Ulepszyliśmy nawigację na telefonach (menu mobilne) i układ strony, żeby było czytelniej.'
+	}
+
+	if (lower.includes('language') || lower.includes('język') || lower.includes('przełącznik')) {
+		return 'Dodaliśmy wygodny przełącznik języka (PL/EN), widoczny także na telefonach.'
+	}
+
+	if (lower.includes('email') || lower.includes('przypomn') || lower.includes('link')) {
+		return 'Dopisaliśmy do wiadomości e‑mail link do poradnika, żeby ułatwić przygotowanie do rejsu.'
+	}
+
+	if (lower.includes('hero__contact') || (lower.includes('hero') && lower.includes('kontakt'))) {
+		return 'Uporządkowaliśmy stronę główną, żeby kontakt i wezwania do działania były czytelniejsze.'
+	}
+
+	if (lower.includes('usunięty') && lower.includes('hero')) {
+		return 'Uporządkowaliśmy stronę główną, żeby była czytelniejsza na telefonach.'
+	}
 
 	if (lower.includes('guard') || (lower.includes('role') && lower.includes('admin'))) {
 		return 'Dodaliśmy kontrolę dostępu do panelu administracyjnego (tylko dla uprawnionych operatorów).'
@@ -167,6 +220,14 @@ function normalizeChangeBullet(bullet) {
 function normalizeNextStepBullet(bullet) {
 	const text = stripJargon(bullet)
 	const lower = text.toLowerCase()
+
+	if (lower.includes('poradnik') || lower.includes('faq') || lower.includes('mobile') || lower.includes('manualna weryfikacja')) {
+		return 'Przejść szybkie testy na telefonie i komputerze, żeby upewnić się, że poradnik i nawigacja działają bez zgrzytów.'
+	}
+
+	if (lower.includes('q&a') || lower.includes('pytania')) {
+		return 'W razie potrzeby zaktualizować listę pytań i odpowiedzi na podstawie bieżących ustaleń.'
+	}
 
 	if (
 		lower.includes('env set') ||
@@ -246,10 +307,11 @@ async function main() {
 	)
 
 	const done = allChangeBullets.length
-		? allChangeBullets.slice(0, 8)
+		? allChangeBullets
 				.map(normalizeChangeBullet)
 				.filter(Boolean)
 				.filter((value, index, array) => array.indexOf(value) === index)
+				.slice(0, 8)
 		: ['Drobne poprawki i porządki w obszarze rezerwacji.']
 	const summaryHints = pickHighlights(allChangeBullets)
 	const summary = summaryHints.length
