@@ -185,6 +185,12 @@
 		return `${page.url.pathname}${query ? `?${query}` : ''}`
 	}
 
+	function panelTarget(): string {
+		const next = page.url.searchParams.get('next')
+		if (next === 'admin') return resolve('/admin')
+		return resolve('/dashboard')
+	}
+
 	const authRedirectUrl = $derived(bookingUrl())
 	async function syncBookingUrl() {
 		await goto(bookingUrl(), {
@@ -280,8 +286,8 @@
 	$effect(() => {
 		if (!isSignedIn || step !== 2) return
 
-		if (panelLoginMode && page.url.searchParams.get('next') === 'dashboard') {
-			void goto(resolve('/dashboard'))
+		if (panelLoginMode) {
+			void goto(panelTarget())
 			return
 		}
 
@@ -585,7 +591,7 @@
 		if (step === 2) {
 			if (!isSignedIn) return
 			if (panelLoginMode) {
-				await goto(resolve('/dashboard'))
+				await goto(panelTarget())
 				return
 			}
 			if (!crew.email && userEmail) {
