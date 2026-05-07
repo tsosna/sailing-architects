@@ -67,13 +67,15 @@ msgstr "Cennik"
 msgid "DM Sans, sans-serif"
 msgstr "DM Sans, sans-serif"
 
-#~ msgid "SA"
-#~ msgstr "SA"
+#: src/routes/[[lang=lang]]/admin/+layout@.svelte
+msgid "SA"
+msgstr "SA"
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/lib/components/site-footer/site-footer.svelte
 #: src/lib/components/site-nav/site-nav.svelte
+#: src/routes/[[lang=lang]]/admin/+layout@.svelte
 msgid "Sailing Architects"
 msgstr "Sailing Architects"
 
@@ -432,6 +434,7 @@ msgid "Wybierz etap"
 msgstr "Wybierz etap"
 
 #: src/lib/components/route-section/route-section.svelte
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
@@ -543,6 +546,7 @@ msgstr "Sailing Architects · rzut kojowy"
 msgid "Konto"
 msgstr "Konto"
 
+#: src/routes/[[lang=lang]]/admin/+layout@.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
@@ -637,6 +641,7 @@ msgstr "Etap"
 msgid "Czas trwania"
 msgstr "Czas trwania"
 
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
@@ -1078,25 +1083,31 @@ msgstr "Anuluj"
 #~ msgid "Nowa rezerwacja bezpłatna"
 #~ msgstr "Nowa rezerwacja bezpłatna"
 
-#~ msgid "— wybierz —"
-#~ msgstr "— wybierz —"
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "— wybierz —"
+msgstr "— wybierz —"
 
-#~ msgid "Imię i nazwisko gościa"
-#~ msgstr "Imię i nazwisko gościa"
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Imię i nazwisko gościa"
+msgstr "Imię i nazwisko gościa"
 
-#~ msgid "Uwagi (opcjonalnie)"
-#~ msgstr "Uwagi (opcjonalnie)"
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Uwagi (opcjonalnie)"
+msgstr "Uwagi (opcjonalnie)"
 
 #~ msgid "Rezerwacja zapisana."
 #~ msgstr "Rezerwacja zapisana."
 
 #: src/lib/components/admin/booking-drawer.svelte
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Zapisuję…"
 msgstr "Zapisuję…"
 
-#~ msgid "Zarezerwuj bezpłatnie"
-#~ msgstr "Zarezerwuj bezpłatnie"
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Zarezerwuj bezpłatnie"
+msgstr "Zarezerwuj bezpłatnie"
 
 #~ msgid "Narzędzia migracji"
 #~ msgstr "Narzędzia migracji"
@@ -1463,6 +1474,7 @@ msgstr "Dla każdej wybranej koi utworzymy osobną kartę uczestnika w panelu."
 msgid "Uzupełnij teraz"
 msgstr "Uzupełnij teraz"
 
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Całość"
@@ -1647,6 +1659,8 @@ msgid "Sprzedaż, płatności i kompletność załogi"
 msgstr "Sprzedaż, płatności i kompletność załogi"
 
 #: src/routes/[[lang=lang]]/admin/+page.svelte
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
 msgid "Segmenty rejsu"
 msgstr "Segmenty rejsu"
 
@@ -1958,7 +1972,9 @@ msgid "Brak uczestników w tej rezerwacji."
 msgstr "Brak uczestników w tej rezerwacji."
 
 #. 0: participant.berthLabel; 1: participant.firstName || participant.lastName ? `${participant.firstName ?? ''} ${participant.lastName ?? ''}`.trim() \\: 'brak imienia'
+#. 0: berth.berthId; 1: berth.guestName ?? 'Gość'
 #: src/lib/components/admin/booking-drawer.svelte
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
 msgid "Koja {0} · {1}"
 msgstr "Koja {0} · {1}"
 
@@ -2028,6 +2044,7 @@ msgid "Dane zapisane. Brak kompletu wymaganych pól — uczestnik nie zostanie p
 msgstr "Dane zapisane. Brak kompletu wymaganych pól — uczestnik nie zostanie poproszony o potwierdzenie."
 
 #: src/lib/components/admin/booking-drawer.svelte
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
 msgid "Nie udało się zapisać."
 msgstr "Nie udało się zapisać."
 
@@ -2277,3 +2294,403 @@ msgstr "Pełny poradnik: 27 pytań, checklisty dokumentów, pakowanie, życie na
 #: src/lib/components/faq-section/faq-section.svelte
 msgid "Czytaj poradnik załogi →"
 msgstr "Czytaj poradnik załogi →"
+
+#: src/routes/[[lang=lang]]/admin/+layout@.svelte
+msgid "Sprzedaż i alerty"
+msgstr "Sprzedaż i alerty"
+
+#: src/routes/[[lang=lang]]/admin/+layout@.svelte
+msgid "Automatyzacje"
+msgstr "Automatyzacje"
+
+#: src/routes/[[lang=lang]]/admin/+layout@.svelte
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Miejsca specjalne"
+msgstr "Miejsca specjalne"
+
+#: src/routes/[[lang=lang]]/admin/+layout@.svelte
+msgid "Admin Console"
+msgstr "Admin Console"
+
+#: src/routes/[[lang=lang]]/admin/+layout@.svelte
+msgid "Sekcje admina"
+msgstr "Sekcje admina"
+
+#: src/routes/[[lang=lang]]/admin/+layout@.svelte
+msgid "Clerk role: admin. Produkcja: kapitan / operator. Dev: dodatkowy operator testowy. Brevo aktywne."
+msgstr "Clerk role: admin. Produkcja: kapitan / operator. Dev: dodatkowy operator testowy. Brevo aktywne."
+
+#: src/routes/[[lang=lang]]/admin/+error.svelte
+#: src/routes/[[lang=lang]]/admin/+layout@.svelte
+msgid "Sailing Architects · Admin"
+msgstr "Sailing Architects · Admin"
+
+#: src/routes/[[lang=lang]]/admin/+layout@.svelte
+msgid "Sekcje admina (mobile)"
+msgstr "Sekcje admina (mobile)"
+
+#: src/routes/[[lang=lang]]/admin/+error.svelte
+msgid "Ten obszar jest zarezerwowany dla operatorów rejsu. Twoje konto nie ma uprawnień administracyjnych."
+msgstr "Ten obszar jest zarezerwowany dla operatorów rejsu. Twoje konto nie ma uprawnień administracyjnych."
+
+#: src/routes/[[lang=lang]]/admin/+error.svelte
+msgid "Nieoczekiwany błąd."
+msgstr "Nieoczekiwany błąd."
+
+#: src/routes/[[lang=lang]]/admin/+error.svelte
+msgid "Brak dostępu · Sailing Architects"
+msgstr "Brak dostępu · Sailing Architects"
+
+#: src/routes/[[lang=lang]]/admin/+error.svelte
+msgid "Brak dostępu"
+msgstr "Brak dostępu"
+
+#: src/routes/[[lang=lang]]/admin/+error.svelte
+msgid "Coś poszło nie tak"
+msgstr "Coś poszło nie tak"
+
+#: src/routes/[[lang=lang]]/admin/+error.svelte
+msgid "Wróć do panelu"
+msgstr "Wróć do panelu"
+
+#: src/routes/[[lang=lang]]/admin/+error.svelte
+msgid "Strona główna"
+msgstr "Strona główna"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Plan domyślny"
+msgstr "Plan domyślny"
+
+#. 0: segmentMeta.name
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Plan {0}"
+msgstr "Plan {0}"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Pozycja 1"
+msgstr "Pozycja 1"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Zaliczka"
+msgstr "Zaliczka"
+
+#. 0: i + 1
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Rata {0}"
+msgstr "Rata {0}"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Pozycje wygenerowane. Możesz teraz dopiąć kwoty i terminy."
+msgstr "Pozycje wygenerowane. Możesz teraz dopiąć kwoty i terminy."
+
+#. 0: items.length + 1
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Pozycja {0}"
+msgstr "Pozycja {0}"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Suma pozycji przekracza cenę za koję. Skoryguj kwoty."
+msgstr "Suma pozycji przekracza cenę za koję. Skoryguj kwoty."
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Każda pozycja musi mieć kwotę większą od zera."
+msgstr "Każda pozycja musi mieć kwotę większą od zera."
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Każda pozycja musi mieć nazwę."
+msgstr "Każda pozycja musi mieć nazwę."
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Plan zapisany. Nowe rezerwacje dostaną ten harmonogram; istniejące pozostają bez zmian."
+msgstr "Plan zapisany. Nowe rezerwacje dostaną ten harmonogram; istniejące pozostają bez zmian."
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Nie udało się zapisać planu."
+msgstr "Nie udało się zapisać planu."
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Admin · Automatyzacje"
+msgstr "Admin · Automatyzacje"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Automation"
+msgstr "Automation"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Elastyczny harmonogram rat"
+msgstr "Elastyczny harmonogram rat"
+
+#. 0: seg.dates; 1: formatPLN(seg.price)
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "{0} · {1} PLN / koja"
+msgstr "{0} · {1} PLN / koja"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Plan dla segmentu"
+msgstr "Plan dla segmentu"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Globalny szablon. Zmiana planu nie zmienia istniejących rezerwacji — każdy booking ma własny snapshot."
+msgstr "Globalny szablon. Zmiana planu nie zmienia istniejących rezerwacji — każdy booking ma własny snapshot."
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Generuj pozycje"
+msgstr "Generuj pozycje"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Zapisz plan"
+msgstr "Zapisz plan"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Szablon"
+msgstr "Szablon"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Zaliczka + 2 raty"
+msgstr "Zaliczka + 2 raty"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Zaliczka + 3 raty"
+msgstr "Zaliczka + 3 raty"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Całość teraz"
+msgstr "Całość teraz"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Własny plan"
+msgstr "Własny plan"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Nazwa planu"
+msgstr "Nazwa planu"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Cena za koję"
+msgstr "Cena za koję"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Płatność jednorazowa"
+msgstr "Płatność jednorazowa"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Pozwól zapłacić całość zamiast rat"
+msgstr "Pozwól zapłacić całość zamiast rat"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Etykieta"
+msgstr "Etykieta"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Typ"
+msgstr "Typ"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "deposit"
+msgstr "deposit"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "installment"
+msgstr "installment"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "balance"
+msgstr "balance"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "full"
+msgstr "full"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "custom"
+msgstr "custom"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Kwota / koja (PLN)"
+msgstr "Kwota / koja (PLN)"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "W górę"
+msgstr "W górę"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "W dół"
+msgstr "W dół"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Usuń"
+msgstr "Usuń"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "+ Dodaj pozycję"
+msgstr "+ Dodaj pozycję"
+
+#. 0: formatPLN(totalPLN)
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Suma planu · {0} PLN / koja"
+msgstr "Suma planu · {0} PLN / koja"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Suma pozycji równa się cenie segmentu."
+msgstr "Suma pozycji równa się cenie segmentu."
+
+#. 0: formatPLN(-overByPLN)
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Brakuje {0} PLN / koja — przy bookingu różnica trafi do \"Dopłata końcowa\"."
+msgstr "Brakuje {0} PLN / koja — przy bookingu różnica trafi do \"Dopłata końcowa\"."
+
+#. 0: formatPLN(overByPLN)
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Przekroczono cenę o {0} PLN / koja — zapis zostanie odrzucony."
+msgstr "Przekroczono cenę o {0} PLN / koja — zapis zostanie odrzucony."
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Valid"
+msgstr "Valid"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Pod"
+msgstr "Pod"
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Ponad"
+msgstr "Ponad"
+
+#: src/routes/[[lang=lang]]/admin/crew/+page.svelte
+msgid "Admin · Dane załogi"
+msgstr "Admin · Dane załogi"
+
+#: src/routes/[[lang=lang]]/admin/crew/+page.svelte
+msgid "Crew Verification"
+msgstr "Crew Verification"
+
+#: src/routes/[[lang=lang]]/admin/crew/+page.svelte
+msgid "Dane uczestników i potwierdzenia"
+msgstr "Dane uczestników i potwierdzenia"
+
+#: src/routes/[[lang=lang]]/admin/crew/+page.svelte
+msgid "Edycja danych uczestników przez admina (Etap 5) oraz publiczny flow potwierdzania danych żeglarza tokenem (Etap 6) trafią tutaj."
+msgstr "Edycja danych uczestników przez admina (Etap 5) oraz publiczny flow potwierdzania danych żeglarza tokenem (Etap 6) trafią tutaj."
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Koja i imię gościa są wymagane."
+msgstr "Koja i imię gościa są wymagane."
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Rezerwacja complimentary zapisana."
+msgstr "Rezerwacja complimentary zapisana."
+
+#. 0: berthId
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Zwolnić koję {0} z rezerwacji complimentary? Wróci na listę dostępnych."
+msgstr "Zwolnić koję {0} z rezerwacji complimentary? Wróci na listę dostępnych."
+
+#. 0: berthId
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Koja {0} zwolniona."
+msgstr "Koja {0} zwolniona."
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Nie udało się zwolnić."
+msgstr "Nie udało się zwolnić."
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Ustawi koje C1 jako \"captain\" na wszystkich segmentach. Operacja jednorazowa, idempotentna."
+msgstr "Ustawi koje C1 jako \"captain\" na wszystkich segmentach. Operacja jednorazowa, idempotentna."
+
+#. 0: result.updated
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Migracja captain — zaktualizowano {0} koj."
+msgstr "Migracja captain — zaktualizowano {0} koj."
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Błąd migracji."
+msgstr "Błąd migracji."
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Admin · Miejsca specjalne"
+msgstr "Admin · Miejsca specjalne"
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Special seats"
+msgstr "Special seats"
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Captain i complimentary trzymamy poza Sales Board, żeby nie mieszały się z normalną sprzedażą i zaległościami. KPI „Specjalne\" w sekcji „Sprzedaż i alerty\" liczy tylko complimentary — captain jest stałą blokadą."
+msgstr "Captain i complimentary trzymamy poza Sales Board, żeby nie mieszały się z normalną sprzedażą i zaległościami. KPI „Specjalne\" w sekcji „Sprzedaż i alerty\" liczy tylko complimentary — captain jest stałą blokadą."
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Captain"
+msgstr "Captain"
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Stała blokada koi kapitana — nie podlega rezerwacji."
+msgstr "Stała blokada koi kapitana — nie podlega rezerwacji."
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Wczytuję koje…"
+msgstr "Wczytuję koje…"
+
+#. 0: segmentMeta.name
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Brak oznaczonej koi kapitana dla {0}. Użyj narzędzia technicznego poniżej, jeśli baza nie była seedowana z Block 2."
+msgstr "Brak oznaczonej koi kapitana dla {0}. Użyj narzędzia technicznego poniżej, jeśli baza nie była seedowana z Block 2."
+
+#. 0: berth.berthId
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "⚓ Koja {0}"
+msgstr "⚓ Koja {0}"
+
+#. 0: segmentMeta.name
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Stała blokada · {0}"
+msgstr "Stała blokada · {0}"
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Complimentary"
+msgstr "Complimentary"
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Rezerwacje bezpłatne organizatora. Blokują koję, ale nie wchodzą do paid revenue."
+msgstr "Rezerwacje bezpłatne organizatora. Blokują koję, ale nie wchodzą do paid revenue."
+
+#. 0: segmentMeta.name
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Brak rezerwacji complimentary dla {0}."
+msgstr "Brak rezerwacji complimentary dla {0}."
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Gość"
+msgstr "Gość"
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Bez uwag"
+msgstr "Bez uwag"
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Zwolnij koję"
+msgstr "Zwolnij koję"
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Dodaj complimentary"
+msgstr "Dodaj complimentary"
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Narzędzia techniczne (jednorazowe migracje)"
+msgstr "Narzędzia techniczne (jednorazowe migracje)"
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Operacje uruchamiane raz po seedowaniu. Idempotentne — można odpalić ponownie bez efektów ubocznych."
+msgstr "Operacje uruchamiane raz po seedowaniu. Idempotentne — można odpalić ponownie bez efektów ubocznych."
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Migruję…"
+msgstr "Migruję…"
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Ustaw C1 = captain (migracja)"
+msgstr "Ustaw C1 = captain (migracja)"
