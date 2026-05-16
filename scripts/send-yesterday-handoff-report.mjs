@@ -21,9 +21,22 @@ function stripJargon(text) {
 	const cleaned = text
 		.replace(/`([^`]+)`/g, '$1')
 		.replace(/\(([^)]*\/[^)]*)\)/g, '')
+		.replace(/\bloadLocale\([^)]*\)/gi, 'wczytanie języka')
+		.replace(/\breturn\s*\{\s*\.\.\.data\s*\}\b/gi, '')
+		.replace(/\bi18n-404\b/gi, 'problem z językiem')
+		.replace(/\bOTP\b/g, 'kod z e‑maila')
+		.replace(/\$\w+/g, '')
 		.replace(/\$\{[^}]+\}/g, '')
 		.replace(/<[^>]+>/g, '')
 		.replace(/\bcommit\s+[a-f0-9]{6,}\b/gi, '')
+		.replace(/\bcommit:\s*[^.]+/gi, '')
+		.replace(/\bspushowane\b/gi, '')
+		.replace(/\bmain\b/gi, '')
+		.replace(/\bhelper\b/gi, '')
+		.replace(/\buseQuery\b/gi, '')
+		.replace(/\bConvex\b/gi, '')
+		.replace(/\$effect\b/gi, '')
+		.replace(/\?next=\b/gi, '')
 		.replace(/\b(?:src|docs|scripts|convex|locales)\/[^\s,;)]*/g, '')
 		.replace(/\bpnpm\b/gi, '')
 		.replace(/\bnpx\b/gi, '')
@@ -87,7 +100,13 @@ function pickHighlights(changeBullets) {
 	const highlights = []
 
 	const lower = changeBullets.map((b) => b.toLowerCase())
-	if (lower.some((b) => b.includes('admin operations console') || b.includes('panel administracyjny') || b.includes('etap 1'))) {
+	if (
+		lower.some(
+			(b) =>
+				(b.includes('admin operations console') || b.includes('panel administracyjny')) &&
+				(b.includes('kpi') || b.includes('sales board') || b.includes('harmonogram') || b.includes('uczestnik') || b.includes('potwierdz'))
+		)
+	) {
 		highlights.push(
 			'Dostarczono pierwszą wersję panelu administracyjnego do obsługi rezerwacji i komunikacji z załogą.'
 		)
@@ -96,6 +115,20 @@ function pickHighlights(changeBullets) {
 		)
 		return highlights
 	}
+
+	if (lower.some((b) => b.includes('loadlocale') || b.includes('i18n') || b.includes('problem z językiem'))) {
+		highlights.push(
+			'Poprawiliśmy działanie wersji językowych w panelu administracyjnym, aby treści nie znikały i nie pokazywały błędów.'
+		)
+	}
+
+	if (lower.some((b) => b.includes('redirect') || b.includes('logow') || b.includes('next=') || b.includes('kod z e-maila'))) {
+		highlights.push(
+			'Uspójniliśmy zachowanie po zalogowaniu, żeby użytkownik trafiał dokładnie tam, gdzie powinien.'
+		)
+	}
+
+	if (highlights.length) return highlights.slice(0, 2)
 
 	if (lower.some((b) => b.includes('poradnik') || b.includes('crew guide'))) {
 		highlights.push(
@@ -154,6 +187,18 @@ function normalizeChangeBullet(bullet) {
 		return null
 	}
 
+	if (lower.includes('cookie consent') || lower.includes('learning question') || lower.includes('pytanie')) {
+		return null
+	}
+
+	if (lower.includes('ux gap') || lower.includes('parking lot') || lower.includes('gap')) {
+		return null
+	}
+
+	if (lower.includes('.po') || lower.includes('wuchale') || lower.includes('regeneracja') || lower.includes('locale')) {
+		return null
+	}
+
 	if (lower.includes('poradnik') || lower.includes('crew guide') || lower.includes('checklist')) {
 		return 'Dodaliśmy „Poradnik załogi” z checklistami i odpowiedziami na najczęstsze pytania.'
 	}
@@ -166,7 +211,11 @@ function normalizeChangeBullet(bullet) {
 		return 'Ulepszyliśmy nawigację na telefonach (menu mobilne) i układ strony, żeby było czytelniej.'
 	}
 
-	if (lower.includes('language') || lower.includes('język') || lower.includes('przełącznik')) {
+	if (lower.includes('problem z językiem') || lower.includes('wczytanie języka') || lower.includes('i18n')) {
+		return 'Naprawiliśmy problem z wyświetlaniem treści w panelu administracyjnym (wersje językowe działały niestabilnie).'
+	}
+
+	if (lower.includes('przełącznik') || lower.includes('switcher')) {
 		return 'Dodaliśmy wygodny przełącznik języka (PL/EN), widoczny także na telefonach.'
 	}
 
@@ -184,6 +233,10 @@ function normalizeChangeBullet(bullet) {
 
 	if (lower.includes('guard') || (lower.includes('role') && lower.includes('admin'))) {
 		return 'Dodaliśmy kontrolę dostępu do panelu administracyjnego (tylko dla uprawnionych operatorów).'
+	}
+
+	if (lower.includes('redirect') || lower.includes('logow') || lower.includes('next=') || lower.includes('kod z e‑maila')) {
+		return 'Uspójniliśmy przekierowanie po zalogowaniu, żeby użytkownik wracał do właściwego panelu.'
 	}
 
 	if (lower.includes('kpi') || lower.includes('sales board') || lower.includes('alert')) {
@@ -220,6 +273,26 @@ function normalizeChangeBullet(bullet) {
 function normalizeNextStepBullet(bullet) {
 	const text = stripJargon(bullet)
 	const lower = text.toLowerCase()
+
+	if (lower.includes('scenariusz 2') || lower.includes('sales board') || lower.includes('kpi')) {
+		return 'Kontynuujemy prace nad panelem administracyjnym: widok podsumowania rezerwacji i prosty „board” do obsługi sprzedaży.'
+	}
+
+	if (lower.includes('reactive') || lower.includes('subscription') || lower.includes('fetch')) {
+		return null
+	}
+
+	if (lower.includes('403') || lower.includes('clerk') || lower.includes('konto')) {
+		return null
+	}
+
+	if (lower.includes('cookie') || lower.includes('consent') || lower.includes('banner')) {
+		return null
+	}
+
+	if (lower.includes('wyloguj') || lower.includes('ux:') || lower.includes('parking lot')) {
+		return null
+	}
 
 	if (lower.includes('poradnik') || lower.includes('faq') || lower.includes('mobile') || lower.includes('manualna weryfikacja')) {
 		return 'Przejść szybkie testy na telefonie i komputerze, żeby upewnić się, że poradnik i nawigacja działają bez zgrzytów.'
@@ -314,9 +387,12 @@ async function main() {
 				.slice(0, 8)
 		: ['Drobne poprawki i porządki w obszarze rezerwacji.']
 	const summaryHints = pickHighlights(allChangeBullets)
-	const summary = summaryHints.length
-		? summaryHints.join(' ')
-		: 'Poniżej krótkie podsumowanie prac z wczoraj. Skupiliśmy się na stabilności procesu rezerwacji i dopracowaniu doświadczenia użytkownika.'
+	const summary =
+		summaryHints.length === 2
+			? summaryHints.join(' ')
+			: summaryHints.length === 1
+				? `${summaryHints[0]} Dodatkowo wykonaliśmy drobne poprawki zwiększające stabilność działania.`
+				: 'Poniżej krótkie podsumowanie prac z wczoraj. Skupiliśmy się na stabilności procesu rezerwacji i dopracowaniu doświadczenia użytkownika.'
 
 	const normalizedNext = allNextBullets
 		.map(normalizeNextStepBullet)

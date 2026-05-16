@@ -1687,7 +1687,6 @@ msgstr "Brak danych"
 msgid "Dane nieuzupełnione"
 msgstr "Dane nieuzupełnione"
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Błąd zapisu"
 msgstr "Błąd zapisu"
@@ -1721,7 +1720,6 @@ msgstr "Uzupełnij"
 msgid "Edytuj"
 msgstr "Edytuj"
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Zapisano"
 msgstr "Zapisano"
@@ -2871,13 +2869,11 @@ msgstr "Zapisz"
 #~ msgid "Uwaga"
 #~ msgstr "Uwaga"
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "Test success"
-msgstr "Test success"
+#~ msgid "Test success"
+#~ msgstr "Test success"
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "Test error"
-msgstr "Test error"
+#~ msgid "Test error"
+#~ msgstr "Test error"
 
 #: src/lib/components/admin/booking-drawer.svelte
 msgid "Kontakt alarmowy — imię i nazwisko"

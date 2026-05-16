@@ -32,12 +32,6 @@ export async function brevoSend(
 ): Promise<BrevoSendResult> {
 	const apiKey = readEnv('BREVO_API_KEY')
 	const fromEmail = readEnv('BREVO_FROM_EMAIL')
-	if (!apiKey || !fromEmail) {
-		throw new Error(
-			'Missing Brevo env in Convex (BREVO_API_KEY or BREVO_FROM_EMAIL)'
-		)
-	}
-
 	if (isDryRun()) {
 		console.log(
 			'[reminders dry-run] would send to',
@@ -47,6 +41,12 @@ export async function brevoSend(
 		)
 		return { messageId: 'dry-run' }
 	}
+	if (!apiKey || !fromEmail) {
+		throw new Error(
+			'Missing Brevo env in Convex (BREVO_API_KEY or BREVO_FROM_EMAIL)'
+		)
+	}
+
 
 	const body = {
 		sender: { email: fromEmail },
