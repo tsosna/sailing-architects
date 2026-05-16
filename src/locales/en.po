@@ -76,6 +76,7 @@ msgstr ""
 #: src/lib/components/site-footer/site-footer.svelte
 #: src/lib/components/site-nav/site-nav.svelte
 #: src/routes/[[lang=lang]]/admin/+layout@.svelte
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
 msgid "Sailing Architects"
 msgstr ""
 
@@ -115,6 +116,7 @@ msgstr ""
 #. 0: totalPriceFormatted
 #. 0: selectedPaymentOption.amountFormatted
 #. 0: formatGrosze(payment.amount)
+#. 0: formatGrosze(payment.amount)
 #: src/lib/components/cabins-section/cabins-section.svelte
 #: src/lib/components/route-section/route-section.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
@@ -124,6 +126,7 @@ msgstr ""
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
 msgid "{0} zł"
 msgstr ""
 
@@ -232,10 +235,12 @@ msgstr ""
 #. 0: d.id
 #. 0: b
 #. 0: participant.berthLabel
+#. 0: participant.berthLabel
 #: src/lib/components/boat-plan/boat-plan.svelte
 #: src/lib/components/boat-plan/boat-plan.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Koja {0}"
 msgstr ""
 
@@ -569,65 +574,83 @@ msgid "Gotowe"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Polska"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Niemcy"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Wielka Brytania"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Inna"
 msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Paszport"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Dowód osobisty"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Wybierz..."
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Doskonały pływak"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Dobry pływak"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Podstawowy"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Nie pływam"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Skipper / patent"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Doświadczony crew"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Kilka rejsów"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Pierwszy rejs"
 msgstr ""
 
@@ -645,6 +668,7 @@ msgstr ""
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Koja"
 msgstr ""
@@ -707,33 +731,44 @@ msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Imię"
 msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Nazwisko"
 msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Data urodzenia"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Narodowość"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Dokument tożsamości"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Typ dokumentu"
 msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Numer dokumentu"
 msgstr ""
 
@@ -741,44 +776,60 @@ msgstr ""
 #~ msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Kontakt alarmowy"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Imię i nazwisko"
 msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Telefon"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Profil żeglarski"
 msgstr ""
 
+#: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Umiejętności pływackie"
 msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Doświadczenie żeglarskie"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Wymagania dietetyczne"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Wegetarianizm, alergie, itp."
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Uwagi medyczne"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Informacje istotne dla bezpieczeństwa"
 msgstr ""
 
@@ -820,6 +871,7 @@ msgid "Krok 4"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
 msgid "🔒 Płatność obsługiwana przez Stripe. Twoje dane są bezpieczne."
 msgstr ""
 
@@ -843,7 +895,9 @@ msgid "Razem"
 msgstr ""
 
 #. 0: selectedPaymentOption?.amountFormatted ?? ''
+#. 0: formatGrosze(payment.amount)
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
 msgid "Zapłać {0} zł →"
 msgstr ""
 
@@ -880,24 +934,31 @@ msgstr ""
 
 #: src/routes/+layout.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
 msgid "DM Sans, system-ui, sans-serif"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
 msgid "Błąd inicjalizacji płatności"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
 msgid "Płatność nie powiodła się"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Błąd zapisu danych"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Zapisywanie…"
 msgstr ""
 
@@ -906,6 +967,7 @@ msgid "Inicjalizacja płatności…"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
 msgid "Przetwarzanie…"
 msgstr ""
 
@@ -957,6 +1019,7 @@ msgid "Plan trasy szczegółowy"
 msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Rezerwacja"
 msgstr ""
@@ -991,6 +1054,8 @@ msgstr ""
 #~ msgstr ""
 
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
 msgid "Brak aktywnej rezerwacji."
 msgstr ""
 
@@ -1277,86 +1342,107 @@ msgid "Przejdź do panelu →"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Austria"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Belgia"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Chorwacja"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Czechy"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Dania"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Estonia"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Finlandia"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Francja"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Grecja"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Hiszpania"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Holandia"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Irlandia"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Litwa"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Łotwa"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Norwegia"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Portugalia"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Słowacja"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Słowenia"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Szwecja"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Węgry"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Włochy"
 msgstr ""
 
@@ -1373,10 +1459,12 @@ msgstr ""
 #~ msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Litery i cyfry"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Bez spacji i znaków specjalnych"
 msgstr ""
 
@@ -1384,15 +1472,19 @@ msgstr ""
 #~ msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Telefon żeglarza"
 msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Miejsce urodzenia"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Miasto"
 msgstr ""
 
@@ -1435,14 +1527,17 @@ msgid "Czas blokady minął. Wróć do wyboru koi i rozpocznij płatność od no
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
 msgid "AbortError"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
 msgid "Inicjalizacja płatności trwa zbyt długo. Spróbuj ponownie za chwilę."
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "E-mail żeglarza"
 msgstr ""
 
@@ -1497,11 +1592,14 @@ msgid "Teraz"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
 msgid "Inicjalizacja…"
 msgstr ""
 
 #. 0: selectedPaymentOption?.amountFormatted ?? ''
+#. 0: formatGrosze(payment.amount)
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
 msgid "Potwierdź {0} zł →"
 msgstr ""
 
@@ -1556,7 +1654,9 @@ msgid "Harmonogram płatności"
 msgstr ""
 
 #. 0: formatDueDate(payment.dueAt)
+#. 0: new Date(payment.dueAt).toLocaleDateString('pl-PL', { day\\: '2-digit', month\\: '2-digit', year\\: 'numeric' })
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
 msgid "Termin {0}"
 msgstr ""
 
@@ -1566,17 +1666,20 @@ msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Komplet"
 msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Niekompletne"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/admin/+page.svelte
 #: src/routes/[[lang=lang]]/admin/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "Brak danych"
 msgstr ""
 
@@ -1584,6 +1687,7 @@ msgstr ""
 msgid "Dane nieuzupełnione"
 msgstr ""
 
+#: src/routes/[[lang=lang]]/admin/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Błąd zapisu"
 msgstr ""
@@ -1601,6 +1705,7 @@ msgid "Uzupełnione: <0/>"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
 msgid "E-mail zaproszenia"
 msgstr ""
 
@@ -1616,6 +1721,7 @@ msgstr ""
 msgid "Edytuj"
 msgstr ""
 
+#: src/routes/[[lang=lang]]/admin/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Zapisano"
 msgstr ""
@@ -1902,6 +2008,7 @@ msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/lib/components/admin/booking-drawer.svelte
+#: src/lib/components/toast/toast.svelte
 msgid "Zamknij"
 msgstr ""
 
@@ -1947,6 +2054,7 @@ msgstr ""
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/lib/components/admin/booking-drawer.svelte
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
 msgid "Wysyłam…"
 msgstr ""
 
@@ -2070,22 +2178,23 @@ msgid "Narodowość (kod kraju)"
 msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
 msgid "Dokument"
 msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
 msgid "Dowód"
 msgstr ""
 
-#: src/lib/components/admin/booking-drawer.svelte
-msgid "Kontakt alarmowy — imię"
-msgstr ""
+#~ msgid "Kontakt alarmowy — imię"
+#~ msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
 msgid "Kontakt alarmowy — telefon"
 msgstr ""
 
-#: src/lib/components/admin/booking-drawer.svelte
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
 msgid "Pływanie"
 msgstr ""
 
@@ -2105,10 +2214,8 @@ msgstr ""
 msgid "Do potwierdzenia"
 msgstr ""
 
-#. 0: result.recipient
-#: src/lib/components/admin/booking-drawer.svelte
-msgid "Link wysłany na {0}. Można też skopiować ręcznie z toasta poniżej."
-msgstr ""
+#~ msgid "Link wysłany na {0}. Można też skopiować ręcznie z toasta poniżej."
+#~ msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
 msgid "Brak adresu odbiorcy — uzupełnij e-mail uczestnika."
@@ -2350,6 +2457,9 @@ msgid "Coś poszło nie tak"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/admin/+error.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
 msgid "Wróć do panelu"
 msgstr ""
 
@@ -2484,6 +2594,7 @@ msgid "Etykieta"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
 msgid "Typ"
 msgstr ""
 
@@ -2693,4 +2804,236 @@ msgstr ""
 
 #: src/routes/[[lang=lang]]/admin/special/+page.svelte
 msgid "Ustaw C1 = captain (migracja)"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
+msgid "Brakuje wymaganych pól. Możesz je uzupełnić później — dane zostały zapisane jako niekompletne."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
+msgid "Dane żeglarza · Sailing Architects"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
+msgid "← Wróć do panelu"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
+msgid "Dane żeglarza"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
+msgid "Ładowanie rezerwacji…"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
+msgid "Nie znaleziono uczestnika."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
+msgid "Wpisałeś już swoje dane przy rezerwacji. Możesz skopiować je do tego uczestnika i edytować, jeśli to ta sama osoba."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
+msgid "Skopiuj moje dane"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
+msgid "Zaproszenie"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
+msgid "Adres e-mail, na który wyślemy uczestnikowi przypomnienia o uzupełnieniu danych i nadchodzących płatnościach."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
+msgid "Dane osobowe"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
+msgid "Zapisano dane uczestnika."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
+msgid "← Anuluj"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
+msgid "Zapisz"
+msgstr ""
+
+#~ msgid "Zapisano zmiany"
+#~ msgstr ""
+
+#~ msgid "Uwaga"
+#~ msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Test success"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Test error"
+msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Kontakt alarmowy — imię i nazwisko"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Nie udało się potwierdzić."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Opisz krótko, co wymaga poprawy."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Nie udało się wysłać."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Link jest nieprawidłowy lub został zastąpiony nowym."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Link wygasł. Skontaktuj się z organizatorem, aby otrzymać nowy."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Ten link został już użyty. Skontaktuj się z organizatorem, jeżeli potrzebujesz nowego."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Coś poszło nie tak. Spróbuj ponownie lub napisz do organizatora."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Email"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Numer"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Doświadczenie i zdrowie"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Dieta"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Notatki medyczne"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Potwierdź dane uczestnika rejsu · Sailing Architects"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Potwierdź dane uczestnika rejsu"
+msgstr ""
+
+#. 0: view.error.message
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Nie udało się wczytać linku. {0}"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Wczytuję dane…"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Skontaktuj się z organizatorem rejsu — możemy wystawić nowy link."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Dziękujemy za potwierdzenie"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Dane uczestnika zostały zatwierdzone. Możesz zamknąć tę stronę — kapitan dostanie informację automatycznie."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Otrzymaliśmy zgłoszenie poprawki"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Organizator skontaktuje się z Tobą, żeby uzupełnić dane. Tę stronę możesz zamknąć."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Link aktywny do"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Dane są już potwierdzone"
+msgstr ""
+
+#. 0: formatDate(data.confirmedAt)
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Potwierdziłaś/eś je {0}. Jeśli coś trzeba zmienić, napisz do organizatora."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Potwierdzam…"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Potwierdzam, dane są poprawne"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Chcę zgłosić poprawkę"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Co wymaga poprawy?"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Np. nazwisko zapisane błędnie, telefon kontaktu alarmowego się zmienił."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Wróć"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Wyślij zgłoszenie"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
+msgid "Płatność raty · Sailing Architects"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
+msgid "Płatność raty"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
+msgid "Nie znaleziono tej płatności."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
+msgid "Dziękujemy!"
+msgstr ""
+
+#. 0: formatGrosze( payment.amount )
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
+msgid "Płatność <0/> ({0} zł) została zaksięgowana."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
+msgid "Ta płatność jest już opłacona."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
+msgid "Ta płatność jest w trakcie przetwarzania. Spróbuj ponownie za chwilę lub wróć do panelu."
 msgstr ""

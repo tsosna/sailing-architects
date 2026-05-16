@@ -65,6 +65,36 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
+## Sesja 2026-05-08 — Compile sessions + promocja wiki
+
+### Zmiany poza kodem aplikacji
+
+- Uruchomiono `compile sessions` w `/Volumes/HomeX-MacMini/tomeksosinskiminiEx/Workspace/claude-memory-compiler`:
+  - komenda: `uv run python scripts/compile.py`
+  - przetworzony log: `daily/2026-05-08.md`
+  - wynik: `Knowledge base: 84 articles`
+  - koszt agenta: `$0.7922`
+- Compile uznał sam `daily/2026-05-08.md` za recap bez nowych artykułów technicznych, ale wcześniejsza wiedza z sesji Scenariusza 2 była już zapisana w `knowledge-vault/wiki/topics/tomek-coding-learning-profile.md`.
+- Na tej podstawie ręcznie wypromowano 3 kandydatów do osobnych konceptów w `knowledge-vault/wiki/concepts/`:
+  - `stripe-webhook-localhost-forwarding.md` — lokalne testy Stripe webhooków wymagają `stripe listen --forward-to localhost:5173/api/stripe/webhook`, lokalnego `STRIPE_WEBHOOK_SECRET` z CLI i restartu `pnpm dev`.
+  - `convex-data-inspection-no-sql.md` — Convex nie ma ad-hoc SQL; dane sprawdzać przez Dashboard Data tab, Functions tab albo `npx convex run module:functionName '{"arg":"value"}'`.
+  - `brew-fallback-to-github-binary.md` — gdy Homebrew blokuje instalację przez wymagania Xcode/toolchaina, sprawdzić oficjalną pre-built binarkę z GitHub Releases; na Apple Silicon binarki trafiają do `/opt/homebrew/bin`.
+- Zaktualizowano `knowledge-vault/wiki/index.md` i `knowledge-vault/wiki/log.md`.
+- Przy okazji naprawiono w `knowledge-vault/wiki/concepts/redirect-303-vs-error-403.md` dwa fałszywe wikilinki `[[lang=lang]]`, które lint czytał jako brakującą stronę.
+
+### Weryfikacja
+
+- `uv run python scripts/lint.py` w `claude-memory-compiler`:
+  - broken links: `0`
+  - wynik końcowy: `0 errors, 29 warnings, 174 suggestions`
+- Pozostałe ostrzeżenia to istniejący dług vaulta: orphan pages, missing backlinks, sparse articles i 3 sugestie niespójności/kontradykcji.
+
+### Znaczenie dla kolejnych sesji nauki
+
+- Przy testach Scenariusza 2 w sailing-architects pamiętać, że płatność Stripe może przejść, a booking nadal wyglądać na anulowany, jeśli lokalny webhook nie jest forwardowany.
+- Przy debugowaniu danych w Convex nie szukać konsoli SQL; najpierw Dashboard Data/Functions albo typed query przez `npx convex run`.
+- Gdy instalacja CLI przez `brew` pada na wymagania Xcode, nie zatrzymywać pracy: sprawdzić release binarki upstream, szczególnie dla narzędzi typu Stripe CLI.
+
 ## Sesja 2026-04-24 — Setup projektu sailing-architects
 
 ### Zmiany
@@ -994,4 +1024,169 @@ Sesja przygotowała design-first handoff rozbudowy /admin jako centrum sprzedaż
 
 - Czy mobile menu ma blokować scroll body (gdyby content menu rosło > viewport)?
 - Czy sidebar contact w `/poradnik` desktop zostaje, czy też do usunięcia.
+
+## Sesja 2026-05-04 — Setup workflow nauki + git fundamenty
+
+### Zmiany
+
+Brak zmian w kodzie produkcyjnym. Sesja organizacyjna — zbudowanie warstw pamięci pod naukę kodowania.
+
+W projekcie:
+- `docs/learning-questions.md` (nowy) — parking lot na pytania w toku, pojedynczy plik z checkboxami
+- `.gitignore` — dopisana linia `.claude/worktrees/`
+- `scripts/send-yesterday-handoff-report.mjs` — `stripJargon` + `pickHighlights` rozszerzone o template literals, HTML tags, pnpm/npx/node, blok poradnik (autozmiana z poprzedniej sesji, tu tylko zacommitowana)
+
+W `~/.claude/projects/.../memory/`:
+- `user_role_learning.md` — rola: nauczyciel/uczeń, edytor: Cursor, projekt: sailing-architects
+- `feedback_communication_style.md` — bez fluff, bez gamifikacji, bez „świetne pytanie"
+- `user_dyslexia_dysgraphia.md` — krótkie zdania, struktura wizualna, nie komentować literówek
+- `reference_learning_profile_vault.md` — pointer do profilu w vault + triggery sesji
+
+W `knowledge-vault/wiki/`:
+- `topics/tomek-coding-learning-profile.md` (nowy) — mapa kompetencji 0-4, aktywny kurs (admin E2E checklist 0/9), backlog luk fundamentów, format pracy
+- `concepts/anonymous-convex-env-inheritance.md` (nowy) — anonymous Convex deployment dziedziczy `process.env` z parent shella `npx convex dev`
+- `concepts/cursor-multi-root-source-control-confusion.md` (nowy) — multi-root workspace + dwa repo git mylą Source Control panel; default workflow podczas nauki: git z terminala
+- `index.md` — dopisane pointery do nowych stron
+
+W projekcie zainstalowany plugin Claude Code: `caveman@caveman` (globalnie, scope: user) — nie używamy podczas nauki, tnie wyjaśnienia za bardzo.
+
+### Decyzje
+
+- **Workflow nauki — „reading code as study"**: Tomek ma intuicję ale brak fundamentów. Bierzemy istniejący kod, ja pytam „co i dlaczego", przy luce stop + fundament. Bez kursu od podstaw.
+- **Edycja kodu — Tomek pisze, ja sprawdzam**. `Cmd+L` (chat) używać liberalnie, `Cmd+K` (inline edit) ostrożnie — bo zabiera naukę.
+- **Profil ucznia w `wiki/topics/`** edytowany ręcznie poza pipeline'em `compile.py`. Świadomy wyjątek od reguły „nie edytuj wiki ręcznie" w knowledge-vault/CLAUDE.md. Powód: kompiler produkuje wiedzę o stacku, profil ucznia to inny rodzaj danych.
+- **Triggery sesji nauki**: `close session` (rozszerzony — aktualizuje też profil w vault) + `save learning progress` (checkpoint w środku sesji).
+- **Aktywny kurs faza 1**: `docs/admin-e2e-checklist.md` (9 scenariuszy, Etapy 1-7 Admin Operations Console). Tomek testuje w UI, my razem czytamy kod, debugujemy gdy coś pęknie.
+- **Parking lot pytań**: jeden plik `docs/learning-questions.md` z checkboxami. Otwarte / zamknięte. Po odpowiedzi: decyzja projektowa → `admin-post-mvp-decisions.md`; trwała wiedza → wiki concepts; lekcja kursowa → profil.
+- **Cursor multi-root workspace**: dodany knowledge-vault obok sailing-architects. Wspólne `Cmd+P` po obu repo, ale **uwaga** — Source Control panel widzi dwa repo i może mylić.
+- **Tomek ma dysleksję i dysgrafię** — stylistyka odpowiedzi: krótkie zdania, struktura wizualna (tabele, bullety, bold na akcji), izolowane bloki kodu, nigdy nie komentować literówek.
+
+### Wnioski
+
+- **Cursor multi-root + dwa git repo = mylący Source Control panel**. „Publish Branch" zamiast „Sync" pojawia się gdy panel skupia inny repo niż myślisz. Default workflow podczas nauki: git z terminala, GUI dopiero po fundamencie. Promowane do `wiki/concepts/cursor-multi-root-source-control-confusion.md`.
+- **Anonymous Convex deployment (`CONVEX_DEPLOYMENT=anonymous:...`) dziedziczy `process.env` z parent shella `npx convex dev`**. Dotenv z `.env`/`.env.local` ładuje się automatycznie. W przeciwieństwie do cloud Convex (gdzie env idzie przez `npx convex env set`). Promowane do `wiki/concepts/anonymous-convex-env-inheritance.md` (z markerem do zweryfikowania empirycznie przy scenariuszu 4-6).
+- **`git add .` to pułapka** — łatwo wciągnąć przypadkowo modyfied pliki innych autorów / sekrety / śmieci. Default: zawsze `git add <konkretny plik>`.
+- **`git mv` vs zwykłe `mv`** — git zwykle zauważy rename po zawartości, ale `git mv` jest jednoznaczny i nic nie zostawia w „untracked". Zwłaszcza po commicie poprzedniej wersji.
+- **Pager (`less`) urywa output git diff**. `git diff … | cat` omija pager — wygodniej do przeglądu całości na ekranie podczas nauki.
+- **Plugin caveman zainstalowany ale niedostępny w bieżącej sesji** — Claude Code ładuje skille tylko przy starcie. Po `claude plugin install` trzeba zrestartować sesję żeby skill stał się wywoływalny.
+
+### Następne kroki
+
+#### Next
+- **Scenariusz 1 — Guard `/admin`**: kroki 1, 3, 4 z `docs/admin-e2e-checklist.md` (krok 2 pomijamy do czasu drugiego konta Clerk). Po teście otwieramy 4 pliki: `admin-guard.ts`, `+layout.server.ts`, `+error.svelte`, `hooks.server.ts`. Pierwsza lekcja: dlaczego SvelteKit może odmówić dostępu zanim załaduje stronę (granica server/client).
+- Tomek przegląda profil ucznia w `wiki/topics/tomek-coding-learning-profile.md` — feedback na mapę kompetencji i backlog luk. Profil zaktualizuję po jego korektach.
+
+#### Blocked / Later / Open questions
+- Krok 2 scenariusza 1 (test 403 dla non-admin) — czeka na drugie konto Clerk.
+- Cursor pricing decision — zostajemy na Free, eskalacja gdy wpadnie w slow queue. Sprawdzimy empirycznie.
+- Verification że anonymous Convex naprawdę widzi `PUBLIC_APP_URL` z `.env` — przyjdzie naturalnie przy scenariuszu 4-6 (mail z linkiem do `localhost:5173/crew/confirm/[token]`).
+
+## Sesja 2026-05-07 — Nauka: Scenariusz 1 admin guard + fix i18n
+
+### Zmiany
+
+- `src/routes/[[lang=lang]]/admin/+layout.ts` (nowy) — dodano `loadLocale(params.lang ?? 'pl')` + `return { ...data }` żeby fix nie kasował `admin` z `+layout.server.ts`. Commit: `fix: load locale in admin layout to prevent i18n-404 on render`. Spushowane na `main`.
+- `docs/learning-questions.md` — dopisane pytanie o cookie consent banner (lekcja na później).
+
+### Decyzje
+
+- **`+layout.ts` w admin jako miejsce `loadLocale`** — `+layout@.svelte` (reset) powodował że tłumaczenia były ładowane za późno względem renderowania komponentów. Osobny `+layout.ts` per segment jest najprostszym fixem bez ruszania globalnej struktury.
+
+### Wnioski
+
+- **`+layout@.svelte` (reset) nie blokuje data flow z `+layout.server.ts`** — ale timing `loadLocale` z `[[lang=lang]]/+layout.ts` jest za późny dla komponentów admina. Objaw: i18n-404 znikało po hover (Svelte re-ewaluował stan reaktywny przy evencie DOM). Fix: własny `+layout.ts` w admin.
+- **Gdy istnieje i `+layout.server.ts` i `+layout.ts`** — universal load dostaje dane serwera przez parametr `data` i musi je zwrócić przez `return { ...data }`. Bez tego dane serwera znikają.
+- **Redirect po Clerk login nie wraca do `/admin`** — po wpisaniu kodu OTP SvelteKit ląduje na `/dashboard`. Wymaga `forceRedirectUrl` lub `next` param w guard redirect. Nienaprawione — do osobnego commita.
+
+### Następne kroki
+
+#### Next
+
+- **Scenariusz 2** z `docs/admin-e2e-checklist.md`: Sales Board + KPI. Kroki 1-4: segment strip, przełączanie KPI, Sales Board z kolumnami, filtry.
+- Po Scenariuszu 2 — lekcja kodu: jak działa `useQuery` w Convex (reactive subscription vs fetch).
+
+#### Blocked / Later / Open questions
+
+- Krok 2 Scenariusza 1 (403 dla non-admin) — czeka na drugie konto Clerk.
+- **Bug: redirect po OTP login ląduje na `/dashboard` zamiast `/admin`** — po wejściu na `/admin` wylogowanym, zalogowaniu przez OTP email, SvelteKit nie wraca do `/admin`. Wymaga `forceRedirectUrl=/admin` w guard redirect lub `next` param przekazanego do Clerk. Do naprawy w osobnym commicie przed Scenariuszem 2.
+- Cookie consent banner — lekcja na później (parking lot).
+
+## Sesja 2026-05-07 (popołudnie) — Nauka: fix redirect po loginie + fundamenty JS
+
+### Zmiany
+
+- `src/routes/[[lang=lang]]/book/+page.svelte` — nowy helper `panelTarget()` czytający `?next=` i routujący na `/admin` lub `/dashboard`. Podmienione dwa miejsca: `$effect` po loginie (~290) i ręczny klik „Przejdź do panelu →" (~594). Commit: `fix: route to /admin (not /dashboard) when next=admin after sign-in`. Spushowane na `main`.
+- `src/locales/en.po`, `pl.po` — regeneracja przez Wuchale (skutek wcześniejszych zmian w `admin/+layout@.svelte` i `admin/automation/+page.svelte`). Commit: `chore: regenerate locale files`. Spushowane.
+- `docs/learning-questions.md` — dodane dwa UX gaps z dzisiejszej sesji (brak „Wyloguj" w `/dashboard`, czarny caret na ciemnogranatowym OTP).
+
+### Decyzje
+
+- **Whitelist zamiast free-form `next`** — `panelTarget()` mapuje tylko znaną wartość `'admin'` na `/admin`, reszta → `/dashboard`. Powód: zabezpieczenie przed open redirect. Skalowalne na przyszłe wartości `next`.
+- **Helper jako top-level `function`** zamiast arrow w zmiennej — dopasowanie do stylu pliku (`bookingUrl`, `syncBookingUrl` też są `function`).
+- **`.po` w osobnym chore-commicie** zamiast w fixie — jeden commit, jeden cel.
+
+### Wnioski
+
+- **`?next=` to dane wrogie dopóki niezweryfikowane.** Każdy redirect bazujący na user-providowanej wartości URL musi być whitelistowany. Inaczej phishing przez open redirect.
+- **`.po` (Wuchale) auto-regeneruje się przy `pnpm dev`** — gdy ktoś doda tekst UI ale nie zacommituje `.po`, kolejny dev serwer pokaże to jako modyfikację. Higiena: traktować `.po` jak generowany artefakt zsynchronizowany z kodem, nie ręcznie edytowany. Kandydat na `wiki/concepts/` — pójdzie przez `compile.py` w osobnej sesji.
+- Drobiazg Prettier: `if (panelLoginMode )` z luźną spacją działa — formatter zje przy zapisie.
+
+### Następne kroki
+
+#### Next
+
+- **Scenariusz 2** z `docs/admin-e2e-checklist.md`: Sales Board + KPI. Plan: segment strip, przełączanie KPI, kolumny Sales Board, filtry.
+- Po Scenariuszu 2 — lekcja fundamentu: `useQuery` w Convex jako reactive subscription vs fetch.
+
+#### Blocked / Later / Open questions
+
+- Krok 2 Scenariusza 1 (403 dla non-admin) — nadal czeka na drugie konto Clerk.
+- UX: brak „Wyloguj" w `/dashboard` (parking lot).
+- UX: caret na OTP niewidoczny (parking lot).
+- Cookie consent banner — lekcja na później (parking lot).
+- Czy mobile menu ma blokować scroll body (gdyby content menu rosło > viewport)?
+- Czy sidebar contact w `/poradnik` desktop zostaje, czy też do usunięcia.
+
+## Sesja 2026-05-16 — Krok 3 toast w drawerze + Scenariusz 4 (admin token confirmation)
+
+### Zmiany
+
+- `src/lib/components/admin/booking-drawer.svelte`: migracja 6 use-case'ów (sendPaymentReminder, sendCrewDataReminder, sendConfirmationLink, confirmParticipant, requestCorrection, copyText, saveParticipant) ze starego inline toasta na `toastState.addToast` z `$lib/components/toast`. Usunięty lokalny `let toast = $state(...)`, render `{#if toast}` z linii 901-903, style `.toast`/`.toast--ok`/`.toast--err`. Komunikat w `sendConfirmationLink` poprawiony („z toasta poniżej" → „URL skopiowany do schowka"), `try/catch` clipboardu przesunięte przed addToast żeby komunikat był prawdziwy w momencie wyświetlenia.
+- `src/routes/[[lang=lang]]/crew/confirm/[token]/+layout.ts` — nowy plik, `loadLocale(params.lang ?? 'pl')` z typem `LayoutLoad`. Pattern z admin/+layout.ts (commit `a27684f` z 2026-05-15).
+- `src/routes/[[lang=lang]]/crew/confirm/[token]/+layout@.svelte` przemianowany na `+layout.svelte` (zdjęty `@-reset`) — workaround dla i18n-404 z wuchale. Konsekwencja: public confirmation page dziedziczy `<SiteNav />` z `[[lang=lang]]/+layout.svelte`.
+- `src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte`: kolejność warunków renderu — `finished === 'confirmed'` i `finished === 'correction'` przesunięte **przed** `view.data.status === 'invalid'`. Fix race condition Convex reactive subscription vs lokalny `$state`.
+- `docs/admin-post-mvp-decisions.md`: 6 nowych pozycji backloga — widoczność realnego odbiorcy reminderów, przyjazne komunikaty błędów, walidacja pól formy edycji uczestnika, drobiazgi UX (date icon, dropdowns, nationality), przywrócenie `+layout@.svelte` po fixie wuchale, przycisk „Poproś o nowy link" na zużytym tokenie.
+- Convex env: `PUBLIC_APP_URL=http://localhost:5173` ustawione przez `npx convex env set` (działało już po staremu z prod, ale tokeny generowane lokalnie nie pasowały do prod URL).
+
+### Decyzje
+
+- **Brak refactoru `AddToastOptions` na `duration: number | 'persistent'`** — obecny kod (`if (duration > 0 && duration !== Infinity)`) sensownie obsługuje `0` = persistent. Dodanie union sypie typy bez wartości.
+- **Reset `toast = null` na początku akcji skreślony** — w nowym systemie toaster to stos, nie pojedynczy slot. Stare toasty znikają same po duration lub zostają (przy error `duration: 0`). Brak slotu do wyczyszczenia.
+- **A-tryb dla i18n-404 + @-reset + głęboko zagnieżdżona route w wuchale** — zdjęcie `@` zamiast debugowania root cause. `<SiteNav />` na public page UX-owo akceptowalny dla MVP. Powrót po fixie zaplanowany w backlogu.
+- **Komunikat „URL skopiowany do schowka" mówiony po clipboard.writeText, nie przed** — jeśli clipboard zawiódł cicho (catch), toast nie kłamie. Świadomy odchył od pierwotnego porządku.
+- **Lokalny `finished` ma priorytet nad `view.data.status === 'invalid'`** — „co właśnie zrobiłem" > „jaki jest stan bazy". Po refresh `finished` resetuje się i user widzi truth z bazy. Oba warunki potrzebne dla dwóch różnych scenariuszy wejścia.
+- **Promocja do wiki:** [[concepts/convex-subscription-vs-local-success-state]] — uniwersalny wzorzec dla każdego systemu z reactive subscriptions.
+
+### Wnioski
+
+- **Convex reactive subscription wyprzedza lokalny `$state` w renderze** — najmocniejsza lekcja sesji. Po `await mutation()` subscription pushuje aktualizację szybciej niż `finished = 'confirmed'` zdąży się ustawić. Kolejność `{#if}` decyduje. Promowane do wiki.
+- **`+layout.ts` (bez `.server`) jest uniwersalny** — odpala się SSR i klient. Te same dane potrzebne w obu pipeline'ach (locale catalog) → `.ts`. Sekrety, DB, auth → `.server.ts`. Trzy warstwy load chain wyjaśnione: root server → segment universal → segment server.
+- **`./$types` to generowany moduł** — SvelteKit regeneruje przy zmianie struktury route'ów. Dodanie nowego `+layout.ts` wymaga restart `pnpm dev` lub `pnpm check` żeby TS zobaczył nowe typy `LayoutLoad`/`PageData`.
+- **Convex env ≠ SvelteKit env (drugi raz)** — `PUBLIC_APP_URL` w Convex env służy actions sklejającym URL-e (token, confirmUrl). Edycja `.env.local` nie wpływa. Wzmocnienie lekcji z 2026-05-10.
+- **`@-reset` + wuchale + głęboko zagnieżdżona route = i18n-404 (niezdiagnozowane)** — admin (1 segment od `[[lang=lang]]`) działa, crew/confirm/`[token]` (3 segmenty + dynamic) nie. Empirycznie potwierdzone, root cause nieznane. Backlog.
+- **Convex mutation transakcyjność** — `result.ok = true` to **kontrakt** że dane są w bazie, nie zaufanie ślepe. Klient nie potrzebuje drugiego sprawdzenia. Lekcja przy okazji pytania „a co jak success a baza nie zapisze".
+- **State machine w UI: stan danych → dostępna akcja** — „Wyślij prośbę" (gdy data missing) vs „Wyślij link do potwierdzenia" (gdy admin wypełnił). Operator nie pamięta, UI prowadzi. Pattern uniwersalny.
+- **Incognito jako standard testowania public flow** — czysta sesja, brak ciasteczek admina, brak Clerk. Reset hasła, magic link, public share — wszystko incognito.
+
+### Następne kroki
+
+#### Next
+
+- Scenariusz 5 (Korekta od uczestnika → alert dla admina). Wykorzystaj scenariusz 4 do kroku 7, w kroku 8 zamiast „Potwierdzam" → „Zgłoś poprawkę".
+- Scenariusze 6 (Wygasły link), 7 (Plan rat), 8 (Miejsca specjalne), 9 (Hold expiring).
+
+#### Blocked / Later / Open questions
+
+- 6 pozycji w `docs/admin-post-mvp-decisions.md` — patrz sekcja UX/drobne.
+- Diagnoza `@-reset` + wuchale + głęboko zagnieżdżona route — root cause nieznane.
 

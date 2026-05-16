@@ -156,11 +156,6 @@
 		<p class="error">Nie udało się wczytać linku. {view.error.message}</p>
 	{:else if view.isLoading || !view.data}
 		<p class="loading">Wczytuję dane…</p>
-	{:else if view.data.status === 'invalid'}
-		<p class="invalid">{explainReason(view.data.reason)}</p>
-		<p class="hint">
-			Skontaktuj się z organizatorem rejsu — możemy wystawić nowy link.
-		</p>
 	{:else if finished === 'confirmed'}
 		<div class="result result--ok">
 			<h2>Dziękujemy za potwierdzenie</h2>
@@ -177,6 +172,11 @@
 				możesz zamknąć.
 			</p>
 		</div>
+	{:else if view.data.status === 'invalid'}
+		<p class="invalid">{explainReason(view.data.reason)}</p>
+		<p class="hint">
+			Skontaktuj się z organizatorem rejsu — możemy wystawić nowy link.
+		</p>
 	{:else}
 		{@const data = view.data}
 		<div class="meta">

@@ -3,6 +3,8 @@
 	import { api } from '$convex/api'
 	import { PUBLIC_APP_URL } from '$env/static/public'
 	import type { Id } from '$convex/dataModel'
+	import { Toast } from '$lib/components/toast'
+	import { toastState } from '$lib/state/toast.svelte'
 
 	type Props = {
 		bookingId: Id<'bookings'> | null
@@ -19,7 +21,6 @@
 	)
 
 	let busyId = $state<string | null>(null)
-	let toast = $state<{ kind: 'ok' | 'err'; text: string } | null>(null)
 	let copiedAt = $state<number | null>(null)
 	let notifyAdmin = $state(true)
 
@@ -181,7 +182,6 @@
 	async function saveParticipant() {
 		if (!editingParticipantId || !editForm) return
 		savingParticipant = true
-		toast = null
 		try {
 			const optional = (value: string): string | undefined =>
 				value.trim() ? value.trim() : undefined
@@ -212,20 +212,22 @@
 					medicalNotes: optional(editForm.medicalNotes)
 				}
 			)
-			toast = {
-				kind: 'ok',
-				text:
+			toastState.addToast({
+				message:
 					result.dataStatus === 'complete'
 						? 'Dane zapisane. Status: robocze (admin) — wyślij link, gdy uczestnik ma potwierdzić.'
-						: 'Dane zapisane. Brak kompletu wymaganych pól — uczestnik nie zostanie poproszony o potwierdzenie.'
-			}
+						: 'Dane zapisane. Brak kompletu wymaganych pól — uczestnik nie zostanie poproszony o potwierdzenie.',
+				status: result.dataStatus === 'complete' ? 'success' : 'warning',
+				duration: 5000
+			})
 			editingParticipantId = null
 			editForm = null
 		} catch (err) {
-			toast = {
-				kind: 'err',
-				text: err instanceof Error ? err.message : 'Nie udało się zapisać.'
-			}
+			toastState.addToast({
+				message: err instanceof Error ? err.message : 'Nie udało się zapisać.',
+				status: 'error',
+				duration: 0
+			})
 		} finally {
 			savingParticipant = false
 		}
@@ -285,33 +287,34 @@
 
 	async function sendPaymentReminder(paymentId: Id<'bookingPayments'>) {
 		busyId = paymentId
-		toast = null
 		try {
 			const result = await convex.action(api.admin.sendAdhocPaymentReminder, {
 				paymentId,
 				notifyAdmin
 			})
 			if (result.ok) {
-				toast = {
-					kind: 'ok',
-					text: result.adminCopySent
+				toastState.addToast({
+					message: result.adminCopySent
 						? 'Monit wysłany. Kopia poszła do operatora.'
-						: 'Monit wysłany.'
-				}
+						: 'Monit wysłany.',
+					status: 'success'
+				})
 			} else {
-				toast = {
-					kind: 'err',
-					text:
+				toastState.addToast({
+					message:
 						result.reason === 'recipient_unavailable'
 							? 'Brak adresu odbiorcy — uzupełnij dane uczestnika lub kupującego.'
-							: `Nie udało się wysłać: ${result.reason}`
-				}
+							: `Nie udało się wysłać: ${result.reason}`,
+					status: 'error',
+					duration: 0
+				})
 			}
 		} catch (err) {
-			toast = {
-				kind: 'err',
-				text: err instanceof Error ? err.message : 'Błąd wysyłki'
-			}
+			toastState.addToast({
+				message: err instanceof Error ? err.message : 'Błąd wysyłki',
+				status: 'error',
+				duration: 0
+			})
 		} finally {
 			busyId = null
 		}
@@ -321,36 +324,38 @@
 		participantId: Id<'bookingParticipants'>
 	) {
 		busyId = participantId
-		toast = null
 		try {
 			const result = await convex.action(
 				api.crewConfirmation.sendCrewConfirmationLink,
 				{ participantId, adminUserId }
 			)
 			if (result.ok) {
-				toast = {
-					kind: 'ok',
-					text: `Link wysłany na ${result.recipient}. Można też skopiować ręcznie z toasta poniżej.`
-				}
+				toastState.addToast({
+					message: `link wysłany na ${result.recipient}. \nURL skopiowany do schowka`,
+					status: 'success',
+					duration: 5000
+				})
 				try {
 					await navigator.clipboard.writeText(result.confirmUrl)
 				} catch {
 					/* clipboard optional */
 				}
 			} else {
-				toast = {
-					kind: 'err',
-					text:
+				toastState.addToast({
+					message:
 						result.reason === 'recipient_unavailable'
 							? 'Brak adresu odbiorcy — uzupełnij e-mail uczestnika.'
-							: `Nie udało się wysłać linku: ${result.reason}`
-				}
+							: `Nie udało się wysłać linku: ${result.reason}`,
+					status: 'error',
+					duration: 0
+				})
 			}
 		} catch (err) {
-			toast = {
-				kind: 'err',
-				text: err instanceof Error ? err.message : 'Błąd wysyłki linku.'
-			}
+			toastState.addToast({
+				message: err instanceof Error ? err.message : 'Błąd wysyłki linku.',
+				status: 'error',
+				duration: 0
+			})
 		} finally {
 			busyId = null
 		}
@@ -366,18 +371,21 @@
 		)
 			return
 		busyId = participantId
-		toast = null
 		try {
 			await convex.mutation(api.crewConfirmation.adminMarkConfirmedManually, {
 				participantId,
 				adminUserId
 			})
-			toast = { kind: 'ok', text: 'Dane oznaczone jako potwierdzone.' }
+			toastState.addToast({
+				message: 'Dane oznaczone jako potwierdzone.',
+				status: 'success'
+			})
 		} catch (err) {
-			toast = {
-				kind: 'err',
-				text: err instanceof Error ? err.message : 'Nie udało się oznaczyć.'
-			}
+			toastState.addToast({
+				message: err instanceof Error ? err.message : 'Nie udało się oznaczyć.',
+				status: 'error',
+				duration: 0
+			})
 		} finally {
 			busyId = null
 		}
@@ -385,33 +393,34 @@
 
 	async function sendCrewReminder(participantId: Id<'bookingParticipants'>) {
 		busyId = participantId
-		toast = null
 		try {
 			const result = await convex.action(api.admin.sendAdhocCrewDataReminder, {
 				participantId,
 				notifyAdmin
 			})
 			if (result.ok) {
-				toast = {
-					kind: 'ok',
-					text: result.adminCopySent
+				toastState.addToast({
+					message: result.adminCopySent
 						? 'Prośba wysłana. Kopia poszła do operatora.'
-						: 'Prośba wysłana.'
-				}
+						: 'Prośba wysłana.',
+					status: 'success'
+				})
 			} else {
-				toast = {
-					kind: 'err',
-					text:
+				toastState.addToast({
+					message:
 						result.reason === 'recipient_unavailable'
 							? 'Brak adresu odbiorcy — uzupełnij dane uczestnika lub kupującego.'
-							: `Nie udało się wysłać: ${result.reason}`
-				}
+							: `Nie udało się wysłać: ${result.reason}`,
+					status: 'error',
+					duration: 0
+				})
 			}
 		} catch (err) {
-			toast = {
-				kind: 'err',
-				text: err instanceof Error ? err.message : 'Błąd wysyłki'
-			}
+			toastState.addToast({
+				message: err instanceof Error ? err.message : 'Błąd wysyłki',
+				status: 'error',
+				duration: 0
+			})
 		} finally {
 			busyId = null
 		}
@@ -467,12 +476,16 @@
 		try {
 			await navigator.clipboard.writeText(text)
 			copiedAt = Date.now()
-			toast = { kind: 'ok', text: 'Skopiowano do schowka.' }
+			toastState.addToast({
+				message: 'Skopiowano do schowka.',
+				status: 'success'
+			})
 		} catch {
-			toast = {
-				kind: 'err',
-				text: 'Nie udało się skopiować — zaznacz ręcznie.'
-			}
+			toastState.addToast({
+				message: 'Nie udało się skopiować — zaznacz ręcznie.',
+				status: 'error',
+				duration: 0
+			})
 		}
 	}
 
@@ -804,7 +817,8 @@
 														/></label
 													>
 													<label
-														><span>Kontakt alarmowy — imię</span><input
+														><span>Kontakt alarmowy — imię i nazwisko</span
+														><input
 															bind:value={editForm.emergencyContactName}
 														/></label
 													>
@@ -814,7 +828,7 @@
 														/></label
 													>
 													<label
-														><span>Pływanie</span><input
+														><span>Umiejętności pływackie</span><input
 															bind:value={editForm.swimmingAbility}
 															placeholder="np. dobre"
 														/></label
@@ -897,10 +911,6 @@
 							<span>Wyślij kopię do operatora (HANDOFF_REPORT_TO)</span>
 						</label>
 					</section>
-
-					{#if toast}
-						<p class="toast toast--{toast.kind}">{toast.text}</p>
-					{/if}
 				</div>
 			{/if}
 		</aside>
@@ -1266,25 +1276,6 @@
 		width: 16px;
 		height: 16px;
 		accent-color: var(--admin-brass, #c4923a);
-	}
-
-	.toast {
-		margin: 0;
-		padding: 12px 16px;
-		border: 1px solid var(--admin-line, rgba(196, 146, 58, 0.16));
-		font-size: 12px;
-	}
-
-	.toast--ok {
-		background: var(--admin-ok-bg, rgba(138, 199, 164, 0.12));
-		border-color: rgba(138, 199, 164, 0.3);
-		color: var(--admin-ok, #8ac7a4);
-	}
-
-	.toast--err {
-		background: var(--admin-danger-bg, rgba(228, 109, 95, 0.12));
-		border-color: rgba(228, 109, 95, 0.34);
-		color: var(--admin-danger, #e46d5f);
 	}
 
 	@media (max-width: 600px) {
