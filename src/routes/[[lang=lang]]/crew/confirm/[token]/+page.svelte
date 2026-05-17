@@ -2,6 +2,7 @@
 	import { useQuery, useConvexClient } from 'convex-svelte'
 	import { api } from '$convex/api'
 	import { page } from '$app/state'
+	import { toastState } from '$lib/state/toast.svelte'
 
 	const convex = useConvexClient()
 	const token = $derived(page.params.token ?? '')
@@ -13,7 +14,6 @@
 	let mode = $state<'idle' | 'correction'>('idle')
 	let correctionNote = $state('')
 	let busy = $state(false)
-	let toast = $state<{ kind: 'ok' | 'err'; text: string } | null>(null)
 	let finished = $state<'confirmed' | 'correction' | null>(null)
 
 	function formatDate(timestamp?: number): string {
@@ -28,7 +28,6 @@
 	async function confirmData() {
 		if (!token) return
 		busy = true
-		toast = null
 		try {
 			const result = await convex.mutation(
 				api.crewConfirmation.confirmCrewDataByToken,
@@ -37,13 +36,19 @@
 			if (result.ok) {
 				finished = 'confirmed'
 			} else {
-				toast = { kind: 'err', text: explainReason(result.reason) }
+				toastState.addToast({
+					message: explainReason(result.reason),
+					status: 'error',
+					duration: 0
+				})
 			}
 		} catch (err) {
-			toast = {
-				kind: 'err',
-				text: err instanceof Error ? err.message : 'Nie udało się potwierdzić.'
-			}
+			toastState.addToast({
+				message:
+					err instanceof Error ? err.message : 'Nie udało się potwierdzić.',
+				status: 'error',
+				duration: 0
+			})
 		} finally {
 			busy = false
 		}
@@ -52,11 +57,13 @@
 	async function submitCorrection() {
 		if (!token) return
 		if (!correctionNote.trim()) {
-			toast = { kind: 'err', text: 'Opisz krótko, co wymaga poprawy.' }
-			return
+			toastState.addToast({
+				message: 'Opisz krótko, co wymaga poprawy.',
+				status: 'error',
+				duration: 0
+			})
 		}
 		busy = true
-		toast = null
 		try {
 			const result = await convex.mutation(
 				api.crewConfirmation.requestCrewDataCorrectionByToken,
@@ -65,13 +72,18 @@
 			if (result.ok) {
 				finished = 'correction'
 			} else {
-				toast = { kind: 'err', text: explainReason(result.reason) }
+				toastState.addToast({
+					message: explainReason(result.reason),
+					status: 'error',
+					duration: 0
+				})
 			}
 		} catch (err) {
-			toast = {
-				kind: 'err',
-				text: err instanceof Error ? err.message : 'Nie udało się wysłać.'
-			}
+			toastState.addToast({
+				message: err instanceof Error ? err.message : 'Nie udało się wysłać.',
+				status: 'error',
+				duration: 0
+			})
 		} finally {
 			busy = false
 		}
@@ -226,7 +238,6 @@
 						class="btn"
 						onclick={() => {
 							mode = 'correction'
-							toast = null
 						}}
 						disabled={busy}
 					>
@@ -248,6 +259,7 @@
 							bind:value={correctionNote}
 							placeholder="Np. nazwisko zapisane błędnie, telefon kontaktu alarmowego się zmienił."
 							required
+							maxlength="2000"
 						></textarea>
 					</label>
 					<div class="actions">
@@ -266,10 +278,6 @@
 				</form>
 			{/if}
 		{/if}
-	{/if}
-
-	{#if toast}
-		<p class="toast toast--{toast.kind}">{toast.text}</p>
 	{/if}
 </article>
 
@@ -439,23 +447,6 @@
 	}
 	.result--info {
 		border-color: rgba(212, 170, 90, 0.34);
-	}
-
-	.toast {
-		margin-top: 18px;
-		padding: 12px 16px;
-		font-size: 13px;
-		border: 1px solid rgba(196, 146, 58, 0.18);
-	}
-	.toast--err {
-		background: rgba(228, 109, 95, 0.12);
-		border-color: rgba(228, 109, 95, 0.34);
-		color: #e46d5f;
-	}
-	.toast--ok {
-		background: rgba(138, 199, 164, 0.12);
-		border-color: rgba(138, 199, 164, 0.3);
-		color: #8ac7a4;
 	}
 
 	@media (max-width: 600px) {
