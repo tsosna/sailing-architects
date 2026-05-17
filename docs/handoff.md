@@ -1147,6 +1147,132 @@ W projekcie zainstalowany plugin Claude Code: `caveman@caveman` (globalnie, scop
 - Czy mobile menu ma blokować scroll body (gdyby content menu rosło > viewport)?
 - Czy sidebar contact w `/poradnik` desktop zostaje, czy też do usunięcia.
 
+# Sesja 2026-05-08 — Scenariusz 1 admin guard zamknięty + lekcja server/client boundary
+
+### Zmiany
+
+- Brak zmian w kodzie. Sesja wyłącznie dydaktyczna (reading code as study).
+
+### Decyzje
+
+- Scenariusz 1 z `docs/admin-e2e-checklist.md` zamknięty: drugie konto Clerk (`footy2_rubbles@icloud.com`) zweryfikowało krok 2 — non-admin dostaje 403 „Brak uprawnień administracyjnych" zamiast redirectu na `/dashboard`.
+- Następna sesja: Scenariusz 2 (Sales Board + KPI) lub lekcja JS `.map().filter()` z backlogu — do decyzji.
+
+### Wnioski
+
+- **Redirect 303 vs error 403 — semantyka dobierana świadomie:** anonim → redirect (brakuje kroku który może zrobić: login). Non-admin zalogowany → 403 (brakuje uprawnień których sam nie zdobędzie). `requireAdmin` w `src/lib/server/admin-guard.ts:89-99` realizuje obie ścieżki. **Promowane do `wiki/concepts/redirect-303-vs-error-403.md`.**
+- **JWT / session claims jako fast path, Clerk API jako slow path:** `resolveAdmin` najpierw czyta rolę z `auth.sessionClaims` (token w cookie, lokalnie, mikrosekundy). Fallback do `clerkClient.users.getUser()` (HTTP, setki ms) gdy token nie zawiera roli — bo token się starzeje, rola mogła się zmienić od czasu wystawienia. Wzorzec ogólny: szybki cache → fallback do źródła prawdy.
+- **`+layout.server.ts` vs `+layout.ts` — granica server/client:** guard MUSI być `.server.ts`, bo używa `clerkClient` (sekret API), `env` z `$env/dynamic/private` i podejmuje decyzję autoryzacyjną. Reguła: autoryzacja zawsze server-side, bo klient kłamie. OTP / 2FA chronią autentykację (kim jesteś), nie autoryzację (co możesz).
+- **`locals` to per-request scratch pad SvelteKit:** świeży `{}` na każdy request, hooks zapisują, `load` czyta, po response znika. `withClerkHandler()` w `hooks.server.ts` świadomie dopisuje `locals.auth()` — nie wszystko z hooka trafia do locals automatycznie.
+- **`app.d.ts` zostaje pusty dopóki sami nie dopisujemy do `event.locals`:** paczki (np. `svelte-clerk`) rozszerzają `App.Locals` przez declaration merging — referencja `/// <reference types="svelte-clerk/env" />` ściąga typy. Edycja `app.d.ts` potrzebna tylko gdy własny hook kładzie własne pole (np. `locals.requestId`).
+- **Destructuring jednego pola vs trzymanie obiektu — wybór stylistyczny, nie techniczny:** `const { userId } = locals.auth()` sygnalizuje „dalej używam tylko userId". `const auth = locals.auth(); auth.userId` pasuje gdy sięgamy też po `auth.sessionClaims`. Niespójność w `admin-guard.ts` (resolveAdmin trzyma obiekt, requireAdmin destrukturyzuje) bez głębszego powodu — historia edycji, nie projekt.
+
+### Następne kroki
+
+#### Next
+
+- Scenariusz 2 z `docs/admin-e2e-checklist.md` — Sales Board + KPI (segment strip, KPI strip 8 kart, filtry po `flags`).
+- Albo lekcja JS `.map().filter()` z backlogu fundamentów — wypłynie i tak przy listach w adminie.
+
+#### Blocked / Later / Open questions
+
+- (brak)
+
+## Sesja 2026-05-10 11:30 — Scenariusz 3 (overdue rata) + bug fix _brevo
+
+### Zmiany
+
+- **Scenariusz 3 z `docs/admin-e2e-checklist.md` zamknięty** (3/9). Pipeline overdue rata → KPI/Alert Queue → drawer → "Wyślij monit" → audit → "Kopiuj WhatsApp" — wszystko zaliczone na rezerwacji `SA-2026-4842`.
+- **Postarzenie raty w bazie**: ręczna edycja `bookingPayments` przez Convex Dashboard — `status: pending`, `dueAt: 1746230400000` (2025-05-03, błędnie obliczony — miało być 2026-05-05; zostawione, "372 dni zaległości" nie psuje testu). Wpis dalej w bazie po sesji.
+- **Fix bugu `src/convex/_brevo.ts:30-49`**: kolejność `if (isDryRun())` przed `if (!apiKey || !fromEmail)` — wcześniej dry-run nie działał gdy klucze nieustawione, bo walidacja env rzucała pierwsze. Zmiana niezacommitowana.
+- **Convex env**: `REMINDERS_DRY_RUN=1` ustawione. Mail nie poszedł fizycznie, treść do logu. WhatsApp clipboard działa (booking ref + kwota + link do panelu).
+- **Trzy nowe wpisy w `Otwarte problemy`** (`docs/handoff.md` góra pliku):
+  - Toast feedback poza viewportem przy małej wysokości okna → propozycja Svelte Sonner (top-right + richColors).
+  - Drawer nie wyróżnia zaległej raty wizualnie mimo że KPI/Alert Queue tak.
+  - UX: kupujący ≠ żeglarz — Krok 3 booking flow + email potwierdzenia mylą role.
+
+### Decyzje
+
+- **Dry-run zamiast realnej konfiguracji Brevo na lokalu** — świadomie nie wystawiamy API key na anonymous Convex; testujemy logikę backendową (licznik monitów, audit, toast) bez palenia kwoty na transakcyjny mail i bez ryzyka spamu testowych klientów.
+- **Stan postarzonej raty zostaje po sesji** — Sonner integration jutro może się przydać do testów żywego alertu. Cleanup zrobimy gdy potrzebny będzie czysty stan (nie przed Scenariuszem 4 — ten dotyka uczestników, nie rat).
+- **Fix `_brevo.ts` nie zacommitowany** — łącznie ze zmianami z otwartych problemów może iść w jednym commicie po Sonnerze, jeśli Tomek zechce wyciągnąć wnioski o atomowości.
+- **Bug raportowany jako fix kolejności, nie jako "dorzuć dry-run mode"** — dry-run istniał jako koncept w kodzie, ale był nieosiągalny przez kolejność walidacji. Kierunek naprawy: minimalna zmiana porządku, nie dodanie nowej funkcjonalności.
+
+### Wnioski
+
+- **Convex env vs SvelteKit `.env` to dwa osobne worki** — Convex backend (chmurowy lub lokalny anonymous) ma własny zestaw env vars ustawianych przez `npx convex env set NAME value`. `process.env` w Convex action czyta env Convexa, nie projektu. SvelteKit `.env`/`.env.local` jest tylko dla frontendu i `+server.ts`. Pułapka: edycja `.env.local` nie wpływa na Convex actions, mimo że oba leżą w tym samym repo. Kandydat do `wiki/concepts/convex-env-vs-sveltekit-env.md` — ponadprojektowy.
+- **Dry-run jako bypass dla brakujących secretów**: pattern wart zapamiętania — funkcja udaje wysyłkę (log + fake `messageId`) bez fetch do API. Ale **kolejność walidacji ma znaczenie**: `if (dryRun) return` musi być przed `if (!secret) throw`, inaczej dry-run jest nieosiągalny. Generic gotcha w "guard clauses" — najtwardszy guard nie zawsze powinien iść pierwszy.
+- **Drawer status czyta surowy `bookingPayments.status`** zamiast derive po `dueAt < now` — stąd niespójność z KPI/Alert Queue. Wzorzec do rozpoznania: gdy ten sam fakt jest reprezentowany w bazie binarnie (`pending`/`overdue`) ale tylko jeden writer go aktualizuje (cron `markOverduePayments`), reszta widoków musi albo czekać na cron, albo derive'ować lokalnie. Dwa źródła prawdy = niespójność, jeden derive = spójność.
+- **Wuchale toast (istniejący w admin shell) jest pozycjonowany u dołu** — przy krótkim viewport ucina feedback. Świadoma ingerencja w UX, nie tylko cosmetic. Sonner ma `position` jako prop, więc problem znika konfiguracją.
+- **`npx convex dashboard` to jedyna ścieżka do anonymous local Convex Dashboard** — port `127.0.0.1:6790` nie jest serwerem WWW, to TCP control channel. Mit z poprzedniej sesji potwierdzony.
+
+### Następne kroki
+
+#### Next
+
+- **Wdrożyć Svelte Sonner** (priorytet — wybór użytkownika): `pnpm add svelte-sonner`, `<Toaster position="top-right" richColors />` w admin shell layout, refactor istniejących toastów w drawer akcjach. Czytanie [Svelte Sonner doc](https://svelte-sonner.vercel.app/) + lokalna kopia `knowledge-vault/raw/docs/Svelte Sonner.md`.
+- **Scenariusz 4** — admin edytuje dane uczestnika (`bookingParticipants`) → token email → `/crew/confirm/[token]` → potwierdzenie. Tu wreszcie tykamy „kupujący ≠ żeglarz" w UI.
+- **Commit zmian z tej sesji** — `_brevo.ts` fix kolejności + ewentualnie Sonner refactor razem.
+
+#### Blocked / Later / Open questions
+
+- **Drawer overdue highlight** — fix w UI (derive `overdue` po `dueAt < now`) vs fix w backendzie (`markOverduePayments` aktualizuje `status`)? Decyzja pasuje do większej dyskusji „derive vs storage" — odłożone.
+- **Realna integracja Brevo na lokalu** — czeka na potrzebę testowania wizualnego template'ów maili (póki co dry-run wystarcza).
+- **Cleanup postarzonej raty `SA-2026-4842`** — przed produkcyjnym deployem albo gdy potrzebny będzie czysty stan testowy.
+- **Kupujący ≠ żeglarz — copy + UI rozdzielić** — duża zmiana, do osobnej sesji po Sonnerze i Scenariuszu 4.
+- **`package.json` ma malformed config** (warning npm: `Unknown project config "[\"esbuild\"]}"`) — niska priorytet, nie blokuje.
+
+## Sesja 2026-05-15 — Toast/notification system (Krok 2 trzykrokowego planu)
+
+### Zmiany
+
+- **Nowy state singleton** `src/lib/state/toast.svelte.ts` — typy `ToastStatus` (`'success' | 'error' | 'info' | 'warning'`), `Toast` (id/message/status/duration), wewnętrzny `AddToastOptions`. Klasa `ToastState` z `toasts = $state<Toast[]>([])`, `private timeouts = new Map<string, ReturnType<typeof setTimeout>>()`, metodami `addToast(options)` (UUID + setTimeout warunkowy `duration > 0 && !== Infinity`) i `removeToast(id)` (clearTimeout + filter). Eksport `export const toastState = new ToastState()` — singleton modułu, spójny z konwencją `booking-selection.svelte.ts`.
+- **Komponent `Toast`** `src/lib/components/toast/{toast.svelte, index.ts}` — przyjmuje `toast: Toast` jako jeden prop, BEM klasy `toast`, `toast--{status}`, `toast__message`, `toast__close`. `role="alert"` dla error, `role="status"` reszta. Przycisk X = znak `×` + `aria-label="Zamknij"` + `type="button"` (konwencja z `booking-drawer.svelte`). Stylowanie: navy/brass z `border-left: 3px` w kolorze statusu (success #4ade80, error #ef4444, warning #fbbf24, info brass). Min-width 280, max-width 420.
+- **Komponent `Toaster`** `src/lib/components/toaster/{toaster.svelte, index.ts}` — kontener `position: fixed; top: 1rem; right: 1rem; z-index: 9999`. `aria-live="polite" aria-atomic="false"`. Keyed each po `toastState.toasts` z kluczem `(toast.id)`. Każdy slot ma `in:fly={{x:320, duration:200}}`, `out:fly={{x:320, duration:150}}`, `animate:flip={{duration:200}}`. Pointer-events overlay pattern: `none` na `.toaster`, `auto` na `.toaster__slot`.
+- **Wpięcie root**: `src/routes/+layout.svelte` — import `Toaster` + render `<Toaster />` po `{@render children()}` wewnątrz `<ClerkProvider>` (jeden globalny system na całą apkę, działa nawet pod admin `+layout@.svelte` reset).
+
+### Decyzje
+
+- **Singleton zamiast Context API** — odejście od pomysłu nomadom toast (context). Powód: stan toastów jest **client-only** (akcje usera w przeglądarce, SSR nigdy nie renderuje toasta), więc wycieki między userami niemożliwe; spójność z istniejącym `booking-selection.svelte.ts`; mniej boilerplate (zero `setContext`/`getContext`/Symbol). Context lekcja z wczoraj zostaje w bazie, użyjemy gdy stan **musi** być per-request.
+- **Obiekt opcji w `addToast({...})` zamiast args pozycyjnych** — defaults w destructuringu (`status = 'info'`, `duration = 3000`), `AddToastOptions` typ wewnętrzny (bez eksportu). Skaluje się bez breaking change gdy dorzucimy 4. opcję (np. `action`).
+- **Reassignment zamiast mutacji in-place w `$state` collections** — `this.toasts = [...this.toasts, newToast]` i `this.toasts = this.toasts.filter(...)`, nie `.push()`. Spójność z `booking-selection.toggleBerth`. Bezpieczniejsze dla derivacji i debug snapshots.
+- **`private timeouts`** — eksplicytne `private` na polu zamiast tylko konwencji. Kompilator wymusi.
+- **Pojedyncze pole `message`** zamiast `title`+`comment` — odjazd od pomysłu w trakcie sesji. Jedno pole wystarczy dla MVP, mniej decyzji per wywołanie.
+- **Znak `×` zamiast komponentu ikony** — konwencja repo (`booking-drawer.svelte:512` używa tego samego patternu). Zero zależności, A11y rozwiązane przez `aria-label="Zamknij"`.
+- **`border-left: 3px` jako sygnał statusu** — spójność z dashboard cards (border-left brass dim). Kolory success/error/warning poza tokenami (tokeny repo nie mają semantic status); minimalna wstawka. Gdy projekt dostanie tokeny `--color-success` itp. — refactor jednolinijkowy.
+- **Toaster top-right** (zamiast top-center / bottom-right) — admin patrzy na góra-prawo (Panel/SignOut tam już są), nie konkuruje z dolnymi CTA. Wybór dla MVP; hardcoded, nie prop.
+- **Toaster w root `+layout.svelte`, nie `[[lang=lang]]`** — bo admin używa `+layout@.svelte` (reset chain), więc lang layout by go nie dosięgnął.
+
+### Wnioski
+
+- **`this` binding przy ekstrakcji metody klasy** — `export const addToast = toastState.addToast` to **runtime bug**, nie compile error. TS nie ostrzega. Po wywołaniu `addToast(...)` `this` jest `undefined`, dostajemy `Cannot read properties of undefined`. Powód: `this` jest ustawiane w momencie wywołania (to co stoi przed kropką), nie w momencie definicji. Wyciągnięcie referencji do funkcji odrywa ją od instancji. Fundament `this` z profilu („lekcja na potem") trafił sam — promowane: `wiki/concepts/js-this-binding-method-extraction.md`. Fixy: nie eksportuj metod osobno (rekomendowane, spójne z singletonem), arrow-function field, `.bind()`.
+- **TS `type` vs `interface`** — 95% zamienne. Kluczowe różnice: union/intersection alias tylko w `type`; **declaration merging** tylko w `interface`. Praktyka: framework / public API biblioteki → `interface` (żeby konsumenci mogli rozszerzyć — patrz `app.d.ts` + `App.Locals`); lokalne kształty, uniony, alias prymitywu → `type`. Hoisting typów: TS pozwala użyć typu zdefiniowanego niżej, ale **człowiek czyta od góry** — kolejność atom → agregat (status → Toast → AddToastOptions → klasa). Promowane: `wiki/concepts/typescript-type-vs-interface-declaration-merging.md`.
+- **ARIA — minimalny zestaw dla dynamicznych komponentów** — `role="status"` (polite, screen reader dokończy) vs `role="alert"` (assertive, przerywa); `aria-label` daje nazwę elementom bez tekstu (glify, ikony); `aria-live` na kontenerze monitorującym wstrzykiwany content; `aria-hidden="true"` na dekoracjach; stany dynamiczne `aria-expanded`/`aria-pressed`. Reguła: natywny HTML semantyczny pierwszy, ARIA jako doklejka. Nie promowane (broad topic, mocniejsze będzie po większej liczbie konkretnych przypadków).
+- **Singleton vs Context — kiedy który** — singleton OK gdy: state client-only (toasty), repo trzyma tę konwencję, mało boilerplate. Context wymagany gdy: state per-user na serwerze (SSR cache), state per drzewo komponentów (theme provider, form context), testowanie izolowane. Wzmocniona lekcja z wczoraj.
+- **Komponent jest funkcją stanu, nie statycznym obrazkiem** — manualne wstawienie `<Toast toast={{...}} />` z hardcoded prop nie reaguje na `removeToast` bo komponent nie czyta z `toastState.toasts`. Akcja zmienia **stan**, framework redrawuje. Różnica od imperatywnego modelu (jQuery: usuń node ręcznie). Fundament reaktywności po raz N-ty, ale tym razem zilustrowany konkretnym własnym bugiem testowym.
+- **`animate:` musi siedzieć na bezpośrednim dziecku `{#each}`, nie na komponencie** — dlatego w `Toaster` jest `<div class="toaster__slot" animate:flip>` opakowujący `<Toast>`, nie `<Toast animate:flip>`. Dotyczy tylko animate, nie transition (transition na komponencie się łapie).
+- **Pusty barrel `index.ts` = `Cannot read properties of undefined (is not a function)`** — typowy błąd po stworzeniu folderu. Plik istnieje, ale jest pusty, więc `import { Toast } from '$lib/components/toast'` zwraca `undefined`. Svelte krzyczy o `is not a function` w SSR renderze. Lekcja diagnostyczna: sprawdzaj treść barrel po stworzeniu.
+- **Pointer-events overlay pattern** w praktyce — już opisane wczoraj jako koncept, dziś zastosowane. Kontener `pointer-events: none` przepuszcza kliknięcia na to co pod spodem (między toastami można normalnie klikać UI), child `pointer-events: auto` łapie kliknięcia X.
+
+### Następne kroki
+
+#### Next
+
+- **Krok 3 trzykrokowego planu**: zastąpić istniejące „komunikaty pod viewportem" w admin booking detail (`src/lib/components/admin/booking-drawer.svelte`) wywołaniami `toastState.addToast({...})` — sukces/error po `sendAdhocPaymentReminder`, `sendAdhocCrewDataReminder`, `adminUpdateParticipantData`. Usunąć tymczasowe test-buttony z `/admin/+page.svelte`.
+- Po toastach: powrót do **Scenariusza 4** admin E2E checklist (admin edytuje uczestnika → token → potwierdzenie email).
+
+#### Later
+
+- Toaster pozycja konfigurowalna przez prop (`position?: 'top-right' | 'top-center' | 'bottom-right' | 'bottom-center'`) — gdy pojawi się drugi use case.
+- Tokeny semantyczne kolorów (`--color-success`, `--color-error`, `--color-warning`) — refactor `toast.svelte` na nie gdy projekt dostanie design system pass.
+- `action` na toaście (`{ label, onClick }`) — gdy pojawi się use case „Cofnij" / „Zobacz szczegóły".
+- Pause-on-hover na toaście (zatrzymanie timera przy hover) — gdy będą sygnały że user nie zdąża przeczytać.
+
+#### Blocked / Later / Open questions
+
+- Czy toasty mają persystować przez nawigację SPA (klik linka → toast widoczny na nowej stronie)? Singleton trzyma listę, więc tak — ale nie testowane.
+
+
 ## Sesja 2026-05-16 — Krok 3 toast w drawerze + Scenariusz 4 (admin token confirmation)
 
 ### Zmiany
@@ -1190,3 +1316,46 @@ W projekcie zainstalowany plugin Claude Code: `caveman@caveman` (globalnie, scop
 - 6 pozycji w `docs/admin-post-mvp-decisions.md` — patrz sekcja UX/drobne.
 - Diagnoza `@-reset` + wuchale + głęboko zagnieżdżona route — root cause nieznane.
 
+## Sesja 2026-05-17 — Scenariusz 5 (korekta) + Scenariusz 6 (wygasły link) + toast cleanup + fundamenty Promise/async
+
+### Zmiany
+
+- `src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte` — migracja toastów z lokalnego `let toast = $state(...)` na globalny `toastState.addToast`. Usunięte: deklaracja stanu, 3 resety `toast = null`, render `{#if toast}`, style `.toast/.toast--err/.toast--ok`. Pięć przypisań błędów (linie 40, 43, 55, 68, 71) zamienione na `toastState.addToast({ message, status: 'error', duration: 0 })`. Bug w pierwszej iteracji migracji: w `submitCorrection` znikł guard `if (!correctionNote.trim()) { ...; return }` — naprawiony przed commitem.
+- `docs/admin-post-mvp-decisions.md` — dwie pozycje: (1) alert „Link potwierdzenia wygasł" nie wyzwala się sam (storage flag wymagająca eventu mutacji, której UI blokuje), (2) status pill na public confirmation page wygląda jak przycisk — false affordance.
+- Convex Dashboard (mock danych do testu UI): ręczny patch `bookingParticipants.confirmationStatus = 'expired'` na jednym uczestniku — workaround żeby zobaczyć alert w Alert Queue mimo gapu w designie.
+
+### Decyzje
+
+- **Migracja toastów `duration: 0` (persistent) dla errorów** — spójność z drawerem (linia 229). User sam zamyka, nie znika przez timeout.
+- **Workaround scenariusza 6 zamiast fixu designu** — naprawa derivacji alertu (z `participant.confirmationStatus` na `token.expiresAt < now`) wymaga zmiany w `src/convex/admin.ts` + analizy konsekwencji dla innych alertów. Sesja nauki, nie sesja refactoru — przeszło do backlogu.
+- **Commit samodzielny przez Tomka** — tylko `+page.svelte` z migracją toastów; reszta (backlog, handoff, profil) osobno albo zbiorczo.
+
+### Wnioski
+
+- **Convex nie ma URL endpointów** — klient nie zna adresów. `convex.mutation(api.<plik>.<nazwa>, args)` idzie WebSocket'em, na backendzie ląduje w funkcji eksportowanej z `src/convex/<plik>.ts`. Trzy typy funkcji: `query` (read, reactive), `mutation` (write, transakcyjna), `action` (zewnętrzny świat — fetch, email). Inaczej niż REST gdzie endpoint = URL. Kandydat do wiki: [[concepts/convex-functions-vs-rest-endpoints]].
+- **`useQuery` to subskrypcja, nie fetch — wzmocnienie z 2026-05-16** — alert „Korekta od uczestnika" w drawerze pojawia się sam po mutacji uczestnika bez refresh strony. WebSocket push: mutation patchuje `bookingParticipants.correctionNote` → Convex wie że `bookingDetailById` subskrybuje tę tabelę → push do drawera → `detail.data` aktualizuje się → Svelte `{#if}` przelicza. Drugi raz ta sama lekcja, na innym widoku.
+- **Query agregat zamiast wielu subskrypcji** — `bookingDetailById` zwraca jednym wywołaniem: booking + segment + berths + buyer + payments + participants. Wewnątrz handlera `Promise.all([...])` odpala 4 zapytania **równolegle**. Świadomy wzorzec Convex: jedna subskrypcja per widok, mniej WebSocket round-tripów, prostszy konsument.
+- **Storage vs derive — drugi raz, w drugą stronę (wzmocnienie 2026-05-10)** — alert „Link potwierdzenia wygasł" derive'uje z `participant.confirmationStatus === 'expired'` (storage), nie z `token.expiresAt < now` (derive). Storage wymaga eventu zapisu. UI blokuje akcję która jedyna mogła ten event wywołać → pętla zamknięta → alert nigdy nie wyzwala się sam. Pytania diagnostyczne: (1) czy fakt można policzyć z innych pól, (2) czy źródło zmienia się samo (jak czas), (3) czy storage wymaga eventu który może się nie wykonać. **Promocja do wiki:** [[concepts/storage-vs-derive-time-based-facts]].
+- **Defense-in-depth — trzy warstwy obronne na wygasłym tokenie** — (1) UI ukrywa przyciski gdy `view.data.status === 'invalid'`, (2) query `getCrewConfirmationByToken` zwraca `status: 'invalid'` zamiast danych, (3) mutation `confirmCrewDataByToken` ma guard `if (row.expiresAt < now)` mimo że UI „już to załatwia". Warstwa 3 nie jest paranoja — chroni przed: stara karta otwarta sprzed wygaśnięcia + klik po wygaśnięciu, race condition na timestamp, klient odpalający mutation z konsoli przeglądarki, zatruty cache. Frontend dla UX, backend dla security. **Promocja do wiki:** [[concepts/defense-in-depth-frontend-backend-layers]]. Powiązane z lekcją 2026-05-08 (autoryzacja zawsze server-side).
+- **`onsubmit={...}` + `preventDefault()`** — domyślne zachowanie `<form>` to HTTP request + przeładowanie strony. `e.preventDefault()` wyłącza to żeby SPA mogło obsłużyć submit w JS. Bez tego cały lokalny `$state` znika przy submit. Wzorzec uniwersalny dla każdego SPA, każdej formy.
+- **Promise / async / await — pełny fundament** — JS jednowątkowy, operacje trwające (sieć, dysk, crypto) zwracają Promise zamiast wartości. Promise ma trzy stany: pending → fulfilled | rejected (jednorazowo). `await x` wstrzymuje **funkcję** (nie wątek) do rozstrzygnięcia Promise, fulfilled → zwraca wartość, rejected → throw do `catch`. `async` na funkcji wymusza Promise return + uprawnia `await` wewnątrz. Najczęstszy bug: brak `await` → operujesz na Promise zamiast wartości. `Promise.all([p1, p2])` dla równoległych niezależnych operacji — best-of zamiast sumy. Fundament nie jest jeszcze oswojony — wzmocni się przez realne bugi.
+- **Niespójność checklisty z kodem — empiryka wygrywa** — krok 3 scenariusza 6 obiecuje że „próba akcji patchuje participanta na expired"; w realu UI blokuje akcję na warstwie query, więc mutation nigdy nie odpala. Mutation handle wygaśnięcia istnieje (linia 327 w `crewConfirmation.ts`) ale jest dead branch w tym konkretnym flow. Dokumentacja starzeje się względem kodu.
+- **Convex Dashboard jako mock danych do testu UI** — gdy fizyczny flow nie da się odtworzyć w realistycznym czasie (token 14 dni żywotu, expired flow przez UI nieosiągalny), Dashboard Data tab pozwala ręcznie postawić stan. Drugi raz lekcja z 2026-05-10 (`bookingPayments.status` ręcznie do testu overdue).
+- **Tryb rozkazujący w commit message** — test wypełnienia „Jeśli zastosujesz ten commit, on _____ ." Wypełnij bezokolicznikiem angielskim: `fix guard`, `migrate toast`, `add import` — nie `fixed`, nie `fixing`. Conventional Commits: `<type>: <opis>` gdzie type ∈ feat | fix | chore | docs | refactor | style | test.
+- **Zsh glob `[[...]]`** — ścieżki SvelteKit z `[[lang=lang]]` w zsh traktowane jako glob pattern. `git add src/.../[[lang=lang]]/...` → `zsh: no matches found`. Fix: single quotes (`'src/...'`) albo escape backslashami albo `noglob` prefix. Single quotes nic nie interpretują — najsafest.
+
+### Następne kroki
+
+#### Next
+
+- **Scenariusz 7** — Plan rat: globalna zmiana nie modyfikuje istniejących bookingów. Świeży obszar (`/admin/automation`), niezwiązany z tokens/uczestnicy światem.
+- Po Scenariuszu 7 — lekcja: snapshot vs reference w bazie (dlaczego stare bookingi mają stary plan rat zamrożony).
+
+#### Blocked / Later / Open questions
+
+- Alert „Link potwierdzenia wygasł" — design fix derive'ujący z `token.expiresAt`, nie z `participant.confirmationStatus`. W backlogu.
+- Status pill na public confirmation page wygląda jak button — false affordance. W backlogu UX.
+- Fundament Promise/async nie jest „oswojony" — Tomek sygnalizował świadomie. Wzmocnienie przez realne bugi w kolejnych sesjach.
+- Scenariusze 8 (Miejsca specjalne), 9 (Hold expiring) — po Scenariuszu 7.
+
+~

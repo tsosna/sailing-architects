@@ -47,7 +47,6 @@ export async function brevoSend(
 		)
 	}
 
-
 	const body = {
 		sender: { email: fromEmail },
 		to: [input.to],

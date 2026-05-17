@@ -153,3 +153,18 @@ Backlog rzeczy, które są świadomie odłożone po Etapach 1-7. Nic z tej listy
 - Multi-language admin UI (admin jest wewnętrzny, polski; spec nie wymaga).
 - Refaktor booking flow (niezwiązany z admin console; obecne przepływy działają).
 - Migracja `voyageSegments` price source — patrz „Single source of truth" wyżej. Dotyka landing page, więc trzeba uważać.
+
+## Alert „Link potwierdzenia wygasł" nie wyzwala się automatycznie
+
+**Stan:** Alert derivuje z `bookingParticipants.confirmationStatus === 'expired'`,
+status ląduje tylko po wywołaniu mutacji `confirmCrewDataByToken` z wygasłym
+tokenem. Strona confirmation blokuje UI w query gdy token wygasł, więc mutacja
+nigdy nie zostanie odpalona. Alert pojawia się tylko gdy uczestnik miał kartę
+otwartą sprzed wygaśnięcia.
+
+**Trigger:** Każdy wygasły token bez odwiedziny strony zostaje cichy.
+
+**Kierunek:** Alert powinien derivować bezpośrednio z `crewConfirmationTokens`
+(np. query: `expiresAt < now && !usedAt && participant.confirmationStatus
+!== 'confirmed'`). Storage flag na uczestniku zostaje jako optymalizacja /
+cache, ale nie jest jedynym źródłem.

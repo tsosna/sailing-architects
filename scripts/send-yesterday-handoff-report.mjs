@@ -183,6 +183,16 @@ function normalizeChangeBullet(bullet) {
 	const text = stripJargon(bullet)
 	const lower = text.toLowerCase()
 
+	if (
+		lower.includes('kolejność warunków') ||
+		lower.includes('race condition') ||
+		(lower.includes('reactive') && lower.includes('subscription')) ||
+		lower.includes('renderu') ||
+		lower.includes('finished ===')
+	) {
+		return 'Ustabilizowaliśmy ekran potwierdzania danych, żeby po wykonaniu akcji od razu wyświetlał właściwy komunikat.'
+	}
+
 	if (lower.includes('walidacja') || lower.includes('0 błęd') || lower.includes('ostrzeż')) {
 		return null
 	}
@@ -273,6 +283,18 @@ function normalizeChangeBullet(bullet) {
 function normalizeNextStepBullet(bullet) {
 	const text = stripJargon(bullet)
 	const lower = text.toLowerCase()
+
+	if (lower.includes('patrz sekcja') || lower.includes('ux/drobne') || lower.includes('pozycj')) {
+		return null
+	}
+
+	if (lower.includes('diagnoza') || lower.includes('root cause') || lower.includes('@-reset') || lower.includes('wuchale') || lower.includes('route')) {
+		return null
+	}
+
+	if (lower.includes('scenariusz 5') || lower.includes('scenariusze 6') || lower.includes('hold expiring')) {
+		return 'Kontynuujemy dopracowanie procesu korekty danych przez uczestnika oraz obsługi przypadków typu wygasły link.'
+	}
 
 	if (lower.includes('scenariusz 2') || lower.includes('sales board') || lower.includes('kpi')) {
 		return 'Kontynuujemy prace nad panelem administracyjnym: widok podsumowania rezerwacji i prosty „board” do obsługi sprzedaży.'
