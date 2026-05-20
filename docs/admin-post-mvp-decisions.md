@@ -168,3 +168,67 @@ otwartą sprzed wygaśnięcia.
 (np. query: `expiresAt < now && !usedAt && participant.confirmationStatus
 !== 'confirmed'`). Storage flag na uczestniku zostaje jako optymalizacja /
 cache, ale nie jest jedynym źródłem.
+
+## Brak akcji „Wyloguj" w layoucie `/admin`
+
+**Stan:** Admin layout (`src/routes/[[lang=lang]]/admin/+layout.svelte` + nagłówek) nie eksponuje `<SignOutButton />` ani linku do wylogowania. Żeby zakończyć sesję operator musi nawigować ręcznie do `/dashboard` (gdzie SignOut żyje) i kliknąć tam.
+
+**Trigger:** Operator kończy zmianę przy publicznym/współdzielonym ekranie i nie ma jednoklikowej drogi do wylogowania z poziomu admin console — zwiększa ryzyko porzuconej sesji.
+
+**Kierunek:** Dodać SignOut do nagłówka admin (np. menu pod awatarem / inicjałami) — spójnie z `/dashboard`. Wspólny komponent `user-menu` jeśli sensownie się da wyciągnąć.
+
+## Responsywność akcji w wierszu Sales Board
+
+**Stan:** Przy zwężaniu viewportu (ale jeszcze nie mobile) z wiersza Sales Board znikają kolejno przyciski akcji — najpierw „Otwórz", potem „Monit płatności". Layout chowa je bez fallbacku (overflow / hamburger / menu kontekstowe).
+
+**Trigger:** Na laptopie z bocznym panelem dev-tools albo split-screen operator traci dostęp do podstawowej akcji wiersza. Nie ma sygnału że coś jest ukryte.
+
+**Kierunek:** Albo przenieść akcje do menu kebab (`⋯`) z pełną listą poniżej breakpointu, albo trzymać minimum (`Otwórz`) przyklejone i resztę pakować do overflow. Audytować pozostałe breakpointy admin tabel pod tym kątem.
+
+## Booking-selection nie czyści stanu po zakończonym zakupie
+
+**Stan:** Po sukcesie checkoutu state w `booking-selection` (singleton / `$state` klasa, ewentualnie z persystencją w `localStorage`/`sessionStorage`) nie resetuje zaznaczonych koi. Otwarcie nowego zakupu w tej samej sesji pokazuje poprzednio kupione koje jako wciąż „wybrane"; dorzucenie kolejnych daje sumę krzyżową (np. A1+A2 już opłacone + E1+E2 nowe → panel pokazuje 4 koje, 7200 zł zamiast 3600 zł).
+
+**Trigger:** Operator/klient kupuje 2 koje, wraca do flow żeby kupić następne — zamiast czystego startu widzi historyczne zaznaczenie i potencjalnie próbuje zapłacić ponownie za to co już ma.
+
+**Kierunek:** Reset state po `bookingComplete` (po sukcesie mutation albo na unmount strony sukcesu). Audytować źródło prawdy — jeśli state żyje w singletonie, dodać `reset()`; jeśli w storage, czyścić klucz. Rozważyć osobno: zaznaczenia powinny być scoped per `bookingDraft` (lub per segment), nie globalnie.
+
+## `/admin/automation` — zmiana szablonu nie regeneruje pozycji
+
+**Stan:** Na `/admin/automation` po wyborze szablonu (np. „Zaliczka + 2 raty") i wygenerowaniu pozycji, zmiana szablonu na inny (np. „Zaliczka + 3 raty") **nie** odpala recompute — w UI zostają stare pozycje (3 zamiast 4). Dodatkowy wariant: po ręcznym usunięciu wszystkich pozycji wybór „Całość teraz" tiket selecta cofa się sam do „Zaliczka + 2 raty" i regeneruje 3 pozycje — czyli select nie respektuje wyboru gdy lista pozycji jest pusta / wraca do defaultu.
+
+**Trigger:** Operator zmienia plan globalny dla nowych bookingów — UI sugeruje że nic się nie zmieniło (lub że zmiana jest nieosiągalna) i blokuje świadomy zapis. Krok 5 Scenariusza 7 admin checklisty („Zmień plan na 'Całość teraz' → zapisz. Nowy booking dostaje 1 pozycję") niewykonalny przez UI.
+
+**Kierunek:** (1) `$effect` / `$derived` na zmianie szablonu który czyści i regeneruje pozycje (lub przycisk „Regeneruj" jasno widoczny przy zmianie). (2) Audyt logiki selecta — nie wracać do `default` gdy lista pozycji jest pusta; pozwolić użytkownikowi zapisać plan jednopozycyjny.
+
+## `/admin/automation` używa starego inline toasta
+
+**Stan:** Strona `/admin/automation` ma własny komunikat „Plan zapisany" wpięty bezpośrednio w stronie (stary wzorzec sprzed globalnego toastera), zamiast `toastState.addToast(...)`. Niespójne z resztą admina (booking-drawer, crew-confirm) zmigrowanej w sesjach 2026-05-15/16/17.
+
+**Trigger:** Niespójny UX (różne miejsce/styl powiadomień w jednej konsoli), techniczny dług niedokończonej migracji.
+
+**Kierunek:** Zmigrowac wszystkie toasty na `/admin/automation` na globalny `toastState.addToast` — analogicznie do migracji booking-drawer (sesja 2026-05-16) i crew/confirm (sesja 2026-05-17). Wyrzucić lokalny render/style toastów.
+
+## `createPaymentSchedule` duplikuje sumę przez wpisanie „Całość" obok itemów planu (BLOKER scenariusza 7)
+
+**Stan:** `createPaymentSchedule` w `src/convex/mutations.ts` (linie ~190–230) przy zakładaniu nowego bookingu wstawia do `bookingPayments`:
+1. pętla po `paymentPlanItems` — N wierszy (zaliczka + N-1 rat) sumujących się do `totalAmount`,
+2. **dodatkowo**, jeśli `plan.allowFullPayment === true`, wiersz `label='Całość', kind='full', amount=totalAmount` **bez `paymentPlanItemId`**.
+
+Skutek dla bookingu SA-2026-3508 (2 koje, `totalAmount=3600` PLN): 4 wiersze w bazie — `zaliczka 1080 + rata1 1260 + rata2 1260` (suma 3600, z `paymentPlanItemId`) **oraz** osobny `całość 3600` (bez `paymentPlanItemId`). `sum(bookingPayments.amount) = 7200 = 2 × totalAmount`. Niespójność wewnętrzna w danych już od momentu insertu (potwierdzone przez identyczne `_creationTime` wszystkich 4 wierszy — jedna transakcja, nie późniejsze dopiski). `paidAmount = 1080` (zaliczka opłacona przez Stripe) zgodne z rzeczywistością — bug nie dotyczy płatności, tylko reprezentacji harmonogramu.
+
+Pierwotna hipoteza („krzyżowanie wierszy między bookingami przez błędny filtr w query") wykluczona: `bookingDetailById` w `src/convex/admin.ts` filtruje poprawnie `withIndex('by_booking', q => q.eq('bookingId', bookingId))`.
+
+**Trigger:** Każde KPI / dashboard / alert sumujący `bookingPayments` po stronie czytania widzi 2× kwotę. Drower pokazuje 4 pozycje gdzie powinny być 3. Scenariusz 7 admin checklisty (snapshot vs reference) niewykonalny — nie da się empirycznie zweryfikować „suma rat = totalAmount" zanim ten bug nie zostanie naprawiony.
+
+**Korzeń:** dwa nakładające się modele danych w jednej tabeli. `bookingPayments` powinien być **harmonogramem zobowiązań w czasie** (rzeczy które kupujący ma zapłacić, każda raz). „Całość" nie jest dodatkowym zobowiązaniem — jest **alternatywną opcją wyboru** w kroku 5 checkoutu (zapłać teraz wszystko zamiast rozkładać). Czyli żywiołem UI/derive, nie storage. Step 5 (`/book +page.svelte:363`) i tak buduje opcje radio przez `$derived.by(...)` z `paymentPlanItems` + `plan.allowFullPayment` — wpis „Całość" w `bookingPayments` jest redundantny.
+
+**Kierunek:** Usunąć blok `if (plan.allowFullPayment) { insert('bookingPayments', { label: 'Całość', ... }) }` z `createPaymentSchedule`. Konsumenci którzy zakładają obecność tego wiersza — przepiąć na derive z planu. Audyt: drower, KPI, alerty, step 5 (już derive). Po fixie: re-run Scenariusza 7 z czystym segmentem, weryfikacja `sum(bookingPayments) === totalAmount`.
+
+## False affordance — wartości w kolumnach `płatność` / `dane` i pigułki w Alert Queue
+
+**Stan:** W tabeli Sales Board komórki kolumn `płatność` i `dane` oraz pigułki statusu w Alert Queue (`pilne`, `dane`, `info`) mają border + padding + tło, wyglądają jak klikalne kontrolki, ale są wyłącznie informacyjne. Ta sama klasa problemu co status pill na public confirmation page (backlog 2026-05-17) — tym razem w widoku administratora, na wielu kolumnach.
+
+**Trigger:** Operator klika i nic się nie dzieje; powtarzające się false affordance obniża zaufanie do UI ("co tu w ogóle reaguje na klik").
+
+**Kierunek:** Albo zdjąć button-like styling z elementów czysto informacyjnych (płaska etykieta, badge bez bordera), albo nadać im funkcję — np. klik na pigułkę „pilne" filtruje listę po severity, klik na `płatność` skrolluje drawer do sekcji płatności. Konsekwentnie w całym admin UI.

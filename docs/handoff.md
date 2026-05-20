@@ -65,6 +65,48 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
+## Sesja 2026-05-20 — Scenariusz 7 odłożony, znaleziony bug w `createPaymentSchedule`
+
+### Zmiany
+
+- `docs/admin-post-mvp-decisions.md` — dopisanych 5 nowych pozycji backlogu (brak SignOut w `/admin`, responsywność akcji Sales Board, false affordance pigułek/kolumn w admin UI, booking-selection nie czyści state po sukcesie zakupu, `/admin/automation` nie regeneruje pozycji przy zmianie szablonu + select cofa się do defaultu, `/admin/automation` używa starego inline toasta), 1 wycofana błędna hipoteza („krzyżowanie payments między bookingami"), zastąpiona prawdziwym opisem korzenia w `createPaymentSchedule`.
+- `knowledge-vault/wiki/concepts/convex-creation-time-as-forensic-tool.md` — nowy artykuł (semantyka `_creationTime` w Convex + use case forensyczny).
+- `knowledge-vault/wiki/concepts/bookingpayments-schedule-vs-ui-options.md` — nowy artykuł (anti-pattern „opcja UI w storage" + reguła diagnostyczna).
+- `knowledge-vault/wiki/topics/tomek-coding-learning-profile.md` — update sesji 2026-05-20, mapa kompetencji (Convex level + nowa pozycja „Modelowanie danych — fakty w czasie vs alternatywy UI"), powiązania.
+- `knowledge-vault/wiki/index.md` — wpisane 2 nowe koncepty w sekcji listy + adnotacja w „Recently updated".
+- `claude-memory-compiler/daily/2026-05-20.md` — daily log sesji dla compilera.
+- **Brak zmian w kodzie produkcyjnym** (close session bez fixu — Plan A wybrany przez Tomka, fix to czysty refactor backendu nie sesja nauki).
+
+### Decyzje
+
+- **Scenariusz 7 odłożony** — start zablokowany przez bug w `createPaymentSchedule`. Bez fixu nie da się empirycznie zweryfikować inwariantu `sum(bookingPayments) === totalAmount`, więc lekcja koncepcyjna „snapshot vs reference" tonie w szumie. Fix to refactor backendu (nie nauka) — oddzielna sesja.
+- **Plan A close session** — bez czytania zmiany przez Tomka, bez fixu w tej sesji, z promocją do wiki + commit + push.
+- **Backlog jako jedyne miejsce prawdy** — wszystkie 8 obserwacji UX/UI/DB w `docs/admin-post-mvp-decisions.md`, format Stan/Trigger/Kierunek (z opcjonalnym Korzeniem gdy znaleziony). Nie rozsiewanie między plikami.
+
+### Wnioski
+
+- **`_creationTime` w Convex jako narzędzie forensyczne** — stempel ustawiany **raz na początku transakcji mutacji**, nie per `ctx.db.insert()`. Wszystkie inserty w jednym handlerze dostają identyczne `_creationTime` z mikrosekundowym tiebreakerem. Klaster < 1 ms = jeden write (bug w insercie), rozjazd minut = osobne writy (bug w narastaniu). Cztery wiersze SA-2026-3508 miały rozrzut < 1 ms → wszystkie z jednej transakcji, hipoteza „admin save dopisał później" padła bez czytania kodu. **Promocja do wiki:** [[concepts/convex-creation-time-as-forensic-tool]].
+- **Storage vs derive — trzeci wymiar: opcje UI nie należą do storage** (rozszerzenie 2026-05-17 w wymiarze alternatywy) — `bookingPayments` to harmonogram faktów do zapłacenia w czasie. „Całość teraz" nie jest dodatkowym zobowiązaniem, tylko **alternatywną ścieżką** do tego samego faktu (zapłać wszystko jednorazowo). Step 5 i tak buduje opcje radio przez `$derived.by(...)` z planu + flagi `allowFullPayment` — wpis „Całość" w storage jest redundantny i kłamie sumę 2×. Pytanie diagnostyczne: czy artefakt to przyszły fakt, czy alternatywna ścieżka do faktu już reprezentowanego? **Promocja do wiki:** [[concepts/bookingpayments-schedule-vs-ui-options]].
+- **Schemat debugowania query → data → write → render** — gdy widzisz złe dane w UI, eliminuj warstwy. (1) filtr query, (2) dane w bazie surowo, (3) write mutation, (4) render. Każdy krok zamyka jeden front. Dziś wykluczyliśmy 1, 4 i 3a; winowajca = 3b (`createPaymentSchedule`).
+- **Pierwsza hipoteza bywa atrakcyjna i fałszywa** — „krzyżowanie payments" pasowało do obserwacji 3508, ale test asymetrii (czy 4842 też ma cudze wiersze) ją zabił. Reguła: hipoteza musi się zgadzać ze **wszystkimi** obserwacjami, nie tylko niektórymi.
+- **`paymentOptions` w step 5 to derive z planu — model „prefix z planu" (2a)** — `/book +page.svelte:363–419` akumuluje prefix planu + opcjonalna „Całość" gdy `allowFullPayment`. UX kosztuje: dwa ostatnie radio z identyczną kwotą wyglądają jak duplikat. Lekcja UX dopisana do backlogu.
+- **`upsertSegmentPaymentPlan` jako wzorzec snapshot principle** — `src/convex/mutations.ts:289–361` nie iteruje istniejących bookingów. Tworzy nowy plan (`isActive: true`), dezaktywuje stary, wstawia nowe itemy. Stare bookingi trzymają stary `paymentPlanItemId` → snapshot zachowany. Scenariusz 7 technicznie się broni, tylko brudny przez bug w `createPaymentSchedule`.
+
+### Następne kroki
+
+#### Next
+
+- **Fix `createPaymentSchedule`** (`src/convex/mutations.ts:~213–230`) — usunąć blok `if (plan.allowFullPayment) { insert('bookingPayments', { label: 'Całość', ... }) }`. Konsumenci którzy zakładają obecność tego wiersza — audyt i przepięcie na derive z planu. Po fixie weryfikacja `sum(bookingPayments) === totalAmount` na świeżym bookingu.
+- **Po fixie** — re-run Scenariusza 7 z czystym segmentem. Po Scenariuszu 7 lekcja: **snapshot vs reference w bazie** (czemu stare bookingi mają stary plan rat zamrożony przez `paymentPlanItemId`).
+
+#### Blocked / Later / Open questions
+
+- Bug w `createPaymentSchedule` — fix to refactor backendu, prawdopodobnie touchuje schemat lub konsumentów. Wymaga osobnej sesji refactoringowej (nie nauki).
+- 5 pozycji backlogu z dzisiejszej sesji + 3 sprzed Scenariusza 7 (brak SignOut, responsywność, false affordance) — czekają na cykle UX/refactor.
+- Scenariusze 8 (Miejsca specjalne), 9 (Hold expiring) — po Scenariuszu 7.
+- Fundament Promise/async (z 2026-05-17) nadal nie „oswojony" — wzmocnienie przez realne bugi w kolejnych sesjach.
+
+
 ## Sesja 2026-05-08 — Compile sessions + promocja wiki
 
 ### Zmiany poza kodem aplikacji
