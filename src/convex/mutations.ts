@@ -210,25 +210,6 @@ async function createBookingPaymentSchedule({
 		inserted.push(id)
 	}
 
-	if (plan.allowFullPayment) {
-		const id = await ctx.db.insert('bookingPayments', {
-			bookingId,
-			buyerUserId,
-			segmentId: segment._id,
-			paymentPlanId: plan._id,
-			label: 'Całość',
-			kind: 'full',
-			amount: totalAmount,
-			currency,
-			sortOrder: 0,
-			status: 'pending',
-			createdAt: now,
-			updatedAt: now,
-			reminderCount: 0
-		})
-		inserted.push(id)
-	}
-
 	if (scheduledAmount !== totalAmount && sortedItems.length > 0) {
 		const id = await ctx.db.insert('bookingPayments', {
 			bookingId,

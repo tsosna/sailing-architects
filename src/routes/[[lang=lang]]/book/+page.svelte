@@ -406,16 +406,6 @@
 			})
 		}
 
-		if (plan.allowFullPayment) {
-			options.push({
-				id: 'full',
-				label: 'Całość',
-				amount: totalGrosze,
-				amountFormatted: formatGrosze(totalGrosze),
-				sortOrders: [0]
-			})
-		}
-
 		return options
 	})
 
