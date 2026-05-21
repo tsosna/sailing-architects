@@ -55,10 +55,6 @@ function projectSchedule(
 		amount: item.amountPerBerth * berthCount
 	}))
 
-	if (plan.allowFullPayment) {
-		rows.push({ sortOrder: 0, kind: 'full', amount: totalAmount })
-	}
-
 	const scheduledAmount = items.reduce(
 		(sum, item) => sum + item.amountPerBerth * berthCount,
 		0
