@@ -65,6 +65,50 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
+## Sesja 2026-05-21 — Fix duplikatu „Całość" w `createPaymentSchedule` (PR #2 merged)
+
+### Zmiany
+
+- `src/convex/mutations.ts` — usunięty blok `if (plan.allowFullPayment) { insert('bookingPayments', { label: 'Całość', kind: 'full', sortOrder: 0, ... }) }` w `createBookingPaymentSchedule` (linie 213–230). 19 linii usuniętych.
+- `src/routes/api/stripe/create-intent/+server.ts` — usunięty `rows.push({ sortOrder: 0, kind: 'full', amount: totalAmount })` w `projectSchedule` (linie 58–60). 4 linie usunięte.
+- `src/routes/[[lang=lang]]/book/+page.svelte` — usunięta opcja `{ id: 'full', label: 'Całość', sortOrders: [0] }` w `paymentOptions $derived.by` (linie 409–417). 10 linii usuniętych.
+- `knowledge-vault/wiki/concepts/three-layer-api-contract-symmetry.md` — nowy artykuł (kontrakt UI/API/DB w 3 warstwach, anti-pattern „fix tylko jednej warstwy").
+- `knowledge-vault/wiki/concepts/let-compiler-guide-refactor.md` — nowy artykuł (typecheck guide jako strategia + granice: działa dla typów, nie wartości runtime).
+- `knowledge-vault/wiki/procedures/test-fix-from-worktree-via-cp.md` — nowa procedura (cp dla testu, commit z worktree, stash+pull+pop dla sync).
+- `knowledge-vault/wiki/topics/tomek-coding-learning-profile.md` — update sesji 2026-05-21, mapa kompetencji (nowa pozycja „Refactor strategy — three-layer contract + compiler guide"), postęp.
+- `knowledge-vault/wiki/index.md` — wpisane 2 nowe koncepty + 1 procedura + adnotacja w „Recently updated".
+
+**Delta produkcyjna: 33 linie usunięte, zero dodanych.** Pure delete-only fix.
+
+### Decyzje
+
+- **Sesja jako nauka, nie pure refactor** — handoff 2026-05-20 sugerował „fix to refactor backendu, nie nauka, oddzielna sesja". Tomek wybrał wariant „zrób fix razem ze mną jako sesja nauki" — przy okazji wytłumaczyłem trzy warstwy kontraktu, kompilator guide, worktree workflow. Wszystkie 3 koncepty wyniosły się do wiki.
+- **Opcja C (cp) dla testu zamiast B (`git checkout`)** — główny katalog miał uncommitted changes (package.json, pnpm-lock, scripts, en.po, pl.po) niezwiązane z fixem. `git checkout` brancha pada na konflikty. `cp` 3 plików = zero ingerencji w git state głównego, łatwe cofnąć.
+- **`allowFullPayment` flag zostaje jako martwy kod** — per CLAUDE.md „wspomnij, nie usuwaj". Flag dalej w schema, admin UI, mutations args — po fixie nic nie robi, ale scope czysta. Dopisać do backlogu cleanupu.
+- **Squash merge przez gh CLI** — `gh pr merge 2 --squash --delete-branch` z głównego katalogu (z worktree pada na „main is already used"). Lokalny branch worktree'a nieusuwalny dopóki worktree istnieje — zostawione do późniejszego sprzątania.
+
+### Wnioski
+
+- **Three-layer API contract symmetry** — kontrakt „co user wybiera → co serwer waliduje → co DB zapisuje" żyje w 3 plikach. Zmiana wymaga update wszystkich trzech atomowo, inaczej runtime mismatch (walidacja odrzuca / sum 2× / sortOrder krzaczy). UI: typ TypeScript opisujący opcję. API: pomocnicza funkcja projekcji odtwarzająca schedule w pamięci (bo zapis jeszcze nie istnieje gdy liczymy cenę dla Stripe). DB: handler mutation. Heurystyka diagnostyczna: gdy widzisz zmianę w jednej z trzech warstw, pytaj „czy pozostałe dwie znają tę zmianę?". Promocja: [[concepts/three-layer-api-contract-symmetry]].
+- **Let-the-compiler-guide-you refactor — z ograniczeniem** — strategia „zmień jedno, niech błędy wskażą resztę" działa świetnie dla refactoringów na poziomie **typów** (rename pola, zmiana sygnatury). **Nie działa** dla zmian na poziomie **wartości runtime** (kontrakt `sortOrder: 0` szedł przez wartość, nie typ — `pnpm check` zwrócił 0 błędów po usunięciu inserta). Wtedy: grep + manualna lista call-site'ów. Lekcja: typecheck sprawdza typy, nie semantykę kontraktów wartościowych. Promocja: [[concepts/let-compiler-guide-refactor]].
+- **Pure delete-only fix jako idealny case** — 33 linie usunięte, zero dodanych, zero nowych komentarzy. Sygnał że bug to **akumulacja kodu** (ktoś dodał ścieżkę „Całość" obok itemów planu, nie zauważając że Step 5 i tak deriwuje opcję z planu). Heurystyka: gdy fix wymaga **mniej** kodu niż przed, prawdopodobnie naprawiasz akumulację, nie braki. Często idzie z lekcją „opcje UI ≠ storage" ([[concepts/bookingpayments-schedule-vs-ui-options]] z poprzedniej sesji).
+- **Worktree workflow dla Claude'a — opcja C najprostsza dla testu** — Claude pracuje w `.claude/worktrees/<nazwa>/`, node chodzi w głównym katalogu. Cp plików → HMR podłapie → test → commit z worktree → PR → merge → stash+pull+pop dla sync. Promocja: [[procedures/test-fix-from-worktree-via-cp]].
+
+### Następne kroki
+
+#### Next
+
+- **Re-run Scenariusza 7** — snapshot vs reference (`paymentPlanItemId` przy bookingach, zmiana planu admin → bookingi trzymają stary plan). Bug już nie blokuje, można empirycznie zweryfikować inwariant.
+- **Po Scenariuszu 7** → Scenariusz 8 (Miejsca specjalne) + Scenariusz 9 (Hold expiring).
+- **Sprzątanie worktree** — `git worktree remove .claude/worktrees/clever-haslett-1a171c` + `git branch -d claude/clever-haslett-1a171c` po zakończeniu obecnej sesji.
+
+#### Blocked / Later / Open questions
+
+- **`allowFullPayment` cleanup** — flaga martwa po dzisiejszym fixie. Schema field + admin UI checkbox + mutations args wymagają migracji (downgrade schema, usunięcie z admin UI, usunięcie z args). Czeka na osobną sesję refactoringową.
+- **Backlog z 2026-05-20** — 8 obserwacji UX/UI/DB w `docs/admin-post-mvp-decisions.md` (brak SignOut w `/admin`, responsywność Sales Board, false affordance pigułek, booking-selection reset, /admin/automation regeneracja+select+toast). Czekają na cykle UX/refactor.
+- **Fundament Promise/async (z 2026-05-17)** — nadal nie „oswojony", wzmocnienie przez realne bugi w kolejnych sesjach.
+
+
 ## Sesja 2026-05-20 — Scenariusz 7 odłożony, znaleziony bug w `createPaymentSchedule`
 
 ### Zmiany
