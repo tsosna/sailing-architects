@@ -264,3 +264,43 @@ Pierwotna hipoteza („krzyżowanie wierszy między bookingami przez błędny fi
 **Trigger:** Booking z 2+ kojami i alertem na konkretną — operator klika, traci kontekst który uczestnik wymaga uwagi.
 
 **Kierunek:** Deep link `?berth=<berthId>` na link „Otwórz rezerwację", drawer scrolluje + highlightuje sekcję uczestnika dla tej koi. Stan zaznaczenia widoczny ~3s, potem fade.
+
+## `/admin/special` — stary inline toast do migracji na globalny toaster
+
+**Stan:** `src/routes/[[lang=lang]]/admin/special/+page.svelte` używa lokalnego inline toasta (własny render + style + state). Reszta admin UI (booking-drawer od 2026-05-16, crew/confirm od 2026-05-17) już zmigrowana na `toastState.addToast`. `/admin/automation` ma tę samą zaległość (osobna pozycja backlogu wyżej).
+
+**Trigger:** Niespójność UX (różne miejsca/styl powiadomień w jednej konsoli), dług niedokończonej migracji toasterowej.
+
+**Kierunek:** Zmigrować wszystkie wywołania toasta na `/admin/special` na `toastState.addToast` — analogicznie do `/admin/automation` i booking-drawer. Wyrzucić lokalny render/style.
+
+## `/admin/special` — niespójność językowa „Complimentary"
+
+**Stan:** Panel „Complimentary" (rezerwacje bezpłatne admin) używa angielskiej etykiety w polskim UI. Czwarta lokalizacja niespójności jęz. po `Valid` (badge automation), oraz CTA confirmation page.
+
+**Trigger:** Operator widzi angielski label między polskimi sekcjami — drobiazg, ale obniża jakość konsoli i sygnalizuje brak code review na inline literały.
+
+**Kierunek:** Etykieta po polsku — propozycje: „Rezerwacje gratisowe" / „Bezpłatne" / „Gratisy". Decyzja parasolowa z resztą jęz. niespójności (jeden język per UI).
+
+## `/admin/crew` — placeholder strona bez funkcji
+
+**Stan:** `src/routes/[[lang=lang]]/admin/crew/+page.svelte` to placeholder z tekstem „Edycja danych uczestników (Etap 5) oraz publiczny flow potwierdzania (Etap 6) trafią tutaj". Obie funkcje już zrealizowane gdzie indziej: Etap 5 w `booking-drawer.svelte` (admin edytuje dane per koja), Etap 6 w `/crew/confirm/[token]/+page.svelte` (public token confirm). Strona `/admin/crew` nie ma własnej zawartości, ale sidebar w `+layout@.svelte:9` dalej linkuje do niej.
+
+**Trigger:** Operator klika „Dane załogi" w sidebarze — trafia na pustą stronę. False navigation, sygnał „nieukończony admin".
+
+**Kierunek:** Najsensowniej (preferowane) — **cross-booking overview uczestników**: tabela wszystkich uczestników wszystkich bookingów ze statusem (`missing` / `drafted_by_admin` / `confirmed` / `expired`), filtry per status + per segment, klik → otwiera booking-drawer scrollowany do tej koi (synergia z deep-link backlogiem Alert Queue). Realny ops-tool: kapitan ma jedną stronę „kto jeszcze nie potwierdził danych" cross-cały rejs. Fallback (jeśli overview nie ma priorytetu) — usunąć route + link w sidebarze, dead navigation precz.
+
+## Reactive clock dla odliczania held (alert + KPI)
+
+**Stan:** `src/convex/admin.ts:319-322` liczy `minutesLeft = (holdExpiresAt - now) / 60000` z `now = Date.now()` **wewnątrz query**. Convex subscription reactive na zmiany **DB**, nie na upływ czasu — Convex nie wie że minuta minęła. Identyczny problem: `src/routes/[[lang=lang]]/admin/+page.svelte:53-56` (`formatHoldCountdown` używa `Date.now()` w funkcji, `$derived` przelicza tylko gdy źródło DB się zmieni). Skutek: alert „Held kończy się za 15 min" zamrożony, KPI „N do wygaśnięcia" zamrożone — odliczanie nie tyka aż coś z DB nie pchnie nowego stanu.
+
+**Trigger:** Operator patrzy na alert / KPI w admin overview — odliczanie kłamie, „15 min" wisi 10 minut.
+
+**Kierunek:** Lokalny zegar po stronie klienta — `$state(now)` + `setInterval(() => now = Date.now(), 1000)` w admin page, `$derived` countdown z `now` jako żywego źródła. Alert label też przeliczać klientsko z `holdExpiresAt` (query zwraca timestamp surowy, klient liczy minuty). Wzorzec ogólny: gdy widok zależy od „teraz", nie polegaj na backendzie żeby push'ował upływ czasu — drugi przykład [[concepts/storage-vs-derive-time-based-facts]] po Scenariusz 6 (alert „link wygasł").
+
+## `/admin` — „Checkout" jako subtitle alertu held po angielsku
+
+**Stan:** `src/routes/[[lang=lang]]/admin/+page.svelte:248` renderuje subtitle alertu held jako `'Checkout'`. Piąta lokalizacja niespójności jęz. po `Valid` (`/admin/automation`), `Complimentary` (`/admin/special`), status pill confirmation page i wcześniejsze.
+
+**Trigger:** Operator widzi angielski subtitle w polskim admin UI; ten sam wzorzec false-affordance/jęz. decyzji parasolowej.
+
+**Kierunek:** Subtitle po polsku, propozycje: „Trwa checkout" / „W koszyku" / „Wybrana w checkout". Decyzja parasolowa z innymi niespójnościami jęz. — jeden język per UI, code review łapie inline literały.
