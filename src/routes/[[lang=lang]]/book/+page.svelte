@@ -23,6 +23,7 @@
 	} from '$lib/schemas/crew-profile'
 	import { SignIn, SignUp, useClerkContext } from 'svelte-clerk'
 	import { api } from '$convex/api'
+	import { bookingSelection } from '$lib/state/booking-selection.svelte'
 
 	const STEPS = [
 		{ id: 1, label: 'Koje' },
@@ -567,6 +568,7 @@
 			paymentError = stripeErr.message ?? 'Płatność nie powiodła się'
 			paymentLoading = false
 		} else {
+			bookingSelection.reset()
 			step = 6
 			paymentLoading = false
 		}

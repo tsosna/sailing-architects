@@ -38,6 +38,11 @@ class BookingSelection {
 
 		return `${base}?${params.toString()}`
 	}
+
+	reset() {
+		this.selectedSegment = voyageSegments[0].id
+		this.selectedBerths = []
+	}
 }
 
 export const bookingSelection = new BookingSelection()
