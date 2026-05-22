@@ -65,6 +65,47 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
+## Sesja 2026-05-22 — Scenariusz 7 zamknięty (snapshot vs reference) + 4 obserwacje backlogu
+
+### Zmiany
+
+- `docs/admin-e2e-checklist.md` — Scenariusz 7 krok 5 oznaczony jako nieaktualny po PR #2 (Całość nie idzie do bookingPayments).
+- `docs/admin-post-mvp-decisions.md` — entry `createPaymentSchedule duplikuje` oznaczone RESOLVED 2026-05-21 (PR #2). Dopisane 4 nowe pozycje backlogu:
+  1. `/admin/automation` — badge „Valid" wygląda jak przycisk + niespójność językowa (polski/angielski).
+  2. Alert Queue — koja jako primary identifier, nie booking ID.
+  3. Alert Queue — sortowanie po severity tworzy wizualne duplikaty bookingu.
+  4. Alert Queue — drawer nie zaznacza klikniętej koi.
+- `knowledge-vault/wiki/topics/tomek-coding-learning-profile.md` — update sesji 2026-05-22 (do dopisania ręcznie albo następną sesją).
+
+### Decyzje
+
+- **Krok 5 Scenariusza 7 jako nieaktualny, nie usuwać** — krok mówił „Zmień plan na Całość → nowy booking dostaje 1 pozycję Całość". Po PR #2 „Całość" to opcja UI, nie wiersz storage. Oznaczone strikethrough + adnotacja, żeby przyszłe odczyty checklisty widziały kontekst (historia decyzji ważna).
+- **Scenariusz 7 zaliczony na 4 krokach** — empirycznie potwierdzony snapshot principle: nowy plan, stary booking nietknięty (2 raty stare), nowy booking z nowym planem (Zaliczka 900 opłacona + rata 900 czeka). Krok 5 niepotrzebny do weryfikacji inwariantu.
+- **Backlog zamiast inline fix** — 4 obserwacje (badge Valid, 3× Alert Queue) → backlog, nie ruszać. Scope sesji = Scenariusz 7. Per CLAUDE.md i konwencja sesji.
+
+### Wnioski
+
+- **Snapshot vs reference jako wzorzec ogólny** — `bookingPayments` snapshotuje plan przez `paymentPlanItemId` na konkretny item-rev. `upsertSegmentPaymentPlan` (mutations.ts:289–342) robi soft delete (`isActive: false`) + insert nowego planu, **nie iteruje** istniejących bookingów. Stare wiersze dalej wskazują na stary item (który zostaje w bazie z `isActive: false`). Trzy alternatywy które łamią inwariant: (1) `delete(plan._id)` — FK rozkład, audyt znika; (2) update in place na items — historia kłamie, opłacone raty rozjeżdżają się z planem; (3) iteracja po bookingach z patchem — zmiana reguł gry w trakcie spłaty. Wzorzec uniwersalny: faktury kopiują adres+cenę, order line kopiuje productName+price, audit log kopiuje wartości. Promocja: [[concepts/snapshot-vs-reference-in-storage]] (nowy artykuł, do napisania).
+- **Soft delete jako forma snapshot** — `isActive: false` zamiast `delete` ma dwie funkcje: (1) zachowuje integralność FK z `bookingPayments.paymentPlanItemId`, (2) zachowuje audyt „jaki plan był aktywny gdy user kupował". Pattern: gdy rekord ma FK z innych tabel **i** ma znaczenie historyczne, soft delete > hard delete.
+- **Krok 4 jako kontrolny test inwariantu** — sam krok 3 (stary booking nietknięty) nie wystarcza, bo mógłby też oznaczać że plan w ogóle nic nie zmienia. Krok 4 (nowy booking z nowym planem) zamyka asymetrię — plan się zmienia dla nowych, nie dla starych. Reguła: do weryfikacji inwariantu „X nie wpływa na Y" potrzeba też dowodu że X realnie działa gdzieś indziej.
+- **Backlog jako antidotum na scope creep** — 4 obserwacje w trakcie scenariusza, zero fixów inline. Decyzja świadoma — gdyby fix'ować na bieżąco, sesja zajęłaby 3× więcej i Scenariusz 7 nie zamknąłby się. Backlog ma 9 otwartych pozycji + 1 zamknięta (PR #2) — pokazuje dyscyplinę.
+
+### Następne kroki
+
+#### Next
+
+- **Scenariusz 8 — Miejsca specjalne** — Captain panel (koje status=captain), Complimentary panel (rezerwuj/zwolnij), KPI „Specjalne" vs „Sprzedane".
+- **Po S8** → Scenariusz 9 (Hold expiring).
+- **Update profilu ucznia** sesją 2026-05-22 — mapa kompetencji (snapshot vs reference jako koncept opanowany).
+
+#### Blocked / Later / Open questions
+
+- **`allowFullPayment` cleanup** — flaga martwa od PR #2. Schema + admin UI + mutations args. Osobna sesja refactor.
+- **Backlog 9 otwartych pozycji** w `docs/admin-post-mvp-decisions.md` — false affordance (3 lokalizacje: confirmation page, Sales Board, badge Valid), Alert Queue (header/sort/drawer focus), `/admin/automation` (regeneracja przy szablonie + select default + stary toast). Cykle UX/refactor po MVP.
+- **Fundament Promise/async** — nadal nie oswojony, wzmocnienie przez realne bugi.
+- **Wiki article `concepts/snapshot-vs-reference-in-storage.md`** — do napisania. Wzorzec uniwersalny (faktury, order lines, audit log) z konkretem `bookingPayments.paymentPlanItemId`.
+
+
 ## Sesja 2026-05-21 — Fix duplikatu „Całość" w `createPaymentSchedule` (PR #2 merged)
 
 ### Zmiany

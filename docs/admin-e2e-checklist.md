@@ -86,7 +86,7 @@ Manualny scenariusz dla `/admin` (Etapy 1-7). Wymaga:
 2. „Zapisz plan" → toast „Plan zapisany. Nowe rezerwacje dostaną ten harmonogram; istniejące pozostają bez zmian.".
 3. Otwórz dowolną istniejącą rezerwację s1 w drawerze → harmonogram pozostaje niezmieniony (snapshot z momentu utworzenia).
 4. Stwórz nową rezerwację s1 (np. `/book?segment=s1&berths=...`) → po sukcesie drawer pokazuje nowy snapshot z 3 pozycjami zgodnymi z planem.
-5. Zmień plan na „Całość teraz" → zapisz. Nowy booking dostaje 1 pozycję `Całość`. Stare bookings pozostają.
+5. ~~Zmień plan na „Całość teraz" → zapisz. Nowy booking dostaje 1 pozycję `Całość`. Stare bookings pozostają.~~ **Nieaktualne po PR #2 (2026-05-21):** „Całość" nie jest wierszem w `bookingPayments`, tylko opcją radio w Step 5 checkoutu derive'owaną z planu. Snapshot principle weryfikujemy krokami 1-4.
 
 ## Scenariusz 8 — Miejsca specjalne
 
