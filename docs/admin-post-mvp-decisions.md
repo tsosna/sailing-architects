@@ -209,7 +209,7 @@ cache, ale nie jest jedynym źródłem.
 
 **Kierunek:** Zmigrowac wszystkie toasty na `/admin/automation` na globalny `toastState.addToast` — analogicznie do migracji booking-drawer (sesja 2026-05-16) i crew/confirm (sesja 2026-05-17). Wyrzucić lokalny render/style toastów.
 
-## `createPaymentSchedule` duplikuje sumę przez wpisanie „Całość" obok itemów planu (BLOKER scenariusza 7)
+## ~~`createPaymentSchedule` duplikuje sumę przez wpisanie „Całość" obok itemów planu~~ — RESOLVED 2026-05-21 (PR #2)
 
 **Stan:** `createPaymentSchedule` w `src/convex/mutations.ts` (linie ~190–230) przy zakładaniu nowego bookingu wstawia do `bookingPayments`:
 1. pętla po `paymentPlanItems` — N wierszy (zaliczka + N-1 rat) sumujących się do `totalAmount`,
@@ -232,3 +232,35 @@ Pierwotna hipoteza („krzyżowanie wierszy między bookingami przez błędny fi
 **Trigger:** Operator klika i nic się nie dzieje; powtarzające się false affordance obniża zaufanie do UI ("co tu w ogóle reaguje na klik").
 
 **Kierunek:** Albo zdjąć button-like styling z elementów czysto informacyjnych (płaska etykieta, badge bez bordera), albo nadać im funkcję — np. klik na pigułkę „pilne" filtruje listę po severity, klik na `płatność` skrolluje drawer do sekcji płatności. Konsekwentnie w całym admin UI.
+
+## `/admin/automation` — badge „Valid" wygląda jak przycisk + niespójność językowa
+
+**Stan:** `src/routes/[[lang=lang]]/admin/automation/+page.svelte:407` renderuje `<span class="badge badge--ok|warn|danger">{sumStatus === 'ok' ? 'Valid' : 'Pod' : 'Ponad'}</span>` jako status walidacji sumy planu. Dwa problemy: (1) `.badge` ma border + padding + kolorowe tło → wygląda klikalnie (ta sama klasa false affordance co kolumny Sales Board / pigułki Alert Queue), (2) etykieta `Valid` po angielsku, reszta UI po polsku („Pod", „Ponad", „Suma pozycji równa się cenie segmentu").
+
+**Trigger:** Operator próbuje kliknąć badge (nie reaguje); niespójność jęz. obniża jakość konsoli.
+
+**Kierunek:** (1) Zmienić `Valid` na `OK` lub `Zgadza się`. (2) Spłaszczyć styling badge'a statusowego (bez bordera) albo zunifikować z resztą badge'y informacyjnych (decyzja parasolowa z [false affordance] wyżej).
+
+## Alert Queue — koja jako primary identifier, nie booking ID
+
+**Stan:** Alert Queue renderuje header alertu jako `SA-2026-3508 · Koja A1 · przypomnienia 0`. Booking ID wizualnie dominuje, koja jest w treści. Dla alertów typu „Brak danych uczestnika" / „Niekompletne dane uczestnika" akcja jest **per koja** (jeden uczestnik, jeden token), nie per booking.
+
+**Trigger:** Operator widząc 4 alerty z tym samym booking ID (`SA-2026-1155 ×2`, `SA-2026-3508 ×2`, `SA-2026-4842 ×3`) musi szukać koi w drugiej linijce żeby zrozumieć którą koje obsługuje.
+
+**Kierunek:** Koja jako primary (większy font / lewy panel), booking ID jako kontekst (mniejszy, w treści). Albo grupować alerty per booking gdy z jednego bookingu jest 2+ alertów tej samej klasy.
+
+## Alert Queue — sortowanie po severity tworzy wizualne duplikaty bookingu
+
+**Stan:** Lista posortowana po severity (Pilne → Dane → Info). `SA-2026-4842` pojawia się na pozycji 1 (Rata zaległa, Pilne) i ostatniej (Link wygasł, Info), między nimi 4 inne alerty. Operator widzi „ten sam booking dwa razy" jako wizualny zgrzyt.
+
+**Trigger:** Naturalna interpretacja „bug, lista źle zsortowana"; przy większej liczbie alertów problem rośnie.
+
+**Kierunek:** Secondary sort po booking ID po severity, albo grupowanie wizualne per booking (collapsible section per booking z miniaturą severity). Decyzja parasolowa z poprzednią pozycją Alert Queue.
+
+## Alert Queue — drawer nie zaznacza klikniętej koi
+
+**Stan:** Klik „Otwórz rezerwację" przy alercie dla koi B1 otwiera drawer z całym bookingiem (B1 + B2). Brak focusu / scrollu / highlightu na koję która wygenerowała alert. Operator musi sam szukać której koi dotyczy akcja.
+
+**Trigger:** Booking z 2+ kojami i alertem na konkretną — operator klika, traci kontekst który uczestnik wymaga uwagi.
+
+**Kierunek:** Deep link `?berth=<berthId>` na link „Otwórz rezerwację", drawer scrolluje + highlightuje sekcję uczestnika dla tej koi. Stan zaznaczenia widoczny ~3s, potem fade.
