@@ -65,6 +65,52 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
+## Sesja 2026-05-22 (III) — A1 backlog: reset booking-selection po sukcesie zakupu (PR #5 merged)
+
+### Zmiany
+
+- `src/lib/state/booking-selection.svelte.ts` — dodana metoda `reset()` (4 linie): `selectedSegment = voyageSegments[0].id`, `selectedBerths = []`. Przywraca singleton do stanu jak po świeżym utworzeniu.
+- `src/routes/[[lang=lang]]/book/+page.svelte` — import `bookingSelection` + wywołanie `bookingSelection.reset()` w `submitPayment` w gałęzi `else` (po sukcesie Stripe), bezpośrednio przed `step = 6`.
+- **PR [#5](https://github.com/tsosna/sailing-architects/pull/5)** — squash-merged do main jako `fa58bf1`. Delta produkcyjna: **+7 linii, zero usuniętych**.
+- `knowledge-vault/wiki/concepts/svelte5-runes-declare-not-invoke.md` — nowy artykuł (runy jako compile-time markery w miejscu deklaracji; w metodach przypisuj/czytaj jak zwykłą zmienną).
+- `knowledge-vault/wiki/index.md` — wpisany nowy koncept w sekcji Concepts.
+- `knowledge-vault/wiki/topics/tomek-coding-learning-profile.md` — update sesji 2026-05-22 (III), mapa kompetencji (Svelte 5 runes podniesiony z 2 na 2-3 + powiązanie z [[svelte5-runes-declare-not-invoke]]).
+- TaskList — A1 completed; dodano A4b (walidacja `dueDate` + gate Step 5) i A7 (Stripe webhook `charge.refunded` → release koi). 21 pozycji w liście (1 done, 20 pending).
+
+### Decyzje
+
+- **Tier A + Tier B całość przed prod, Tier C odłożone świadomie** — user wybrał ścieżkę pełnego backlogu Tier A (6 poz.) + Tier B (13 poz.) przed prod testem za 5 zł. Tier C (WhatsApp/Twilio, audit log, granular roles, eksport CSV, cron token cleanup, reguły monitów konfigurowalne, per-booking override, nightly admin email, `allowFullPayment` cleanup) świadomie do post-prod. Backlog w `docs/admin-post-mvp-decisions.md` otwiera się „Nic z tej listy nie jest blokerem MVP" — Tier A/B robimy bo realne ryzyko poprawności/UX, Tier C bo to dni-tygodnie roboty których test pieniędzy nie wymaga.
+- **Reset PRZED `step = 6`**, nie po — Step 6 nie czyta `bookingSelection` (czyta `berths` / `segment` / `createdBookingRef` z URL params i lokalnego state), więc kolejność technicznie obojętna. Wybór konwencji „najpierw cleanup, potem zmiana widoku" jako defensive default na wypadek przyszłych zmian Step 6.
+- **Brak `try/catch` wokół `reset()`** — dwie linie zwykłego przypisania, nie może rzucić. Defensive try/catch byłby ceremonia kontrproduktywna.
+- **Stripe live KYC przez Michała async-blocker** — sesja produkcyjna nie ruszy bez live keys. User pyta Michała, sesje idą równolegle przez backlog. Inne pre-prod TODO: Vercel project + Clerk prod instance (status nieznany — Michał wie).
+- **Nowo odkryte luki podczas testu A1 → backlog, nie chasujemy** — `/admin/automation` zapis bez wpisanych dat działa, „Nieprawidłowy wybór płatności" przy pustym `paymentPlanItems` w `/book` Step 5. Symptomy A5 + nowy A4b. Dyscyplina scope: A1 dokończone czysto.
+- **Sprzątanie main repo: divergent po PR #5 squash** — main miał lokalny commit z tym samym fixem (z `cp` testu) + drift `scripts/`+`.po`. `git diff main origin/main` puste → trees identyczne → `stash` driftu, `reset --hard origin/main`, `stash pop`. Bezpieczne bo commity różniły się tylko hash'em.
+
+### Wnioski
+
+- **Runy Svelte 5 to compile-time markery w miejscu deklaracji** — najmocniejsza lekcja sesji. `$state(...)` wewnątrz metody to bug; w metodach przypisujesz/czytasz pole jak zwykłą zmienną JS. Kompilator robi getter/setter raz przy deklaracji. Reguła diagnostyczna: jeśli widzisz `$rune(...)` w wnętrzu metody/handlera/callbacku → prawdopodobnie błąd. Powiązanie z 2026-05-12 lekcją `$props()` (`let` mimo read-only — ten sam compiler-magic principle). Promocja: [[concepts/svelte5-runes-declare-not-invoke]].
+- **Server/client boundary: backend nie ma dostępu do RAM-u przeglądarki** — pytanie o miejsce resetu trafiło na pułapkę „w webhook Stripe / Convex mutation". Webhook leci z serwerów Stripe na Vercel na Convex; `bookingSelection` żyje w pamięci konkretnej karty Chrome. Convex umie pchnąć dane do przeglądarki (WebSocket subscription), ale singleton lokalny to nie subskrypcja Convex. Wzmocnienie [[concepts/sveltekit-server-client-boundary]] na konkretnym przypadku.
+- **Success view ≠ draft state — różne źródła prawdy** — Step 6 to ekran historii faktu („kupiłeś te koje"), singleton to draft intencji („co user chciałby kupić następnym razem"). Mieszanie daje sprzeczność. Wzorzec uniwersalny: dla ekranu sukcesu pytanie „dane czyje?" — historia faktu (URL params snapshot, query Convex), nie draft.
+- **Reset w singletonie po zakończonej operacji jako konwencja** — analogiczna do Map+timeout cleanup w `ToastState` (2026-05-12). Wzorzec: wszystko co zaczynasz w singletonie, kończysz w singletonie. Bez tego śmieci między operacjami → ryzyko podwójnej płatności w tym konkretnym przypadku.
+- **Dyscyplina scope w trakcie A1** — odkryte 2 luki (A5 symptomy + A4b nowy), zero inline fixów. Backlog rośnie do 21 pozycji, ale każdy task zamykany czysto. Powtórka lekcji 2026-05-22 (I/II).
+
+### Następne kroki
+
+#### Next
+
+- **A2 — Hardening Convex admin mutations** (`ctx.auth.getUserIdentity()` + weryfikacja roli przez Clerk JWT). Większy niż A1 — `convex/auth.config.ts` setup + 9 mutations do migracji. Prawdopodobnie pełna sesja.
+- **Michał async** — sprawdzenie statusu: Stripe live KYC, Vercel project, Clerk prod instance.
+- **Sprzątanie worktree** po PR #5 → po następnej sesji: `git worktree remove .claude/worktrees/unruffled-cartwright-103e23` + `git branch -d claude/unruffled-cartwright-103e23`.
+
+#### Blocked / Later / Open questions
+
+- **Stripe live keys** — async-blocker przez Michała (KYC weryfikacja firmy). Bez tego prod test za 5 zł nie ruszy.
+- **20 otwartych pozycji w TaskList** — A2-A7 + B1-B13. Wszystkie świadomie wybrane do zrobienia przed prod.
+- **Wiki article `concepts/snapshot-vs-reference-in-storage.md`** (od 2026-05-22 I) — nadal do napisania.
+- **Fundament Promise/async** (od 2026-05-17) — nieoswojony, wzmocnienie przez realne bugi w kolejnych zadaniach (A2 ma `convex.auth` — dużo `await`).
+
+---
+
 ## Sesja 2026-05-22 (II) — Scenariusz 8 + 9 zaliczone, admin E2E checklist 9/9, +5 obserwacji backlogu
 
 ### Zmiany
