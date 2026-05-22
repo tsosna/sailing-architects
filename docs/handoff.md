@@ -65,6 +65,51 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
+## Sesja 2026-05-22 (II) — Scenariusz 8 + 9 zaliczone, admin E2E checklist 9/9, +5 obserwacji backlogu
+
+### Zmiany
+
+- `docs/admin-post-mvp-decisions.md` — +5 pozycji backlogu:
+  1. `/admin/special` — stary inline toast do migracji na `toastState.addToast`.
+  2. `/admin/special` — „Complimentary" PL.
+  3. `/admin/crew` — placeholder bez funkcji (Etap 5/6 zrealizowane gdzie indziej). Kierunek: cross-booking overview uczestników (preferowane) lub usunąć route.
+  4. Reactive clock dla odliczania held — alert (`admin.ts:319–322`) i KPI (`admin/+page.svelte:53–56`) liczą `(holdExpiresAt - Date.now())` w query/funkcji bez żywego zegara. Odliczanie zamrożone do najbliższego push'a z DB.
+  5. `/admin` — subtitle alertu held „Checkout" po angielsku (`admin/+page.svelte:248`). Piąta lokalizacja jęz. niespójności.
+
+**Brak zmian w kodzie produkcyjnym** — całość sesji = empiryczna weryfikacja Scenariuszy 8/9 + dokumentacja backlogu.
+
+### Decyzje
+
+- **Toast `/admin/special` + „Complimentary" do backlogu, nie inline fix** — scope sesji = Scenariusz 8 (special), nie refactor toastów. Migracja toasta wymaga audytu wszystkich wywołań + style cleanup, osobna pozycja.
+- **`/admin/crew` jako overview cross-booking** (kierunek preferowany w backlogu) — Etap 5 (admin edit) i Etap 6 (token confirm) już zrealizowane w booking-drawer + `/crew/confirm/[token]`. Strona crew była stub'em z fazy designu; zamiast usuwać, dać jej realną funkcję — tabela wszystkich uczestników wszystkich bookingów z filtrami statusu. Klik → drawer z deep-linkiem do koi. Fallback: usunąć route + link.
+- **Scenariusz 9 zaliczony z asteryskiem** — funkcjonalnie kroki 1-3 przechodzą (koja w held, alert generuje się, KPI licznik OK), ale odliczanie statyczne (Convex query reactive na DB, nie na zegar). UX kłamie, ale to lekcja koncepcyjna nie blocker. Reactive clock = backlog.
+- **Close session bez wolnych myśli** (user opt-out).
+- **Przeniesienie zmian z worktree do main repo** przez commit z worktree + PR + merge (procedura z 2026-05-21).
+
+### Wnioski
+
+- **Convex query reactive na DB, nie na czas** — najmocniejsza lekcja sesji. `useQuery` push'uje gdy zmienia się tabela. Czas (ambient state, nie DB-fact) wymaga lokalnego zegara klienta. Pattern: `$state(now) + setInterval` + `$derived` countdown z `now` jako żywego źródła. Heurystyka diagnostyczna: gdy UI ma odliczać/odświeżać per minutę, pytaj — kto pcha aktualizację? Jeśli backend → tylko zmiana DB to wyzwoli. Jeśli klient → lokalny zegar. Trzeci przykład [[concepts/storage-vs-derive-time-based-facts]] (po Scenariusz 6 link expired + Scenariusz 7 snapshot). Powiązane: [[concepts/convex-subscription-vs-local-success-state]] (2026-05-16) — ten sam fundament „co właściwie triggeruje re-render", inny przejaw.
+- **Stub-routes z fazy designu jako sygnał drift'u** — `/admin/crew` zaplanowany w sidebarze + placeholder strona „Etap 5 i 6 trafią tutaj". Etap 5 zrealizowany w drawerze (bardziej kontekstowo), Etap 6 jako public page (bo wymaga braku auth). Sidebar link został. Heurystyka: po zamknięciu etapu sprawdzić czy stub-routes z planu zostały świadomie napełnione albo świadomie usunięte. Czasem realizacja okazuje się lepsza poza pierwotnym slotem — wtedy slot trzeba zlikwidować lub przebudować, nie zostawiać jako dead navigation.
+- **Backlog jako dyscyplina dla scope creep — drugi raz** — Scenariusz 8 + 9 razem dały +5 obserwacji, zero inline fixów. Toast migracja `/admin/special` była kuszącym małym refactorem, ale dotknięcie strony rozszerzyłoby scope. Backlog urósł do 14 otwartych + 1 zamknięta (PR #2). Wzmocnienie lekcji 2026-05-22 popołudniu.
+- **Niespójność jęz. polski/angielski — pattern parasolowy** — 5 lokalizacji teraz (Valid, Complimentary, status pill, Checkout, wcześniejsze). Każda osobno drobiazg, razem klasa problemu. Sygnał: code review nie łapie inline literałów; warto rozważyć rule (lint na hardcoded English strings w plikach pod `[[lang=lang]]/`) albo zdyscyplinowane przejście raz na cały admin po MVP.
+
+### Następne kroki
+
+#### Next
+
+- **Update profilu ucznia** sesją 2026-05-22 (II) — mapa kompetencji (Convex: reactive subscription vs ambient state — czas jako nie-DB-fact).
+- **Sprzątanie worktree** — `git worktree remove .claude/worktrees/nervous-torvalds-670ebd` + `git branch -d claude/nervous-torvalds-670ebd` po merge.
+- Po MVP — wybór z backlogu (14 otwartych): false affordance parasolowa decyzja, `/admin/crew` overview, reactive clock fix, lub toast migracje (`/admin/special` + `/admin/automation`).
+
+#### Blocked / Later / Open questions
+
+- **`allowFullPayment` cleanup** (od 2026-05-21) — flaga martwa, schema + admin UI + mutations args. Osobna sesja refactor.
+- **Backlog 14 otwartych pozycji** w `docs/admin-post-mvp-decisions.md`. Cykle UX/refactor po MVP.
+- **Fundament Promise/async** (od 2026-05-17) — nieoswojony, wzmocnienie przez realne bugi.
+- **Wiki article `concepts/snapshot-vs-reference-in-storage.md`** (od 2026-05-22 I) — do napisania.
+
+---
+
 ## Sesja 2026-05-22 — Scenariusz 7 zamknięty (snapshot vs reference) + 4 obserwacje backlogu
 
 ### Zmiany
