@@ -10,6 +10,7 @@ import type { Id } from './_generated/dataModel'
 import { v } from 'convex/values'
 import { panelUrl } from './_brevo'
 import { sendCrewConfirmationEmail } from './_emails'
+import { requireConvexAdmin } from './_lib/requireAdmin' 
 
 const TOKEN_VALIDITY_MS = 14 * 24 * 60 * 60 * 1000
 
@@ -379,6 +380,7 @@ export const adminMarkConfirmedManually = mutation({
 		adminUserId: v.string()
 	},
 	handler: async (ctx, args) => {
+		await requireConvexAdmin(ctx)
 		const participant = await ctx.db.get(args.participantId)
 		if (!participant) throw new Error('Participant not found')
 		if (participant.dataStatus !== 'complete') {

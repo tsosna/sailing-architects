@@ -65,6 +65,59 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
+## Sesja 2026-05-23 — A2: Hardening Convex admin mutations (auth-N + auth-Z przez Clerk JWT)
+
+### Zmiany
+
+- `src/convex/auth.config.ts` — nowy plik, provider Clerk: `domain: process.env.CLERK_JWT_ISSUER_DOMAIN`, `applicationID: "convex"`. Bez tego `ctx.auth.getUserIdentity()` zwraca null.
+- `src/convex/_lib/requireAdmin.ts` — nowy helper `requireConvexAdmin(ctx)`: `getUserIdentity()` → throw `Unauthorized` gdy null, throw `Forbidden` gdy `identity.role !== 'admin'`. Generic ctx (query/mutation).
+- `src/lib/auth/convex-clerk-bridge.svelte` — nowy komponent (zero render), `$effect` wpina token Clerk do `convexClient.setAuth(async () => session.getToken({ template: 'convex' }))`. Brak sesji → `setAuth(async () => null)` (ConvexClient z `convex/browser` nie ma `clearAuth`).
+- `src/lib/auth/index.ts` — barrel.
+- `src/routes/+layout.svelte` — import `ConvexClerkBridge`, render wewnątrz `<ClerkProvider>`. Bridge musi być dzieckiem providera (context API).
+- `src/convex/mutations.ts` — `await requireConvexAdmin(ctx)` jako pierwsza linia handlera w 8 mutacjach: `upsertSegmentPaymentPlan`, `adminUpdateParticipantData`, `backfillBookingParticipants`, `reserveComplimentary`, `cancelAdminBooking`, `seedTestPaymentPlan`, `backfillLegacyBookingPayments`, `migrateCaptainBerths`.
+- `src/convex/crewConfirmation.ts` — `await requireConvexAdmin(ctx)` w `adminMarkConfirmedManually`.
+- Clerk Dashboard (poza repo): JWT template `convex` z custom claim `role: {{user.public_metadata.role}}`. User Tomek: `publicMetadata.role = "admin"`.
+- Convex env: `CLERK_JWT_ISSUER_DOMAIN=https://poetic-cougar-82.clerk.accounts.dev`.
+- `docs/admin-post-mvp-decisions.md` — +2 pozycje backlogu:
+  1. Dashboard żeglarza pokazuje tylko jedną koję mimo zakupu wielu (3 hipotezy do diagnozy).
+  2. Dashboard żeglarza — „Cała trasa rejsu" zawsze podświetla Gibraltar → Madera (korzeń: hardcode w design mock `dashboard.jsx:7`).
+
+### Decyzje
+
+- **Custom claim `role` w JWT template Clerk, nie allowlist** — produkcyjna ścieżka, jedno źródło prawdy (`publicMetadata.role`). Bez zewnętrznych roundtripów z Convex do Clerk REST (mutation runtime nie ma sensownie dostępu).
+- **Brak dev-allowlist po email w Convex** — `admin-guard.ts` w SvelteKit ma dev-allowlist dla wygody, ale Convex side wymaga JWT role. Powielanie = drift, kto admin w SvelteKit musi też mieć rolę w Clerk.
+- **Throw zamiast `{ ok: false, reason }`** — błąd bezpieczeństwa, nie biznesowy. Throw + rollback transakcji gratis. Frontend łapie i pokazuje toast (osobna sprawa).
+- **A2 scope: tylko 9 admin mutations** — server-side mutations wołane przez `ConvexHttpClient` ze Stripe webhook (`applyStripePayment`, `markPaymentEmailSent`, `cancelBooking` itd.) wyłączone. Wymagają osobnej strategii (`internalMutation` + service token albo `CONVEX_DEPLOY_KEY`). Odrębne zadanie A6.
+- **`_lib/` jako konwencja Convex** — prefix `_` w nazwie pliku/folderu = nie generuj endpointu, helper wewnętrzny.
+
+### Wnioski
+
+- **Authentication vs Authorization — fundament otwarty** — auth-N („kim jesteś", podpis JWT) vs auth-Z („co możesz", reguła roli). Pierwsze Convex weryfikuje sam podpisem (`auth.config.ts` + JWKS Clerk), drugie my piszemy (`requireConvexAdmin`). User signed-in to nie to samo co user uprawniony. Powiązany koncept: defense-in-depth (lekcja 2026-05-17 Scenariusz 6), tu jako trzecia warstwa po SvelteKit guard + ukrywaniu UI.
+- **JWT — struktura `xxx.yyy.zzz` (base64.base64.signature)** — payload czytelny dla każdego, podpis niefalszowalny bez klucza prywatnego wydawcy. Convex weryfikuje publicznym kluczem Clerk z JWKS endpoint (stąd `domain` w config). Audience claim `aud === "convex"` matchuje `applicationID`. Nazwa template w Clerk = applicationID = audience. Trzy nazwy muszą się zgadzać.
+- **Endpoint vs helper — fundament Convex** — endpoint = funkcja w `api.*`, publicznie wystawiona (z internetu można wywołać). Helper = funkcja importowana tylko z innych funkcji backendu (nie ma URL). Prefix `_` = helper, bez prefiksu = endpoint. Reguła: walidacja argumentów + guardy są tylko na endpointach (drzwiach z ulicy). Analogia: drzwi frontowe vs lodówka.
+- **Throw propaguje się sam, try/catch w handlerze = anty-wzorzec** — throw → Convex rollback transakcji + odsyła error klientowi (Promise rejected po stronie browsera). Try/catch wewnątrz handlera „połyka" błąd i kontynuuje handler → klasyczny bug bezpieczeństwa (nie-admin zapisze do bazy). Reguła: nie łap throw którego nie umiesz sensownie obsłużyć.
+- **Context API: konsument musi być pod producentem w drzewie komponentów** — `useClerkContext()` w `<script>` `+layout.svelte` rzucił 500 bo `<ClerkProvider>` w template tego samego pliku ustawia context dopiero przy mount. Komponent rodzic NIE widzi swojego własnego contextu. Fix: dziecko providera. Trzeci raz lekcja contextu (2026-05-12 setContext/getContext, 2026-05-16 useConvexClient po setupConvex). Wzorzec: bridge component = małe dziecko ekspozytora dwóch contextów (Clerk + Convex), zero render, tylko effect.
+- **Convex WS jest lazy — otwiera się przy pierwszym `useQuery`/mutation** — na landing bez query Network/WS pusty, na `/dashboard` z `useQuery(api.queries.bookingByUser)` WS się pojawia. Diagnostyka WebSocket w DevTools: hard reload przy otwartych DevTools, filter All, sortuj po Type, szukaj `websocket` / `101 Switching Protocols`. Wiadomości w zakładce Messages: `Connect` → `ModifyQuerySet` → `Transition` → `Authenticate` (gdy bridge aktywny). Brak `Authenticate` = bridge nie odpalił.
+- **`ConvexClient` z `convex/browser` ma `setAuth()` ale nie `clearAuth()`** — `clearAuth` jest w React adapterze, nie w base client. Wyczyszczenie auth = `setAuth(async () => null)`. Cursor agent wyłapał ten bug — wzmocnienie wartości narzędzia jako review-bot.
+- **Convex `_creationTime` stempel + setAuth race** — gdy bridge effect odpali się PO pierwszym query, sekwencja w WS to: Connect → ModifyQuerySet (queryId=0, identity=0) → Transition (identity=0, dane wracają jako anonim, bo query startuje przed Authenticate) → Authenticate → Transition (identity=1). Convex re-evaluuje queries po nowym identity. W praktyce: query który nie zależy od identity (jak `bookingByUser` z arg `userId`) działa bez auth — bo my przesyłamy userId jawnie. Query który zależy od `ctx.auth.getUserIdentity()` poleci z null aż do drugiego Transition. Dla A2 nieistotne (guard tylko w mutations), ale warto mieć w głowie.
+- **Diagnostyka „dlaczego setAuth nie wysłał Authenticate" — sprawdź czy komponent zamontowany** — Cursor utworzył plik bridge ale zapomniał wstawić `<ConvexClerkBridge />` w template. Plik istniał, importu nie było, effect nigdy się nie wykonał. Reguła weryfikacji: po dodaniu komponentu sprawdź czy jest faktycznie renderowany (grep import + render tagu w wrapper). „Plik istnieje" ≠ „komponent działa".
+
+### Następne kroki
+
+#### Next
+
+- **A3** z TaskList — następna pozycja po A2 (do sprawdzenia treści w głównym repo TaskList).
+- **Update profilu ucznia** sesją 2026-05-23 — mapa kompetencji (auth-N/Z, JWT, endpoint vs helper, context bridge pattern jako 3 nowe pozycje).
+- **Sprzątanie worktree** po PR merge — `git worktree remove .claude/worktrees/goofy-dirac-ac5f90` + `git branch -d claude/goofy-dirac-ac5f90`.
+
+#### Blocked / Later / Open questions
+
+- **A6 — Hardening server-side mutations** (Stripe webhook, API routes) — wymaga `CONVEX_DEPLOY_KEY` lub przekształcenia na `internalMutation` z service token. Osobna pozycja w TaskList.
+- **Backlog 23 otwartych pozycji** w `docs/admin-post-mvp-decisions.md` — +2 z dziś (dashboard żeglarza: jedna koja zamiast wielu, hardcoded Gibraltar → Madera).
+- **Fundament Promise/async + auth** — Tomek świadomie sygnalizował lukę. Wzmocnienie przez kolejne realne bugi.
+- **Wiki article `concepts/snapshot-vs-reference-in-storage.md`** (od 2026-05-22 I) — nadal do napisania.
+- **Wiki article `concepts/jwt-auth-convex-clerk.md`** — nowy kandydat z dziś, pełny obraz auth flow Clerk → JWT → Convex z bridge pattern.
+
 ## Sesja 2026-05-22 (III) — A1 backlog: reset booking-selection po sukcesie zakupu (PR #5 merged)
 
 ### Zmiany

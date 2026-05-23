@@ -1,0 +1,1 @@
+export {default as ConvexClerkBridge} from './convex-clerk-bridge.svelte' 
