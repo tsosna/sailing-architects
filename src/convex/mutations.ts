@@ -2,6 +2,7 @@ import { internalMutation, mutation } from './_generated/server'
 import type { MutationCtx } from './_generated/server'
 import type { Doc, Id } from './_generated/dataModel'
 import { v } from 'convex/values'
+import { requireConvexAdmin } from './_lib/requireAdmin'
 
 const HOLD_DURATION_MS = 15 * 60 * 1000
 const DEFAULT_CURRENCY = 'pln'
@@ -276,6 +277,7 @@ export const upsertSegmentPaymentPlan = mutation({
 		items: v.array(paymentPlanItemArgs)
 	},
 	handler: async (ctx, args) => {
+		await requireConvexAdmin(ctx)
 		if (!args.allowFullPayment && args.items.length === 0) {
 			throw new Error('Plan płatności musi mieć raty albo płatność całości')
 		}
@@ -748,6 +750,7 @@ export const adminUpdateParticipantData = mutation({
 		...participantProfileArgs
 	},
 	handler: async (ctx, args) => {
+		await requireConvexAdmin(ctx)
 		const participant = await ctx.db.get(args.participantId)
 		if (!participant) throw new Error('Participant not found')
 
@@ -804,6 +807,7 @@ export const adminUpdateParticipantData = mutation({
 export const backfillBookingParticipants = mutation({
 	args: { limit: v.optional(v.number()) },
 	handler: async (ctx, { limit }) => {
+		await requireConvexAdmin(ctx)
 		const bookings = await ctx.db
 			.query('bookings')
 			.order('desc')
@@ -856,6 +860,7 @@ export const reserveComplimentary = mutation({
 		note: v.optional(v.string())
 	},
 	handler: async (ctx, args) => {
+		await requireConvexAdmin(ctx)
 		const segment = await ctx.db
 			.query('voyageSegments')
 			.withIndex('by_slug', (q) => q.eq('slug', args.segmentSlug))
@@ -883,6 +888,7 @@ export const reserveComplimentary = mutation({
 export const cancelAdminBooking = mutation({
 	args: { segmentSlug: v.string(), berthId: v.string() },
 	handler: async (ctx, args) => {
+		await requireConvexAdmin(ctx)
 		const segment = await ctx.db
 			.query('voyageSegments')
 			.withIndex('by_slug', (q) => q.eq('slug', args.segmentSlug))
@@ -919,6 +925,7 @@ export const seedTestPaymentPlan = mutation({
 		dueAtSecondInstallment: v.optional(v.number())
 	},
 	handler: async (ctx, args) => {
+		await requireConvexAdmin(ctx)
 		const segmentSlug = args.segmentSlug ?? 's1'
 		const segment = await ctx.db
 			.query('voyageSegments')
@@ -1002,6 +1009,7 @@ export const seedTestPaymentPlan = mutation({
 export const backfillLegacyBookingPayments = mutation({
 	args: { limit: v.optional(v.number()) },
 	handler: async (ctx, { limit }) => {
+		await requireConvexAdmin(ctx)
 		const bookings = await ctx.db
 			.query('bookings')
 			.order('desc')
@@ -1090,6 +1098,7 @@ export const backfillLegacyBookingPayments = mutation({
 export const migrateCaptainBerths = mutation({
 	args: {},
 	handler: async (ctx) => {
+		await requireConvexAdmin(ctx)
 		const segments = await ctx.db.query('voyageSegments').collect()
 		let updated = 0
 		for (const segment of segments) {

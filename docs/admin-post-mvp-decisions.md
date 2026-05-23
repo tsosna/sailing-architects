@@ -304,3 +304,20 @@ Pierwotna hipoteza („krzyżowanie wierszy między bookingami przez błędny fi
 **Trigger:** Operator widzi angielski subtitle w polskim admin UI; ten sam wzorzec false-affordance/jęz. decyzji parasolowej.
 
 **Kierunek:** Subtitle po polsku, propozycje: „Trwa checkout" / „W koszyku" / „Wybrana w checkout". Decyzja parasolowa z innymi niespójnościami jęz. — jeden język per UI, code review łapie inline literały.
+
+## Dashboard żeglarza — pokazuje tylko jedną koję mimo zakupu wielu
+
+**Stan:** Po zakupie kilku kój na jeden booking dashboard użytkownika (`/dashboard`) renderuje tylko jedną z nich (przykład: user kupił SA-2026-7663 + inne, widzi tylko SA-2026-7663). Admin booking-drawer dla tego samego usera/bookingu pokazuje wszystkie koje poprawnie. Niespójność między widokami.
+
+**Trigger:** Kupujący wraca po zakupie kilku kój, widzi tylko jedną — myśli że transakcja się nie dopięła lub pieniądze poszły bez przydziału. Realne ryzyko zgłoszeń „brak mojej rezerwacji".
+
+**Kierunek:** Diagnoza wymaga obejrzenia query `bookingByUser` (prawdopodobnie `bookings` filtrowane po `userId`, ale nie hydratuje wszystkich `berthIds` albo `voyageSegments`). Hipotezy do sprawdzenia: (1) query bierze tylko pierwszy booking usera ignorując pozostałe, (2) renderer dashboardu iteruje tylko po `bookings[0].berthIds[0]`, (3) bookingi dla tego usera mają różne `userId` (np. complimentary utworzone przez admina). Schemat debugowania query → data → write → render (lekcja 2026-05-20).
+
+## Dashboard żeglarza — „cała trasa rejsu" zawsze podświetla Gibraltar → Madera
+
+**Stan:** Sekcja „Cała trasa rejsu" na dole `/dashboard` zawsze ma podkreślony segment **Gibraltar → Madera**, niezależnie od tego który segment user faktycznie kupił. Korzeń: design mock `docs/design/design_handoff_sailing_architects/components/dashboard.jsx:7` hardcoduje `name: 'Gibraltar → Madera'` i flagi `active: true` na konkretnych portach (linie 298-299) — wartości prawdopodobnie przeszły do faktycznego komponentu bez przepięcia na dane z bookingu.
+
+**Trigger:** User kupuje segment Palma → Gibraltar lub Madera → Teneryfa, widzi że dashboard podświetla coś innego — sygnał „aplikacja kłamie".
+
+**Kierunek:** Zamienić hardcode'owany `name` na `booking.voyageSegment.name` (z hydrowanego query). Timeline portów (`active`) derive'ować z bookingu (porty należące do segmentu są `active`, reszta nie). Ujednolicić źródło danych: `voyageSegments` z `$lib/data/voyage-segments.ts` (4 etapy s1-s4) ma wszystkie potrzebne pola.
+

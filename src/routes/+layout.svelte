@@ -5,11 +5,11 @@
 	import { plPL } from '@clerk/localizations'
 	import { PUBLIC_CONVEX_URL } from '$env/static/public'
 	import { Toaster } from '$lib/components/toaster'
+	import ConvexClerkBridge from '$lib/auth/convex-clerk-bridge.svelte'
 
 	setupConvex(PUBLIC_CONVEX_URL)
 
 	let { children } = $props()
-
 	const clerkAppearance = {
 		variables: {
 			colorPrimary: '#c4923a',
@@ -97,6 +97,7 @@
 </script>
 
 <ClerkProvider localization={plPL} appearance={clerkAppearance}>
+	<ConvexClerkBridge/>
 	{@render children()}
 	<Toaster />
 </ClerkProvider>
