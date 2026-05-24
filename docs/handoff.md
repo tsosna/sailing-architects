@@ -65,6 +65,56 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
+## Sesja 2026-05-24 — A3: Hardening Convex server-only mutations (`internalMutation` + admin auth)
+
+### Zmiany
+
+- `src/convex/mutations.ts` — 7 mutations zmienionych z `mutation(...)` na `internalMutation(...)`: `createBooking` (linia 351), `applyStripePayment` (465), `markPaymentEmailSent` (565), `markConfirmationEmailSent` (590), `markBookingPaymentsProcessing` (613), `cancelBookingPayments` (661), `cancelBooking` (1121). Import `internalMutation` już istniał z A2 (linia 1).
+- `src/lib/server/convex-admin.ts` — nowy helper `createConvexAdminClient(): ConvexAdminClient`. Tworzy `ConvexHttpClient` + `setAdminAuth(CONVEX_ADMIN_KEY)`. Rozszerza typ klienta o sygnaturę `mutation<InternalMutation>` żeby call-site'y nie potrzebowały każdorazowo `FunctionReturnType` (Cursor poprawił mój pierwotny szablon).
+- `src/routes/api/stripe/webhook/+server.ts` — import `internal` (dodany do istniejącego `api`), klient z `createConvexAdminClient()`, 5 wywołań `api.mutations.X` → `internal.mutations.X` (linie 49, 127, 133, 146, 151). `api.queries.bookingConfirmationByRef` zostaje publiczne.
+- `src/routes/api/stripe/pay-installment/+server.ts` — to samo, 1 wywołanie (`markBookingPaymentsProcessing`).
+- `src/routes/api/stripe/create-intent/+server.ts` — to samo, 5 wywołań (`createBooking`, `cancelBooking` ×2, `markBookingPaymentsProcessing`). Typ `let bookingResult` zmieniony z `Awaited<ReturnType<typeof convex.mutation<typeof api.mutations.createBooking>>>` na `FunctionReturnType<typeof internal.mutations.createBooking>` (Cursor — generic constraint `convex.mutation<T extends FunctionReference<'mutation', 'public'>>` blokuje internal).
+- `.env.local` (main repo) — dodane `CONVEX_ADMIN_KEY=local-tomek_sosinski-sailing_architects|<adminKey>`. Wartość = `adminKey` z `.convex/local/default/config.json`.
+- `.env.example` — dodany szablonowy wpis `CONVEX_ADMIN_KEY=` z komentarzem o źródle wartości (lokalny config lub `npx convex deploy-key` dla prod).
+- **Delta produkcyjna:** ~+50 / -41 linii w 5 plikach + 1 nowy helper.
+
+### Decyzje
+
+- **Strategia: `internalMutation` keyword zamiast service token w argach** — opcja A z dwóch rozważanych (opcja B = `mutation` + `args.serviceToken: v.string()` + guard). A zwycięża: (1) zgodne z guidelines Convex linia 81-82 („Do NOT use mutation to register sensitive internal functions"), (2) atakujący nie widzi nawet nazwy funkcji w `api.*`, (3) spójne z mechanizmem `_` prefix z A2 (lekcja endpoint-vs-helper).
+- **`CONVEX_ADMIN_KEY` zamiast `CONVEX_DEPLOY_KEY`** — początkowo ustawiona jako `CONVEX_DEPLOY_KEY`, Convex CLI wybuchł: `InvalidDeploymentName: Couldn't parse deployment name local-...`. CLI rezerwuje prefix `CONVEX_DEPLOY_KEY` / `CONVEX_DEPLOYMENT` jako sygnał „to dla mnie, cloud auth". Lokalny anonymous backend nie ma cloud konta → CLI próbuje resolve URL i pada. Fix: przenazwać własną zmienną. Convex docs używa `CONVEX_SELF_HOSTED_ADMIN_KEY` dla self-hosted — alternatywa do rozważenia w prod.
+- **A3 scope: tylko 7 mutations server-only** — `upsertCrewProfile`, `upsertBookingParticipant` itd. (user-facing) zostają jako `mutation` z guardem `ctx.auth.getUserIdentity()`. Wymagają auth usera, nie admin guard — osobny wzorzec. Backlog: B14 audyt user-facing mutations pod kątem `getUserIdentity()`.
+- **Query `bookingConfirmationByRef` zostaje publiczna** — query mają własne walidacje i tylko czytają. Hardening query (np. weryfikacja czy `userId` w args matchuje JWT) to osobna analiza, świadomie poza A3.
+
+### Wnioski
+
+- **Dwa mechanizmy „private" w Convex — pełna mapa po dwóch sesjach** — najsilniejsza lekcja sesji. (1) Prefix `_` w nazwie pliku (lekcja A2: `_lib/`, `_emails.ts`, `_brevo.ts`) — cały plik wykluczony z `api.*` codegen. (2) Keyword `internalMutation`/`internalQuery`/`internalAction` — pojedyncza funkcja w pliku z publicznymi mutations ląduje w `internal.*`. Granularność różna (cały plik vs pojedyncza funkcja), efekt netto identyczny. Można mieszać w jednym pliku: `mutations.ts` ma 9 admin mutations jako `mutation` (z `requireConvexAdmin` guard) + 7 server-only jako `internalMutation`. Promocja: [[concepts/convex-internalmutation-keyword-and-admin-auth]].
+- **`setAdminAuth` to brama do `internal.*` z zewnątrz** — `ConvexHttpClient.setAdminAuth(adminKey)` daje klientowi prawo wołać `internal.*`. Bez tego klient widzi tylko `api.*`. SvelteKit server ma admin key w env, woła `internal.mutations.applyStripePayment` jak każdą funkcję. Atakujący bez klucza dostaje `Could not find public function for 'mutations:applyStripePayment'` — Convex nie ujawnia że funkcja istnieje. Trzecia warstwa po SvelteKit guard + JWT admin guard. Najsilniejsza z trzech bo atakujący nie ma zaczepu do brute-force argumentów.
+- **`npx convex run` to admin CLI, nie symulacja ataku — gotcha metodyczna** — pierwszy test ataku przez `npx convex run mutations:applyStripePayment '{...}'` dał fałszywie pozytywny wynik: handler wykonał się i padł na biznesowym błędzie linii 480 (`Payment rows not found for PaymentIntent`). Wniosek na chwilę „hardening nie działa". Korekta: CLI czyta admin key z `.convex/local/default/config.json` i wywołuje `internal.*` jak każdy admin. Pukasz do własnych drzwi własnym kluczem — nie testujesz zamka. Prawdziwy test ataku: klient bez admin auth (`ConvexHttpClient` bez `setAdminAuth`), np. mini-skrypt Node. Wtedy 3 z 3 mutations zablokowane czysto. Promocja: [[concepts/convex-cli-admin-key-not-attack-test]].
+- **`setAdminAuth` istnieje w runtime, ukryty w `.d.ts`** — Convex SDK oznacza metodę `@internal` i nie eksportuje w publicznych typach. Runtime ma `setAdminAuth(token, actingAsIdentity)` na linii 112/127 `http_client.js`. Cast lokalnym typem `ConvexHttpClient & { setAdminAuth(token: string): void }` jako dokumentujący workaround. Cursor agent wyłapał i podpowiedział — drugi raz z rzędu po A2 (`setAuth(async () => null)` zamiast `clearAuth`). Wzorzec: agent jako pierwszy code review w obszarach API Convex których SDK nie eksportuje czysto.
+- **`convex.mutation<T>` ma constraint `"public"` — `FunctionReturnType` jako wyjście** — `typeof convex.mutation<typeof internal.mutations.createBooking>` wybucha: `Type '"internal"' is not assignable to type '"public"'`. Generic klienta wymusza public mutations. Cursor podał czyste rozwiązanie: `FunctionReturnType<typeof internal.mutations.createBooking>` (helper Convex z `convex/server`). Pierwsza propozycja Cursora („wywal Awaited<...>") była gorsza (traci typowanie, `p` implicit `any` w `.filter(p => ...)`) — odrzucone. Końcowa wersja w `convex-admin.ts` poszła dalej: rozszerzony typ `ConvexAdminClient` z metodą `mutation<InternalMutation>`.
+- **Compiler-guide-refactor ma granice — usuwając import zrób grep** — usunąłem `import { api } from '$convex/api'` w webhook bo „wszystko poszło na internal", ale plik dalej wołał `api.queries.bookingConfirmationByRef`. Compiler powiedział „symbol nieznany" — ale **nie powiedział** „chciałeś go zachować". Compiler-guide wskazuje co nie kompiluje, nie co miałeś na myśli. Reguła: przed usunięciem importu grep nazwy w pliku (`api.` w tym wypadku). Granica strategii [[concepts/let-compiler-guide-refactor]] (2026-05-21).
+- **3-warstwowy model security mutations zamknięty po A2 + A3** — (1) Mutations admin = `mutation` + `requireConvexAdmin` (JWT + role check, A2). (2) Mutations user-facing = `mutation` + `ctx.auth.getUserIdentity()` (JWT usera, B14 do audytu). (3) Mutations server-only = `internalMutation` + admin auth na kliencie (A3). Każda warstwa testuje się **innym narzędziem**: (1) przeglądarka bez/z JWT admin, (2) przeglądarka z różnymi userami, (3) `ConvexHttpClient` bez admin auth (powinien blokować) + SvelteKit server (powinien działać). Mieszanie narzędzi = przegapienie warstwy.
+
+### Następne kroki
+
+#### Next (nowa sesja)
+
+- **A4** — następna pozycja w TaskList (do sprawdzenia treści).
+- **Sprzątanie worktree** po PR merge — `git worktree remove .claude/worktrees/elastic-rubin-b4e845` + `git branch -d claude/elastic-rubin-b4e845`.
+
+#### Blocked / Later / Open questions
+
+- **A6 — Hardening server-side mutations w prod context** — dziś użyliśmy lokalnego admin key z `.convex/local/default/config.json`. Dla cloud deployment trzeba `npx convex deploy-key generate`, zmienić nazwę zmiennej na `CONVEX_SELF_HOSTED_ADMIN_KEY` (lub zostać przy `CONVEX_ADMIN_KEY`), dodać do Vercel env. Osobna pozycja przed prod.
+- **B14 — Audyt user-facing mutations pod `ctx.auth.getUserIdentity()`** — `upsertCrewProfile`, `upsertBookingParticipant`, ewentualne inne. Sprawdzić czy każda waliduje userIdentity przed write. Świadomie poza A3 scope.
+- **Hardening publicznych queries** — np. `bookingConfirmationByRef` przyjmuje `userId: string` jako arg bez weryfikacji że to matchuje sesji. Atakujący z innym userId może odczytać cudzą rezerwację. Osobna analiza per query, B-tier.
+- **Stripe live keys** — async-blocker przez Michała (KYC weryfikacja firmy).
+- **17 otwartych pozycji w TaskList** — A4-A7 + B1-B13. Wszystkie świadomie wybrane przed prod.
+- **Wiki article `concepts/snapshot-vs-reference-in-storage.md`** (od 2026-05-22 I) — nadal do napisania.
+- **Wiki article `concepts/jwt-auth-convex-clerk.md`** (od 2026-05-23) — nadal do napisania.
+- **Fundament Promise/async** (od 2026-05-17) — nadal nie „oswojony"; A3 dotykało async (`await convex.mutation`, `await convex.query`), bez nowych potknięć — drobny progres przez wzmocnienie ekspozycji.
+
+---
+
 ## Sesja 2026-05-23 — A2: Hardening Convex admin mutations (auth-N + auth-Z przez Clerk JWT)
 
 ### Zmiany

@@ -1,12 +1,11 @@
 import { json } from '@sveltejs/kit'
-import { ConvexHttpClient } from 'convex/browser'
-import { PUBLIC_CONVEX_URL } from '$env/static/public'
 import { stripe } from '$lib/server/stripe'
-import { api } from '$convex/api'
+import { createConvexAdminClient } from '$lib/server/convex-admin'
+import { api, internal } from '$convex/api'
 import type { Id } from '$convex/dataModel'
 import type { RequestHandler } from './$types'
 
-const convex = new ConvexHttpClient(PUBLIC_CONVEX_URL)
+const convex = createConvexAdminClient()
 const OPERATION_TIMEOUT_MS = 15000
 
 function timeoutError(label: string): Promise<never> {
@@ -96,7 +95,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	try {
-		await convex.mutation(api.mutations.markBookingPaymentsProcessing, {
+		await convex.mutation(internal.mutations.markBookingPaymentsProcessing, {
 			userId,
 			bookingId: bookingId as Id<'bookings'>,
 			paymentIds: paymentIds as Id<'bookingPayments'>[],

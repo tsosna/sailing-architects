@@ -348,7 +348,7 @@ export const upsertSegmentPaymentPlan = mutation({
  * Called server-side from /api/stripe/create-intent after the PaymentIntent is created.
  * Throws if any berth is unavailable (race condition guard) — entire booking aborts.
  */
-export const createBooking = mutation({
+export const createBooking = internalMutation({
 	args: {
 		userId: v.string(),
 		buyerEmail: v.optional(v.string()),
@@ -462,7 +462,7 @@ export const createBooking = mutation({
  * - Refreshes paidAmount/paymentStatus on the booking.
  * Returns isFirstPayment so the webhook knows when to send the confirmation email.
  */
-export const applyStripePayment = mutation({
+export const applyStripePayment = internalMutation({
 	args: {
 		stripePaymentIntentId: v.string(),
 		paidAt: v.number()
@@ -562,7 +562,7 @@ export const applyStripePayment = mutation({
  * Targets all bookingPayments rows attached to a single PaymentIntent so that
  * Stripe webhook retries do not send the same payment confirmation twice.
  */
-export const markPaymentEmailSent = mutation({
+export const markPaymentEmailSent = internalMutation({
 	args: {
 		stripePaymentIntentId: v.string(),
 		sentAt: v.number(),
@@ -587,7 +587,7 @@ export const markPaymentEmailSent = mutation({
 })
 
 /** Mark booking confirmation email as sent after the Stripe webhook sends it. */
-export const markConfirmationEmailSent = mutation({
+export const markConfirmationEmailSent = internalMutation({
 	args: {
 		stripePaymentIntentId: v.string(),
 		sentAt: v.number(),
@@ -610,7 +610,7 @@ export const markConfirmationEmailSent = mutation({
 })
 
 /** Attach one Stripe PaymentIntent to one or more pending booking payment rows. */
-export const markBookingPaymentsProcessing = mutation({
+export const markBookingPaymentsProcessing = internalMutation({
 	args: {
 		userId: v.string(),
 		bookingId: v.id('bookings'),
@@ -658,7 +658,7 @@ export const markBookingPaymentsProcessing = mutation({
 })
 
 /** Release processing payment rows after failed/cancelled Stripe PaymentIntent. */
-export const cancelBookingPayments = mutation({
+export const cancelBookingPayments = internalMutation({
 	args: { stripePaymentIntentId: v.string() },
 	handler: async (ctx, { stripePaymentIntentId }) => {
 		const payments = await ctx.db
@@ -1118,7 +1118,7 @@ export const migrateCaptainBerths = mutation({
 })
 
 /** Release all berths and cancel booking on failed/cancelled payment (called from webhook). */
-export const cancelBooking = mutation({
+export const cancelBooking = internalMutation({
 	args: { stripePaymentIntentId: v.string() },
 	handler: async (ctx, { stripePaymentIntentId }) => {
 		const booking = await ctx.db

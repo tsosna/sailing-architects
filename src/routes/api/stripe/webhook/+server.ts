@@ -1,7 +1,6 @@
 import { error } from '@sveltejs/kit'
-import { ConvexHttpClient } from 'convex/browser'
 import type Stripe from 'stripe'
-import { PUBLIC_APP_URL, PUBLIC_CONVEX_URL } from '$env/static/public'
+import { PUBLIC_APP_URL } from '$env/static/public'
 import { stripe } from '$lib/server/stripe'
 import {
 	bookingConfirmationFilename,
@@ -12,10 +11,10 @@ import {
 	type PaymentEmailType
 } from '$lib/server/email'
 import { STRIPE_WEBHOOK_SECRET } from '$env/static/private'
-import { api } from '$convex/api'
 import type { RequestHandler } from './$types'
-
-const convex = new ConvexHttpClient(PUBLIC_CONVEX_URL)
+import { api, internal } from '$convex/api'
+import { createConvexAdminClient } from '$lib/server/convex-admin'
+const convex = createConvexAdminClient()
 
 function emailTypeFor(
 	isFirstPayment: boolean,
@@ -46,7 +45,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	switch (event.type) {
 		case 'payment_intent.succeeded': {
 			const paymentIntentId = event.data.object.id
-			const result = await convex.mutation(api.mutations.applyStripePayment, {
+			const result = await convex.mutation(internal.mutations.applyStripePayment, {
 				stripePaymentIntentId: paymentIntentId,
 				paidAt: Date.now()
 			})
@@ -124,13 +123,13 @@ export const POST: RequestHandler = async ({ request }) => {
 					guideUrl: `${PUBLIC_APP_URL}/poradnik`,
 					...(pdf && filename ? { pdf, filename } : {})
 				})
-				await convex.mutation(api.mutations.markPaymentEmailSent, {
+				await convex.mutation(internal.mutations.markPaymentEmailSent, {
 					stripePaymentIntentId: paymentIntentId,
 					sentAt: Date.now(),
 					messageId: sendResult.messageId
 				})
 				if (result.isFirstPayment && !result.confirmationEmailSentAt) {
-					await convex.mutation(api.mutations.markConfirmationEmailSent, {
+					await convex.mutation(internal.mutations.markConfirmationEmailSent, {
 						stripePaymentIntentId: paymentIntentId,
 						sentAt: Date.now(),
 						messageId: sendResult.messageId
@@ -143,12 +142,12 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 		case 'payment_intent.payment_failed':
 		case 'payment_intent.canceled':
-			await convex.mutation(api.mutations.cancelBookingPayments, {
+			await convex.mutation(internal.mutations.cancelBookingPayments, {
 				stripePaymentIntentId: event.data.object.id
 			})
 			// Releases berths only when this PI was the first checkout (booking still pending);
 			// no-op for installment failures (booking already confirmed).
-			await convex.mutation(api.mutations.cancelBooking, {
+			await convex.mutation(internal.mutations.cancelBooking, {
 				stripePaymentIntentId: event.data.object.id
 			})
 			break
