@@ -2,6 +2,13 @@
 	import { useQuery, useConvexClient } from 'convex-svelte'
 	import { api } from '$convex/api'
 	import { voyageSegments } from '$lib/data/voyage-segments'
+	import {
+		PAYMENT_PLAN_FALLBACK_NAME,
+		PAYMENT_PLAN_ITEM_LABELS,
+		PAYMENT_PLAN_TOAST,
+		defaultPlanName
+	} from '$lib/admin/payment-plan-labels'
+	import { toastState } from '$lib/state/toast.svelte'
 
 	type ItemKind = 'deposit' | 'installment' | 'balance' | 'full' | 'custom'
 
@@ -20,10 +27,9 @@
 	let selectedSegment = $state(voyageSegments[0].id)
 	let template = $state<TemplateKey>('deposit_2')
 	let allowFullPayment = $state(true)
-	let planName = $state('Plan domyślny')
+	let planName = $state('')
 	let items = $state<DraftItem[]>([])
 	let saving = $state(false)
-	let toast = $state<{ kind: 'ok' | 'err' | 'info'; text: string } | null>(null)
 
 	const planQuery = useQuery(api.queries.activePaymentPlanBySlug, () => ({
 		slug: selectedSegment
@@ -53,10 +59,10 @@
 			}))
 			template = inferTemplate(plan.items)
 		} else {
-			planName = `Plan ${segmentMeta.name}`
+			planName = defaultPlanName(segmentMeta.name)
 			allowFullPayment = true
 			template = 'deposit_2'
-			generateItems('deposit_2')
+			generateItems('deposit_2', pricePerBerthPLN)
 		}
 	})
 
@@ -92,13 +98,12 @@
 		return `i-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
 	}
 
-	function generateItems(t: TemplateKey) {
-		const price = pricePerBerthPLN
+	function generateItems(t: TemplateKey, price: number) {
 		if (t === 'full') {
 			items = [
 				{
 					key: newKey(),
-					label: 'Całość',
+					label: PAYMENT_PLAN_ITEM_LABELS.full,
 					kind: 'full',
 					amountPLN: price,
 					dueAt: ''
@@ -110,7 +115,7 @@
 			items = [
 				{
 					key: newKey(),
-					label: 'Pozycja 1',
+					label: PAYMENT_PLAN_ITEM_LABELS.customFirst,
 					kind: 'custom',
 					amountPLN: price,
 					dueAt: ''
@@ -127,7 +132,7 @@
 		const next: DraftItem[] = [
 			{
 				key: newKey(),
-				label: 'Zaliczka',
+				label: PAYMENT_PLAN_ITEM_LABELS.deposit,
 				kind: 'deposit',
 				amountPLN: depositPLN,
 				dueAt: ''
@@ -137,7 +142,7 @@
 			const isLast = i === installmentCount - 1
 			next.push({
 				key: newKey(),
-				label: `Rata ${i + 1}`,
+				label: PAYMENT_PLAN_ITEM_LABELS.installment(i + 1),
 				kind: isLast ? 'balance' : 'installment',
 				amountPLN: installmentBase + (isLast ? remainder : 0),
 				dueAt: ''
@@ -147,11 +152,11 @@
 	}
 
 	function regenerate() {
-		generateItems(template)
-		toast = {
-			kind: 'info',
-			text: 'Pozycje wygenerowane. Możesz teraz dopiąć kwoty i terminy.'
-		}
+		generateItems(template, pricePerBerthPLN)
+		toastState.addToast({
+			message: PAYMENT_PLAN_TOAST.regenerated,
+			status: 'info'
+		})
 	}
 
 	function addItem() {
@@ -159,7 +164,7 @@
 			...items,
 			{
 				key: newKey(),
-				label: `Pozycja ${items.length + 1}`,
+				label: PAYMENT_PLAN_ITEM_LABELS.item(items.length + 1),
 				kind: 'custom',
 				amountPLN: 0,
 				dueAt: ''
@@ -200,39 +205,42 @@
 
 	async function save() {
 		if (sumStatus === 'over') {
-			toast = {
-				kind: 'err',
-				text: 'Suma pozycji przekracza cenę za koję. Skoryguj kwoty.'
-			}
+			toastState.addToast({
+				message: PAYMENT_PLAN_TOAST.sumOver,
+				status: 'error',
+				duration: 0
+			})
 			return
 		}
 		if (items.some((it) => it.amountPLN <= 0)) {
-			toast = {
-				kind: 'err',
-				text: 'Każda pozycja musi mieć kwotę większą od zera.'
-			}
+			toastState.addToast({
+				message: PAYMENT_PLAN_TOAST.amountRequired,
+				status: 'error',
+				duration: 0
+			})
 			return
 		}
 		if (items.some((it) => !it.label.trim())) {
-			toast = {
-				kind: 'err',
-				text: 'Każda pozycja musi mieć nazwę.'
-			}
+			toastState.addToast({
+				message: PAYMENT_PLAN_TOAST.labelRequired,
+				status: 'error',
+				duration: 0
+			})
 			return
 		}
 		if (items.some((it) => it.kind !== 'full' && it.dueAt === '')) {
-			toast = {
-				kind: 'err',
-				text: 'Każda pozycja musi mieć datę.'
-			}
+			toastState.addToast({
+				message: PAYMENT_PLAN_TOAST.dueRequired,
+				status: 'error',
+				duration: 0
+			})
 			return
 		}
 		saving = true
-		toast = null
 		try {
 			await convex.mutation(api.mutations.upsertSegmentPaymentPlan, {
 				segmentSlug: selectedSegment,
-				name: planName.trim() || 'Plan domyślny',
+				name: planName.trim() || PAYMENT_PLAN_FALLBACK_NAME,
 				allowFullPayment,
 				items: items.map((it, index) => ({
 					label: it.label.trim(),
@@ -242,17 +250,18 @@
 					sortOrder: index + 1
 				}))
 			})
-			toast = {
-				kind: 'ok',
-				text: 'Plan zapisany. Nowe rezerwacje dostaną ten harmonogram; istniejące pozostają bez zmian.'
-			}
+			toastState.addToast({
+				message: PAYMENT_PLAN_TOAST.saved,
+				status: 'success'
+			})
 			lastLoadedSegment = null // refresh from server on next tick
 		} catch (err) {
-			toast = {
-				kind: 'err',
-				text:
-					err instanceof Error ? err.message : 'Nie udało się zapisać planu.'
-			}
+			toastState.addToast({
+				message:
+					err instanceof Error ? err.message : PAYMENT_PLAN_TOAST.saveFailed,
+				status: 'error',
+				duration: 0
+			})
 		} finally {
 			saving = false
 		}
@@ -277,7 +286,6 @@
 			onclick={() => {
 				selectedSegment = seg.id
 				lastLoadedSegment = null
-				toast = null
 			}}
 		>
 			<strong>{seg.name}</strong>
@@ -415,10 +423,6 @@
 			</span>
 		</li>
 	</ul>
-
-	{#if toast}
-		<p class="toast toast--{toast.kind}">{toast.text}</p>
-	{/if}
 </section>
 
 <style>
@@ -701,28 +705,6 @@
 		background: var(--admin-danger-bg);
 		border-color: rgba(228, 109, 95, 0.34);
 		color: var(--admin-danger);
-	}
-
-	.toast {
-		margin: 14px 18px 18px;
-		padding: 12px 16px;
-		border: 1px solid var(--admin-line);
-		font-size: 12px;
-	}
-	.toast--ok {
-		background: var(--admin-ok-bg);
-		border-color: rgba(138, 199, 164, 0.3);
-		color: var(--admin-ok);
-	}
-	.toast--err {
-		background: var(--admin-danger-bg);
-		border-color: rgba(228, 109, 95, 0.34);
-		color: var(--admin-danger);
-	}
-	.toast--info {
-		background: rgba(196, 146, 58, 0.08);
-		border-color: rgba(196, 146, 58, 0.3);
-		color: var(--admin-brass-light);
 	}
 
 	@media (max-width: 1180px) {
