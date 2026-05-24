@@ -220,6 +220,13 @@
 			}
 			return
 		}
+		if (items.some((it) => it.kind !== 'full' && it.dueAt === '')) {
+			toast = {
+				kind: 'err',
+				text: 'Każda pozycja musi mieć datę.'
+			}
+			return
+		}
 		saving = true
 		toast = null
 		try {

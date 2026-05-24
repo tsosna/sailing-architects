@@ -321,3 +321,19 @@ Pierwotna hipoteza („krzyżowanie wierszy między bookingami przez błędny fi
 
 **Kierunek:** Zamienić hardcode'owany `name` na `booking.voyageSegment.name` (z hydrowanego query). Timeline portów (`active`) derive'ować z bookingu (porty należące do segmentu są `active`, reszta nie). Ujednolicić źródło danych: `voyageSegments` z `$lib/data/voyage-segments.ts` (4 etapy s1-s4) ma wszystkie potrzebne pola.
 
+## `/admin/automation` — domyślny szablon wygląda na zapisany plan przy pierwszym wejściu
+
+**Stan:** Wchodząc po raz pierwszy na `/admin/automation` (lub przeskakując między segmentami bez zapisanego planu), UI od razu pokazuje wygenerowany domyślny szablon (Zaliczka + 2 raty) z polami `label`/`amount`/`dueAt`. Brak wskaźnika że to **draft niezapisany** — wygląda identycznie jak plan załadowany z bazy. Admin myśli że plan istnieje, klika do następnego segmentu, plan nigdy nie ląduje w DB.
+
+**Trigger:** Operator konfiguruje plany dla wszystkich segmentów, część zapisuje, część przeskakuje uznając „już jest". W bazie tylko część segmentów ma plan. User próbuje zakupu segmentu bez planu → fallback „Całość" w Step 5 → API odrzuca (zob. A4b — przy okazji ujawnione przy tym samym fixie).
+
+**Kierunek:** (1) Wizualnie odróżnić draft od zapisanego — banner „Niezapisany draft z szablonu" + zmiana koloru sekcji + przycisk „Zapisz plan" wyróżniony. (2) Alternatywa: nie generować draftu automatycznie, pokazać pusty stan z przyciskiem „Wygeneruj z szablonu". (3) Po zmianie segmentu wykryć niezapisane zmiany i ostrzec (`beforeunload` / dialog „Masz niezapisane zmiany, kontynuować?").
+
+## `/book` Step 5 — fallback „Całość" maskuje brak planu w bazie
+
+**Stan:** `paymentOptions` w `src/routes/[[lang=lang]]/book/+page.svelte:367–376` ma fallback: gdy `plan` jest null albo `plan.items.length === 0`, UI i tak pokazuje pojedynczy radio „Całość" (`sortOrders: [1]`). User wybiera, klika „Zapłać", API `validateSelection` (`src/routes/api/stripe/create-intent/+server.ts:99–101`) odtwarza schedule po swojej stronie, sortOrder UI nie matchuje serwerowego → toast „Nieprawidłowy wybór płatności". Bug ujawniony przy A4b ale klasa inna — UX user-facing, fallback maskuje stan błędny zamiast go pokazać.
+
+**Trigger:** Segment bez zapisanego planu (powiązane z A4b oraz pozycją „domyślny szablon wygląda na zapisany plan"). User dochodzi do Step 5, widzi normalną opcję płatności, klika i dostaje cryptic toast.
+
+**Kierunek:** (1) Usunąć fallback, gdy `!plan || plan.items.length === 0` zwrócić pustą tablicę `paymentOptions = []`. (2) W template Step 5 dodać branch: gdy `paymentOptions.length === 0` pokazać komunikat „Plan płatności dla tego segmentu nie jest jeszcze skonfigurowany — skontaktuj się z biurem" + zablokować Step 5 (przycisk „Zapłać" już jest disabled przez `!selectedPaymentOption`, ale komunikat brakuje). (3) Alternatywa: zwracać `plan` jako wymagany w `voyageSegmentDetail` query — gdy brak planu, w ogóle blokować wejście w `/book` na poziomie route.
+

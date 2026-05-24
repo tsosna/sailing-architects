@@ -303,6 +303,11 @@ export const upsertSegmentPaymentPlan = mutation({
 					`Kwota pozycji "${item.label}" musi być większa od zera`
 				)
 			}
+			if (item.kind !== 'full' && !item.dueAt) {
+				throw new Error(
+					`Pozycja "${item.label}" musi mieć datę płatności`
+				)
+			}
 		}
 
 		const now = Date.now()
