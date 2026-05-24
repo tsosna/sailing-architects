@@ -1569,8 +1569,6 @@ msgstr ""
 msgid "Uzupełnij teraz"
 msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
-#: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Całość"
 msgstr ""
@@ -2466,57 +2464,41 @@ msgid "Strona główna"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/admin/automation/+page.svelte
-#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
-#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
 msgid "Plan domyślny"
 msgstr ""
 
-#. 0: segmentMeta.name
-#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
-msgid "Plan {0}"
-msgstr ""
+#~ msgid "Plan {0}"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
-msgid "Pozycja 1"
-msgstr ""
+#~ msgid "Pozycja 1"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
-msgid "Zaliczka"
-msgstr ""
+#~ msgid "Zaliczka"
+#~ msgstr ""
 
-#. 0: i + 1
-#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
-msgid "Rata {0}"
-msgstr ""
+#~ msgid "Rata {0}"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
-msgid "Pozycje wygenerowane. Możesz teraz dopiąć kwoty i terminy."
-msgstr ""
+#~ msgid "Pozycje wygenerowane. Możesz teraz dopiąć kwoty i terminy."
+#~ msgstr ""
 
-#. 0: items.length + 1
-#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
-msgid "Pozycja {0}"
-msgstr ""
+#~ msgid "Pozycja {0}"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
-msgid "Suma pozycji przekracza cenę za koję. Skoryguj kwoty."
-msgstr ""
+#~ msgid "Suma pozycji przekracza cenę za koję. Skoryguj kwoty."
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
-msgid "Każda pozycja musi mieć kwotę większą od zera."
-msgstr ""
+#~ msgid "Każda pozycja musi mieć kwotę większą od zera."
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
-msgid "Każda pozycja musi mieć nazwę."
-msgstr ""
+#~ msgid "Każda pozycja musi mieć nazwę."
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
-msgid "Plan zapisany. Nowe rezerwacje dostaną ten harmonogram; istniejące pozostają bez zmian."
-msgstr ""
+#~ msgid "Plan zapisany. Nowe rezerwacje dostaną ten harmonogram; istniejące pozostają bez zmian."
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
-msgid "Nie udało się zapisać planu."
-msgstr ""
+#~ msgid "Nie udało się zapisać planu."
+#~ msgstr ""
 
 #: src/routes/[[lang=lang]]/admin/automation/+page.svelte
 msgid "Admin · Automatyzacje"
@@ -3033,3 +3015,6 @@ msgstr ""
 #: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
 msgid "Ta płatność jest w trakcie przetwarzania. Spróbuj ponownie za chwilę lub wróć do panelu."
 msgstr ""
+
+#~ msgid "Każda pozycja musi mieć datę."
+#~ msgstr ""
