@@ -1,11 +1,11 @@
 import { json } from '@sveltejs/kit'
-import { ConvexHttpClient } from 'convex/browser'
-import { PUBLIC_CONVEX_URL } from '$env/static/public'
+import type { FunctionReturnType } from 'convex/server'
 import { stripe } from '$lib/server/stripe'
-import { api } from '$convex/api'
+import { createConvexAdminClient } from '$lib/server/convex-admin'
+import { api, internal } from '$convex/api'
 import type { RequestHandler } from './$types'
 
-const convex = new ConvexHttpClient(PUBLIC_CONVEX_URL)
+const convex = createConvexAdminClient()
 const OPERATION_TIMEOUT_MS = 15000
 
 function timeoutError(label: string): Promise<never> {
@@ -191,12 +191,10 @@ export const POST: RequestHandler = async ({ request }) => {
 		return apiError(502, 'Błąd inicjalizacji płatności w Stripe')
 	}
 
-	let bookingResult: Awaited<
-		ReturnType<typeof convex.mutation<typeof api.mutations.createBooking>>
-	>
+	let bookingResult: FunctionReturnType<typeof internal.mutations.createBooking>
 	try {
 		bookingResult = await withTimeout(
-			convex.mutation(api.mutations.createBooking, {
+			convex.mutation(internal.mutations.createBooking, {
 				userId,
 				...(buyerEmail ? { buyerEmail } : {}),
 				segmentSlug,
@@ -221,7 +219,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	if (selectedPaymentIds.length !== selectedSortOrders.length) {
 		await stripe.paymentIntents.cancel(paymentIntent.id).catch(() => null)
 		await convex
-			.mutation(api.mutations.cancelBooking, {
+			.mutation(internal.mutations.cancelBooking, {
 				stripePaymentIntentId: paymentIntent.id
 			})
 			.catch(() => null)
@@ -229,7 +227,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	try {
-		await convex.mutation(api.mutations.markBookingPaymentsProcessing, {
+		await convex.mutation(internal.mutations.markBookingPaymentsProcessing, {
 			userId,
 			bookingId: bookingResult.bookingId,
 			paymentIds: selectedPaymentIds,
@@ -239,7 +237,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		console.error('markBookingPaymentsProcessing error:', convexErr)
 		await stripe.paymentIntents.cancel(paymentIntent.id).catch(() => null)
 		await convex
-			.mutation(api.mutations.cancelBooking, {
+			.mutation(internal.mutations.cancelBooking, {
 				stripePaymentIntentId: paymentIntent.id
 			})
 			.catch(() => null)
