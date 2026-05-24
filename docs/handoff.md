@@ -65,6 +65,61 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
+## Sesja 2026-05-24 (II) — A4b walidacja dueAt + migracja toasta admin/automation + wuchale runtime fix
+
+### Zmiany
+
+- **PR [#9](https://github.com/tsosna/sailing-architects/pull/9) — A4b walidacja dueAt (merged):**
+  - `src/convex/mutations.ts` — w handlerze `upsertSegmentPaymentPlan` dodany throw `if (item.kind !== 'full' && !item.dueAt)` w istniejącej pętli walidującej `amountPerBerth`. Validator args zostaje `v.optional(v.number())` (kontrakt API), guard w handlerze daje czytelny komunikat z nazwą pozycji.
+  - `src/routes/[[lang=lang]]/admin/automation/+page.svelte` — w `save()` dodany 4. blok walidacji `if (items.some((it) => it.kind !== 'full' && it.dueAt === ''))` przed wywołaniem mutation, analogicznie do istniejących walidacji `sumOver/amountRequired/labelRequired`. Toast + `return`.
+  - `docs/admin-post-mvp-decisions.md` — +2 pozycje backlogu odkryte przy A4b: „domyślny szablon wygląda na zapisany plan przy pierwszym wejściu", „/book Step 5 fallback Całość maskuje brak planu w bazie".
+  - Delta produkcyjna: **+12 / -0 linii** w 2 plikach + 2 nowe entries backlogu.
+
+- **PR [#10](https://github.com/tsosna/sailing-architects/pull/10) — refactor toaster + wuchale (merged):**
+  - `src/lib/admin/payment-plan-labels.ts` — nowy plik (Cursor): wszystkie polskie stringi z logiki (`PAYMENT_PLAN_FALLBACK_NAME`, `PAYMENT_PLAN_ITEM_LABELS`, `PAYMENT_PLAN_TOAST`, `defaultPlanName(segmentName)`). 28 linii.
+  - `src/routes/[[lang=lang]]/admin/automation/+page.svelte` — Cursor refactor wuchale: import stringów z `payment-plan-labels`, `planName` startuje jako `''` + `$effect` ustawia, `generateItems(t, price)` przyjmuje cenę jako arg zamiast czytać `$state` w funkcji. Plus własna migracja toasta: 7 wywołań `toastState.addToast({message, status})` zamiast `let toast = $state(...)`, usunięty render `{#if toast}` linia 407 + style `.toast/.toast--ok/.toast--err/.toast--info` linia 693+. Import `toastState` z `$lib/state/toast.svelte`.
+  - `src/locales/en.po` + `pl.po` — Cursor regenerated (mniej entries, bo stringi przeszły do .ts poza komponentem Svelte = wuchale ich nie wyciąga).
+  - Delta produkcyjna: **+129 / -150 linii** w 4 plikach (netto -21, plik labels +28 zysk; .po pliki -65 lokalnych translation entries każdy).
+
+### Decyzje
+
+- **A4b: walidacja w 2 warstwach (UI + Convex handler), nie zmiana validatora na `v.number()`** — opcja B (throw w handlerze) zamiast A (validator wymuszony). Plus: czytelny komunikat z nazwą pozycji (`Pozycja "X" musi mieć datę płatności`), kontrola treści, spójność z istniejącymi walidacjami `amountPerBerth` w tej samej pętli. Minus: walidacja w 2 miejscach — akceptowalne, każda ma inną rolę (UI = UX feedback przed mutation call; backend = ostatni mur dla innych klientów).
+- **`kind === 'full'` pomijane w walidacji `dueAt`** — w obu warstwach. Logicznie: „Całość" = zapłać teraz, data terminu nie ma sensu. Reguła spójna między UI a Convex (zmiana jednej wymaga zmiany drugiej — three-layer API contract symmetry, [[concepts/three-layer-api-contract-symmetry]] z 2026-05-21).
+- **Bug C (fallback „Całość" w `/book` Step 5) → backlog, nie A4b scope** — choć ujawniony przy A4b, to klasa inna (UX user-facing, fallback maskuje błąd). Disciplined scope, osobna pozycja w `admin-post-mvp-decisions.md`.
+- **Wuchale refactor robi Cursor, toast migration robi Tomek** — podział pracy w drugiej połowie sesji. Cursor lepiej skaluje na mechaniczne ekstrakcje wielu stringów, Tomek dokładnie maps `kind→status` + `text→message` w 7 wywołaniach + usuwa template+style. Pierwszy refactor Cursor cofnął (silently), drugi raz po reset+ponowne uruchomienie zaaplikował poprawnie po weryfikacji `git diff` przed Tomka pracą.
+- **Dwa PR-y, nie jeden** — A4b (PR #9) i toast/wuchale refactor (PR #10) jako osobne PR. Powód: czysty scope per PR, łatwo cofnąć jedną zmianę gdyby pękła, A4b mergowane natychmiast bo to security/correctness, refactor mergowane po niezależnym teście.
+
+### Wnioski
+
+- **Cursor auto-import dla krótkich nazw parametrów (`it`, `t`, `e`) — pułapka** — w pierwszej iteracji A4b dodanie `items.some((it) => ...)` triggerowało Cursor auto-import `import { it } from 'node:test'`. Wuchale następnie wybuchnął warning `state_referenced_locally` mylącym wskazaniem linii 30 (niespokrewnionej). Reguła diagnostyczna: po napisaniu kodu z krótką nazwą parametru (1-2 znaki) zrób grep importów — jeśli pojawił się import którego nie pisałeś, usuń. Konwencja na przyszłość: w plikach które edytuje Cursor używać dłuższych nazw (`item`, `task`, `event`) zamiast `it`/`t`/`e`. Promocja: [[concepts/cursor-auto-import-short-name-params]].
+- **Wuchale runtime kolizja z Svelte 5 runes — extract stringów do `.ts`** — najmocniejsza lekcja techniczna sesji. Wuchale auto-wrappuje literały stringów w komponencie Svelte przez `_w_runtime_(...)` dla i18n. Gdy literał używany w `let x = $state('Plan domyślny')`, kompilator widzi że runtime translator capturuje wartość statycznie — emituje warning `state_referenced_locally` mówiący „use derived". Realny fix: wyciągnąć stringi do `.ts` poza komponentem (`src/lib/admin/payment-plan-labels.ts`). W module .ts wuchale ich nie tłumaczy (poza-komponentowy scope), więc nie wrappuje. Side effect: `.po` pliki mają mniej entries (te stringi nie są już translation candidates). Wzorzec: gdy widzisz wuchale warning w runach Svelte 5 → wytypuj stringi do osobnego `.ts` modułu. Promocja: [[concepts/wuchale-runtime-vs-svelte5-runes]].
+- **Cursor potrafi cichaczem cofnąć zmiany po „accept"** — Cursor zaproponował refactor wuchale (nowy `.ts` + modyfikacja `+page.svelte`). Tomek „zaakceptował", ale: (1) nowy plik powstał, (2) zmiany w `+page.svelte` zostały cofnięte (zerowy diff vs origin). Hipoteza: stash+pull+pop sequence w trakcie sync z PR #9 nadpisał zmiany Cursora (silent merge bo części identyczne). Reguła: po każdej akceptacji zmian od Cursora — `git diff <plik>` żeby zweryfikować realne zastosowanie. „Accept" w UI ≠ „changes persisted to disk". Analogiczna pułapka co „plik istnieje ≠ komponent działa" (2026-05-23). Promocja: [[concepts/verify-after-ai-accept]].
+- **Validator `v.optional()` jako contract statement, nie jako convenience default** — `dueAt: v.optional(v.number())` w `paymentPlanItemArgs` (Convex) jest **świadomym oświadczeniem kontraktu** „to pole MOŻE być nieobecne". Gdy w istocie pole jest wymagane (z biznesowego punktu widzenia), validator kłamie. Bug A4b: validator `v.optional` + UI bez walidacji = każdy pusty `dueAt` przechodzi czysto do bazy. Reguła diagnostyczna: gdy validator pola jest `v.optional`, sprawdź **wszystkie call-site'y** czy któryś z nich nie traktuje pola jako wymaganego — jeśli tak, validator jest nieprawdziwy, popraw. Wzmocnienie [[concepts/three-layer-api-contract-symmetry]] o aspekt validatora (warstwa 4).
+- **`!item.dueAt` vs `item.dueAt === ''` — precyzja przy znanych typach** — w UI `dueAt: string`, więc `=== ''` precyzyjne i czytelniejsze. W backend `dueAt: number | undefined`, więc `!item.dueAt` (łapie undefined i 0). Reguła: gdy znasz typ konkretnie, użyj porównania konkretnego (`=== ''` dla pustego stringa, `=== undefined` dla braku liczby). `!x` jest wygodny ale rozjeżdża się z intencją gdy typ ma więcej falsy values (np. `0` to legalna kwota).
+- **Toast migration ✗ inline error w `/book`** — `/book` ma osobny pattern (`saveError`/`intentError`/`paymentError` jako inline errors przy formularzu/przyciskach, nie floating toast). Świadoma decyzja: w checkoutie inline errors lepsze niż floating toast (buyer mógłby przegapić toast przy wpisywaniu karty Stripe). Toast dobry dla admin gdzie akcje dyskretne („zapisałem", „nie udało się"). Reguła ogólna: floating toast = transient ack/error po akcji; inline error = walidacja formy + kontekstowe błędy przy przyciskach. Mieszanie psuje UX (toast znika za szybko, inline rośnie listę i ginie).
+- **4-ta migracja toasta (booking-drawer, crew/confirm/[token], confirmation page, teraz admin/automation)** — wzorzec utrwala się: `import { toastState } from '$lib/state/toast.svelte'`, `addToast({ message, status, duration? })`, zero lokalnych `let toast`. Mapowanie: `kind: 'ok' → status: 'success'`, `'err' → 'error'`, `'info' → 'info'`. Konsystencja kodu rośnie z każdą migracją.
+
+### Następne kroki
+
+#### Next (nowa sesja)
+
+- **Backlog Tier A** — następna pozycja: A5 (`/admin/automation` regeneracja przy zmianie szablonu + select wraca do defaultu), A7 (Stripe `charge.refunded` → release koi), albo B14 (audyt user-facing mutations pod `ctx.auth.getUserIdentity()`). Decyzja przed startem.
+- **Update profilu ucznia** — sesja 2026-05-24 (II) — mapa kompetencji + wnioski.
+- **Sprzątanie worktree** po dwóch PR-ach merged — `git worktree remove .claude/worktrees/xenodochial-euler-d35b93` + `git branch -d` dla 2 branchy lokalnych (claude/xenodochial-euler-d35b93 + claude/toast-migration-admin-automation).
+
+#### Blocked / Later / Open questions
+
+- **PR #11 nie istnieje — sesja zamknięta 2/2 PR-ów merged.**
+- **A4c — domyślny szablon w admin/automation wygląda na zapisany plan** — nowa pozycja backlogu z dziś. Hold/select gotcha z 2026-05-22 oraz dzisiejszy „pre-MVP user mistake" zbiegają się. Kierunek w backlogu — wizualnie odróżnić draft od zapisanego, banner „Niezapisany draft", `beforeunload` warning. Niski priorytet, UX po MVP.
+- **Step 5 fallback „Całość" maskuje brak planu** — nowa pozycja backlogu. Powiązane z A4c — gdy plan nie istnieje w bazie, UI buyera kłamie pokazując „Całość", API odrzuca z cryptic toast. Kierunek: usunąć fallback, pokazać komunikat „Plan nie skonfigurowany". UX, średni priorytet.
+- **Stripe live keys** — async-blocker przez Michała (KYC), bez tego prod test za 5 zł nie ruszy.
+- **18 otwartych pozycji w backlogu Tier A/B** (z 23 sprzed dzisiejszej sesji: +2 nowe z A4b, -2 zamknięte przez A4b i toast migration).
+- **Wiki article `concepts/snapshot-vs-reference-in-storage.md`** (od 2026-05-22 I) — nadal do napisania.
+- **Wiki article `concepts/jwt-auth-convex-clerk.md`** (od 2026-05-23) — nadal do napisania.
+- **Fundament Promise/async** (od 2026-05-17) — nieoswojony, A4b/A4 dotykały async (`await convex.mutation`), bez nowych potknięć.
+
+---
+
 ## Sesja 2026-05-24 — A3: Hardening Convex server-only mutations (`internalMutation` + admin auth)
 
 ### Zmiany
