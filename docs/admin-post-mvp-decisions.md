@@ -193,13 +193,9 @@ cache, ale nie jest jedynym źródłem.
 
 **Kierunek:** Reset state po `bookingComplete` (po sukcesie mutation albo na unmount strony sukcesu). Audytować źródło prawdy — jeśli state żyje w singletonie, dodać `reset()`; jeśli w storage, czyścić klucz. Rozważyć osobno: zaznaczenia powinny być scoped per `bookingDraft` (lub per segment), nie globalnie.
 
-## `/admin/automation` — zmiana szablonu nie regeneruje pozycji
+## ~~`/admin/automation` — zmiana szablonu nie regeneruje pozycji~~ — ZAMKNIĘTE (A5, sesja 2026-05-25)
 
-**Stan:** Na `/admin/automation` po wyborze szablonu (np. „Zaliczka + 2 raty") i wygenerowaniu pozycji, zmiana szablonu na inny (np. „Zaliczka + 3 raty") **nie** odpala recompute — w UI zostają stare pozycje (3 zamiast 4). Dodatkowy wariant: po ręcznym usunięciu wszystkich pozycji wybór „Całość teraz" tiket selecta cofa się sam do „Zaliczka + 2 raty" i regeneruje 3 pozycje — czyli select nie respektuje wyboru gdy lista pozycji jest pusta / wraca do defaultu.
-
-**Trigger:** Operator zmienia plan globalny dla nowych bookingów — UI sugeruje że nic się nie zmieniło (lub że zmiana jest nieosiągalna) i blokuje świadomy zapis. Krok 5 Scenariusza 7 admin checklisty („Zmień plan na 'Całość teraz' → zapisz. Nowy booking dostaje 1 pozycję") niewykonalny przez UI.
-
-**Kierunek:** (1) `$effect` / `$derived` na zmianie szablonu który czyści i regeneruje pozycje (lub przycisk „Regeneruj" jasno widoczny przy zmianie). (2) Audyt logiki selecta — nie wracać do `default` gdy lista pozycji jest pusta; pozwolić użytkownikowi zapisać plan jednopozycyjny.
+**Fix:** `onchange={() => generateItems(template, pricePerBerthPLN)}` na `<select>` szablonu. Bug 2 („select wraca do defaultu") był konsekwencją bug 1 — items nie regenerowały się przy zmianie selecta, więc save wysyłał stare items pasujące do innego template, a `inferTemplate` po reload zwracał oryginalny.
 
 ## `/admin/automation` używa starego inline toasta
 
@@ -337,3 +333,27 @@ Pierwotna hipoteza („krzyżowanie wierszy między bookingami przez błędny fi
 
 **Kierunek:** (1) Usunąć fallback, gdy `!plan || plan.items.length === 0` zwrócić pustą tablicę `paymentOptions = []`. (2) W template Step 5 dodać branch: gdy `paymentOptions.length === 0` pokazać komunikat „Plan płatności dla tego segmentu nie jest jeszcze skonfigurowany — skontaktuj się z biurem" + zablokować Step 5 (przycisk „Zapłać" już jest disabled przez `!selectedPaymentOption`, ale komunikat brakuje). (3) Alternatywa: zwracać `plan` jako wymagany w `voyageSegmentDetail` query — gdy brak planu, w ogóle blokować wejście w `/book` na poziomie route.
 
+
+## `/admin/automation` — kolumna „Typ" pozycji wystawia raw enum adminowi
+
+**Stan:** Każda pozycja planu ma dropdown „Typ" z 5 opcjami: `deposit`, `installment`, `balance`, `full`, `custom`. Admin może wybrać dowolny kind dla dowolnej pozycji — np. plan z pozycją 1 jako `full` (kwota cząstkowa 690 PLN) + pozycje 2/3 jako `installment`/`balance`. Schema przepuszcza, save działa, ale semantyka nonsensowna — `full` znaczy „zapłać całość teraz, brak terminu", a tu jest 1/3 ceny z datą.
+
+**Trigger:** Footgun. Admin nie wie do czego służy `kind`, klika cokolwiek. Downstream `kind` decyduje o (1) skip walidacji `dueAt`, (2) prawdopodobnie alert/monit logice, (3) Stripe schedule mapping. Wartość raw enum nie powinna być w UI admina.
+
+**Kierunek:** (1) Ukryć kolumnę „Typ" w UI. Autoderywować `kind` z pozycji w liście — pierwsza = `deposit`, środkowe = `installment`, ostatnia = `balance`, lub `full` gdy template = `full` (1 item). (2) Alternatywa: zostawić kolumnę ale jako read-only z labelami PL („Zaliczka"/„Rata"/„Wyrównanie"/„Całość"). (3) Dla template `custom` użytkownik dodaje pozycje bez przypisanego `kind` — wszystkie jako `custom`.
+
+## `/admin/automation` — brak ostrzeżenia o niezapisanym drafcie przy zmianie szablonu/segmentu
+
+**Stan:** User edytuje plan (zmienia kwoty, dodaje pozycje), nie klika „Zapisz", zmienia szablon w selecie → items się regenerują z szablonu, draft user'a znika bez ostrzeżenia. Analogicznie zmiana segmentu w `segment-strip` (linia 286-290) ładuje plan innego segmentu bez ostrzeżenia.
+
+**Trigger:** Cicha utrata pracy. Wzmocnienie istniejącej pozycji „domyślny szablon wygląda na zapisany plan" (linia ~324) — ten sam korzeń (brak rozróżnienia draft/saved), inny przejaw.
+
+**Kierunek:** (1) Track `isDirty` (boolean) — true gdy items/planName/allowFullPayment różnią się od ostatnio załadowanego planu. (2) Przy zmianie szablonu/segmentu z `isDirty=true` pokaż `confirm()` lub modal „Masz niezapisane zmiany — kontynuować?". (3) `beforeunload` handler dla nawigacji poza stronę. (4) Zsynchronizować z pozycją A4c.
+
+## `/admin/automation` — „Generuj pozycje" button po fix A5 — przemianować
+
+**Stan:** Po A5 (sesja 2026-05-25) zmiana selecta szablonu sama regeneruje pozycje. Przycisk „Generuj pozycje" (linia 307-309) dalej wywołuje `regenerate()` — przydatne jako re-roll po ręcznej edycji items (user pozmieniał kwoty/dodał wiersze, chce reset z szablonu). Ale label „Generuj pozycje" sugeruje że bez kliknięcia pozycje nie istnieją.
+
+**Trigger:** Nieoczywisty cel przycisku po A5. Mylący label.
+
+**Kierunek:** Przemianować na „Resetuj z szablonu" + tooltip „Nadpisuje obecne pozycje świeżymi z wybranego szablonu". Niski priorytet, polish.

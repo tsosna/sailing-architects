@@ -155,7 +155,8 @@
 		generateItems(template, pricePerBerthPLN)
 		toastState.addToast({
 			message: PAYMENT_PLAN_TOAST.regenerated,
-			status: 'info'
+			status: 'info',
+			duration: 5000
 		})
 	}
 
@@ -321,7 +322,10 @@
 	<div class="form-grid">
 		<label class="field">
 			<span>Szablon</span>
-			<select bind:value={template}>
+			<select
+				bind:value={template}
+				onchange={() => generateItems(template, pricePerBerthPLN)}
+			>
 				<option value="deposit_2">Zaliczka + 2 raty</option>
 				<option value="deposit_3">Zaliczka + 3 raty</option>
 				<option value="full">Całość teraz</option>
