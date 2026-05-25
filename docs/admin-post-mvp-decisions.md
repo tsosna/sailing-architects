@@ -323,7 +323,7 @@ Pierwotna hipoteza („krzyżowanie wierszy między bookingami przez błędny fi
 
 **Trigger:** Operator konfiguruje plany dla wszystkich segmentów, część zapisuje, część przeskakuje uznając „już jest". W bazie tylko część segmentów ma plan. User próbuje zakupu segmentu bez planu → fallback „Całość" w Step 5 → API odrzuca (zob. A4b — przy okazji ujawnione przy tym samym fixie).
 
-**Kierunek:** (1) Wizualnie odróżnić draft od zapisanego — banner „Niezapisany draft z szablonu" + zmiana koloru sekcji + przycisk „Zapisz plan" wyróżniony. (2) Alternatywa: nie generować draftu automatycznie, pokazać pusty stan z przyciskiem „Wygeneruj z szablonu". (3) Po zmianie segmentu wykryć niezapisane zmiany i ostrzec (`beforeunload` / dialog „Masz niezapisane zmiany, kontynuować?").
+**Kierunek:** (1) Wizualnie odróżnić draft od zapisanego — banner „Niezapisany draft z szablonu" + zmiana koloru sekcji + przycisk „Zapisz plan" wyróżniony. (2) Alternatywa: nie generować draftu automatycznie, pokazać pusty stan z przyciskiem „Wygeneruj z szablonu". (3) Po zmianie segmentu wykryć niezapisane zmiany i ostrzec (`beforeunload` / dialog „Masz niezapisane zmiany, kontynuować?"). (4) Zmienić default `template` z `'deposit_2'` na `'full'` w `automation/+page.svelte:28,64` — admin widzi 1 pozycję „Całość" zgodną z tym co widzi buyer w Step 5 (gdy brak planu w bazie, buyer dziś dostaje fallback „Całość" — patrz pozycja niżej). Eliminuje niespójność „admin widzi 3 raty, buyer widzi całość".
 
 ## `/book` Step 5 — fallback „Całość" maskuje brak planu w bazie
 
