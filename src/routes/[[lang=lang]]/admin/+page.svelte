@@ -4,7 +4,6 @@
 	import type { Id } from '$convex/dataModel'
 	import { voyageSegments } from '$lib/data/voyage-segments'
 	import BookingDrawer from '$lib/components/admin/booking-drawer.svelte'
-	import type { PageData } from './$types'
 	type FilterKey =
 		| 'all'
 		| 'overdue'
@@ -13,7 +12,14 @@
 		| 'awaiting_confirmation'
 		| 'paid'
 
-	let { data: pageData }: { data: PageData } = $props()
+	let now = $state(Date.now())
+	$effect(()=>{
+		const id = setInterval(()=>{
+			now = Date.now()
+		}, 60000)
+		return ()=>clearInterval(id)
+	})
+
 	let selectedSegment = $state(voyageSegments[0].id)
 	let activeFilter = $state<FilterKey>('all')
 	let openBookingId = $state<Id<'bookings'> | null>(null)
@@ -44,19 +50,21 @@
 		}
 	})
 
+
 	function formatPLN(grosze: number): string {
 		const zlote = Math.round(grosze / 100)
 		return zlote.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
 	}
 
-	function formatHoldCountdown(timestamp: number | null): string {
+	function formatHoldCountdown(timestamp: number | null, currentTime: number): string {
 		if (!timestamp) return '—'
-		const minutes = Math.max(0, Math.round((timestamp - Date.now()) / 60000))
+		const minutes = Math.max(0, Math.round((timestamp - currentTime) / 60000))
 		if (minutes < 1) return 'teraz'
 		if (minutes < 60) return `${minutes} min`
 		const hours = Math.floor(minutes / 60)
 		return `${hours} h`
 	}
+
 </script>
 
 <svelte:head>
@@ -135,7 +143,7 @@
 		<div class="kpi">
 			<span>Held</span>
 			<strong>{data.kpi.heldCount}</strong>
-			<em>{formatHoldCountdown(data.kpi.nextHoldExpiresAt)} do wygaśnięcia</em>
+			<em>{formatHoldCountdown(data.kpi.nextHoldExpiresAt, now)} do wygaśnięcia</em>
 		</div>
 		<div class="kpi">
 			<span>Specjalne</span>
