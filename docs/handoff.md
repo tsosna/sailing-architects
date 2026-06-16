@@ -65,73 +65,79 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
-## Sesja 2026-05-25 — A5 regeneracja items po zmianie szablonu (PR #11) + B14 częściowy (audyt user-facing mutations)
+## Sesja 2026-06-16 — powrót po 10 dniach urlopu: B14 dokończenie + PR #11 merge + reactive clock fix
 
 ### Zmiany
 
-- **PR [#11](https://github.com/tsosna/sailing-architects/pull/11) — A5 (open, do merge):**
-  - `src/routes/[[lang=lang]]/admin/automation/+page.svelte` — `onchange={() => generateItems(template, pricePerBerthPLN)}` na `<select bind:value={template}>` (linia 324) + bump duration toast `regenerate()` z default na 5s.
-  - `docs/admin-post-mvp-decisions.md` — A5 oznaczone ZAMKNIĘTE, +3 nowe pozycje backlogu (kolumna „Typ" raw enum jako footgun, brak ostrzeżenia o niezapisanym drafcie, „Generuj pozycje" button label do przemianowania) + dopisany 4. kierunek do istniejącej pozycji „domyślny szablon wygląda na zapisany plan" (zmień default `template` z `deposit_2` na `full`).
-  - Delta: **+5 / -1 linii** w `+page.svelte`, **+32 / -4 linii** w backlogu.
-
-- **B14 częściowy — niezacommitowane w main, do dokończenia jutro:**
-  - **User-write (zostaje, dobre):**
-    - `src/convex/_lib/requireAdmin.ts` — extend `AnyCtx` o `GenericActionCtx<DataModel>` (potrzebne dla `sendCrewConfirmationLink` action).
-    - `src/convex/mutations.ts upsertCrewProfile` (linia 237) — drop `userId` z args, `const identity = await ctx.auth.getUserIdentity(); if (!identity) throw 'Unauthorized'`, spread `{ ...args, userId: identity.subject }` w patch + insert.
-    - `src/convex/mutations.ts upsertBookingParticipant` (linia 693) — to samo, drop `userId`, identity check, `identity.subject` zamiast `args.userId`, usunięto `userId: _userId` z destrukturyzacji.
-    - 3 call sites: `book/+page.svelte:605`, `dashboard/+page.svelte:181`, `dashboard/crew/[participantId]/+page.svelte:181` — usunięte `userId: ...` z args mutation.
-  - **Moje (klepane sam, do REVERT + przepisać jutro przez Tomka):**
-    - `src/convex/crewConfirmation.ts sendCrewConfirmationLink` (action 157) — uproszczenie duplikatu `getUserIdentity` do `const adminIdentity = await requireConvexAdmin(ctx)`.
-    - `src/convex/crewConfirmation.ts adminMarkConfirmedManually` (linia 377) — j.w. uproszczenie + drop `adminUserId` z args + zamiana na `identity.subject`.
-    - `src/convex/mutations.ts adminUpdateParticipantData` (linia 751) — drop `adminUserId` z args + `identity.subject`.
-    - `src/lib/components/admin/booking-drawer.svelte` — usunięte `adminUserId` z 3 wywołań mutation/action + martwy prop `adminUserId` (linia 11, 15).
-    - `src/routes/[[lang=lang]]/admin/+page.svelte:273` — usunięte `adminUserId={pageData.admin.userId}` z `<BookingDrawer />`.
-  - Stan w main: 9 plików `git diff --stat`, ~+54 / -50 linii. **NIE commitowane** — workspace na jutro.
+- **PR [#11](https://github.com/tsosna/sailing-architects/pull/11) — A5 regeneracja items w `/admin/automation` (squash-merged dziś):** sprzed urlopu, wisiał open od sesji 2026-05-25. Merge bez zmian, A5 zamknięty.
+- **PR [#12](https://github.com/tsosna/sailing-architects/pull/12) — B14 hardening user-facing Convex mutations (open, do code review jutro):**
+  - `src/convex/_lib/requireAdmin.ts` — helper rozszerzony o `GenericActionCtx<DataModel>` w `AnyCtx` union (action support dla `sendCrewConfirmationLink`).
+  - `src/convex/mutations.ts` — 3 mutations zhardenowane wzorcem B:
+    - `upsertCrewProfile` — drop `userId: v.string()` z args, `const identity = await ctx.auth.getUserIdentity()` na początku handlera, `identity.subject` w `withIndex` query + insert + patch.
+    - `upsertBookingParticipant` — drop `userId: v.string()` z args, auth check + IDOR check `buyerUserId !== identity.subject` (zamiast `args.userId`), destructure bez `userId`.
+    - `adminUpdateParticipantData` — drop `adminUserId: v.string()` z args, `const adminIdentity = await requireConvexAdmin(ctx)` (zamiast `await requireConvexAdmin(ctx)`), `adminEditedBy: adminIdentity.subject`.
+  - `src/convex/crewConfirmation.ts` — 2 admin endpointy zhardenowane:
+    - `sendCrewConfirmationLink` (action) — drop arg, `requireConvexAdmin` przed `runQuery`, `adminUserId: adminIdentity.subject` w `_persistConfirmationDispatch` call.
+    - `adminMarkConfirmedManually` (mutation) — drop arg, `const adminIdentity = ...`, `adminEditedBy: adminIdentity.subject`.
+  - Klienci (drop pola z wywołań):
+    - `src/lib/components/admin/booking-drawer.svelte` + `src/routes/[[lang=lang]]/admin/+page.svelte` — Cursor fix dziś rano (drop `adminUserId` prop + 3 wywołania).
+    - `src/routes/[[lang=lang]]/book/+page.svelte` — drop `userId` z `upsertCrewProfile`.
+    - `src/routes/[[lang=lang]]/dashboard/+page.svelte` + `src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte` — drop `userId` z `upsertBookingParticipant`.
+  - `pnpm check`: 0 errors, 0 warnings.
+  - Delta produkcyjna: **+29 / -40 linii** w 8 plikach.
+- **Reactive clock fix `/admin/+page.svelte`** (niezacommitowany, czeka na osobny PR):
+  - `let now = $state(Date.now())` + `$effect(() => { const id = setInterval(() => { now = Date.now() }, 60_000); return () => clearInterval(id) })` na samej górze `<script>`.
+  - `formatHoldCountdown(timestamp, currentTime)` przyjmuje drugi argument zamiast wewnętrznego `Date.now()`.
+  - Call-site KPI „Held — X min do wygaśnięcia" przekazuje `now`.
+  - Cursor przy okazji usunął martwy kod (`import type { PageData }` + `let { data: pageData }: { data: PageData } = $props()` — nieużywane, `data` brane z `$derived(overview.data ?? null)`).
+  - Empiryczna weryfikacja: countdown odlicza („tak czas się cofa" — Tomek na żywo).
+- `knowledge-vault/wiki/concepts/svelte5-effect-cleanup-ambient-clock.md` — nowy artykuł (pattern reactive clock, ambient state vs DB-fact, cleanup function w `$effect`).
+- `knowledge-vault/wiki/index.md` — wpisany nowy koncept w sekcji Concepts.
+- `knowledge-vault/wiki/topics/tomek-coding-learning-profile.md` — update sesji 2026-06-16, mapa kompetencji (Svelte 5 `$effect` cleanup + ambient state jako utrwalony pattern; Convex security 3-warstwowy: utrwalony przez 5x wzorzec B).
+- **Worktree cleanup:** `git worktree remove .claude/worktrees/jolly-elion-0f66c7` + `git branch -D claude/jolly-elion-0f66c7` (A5 branch).
 
 ### Decyzje
 
-- **Wzorzec security B („drop arg, read from identity") nad A („verify args matches identity")** — najmocniejsza decyzja sesji. B eliminuje **klasę bugów** (nie da się podać cudzego userId bo pole nie istnieje w API), A chroni przed **pojedynczym przypadkiem** (sprawdza za każdym razem, łatwo zapomnieć przy nowych mutations). Reguła: zmniejsz powierzchnię ataku, najlepszy fix to ten po którym bug fizycznie nie może się zdarzyć.
-- **`requireConvexAdmin` rozszerzony o `GenericActionCtx`** — wcześniej helper był typed tylko dla Query/Mutation ctx. Dodanie `| GenericActionCtx<DataModel>` do unii `AnyCtx` pozwala wołać helper w actions (potrzebne dla `sendCrewConfirmationLink`). Identity API jest takie samo we wszystkich trzech typach ctx — typowanie było ograniczeniem TS, nie runtime.
-- **Tokenowe public mutations (`confirmCrewDataByToken`, `requestCrewDataCorrectionByToken`) bez auth — by design** — uczestnik nie loguje się, token = dowód uprawnienia. Trzy warstwy: hash check, `usedAt` (anti-replay), `expiresAt` (window). Brak `ctx.auth` celowy, nie luka.
-- **STOP nauki gdy ja klepię zamiast Tomek** — sesja przekroczyła kontrakt z CLAUDE.md („kod pisze Tomek, ja tłumaczę"). Po fazie cleanup'u przejąłem Edit tool dla 5 plików → Tomek zatrzymał („nie podoba mi się że sam piszesz, to ma być moja lekcja"). Decyzja: revert mojej części + przepis przez Tomka jutro. Zasada na przyszłość: ja klepię tylko gdy Tomek wprost zgodzi się przed każdą edycją.
-- **Niezacommitowane B14 part w main zostaje** — workspace na jutro. Tomek widzi `git diff` rano, decyduje co revert (moje 4 pliki) + przepisuje od zera. PR B14 idzie po przepisaniu.
-- **Worktree cleanup `xenodochial-euler-d35b93`** — `git worktree remove --force` + `git branch -D claude/toast-migration-admin-automation` (sprzątanie z poprzedniej sesji 2026-05-24 II). Diff w worktree był duplikatem wpisu już merged w main.
+- **PR #12 zostawione open, NIE zmergowane dziś** — security PR (5 mutations + IDOR check), warto przespać i wrócić świeżymi oczami jutro. Sugestia z sesji, Tomek zaakceptował. Brak konfliktu z main (różne pliki niż A5/PR #11).
+- **Mini-wykład po analogii zamiast od razu w kod** — pierwsza próba tłumaczenia wzorca B kodem (linia po linii `requireConvexAdmin`) trafiła w „mgłę". Decyzja: cofnąć się do analogii paszport/lotnisko/bramka/VIP, czekać aż Tomek powie „teraz jaśniej", potem wrócić do kodu. Empirycznie zadziałało — po analogii 4 mutations Tomek napisał samodzielnie bez błędu.
+- **5-krotne powtórzenie wzorca B w jednej sesji jako forma utrwalenia** — zamiast jednej mutacji „dla przykładu" + przerwa, świadomie przeszliśmy wszystkie 5 podobnych mutations (`upsertCrewProfile`, `upsertBookingParticipant`, `adminUpdateParticipantData`, `adminMarkConfirmedManually`, `sendCrewConfirmationLink`). Z każdą Tomek tracił czas decyzyjny. Ostatnia była natychmiastowa.
+- **Reactive clock fix tylko po stronie klienta (KPI), alert title odłożone do backlogu** — handoff z 2026-05-22 II mówił o dwóch zamrożonych miejscach: KPI „X do wygaśnięcia" + alert title „Held kończy się za X min". Klient front side łatwy (`$state` + `setInterval`). Alert title wymaga zmiany Convex query (zwracać raw `holdExpiresAt` zamiast formatowanego stringa). Dziś tylko mniejszy scope.
+- **`pageData` martwy kod usunięty przez Cursora przy okazji** — niegroźny scope creep. `pnpm check` zielony. Cursor czyściej niż reakcja „zwroc" — akceptujemy.
+- **Cursor accept ≠ persisted to disk (drugi raz w sesji)** — przy rozszerzeniu helper'a o `GenericActionCtx` Cursor nie zapisał plik mimo „gotowe". `git diff` wyłapał. Procedura potwierdzona: po każdym accept Cursora → `git diff` natychmiast. Reguła z 2026-05-24 II.
+- **`scripts/send-yesterday-handoff-report.mjs` świadomie poza scope B14** — modified z dawniejszej pracy, niezacommitowane, nie należy do tej linii tematycznej. Do osobnego ogarnięcia.
 
 ### Wnioski
 
-- **IDOR (Insecure Direct Object Reference) jako klasa ataków** — najmocniejsza lekcja koncepcyjna. API przyjmuje `id` od klienta, ufa że klient ma do niego prawo. `upsertCrewProfile` z `userId: v.string()` bez weryfikacji = klasyczny IDOR. Atakujący zna cudzy `userId` (z URL, public API, własnego konta jako referenta) → wywołuje mutation z DevTools → nadpisuje cały profil ofiary (paszport, telefon, medical notes). Wzorzec uniwersalny: każdy `id` w args musi mieć weryfikację „czy ten user ma do tego id prawo" albo `id` musi być derywowane z auth (jak `identity.subject`).
-- **Authentication vs Authorization — drugi raz utrwalone (po A2 2026-05-23)** — auth-N (czy zalogowany, JWT signed?) vs auth-Z (czy uprawniony do tego rekordu?). Convex weryfikuje auth-N sam przez `auth.config.ts`. Auth-Z my piszemy w handlerze. `upsertCrewProfile` przed B14 miało **żadne z dwóch**, mimo że strona `/profile` w SvelteKit była za login guardem. Atakujący omija SvelteKit guard przez bezpośrednie wołanie Convex z DevTools — został tylko backend layer, którego nie było.
-- **Defense in depth — warstwy chroniące mutation** — (1) SvelteKit page guard (login required), (2) UI nie pokazuje cudzych userId inputu, (3) Convex mutation auth check. Atakujący może obejść 1+2 przez DevTools. Bez 3 = gołe drzwi. Reguła: nie polegaj na jednej warstwie, każda może zostać przebita.
-- **`args` to input od klienta — nigdy nie ufać** — `userId: v.string()` waliduje **typ** (czy string), nie **prawdę** (czy twój userId). `args.userId` = co user **mówi**. `identity.subject` = co JWT **udowadnia**. Reguła #1 security: nigdy nie ufaj args.
-- **Action ctx ma `auth.getUserIdentity()` jak mutation/query** — runtime identyczny, tylko typowanie różne (`GenericActionCtx<DataModel>`). Helper auth musi mieć union wszystkich trzech ctx typów. Po rozszerzeniu helper działa wszędzie.
-- **Internal mutations są dostępne z innych Convex functions bez admin auth** — `sendCrewConfirmationLink` (action) wołało `internal.crewConfirmation._persistConfirmationDispatch` bez problemu, mimo że atakujący z zewnątrz nie ma jak. Internal `*Mutation`/`*Action` chroni przed zewnętrznym dostępem, nie przed wewnętrznym wywołaniem. Czyli: jeśli external entrypoint (action publiczna) nie ma guard'a, atakujący wywoła action → action wywoła internal → bug. **Każdy public entrypoint MUSI mieć własny auth check.**
-- **`{ ...args, userId: identity.subject }` — spread + override** — `...args` rozsypuje wszystkie pola args, potem dodajesz/nadpisujesz po przecinku. Tu: args nie ma już `userId` (usunięte ze schemy), więc dodajemy niefalszowalną wartość z JWT.
-- **Destrukturyzacja z rename + rest + underscore prefix** — `const { participantId: _participantId, ...profilePatch } = args`. KEY:ALIAS rename, `_` prefix = „nieużywany, zostaw mnie ESLint", `...rest` = zbierz pozostałe pola. Idiom JS dla „wyciągnij to pole żeby NIE trafiło do reszty".
-- **Convex validator args jest STRICT** — nieznane pola odrzucane jako `ArgumentValidationError`. Po deploy zmiany API stary klient z cache wyśle stare args → error. Standardowe ryzyko deploy'u, fix = hard reload. Kontrakt jasny.
-- **Lekcja meta — dynamika nauki dwuwarstwowa (Tomek)** — Tomek wprost zasygnalizował: „dynamika uczenia będzie różna, bo mam duże luki w samych koncepcjach/ideach (typu auth), jak i w samym kodowaniu". Czyli czasem trzeba **lekcji konceptualnej** zanim ruszymy kod (dziś: pełny mini-wykład o auth-N/Z + IDOR + defense in depth przed pierwszą linią kodu B14), czasem **mikro-kroków kodu** (dziś: function reference vs call w A5, spread operator). Niewłaściwy poziom = albo overload („gubię się w tych plikach"), albo nuda. Reguła na przyszłość: pytać przed nowym zadaniem „chcesz koncept najpierw czy ruszymy kod", w trakcie obserwować i przełączać.
-- **Function reference vs function call — fundament zamknięty po lekcji A5** — `fn` (sama funkcja, przepis) ≠ `fn()` (wynik wywołania teraz) ≠ `() => fn(x)` (nowa funkcja: gdy mnie wywołasz, wywołam fn(x)). Pułapka: `onclick={fn()}` wykonuje przy renderze + przekazuje `undefined`. Tomek popełnił błąd („`onchange={generateItems(template, ...)}`") — to ujawniło lukę fundamentu. Lekcja zamknięta z tabelą diagnostyczną. Powiązane: [[concepts/function-reference-vs-call-event-handlers]] do napisania.
-- **Bug 2 jako konsekwencja bug 1 — nie zawsze dwa fixy** — w A5 raport „select wraca do defaultu" wyglądał na osobny bug, w istocie był efektem ubocznym braku regeneracji items (bug 1). Reguła diagnostyczna: gdy 2 bugi z jednego scenariusza, zanim założysz 2 fixy, sprawdź czy jeden nie jest konsekwencją drugiego.
+- **Analogia konkretna > kod linia po linii dla powrotu po przerwie > tydzień** — najmocniejsza lekcja meta. Powrót po 10 dniach urlopu wymagał mini-wykładu od zera, nie kontynuacji. Tomek wprost: „rozumiem słowa ale całość jest dla mnie całkowitą mgłą" po próbie tłumaczenia kodem helper'a `requireConvexAdmin`. Analogia paszport (Clerk wyrabia JWT) / pasażer (user) / bramka (Convex backend) / salonik VIP (admin mutation) z trzema krokami kontroli (paszport jest? pieczęć OK? status VIP?) mapowanymi 1-do-1 na 3 linie helper'a odblokowała. Pattern: gdy uczeń mówi „mgła" — wracaj do aktorów i akcji zanim wrócisz do kodu. Powiązane z reverse-engineering principle [[concepts/learning-by-concrete-analogy]] (do napisania).
+- **Wzorzec B utrwalony przez 5-krotne powtórzenie** — Convex 3-warstwowy security model utrwalony nie przez kolejne sesje ale przez 5 powtórzeń w jednej. Tomek umie z głowy: drop arg `userId`/`adminUserId` → auth check pierwszy w handlerze (`getUserIdentity` dla user, `requireConvexAdmin` dla admin) → użyj `identity.subject` w query/insert/patch/audit log. IDOR check zostaje, ale porównuje z `identity.subject` zamiast args. Reguła nauki: utrwalenie przez wielokrotną ekspozycję w jednej sesji > pojedyncze wprowadzenie + długa przerwa.
+- **`$effect` z return cleanup function — fundament Svelte 5 dla long-living subscriptions** — funkcja zwrócona z `$effect` to cleanup, Svelte wywoła automatycznie przy unmount / re-run effect. Pattern uniwersalny dla `setInterval`, `addEventListener`, websocket connection, observer pattern. Bez cleanup: leak resource po nawigacji, podwójne tick'i jeśli komponent montowany kilka razy. Promocja: [[svelte5-effect-cleanup-ambient-clock]].
+- **Ambient state vs DB-fact — trzeci raz, pierwszy pełny fix** — czas to ambient state (jak `window.innerWidth`, scroll position). Convex `useQuery` reactive na DB, nie na czas. Funkcja formatująca z `Date.now()` wewnątrz = snapshot przy renderze, nie żyje. Fix: `$state(now)` + `setInterval` + przekazanie `now` jako jawny argument do funkcji formatującej. Pierwsze dwa razy (2026-05-22 II Scenariusz 9 hold countdown, 2026-05-16 post-mutation subscription race) tylko diagnoza koncepcyjna; dziś implementowany fix z weryfikacją empiryczną.
+- **3-warstwowy git mental model wymaga jawnego wytłumaczenia po wielu PR-ach** — Tomek pod koniec sesji „gubię się w tym git" przy stanie: lokalny main, origin/main, branch B14. Trzy miejsca historii + sytuacja „PR #11 zmergowany, PR #12 open" wymagały tekstowego diagramu. Po diagramie pytanie „co świadomie zrobić" miało prostą odpowiedź („nic"). Reguła nauki: po każdym merge/push wytłumaczyć eksplicytnie gdzie co żyje, nie tylko wykonać komendy. Lekcja meta dla siebie: nie zakładać że uczeń trzyma diagram w głowie.
+- **Pre-MVP sesja kombinowana: security PR + UX bonus** — dwa różne profile zadań w jednej sesji (security/dyscyplinowane przepisywanie + Svelte 5 reactive clock fix) działa tylko gdy lighter task kończy sesję. Po heavy security session UX/Svelte zmienia rejestr, łatwiej ogarnąć. Reguła planowania nauki: drugie zadanie powinno być inny rejestr techniczny niż pierwsze.
+- **Cursor scope creep akceptowalny gdy `pnpm check` zielony** — Cursor przy okazji usunął martwy kod (`import PageData` + `let { data: pageData } = $props()` nieużywane). To pewien scope creep poza zadanie reactive clock, ale niegroźny: pnpm check przechodzi, `data` brane z `$derived(overview.data)` poniżej w kodzie. Reguła: drobny dead-code cleanup OK, ale weryfikacja typecheck obowiązkowa (przykład Cursor scope creep który był legitymny).
 
 ### Następne kroki
 
 #### Next (nowa sesja)
 
-- **Dokończyć B14:** revert mojej 4-plikowej części (`crewConfirmation.ts` simplifications, `mutations.ts adminUpdateParticipantData`, `booking-drawer.svelte`, `admin/+page.svelte`), Tomek przepisuje od zera krok-po-kroku. Sekwencja: (1) crewConfirmation.ts oba helpery uprościć — usunąć duplikat `getUserIdentity` w `sendCrewConfirmationLink` + `adminMarkConfirmedManually`, użyć return value z `requireConvexAdmin`. (2) adminUpdateParticipantData drop `adminUserId` arg + `identity.subject`. (3) booking-drawer.svelte 3 call sites + martwy prop. (4) admin/+page.svelte prop removal. (5) Test happy path w przeglądarce wszystkich 5 mutations. (6) Commit + PR B14.
-- **Merge PR #11 (A5)** — twoja akcja, prawdopodobnie pre-test w main.
-- **Update profilu ucznia** sesją 2026-05-25 — mapa kompetencji (security: IDOR, auth-N/Z drugi raz, defense in depth; JS: function ref vs call, destructuring rename+rest+underscore, spread override).
-- **Sprzątanie worktree** po PR #11 merge: `git worktree remove .claude/worktrees/jolly-elion-0f66c7` + `git branch -D claude/jolly-elion-0f66c7`.
+- **Code review PR #12** świeżymi oczami → merge lub poprawka. Jeśli OK: squash-merge + `git pull` na main. Sugerowane sprawdzenie: test ataku w DevTools (`convex.mutation(api.mutations.upsertCrewProfile, { firstName: "X" })` bez sesji → powinien throw `Unauthorized`).
+- **Reactive clock fix → osobny PR** (czeka niezacommitowane). Komendy: branch, add `src/routes/[[lang=lang]]/admin/+page.svelte`, commit z message, push, PR.
+- **Backlog Tier A pozostałe pozycje:**
+  - **A6** — Hardening server-side mutations w prod context (CONVEX_ADMIN_KEY → CONVEX_SELF_HOSTED_ADMIN_KEY, dodać do Vercel env). Mała pozycja przed prod.
+  - **A7** — Stripe `charge.refunded` → release koi (return berths to inventory). Płatność/refundy = krytyczne pre-prod.
+  - **Backlog cleanup**: skreślić „Hardening Convex side dla admin mutations" jako resolved przez A2 + A3 + B14 (stale entry w `docs/admin-post-mvp-decisions.md`).
+- **Update profilu ucznia** dopisanie wpisu sesji 2026-06-16 → zrobione w tej sesji.
 
 #### Blocked / Later / Open questions
 
-- **PR #11 (A5) open, merge pending Tomek.**
-- **B14 PR nie istnieje** — po przepisaniu jutra.
-- **Stripe live keys** — async-blocker przez Michała (KYC).
-- **17 otwartych pozycji w backlogu Tier A/B** (z 18: -1 A5 zamknięte, +3 z dziś = 20). Plus 1 backlog rozszerzony (default template).
-- **Wiki article `concepts/idor-and-trust-boundaries.md`** — nowy kandydat z dziś, IDOR + auth-N/Z + defense in depth + B („drop arg") vs A („verify match"). Mocny temat.
-- **Wiki article `concepts/function-reference-vs-call-event-handlers.md`** — kandydat z A5 lekcji.
+- **Alert title „Held kończy się za X min" zamrożony** — ciągle bug, wymaga zmiany Convex query (`admin.ts:319-331`) — zwracać raw `holdExpiresAt` zamiast formatowanego stringa, klient formatuje z lokalnego `now`. Średni priorytet UX, do backlogu jako rozszerzenie reactive clock fix.
+- **Stripe live keys** — async-blocker przez Michała (KYC weryfikacja firmy). Bez tego prod test za 5 zł nie ruszy.
+- **`scripts/send-yesterday-handoff-report.mjs`** modified niezacommitowane od poprzedniej sesji (+116 linii). Należy do osobnej linii tematycznej (handoff e-mail reporter). Sprawdzić co dokładnie, zacommitować lub revert.
 - **Wiki article `concepts/snapshot-vs-reference-in-storage.md`** (od 2026-05-22 I) — nadal do napisania.
 - **Wiki article `concepts/jwt-auth-convex-clerk.md`** (od 2026-05-23) — nadal do napisania.
-- **Reguła na przyszłość — ja klepię TYLKO za zgodą Tomka per zmianę.** Domyślnie: ja prowadzę, Tomek pisze. Złamanie dziś = revert + retry.
+- **Wiki article `concepts/learning-by-concrete-analogy.md`** — nowy kandydat z dziś (analogia paszport/bramka jako odblokowanie po przerwie). Patterna „concrete actors > abstract code" warto skodyfikować.
+- **Wiki article `concepts/git-three-trees-mental-model.md`** — nowy kandydat z dziś (origin/main vs local main vs branch B14 jako trzy miejsca historii).
+- **Fundament Promise/async** (od 2026-05-17) — nieoswojony; dziś dotykane przez `await ctx.auth.getUserIdentity()` × 5, drobny progres przez ekspozycję, ale bez nowych potknięć.
 
 ---
 

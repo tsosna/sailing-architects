@@ -179,7 +179,6 @@
 		saving = true
 		try {
 			await convex.mutation(api.mutations.upsertBookingParticipant, {
-				userId,
 				participantId: participant._id,
 				...(invitedEmail.trim() ? { invitedEmail: invitedEmail.trim() } : {}),
 				...(crew.firstName.trim() ? { firstName: crew.firstName.trim() } : {}),
