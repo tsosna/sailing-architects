@@ -236,7 +236,6 @@ async function createBookingPaymentSchedule({
 /** Save or update crew profile for a user (booking Step 2). */
 export const upsertCrewProfile = mutation({
 	args: {
-		userId: v.string(),
 		firstName: v.string(),
 		lastName: v.string(),
 		email: v.string(),
@@ -254,16 +253,20 @@ export const upsertCrewProfile = mutation({
 		medicalNotes: v.optional(v.string())
 	},
 	handler: async (ctx, args) => {
+		const identity = await ctx.auth.getUserIdentity()
+		if (!identity) {
+			throw new Error('Unauthorized: brak sesji')
+		}
 		const existing = await ctx.db
 			.query('crewProfiles')
-			.withIndex('by_user', (q) => q.eq('userId', args.userId))
+			.withIndex('by_user', (q) => q.eq('userId', identity.subject))
 			.first()
 
 		if (existing) {
-			await ctx.db.patch(existing._id, args)
+			await ctx.db.patch(existing._id, { ...args, userId: identity.subject })
 			return existing._id
 		}
-		return ctx.db.insert('crewProfiles', args)
+		return ctx.db.insert('crewProfiles', { ...args, userId: identity.subject })
 	}
 })
 
@@ -304,9 +307,7 @@ export const upsertSegmentPaymentPlan = mutation({
 				)
 			}
 			if (item.kind !== 'full' && !item.dueAt) {
-				throw new Error(
-					`Pozycja "${item.label}" musi mieć datę płatności`
-				)
+				throw new Error(`Pozycja "${item.label}" musi mieć datę płatności`)
 			}
 		}
 
@@ -692,25 +693,24 @@ export const cancelBookingPayments = internalMutation({
 /** Save participant/crew data for a single booked berth. */
 export const upsertBookingParticipant = mutation({
 	args: {
-		userId: v.string(),
 		participantId: v.id('bookingParticipants'),
 		...participantProfileArgs
 	},
 	handler: async (ctx, args) => {
+		const identity = await ctx.auth.getUserIdentity()
+		if (!identity) {
+			throw new Error('Unauthorized: brak sesji')
+		}
 		const participant = await ctx.db.get(args.participantId)
 		if (!participant) throw new Error('Participant not found')
 
 		const booking = await ctx.db.get(participant.bookingId)
 		const buyerUserId = booking?.buyerUserId ?? booking?.userId
-		if (!booking || buyerUserId !== args.userId) {
+		if (!booking || buyerUserId !== identity.subject) {
 			throw new Error('Participant not found')
 		}
 
-		const {
-			userId: _userId,
-			participantId: _participantId,
-			...profilePatch
-		} = args
+		const { participantId: _participantId, ...profilePatch } = args
 		const nextParticipant = { ...participant, ...profilePatch }
 		const dataStatus = participantDataStatus({
 			invitedEmail: nextParticipant.invitedEmail,
@@ -751,15 +751,14 @@ export const upsertBookingParticipant = mutation({
 export const adminUpdateParticipantData = mutation({
 	args: {
 		participantId: v.id('bookingParticipants'),
-		adminUserId: v.string(),
 		...participantProfileArgs
 	},
 	handler: async (ctx, args) => {
-		await requireConvexAdmin(ctx)
+		const adminIdentity = await requireConvexAdmin(ctx)
 		const participant = await ctx.db.get(args.participantId)
 		if (!participant) throw new Error('Participant not found')
 
-		const { participantId: _participantId, adminUserId, ...profilePatch } = args
+		const { participantId: _participantId, ...profilePatch } = args
 
 		const merged = { ...participant, ...profilePatch }
 		const dataStatus = participantDataStatus({
@@ -798,7 +797,7 @@ export const adminUpdateParticipantData = mutation({
 			dataStatus,
 			confirmationStatus,
 			adminEditedAt: Date.now(),
-			adminEditedBy: adminUserId
+			adminEditedBy: adminIdentity.subject
 		})
 
 		return { participantId: participant._id, dataStatus, confirmationStatus }

@@ -10,7 +10,7 @@ import type { Id } from './_generated/dataModel'
 import { v } from 'convex/values'
 import { panelUrl } from './_brevo'
 import { sendCrewConfirmationEmail } from './_emails'
-import { requireConvexAdmin } from './_lib/requireAdmin' 
+import { requireConvexAdmin } from './_lib/requireAdmin'
 
 const TOKEN_VALIDITY_MS = 14 * 24 * 60 * 60 * 1000
 
@@ -156,10 +156,10 @@ type SendResult =
  */
 export const sendCrewConfirmationLink = action({
 	args: {
-		participantId: v.id('bookingParticipants'),
-		adminUserId: v.string()
+		participantId: v.id('bookingParticipants')
 	},
 	handler: async (ctx, args): Promise<SendResult> => {
+		const adminIdentity = await requireConvexAdmin(ctx)
 		const dispatch: DispatchPayload | null = await ctx.runQuery(
 			internal.crewConfirmation._resolveConfirmationDispatch,
 			{ participantId: args.participantId }
@@ -187,7 +187,7 @@ export const sendCrewConfirmationLink = action({
 					tokenHash,
 					expiresAt,
 					recipientEmail: dispatch.recipient,
-					adminUserId: args.adminUserId
+					adminUserId: adminIdentity.subject
 				}
 			)
 			return {
@@ -376,11 +376,10 @@ export const requestCrewDataCorrectionByToken = mutation({
 
 export const adminMarkConfirmedManually = mutation({
 	args: {
-		participantId: v.id('bookingParticipants'),
-		adminUserId: v.string()
+		participantId: v.id('bookingParticipants')
 	},
 	handler: async (ctx, args) => {
-		await requireConvexAdmin(ctx)
+		const adminIdentity = await requireConvexAdmin(ctx)
 		const participant = await ctx.db.get(args.participantId)
 		if (!participant) throw new Error('Participant not found')
 		if (participant.dataStatus !== 'complete') {
@@ -391,7 +390,7 @@ export const adminMarkConfirmedManually = mutation({
 			confirmationStatus: 'confirmed',
 			confirmedAt: now,
 			adminEditedAt: now,
-			adminEditedBy: args.adminUserId
+			adminEditedBy: adminIdentity.subject
 		})
 
 		// Burn outstanding tokens — no public link should keep working after a

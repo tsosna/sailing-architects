@@ -603,7 +603,6 @@
 			saveError = null
 			try {
 				await convex.mutation(api.mutations.upsertCrewProfile, {
-					userId: ctx.auth.userId!,
 					firstName: result.data.firstName,
 					lastName: result.data.lastName,
 					email: result.data.email,
