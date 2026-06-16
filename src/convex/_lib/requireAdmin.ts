@@ -1,7 +1,7 @@
-import type { GenericQueryCtx, GenericMutationCtx } from 'convex/server'
+import type { GenericQueryCtx, GenericMutationCtx, GenericActionCtx } from 'convex/server'
 import type { DataModel } from '../_generated/dataModel'
 
-type AnyCtx = GenericQueryCtx<DataModel> | GenericMutationCtx<DataModel>
+type AnyCtx = GenericQueryCtx<DataModel> | GenericMutationCtx<DataModel> | GenericActionCtx<DataModel>
 
 const ADMIN_ROLE = 'admin'
 

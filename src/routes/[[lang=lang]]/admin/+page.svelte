@@ -5,7 +5,6 @@
 	import { voyageSegments } from '$lib/data/voyage-segments'
 	import BookingDrawer from '$lib/components/admin/booking-drawer.svelte'
 	import type { PageData } from './$types'
-
 	type FilterKey =
 		| 'all'
 		| 'overdue'
@@ -270,7 +269,6 @@
 
 <BookingDrawer
 	bookingId={openBookingId}
-	adminUserId={pageData.admin.userId}
 	onclose={() => (openBookingId = null)}
 />
 

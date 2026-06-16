@@ -3,16 +3,14 @@
 	import { api } from '$convex/api'
 	import { PUBLIC_APP_URL } from '$env/static/public'
 	import type { Id } from '$convex/dataModel'
-	import { Toast } from '$lib/components/toast'
 	import { toastState } from '$lib/state/toast.svelte'
 
 	type Props = {
 		bookingId: Id<'bookings'> | null
-		adminUserId: string
 		onclose: () => void
 	}
 
-	const { bookingId, adminUserId, onclose }: Props = $props()
+	const { bookingId, onclose }: Props = $props()
 
 	const convex = useConvexClient()
 
@@ -193,7 +191,6 @@
 				api.mutations.adminUpdateParticipantData,
 				{
 					participantId: editingParticipantId as Id<'bookingParticipants'>,
-					adminUserId,
 					invitedEmail: optional(editForm.invitedEmail),
 					firstName: optional(editForm.firstName),
 					lastName: optional(editForm.lastName),
@@ -327,7 +324,7 @@
 		try {
 			const result = await convex.action(
 				api.crewConfirmation.sendCrewConfirmationLink,
-				{ participantId, adminUserId }
+				{ participantId }
 			)
 			if (result.ok) {
 				toastState.addToast({
@@ -373,8 +370,7 @@
 		busyId = participantId
 		try {
 			await convex.mutation(api.crewConfirmation.adminMarkConfirmedManually, {
-				participantId,
-				adminUserId
+				participantId
 			})
 			toastState.addToast({
 				message: 'Dane oznaczone jako potwierdzone.',
