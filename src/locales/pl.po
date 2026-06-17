@@ -1824,7 +1824,7 @@ msgstr "uczestników"
 msgid "Held"
 msgstr "Held"
 
-#. 0: formatHoldCountdown(data.kpi.nextHoldExpiresAt)
+#. 0: formatHoldCountdown(data.kpi.nextHoldExpiresAt, now)
 #: src/routes/[[lang=lang]]/admin/+page.svelte
 msgid "{0} do wygaśnięcia"
 msgstr "{0} do wygaśnięcia"
