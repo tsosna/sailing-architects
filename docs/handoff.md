@@ -65,6 +65,87 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
+## Sesja 2026-06-17 20:25 — backlog cleanup + start A6 (Convex Cloud prod env)
+
+### Zmiany
+
+- **3 commity bezpośrednio na main (housekeeping):**
+  - [`f86289c`](https://github.com/tsosna/sailing-architects/commit/f86289c) — `chore(handoff-email): rozszerz reguły filtrowania jargonu w dziennym raporcie`. +116 linii w `scripts/send-yesterday-handoff-report.mjs` (niezacommitowane wcześniej). Nowe wzorce w `pickHighlights` + `normalizeChangeBullet` + `normalizeNextStepBullet` — przepuszczają biznesowe zmiany (walidacja, hardening, i18n), ucinają dev-jargon (`PR #`, `internalMutation`, `wuchale`, `worktree`, `git`, `branch`, `wiki/concepts/*.md`, `Promise/async`).
+  - [`f1ba67a`](https://github.com/tsosna/sailing-architects/commit/f1ba67a) — `chore(i18n): regenerate .po po PR #13 (formatHoldCountdown 2-arg)`. Auto-regen wuchale po merge'u PR #13 — sygnatura `formatHoldCountdown(timestamp, currentTime)` zmieniona przy reactive clock fix, `.po` pliki nie poszły w tamtym PR.
+  - [`0f9931c`](https://github.com/tsosna/sailing-architects/commit/0f9931c) — `docs(backlog): skreśl "Hardening Convex side dla admin mutations" jako resolved`. Usunięte 8 linii sekcji z `docs/admin-post-mvp-decisions.md` — wszystkie 9 admin mutations zhardenowane przez A2 (PR #7) + A3 + B14 (PR #12).
+- **A6 wystartowane (Convex Cloud prod env setup) — nie skończone, zamrożone:**
+  - Wygenerowany prod deploy key w Convex Cloud (`qualified-crab-196`, region `eu-west-1`, Europe Ireland). Nazwa `vercel-production-sailing-architects`, no expiration, **principle of least privilege**: tylko 3 permissions Functions (`runInternalMutations` + `runInternalQueries` + `runInternalActions`). Klucz zapisany w 1Password.
+  - Vercel env vars (Production scope) — wpisane 2 z 11:
+    - `PUBLIC_CONVEX_URL` = `https://qualified-crab-196.eu-west-1.convex.cloud` (z regionem — patrz Decyzje)
+    - `CONVEX_ADMIN_KEY` = wartość deploy key z 1Password
+- **Weryfikacja prod Convex `qualified-crab-196`:**
+  - **Schema zgodne** z `src/convex/schema.ts` (tabele: `berths`, `bookings`, `bookingParticipants`, `bookingPayments`, `crewConfirmationTokens`, `crewProfiles`, `paymentPlans`, `paymentPlanItems`, `voyageSegments`).
+  - **Last deployed 2 months ago** — kod funkcji STARY. Nie ma A2 / A3 / A4b / A5 / B14 / reactive clock / toast migracji / wuchale fix.
+  - **Convex 1.36 → 1.41 dostępne** (osobny temat, nie A6).
+  - **Prod nigdy nie był używany na żywo** — Tomek potwierdził. Tabele puste / seed only. Zero ryzyka migracji danych przy pierwszym `npx convex deploy --prod`.
+
+### Decyzje
+
+- **Prod = Convex Cloud (nie self-hosted)** — `.env.example` pokazywał `.convex.cloud`, Tomek potwierdził świadomie. Rozwiały lekcję 2026-05-24 (`CONVEX_DEPLOY_KEY` collision) — na Vercel runtime nie odpala się CLI, więc kolizja nazwy z 2026-05-24 nie zachodzi. Self-hosted byłby tylko gdyby compliance / vendor lock-in / skala wymusiły — Hotel Lenart nie ma tych constraints.
+- **Naming convention dla `CONVEX_ADMIN_KEY` — opcja A (zostaje, bez rename)** — kod w `src/lib/server/convex-admin.ts:8` importuje `CONVEX_ADMIN_KEY`. Vercel env var ma tę samą nazwę, ale **inną wartość** (dev = local backend admin key, prod = Convex Cloud deploy key). Zero zmian w kodzie. Alternatywa B (rename na `CONVEX_DEPLOY_KEY`) odrzucona — wymagałaby zmian w 2-3 plikach + spójności w `.env.example` + ryzyko że ktoś pomyli z auto-pickup przez CLI w innym kontekście.
+- **Deploy key — principle of least privilege** — z 22 permissions Convex Cloud zaznaczono **tylko 3** (`runInternalMutations`, `runInternalQueries`, `runInternalActions`). Świadomie pomięte: `data:view/write` (bypass funkcji — niebezpieczne, atakujący czyści bazę), `actAsUser` (impersonation), `deployment:deploy` (Vercel runtime nie deployuje), `env:view/write`, `backups:*`, monitoring. Gdyby klucz wyciekł — atakujący może wywoływać twoje funkcje (z walidatorami + business logic), nie czyści surowo bazy.
+- **No expiration deploy key** — Tomek wybrał wieczny. Ryzyko: jak wycieknie i nie zauważy, atakujący ma dostęp na zawsze. Decyzja świadoma — opcja `1 year` była proponowana jako lepszy default (forsuje rotację), ale Tomek zostawił `No expiration`. Do przemyślenia na kolejną sesję — może po prostu dopisać do backlog „rotacja deploy keys raz w roku".
+- **Vercel scope: tylko Production checkbox** — nie Preview, nie Development. Preview/dev używa lokalnych `.env` z dev backend (local anonymous Convex). Branch deploys na Vercel powinny używać dev Convex, nie prod.
+- **A6 zatrzymane przed Clerk prod** — Clerk dev jest jedyną instancją, prod nie utworzona. Tworzenie prod Clerk = 30-60 min konfiguracji + weryfikacja domeny (DNS propagation, czasem 24h) + odtworzenie JWT template + sign-in methods + email templates. To **osobna sesja**, nie ogon dzisiejszej.
+- **Trzy mini-wykłady fundamentów w jednej sesji** — Convex Cloud vs self-hosted (analogia wynajem mieszkania vs własny dom), `PUBLIC_*` SvelteKit (public = bundle do browsera = każdy widzi), identity vs credential (BREVO_FROM_EMAIL = etykieta, BREVO_API_KEY = władza). Wszystkie poprzedzone pytaniem sprawdzającym — uczeń odpowiadał zanim Claude tłumaczył.
+
+### Wnioski
+
+- **„Last deployed N miesięcy temu" + nowy frontend = breaking contract risk** — najmocniejsza techniczna lekcja meta sesji. Prod Convex `qualified-crab-196` ma kod sprzed 2 miesięcy. Validatory args są wtedy inne (np. `userId: v.string()` na user-facing mutations, później usunięte przez B14). Frontend nowy → woła mutacje bez `userId` → backend stary odrzuca `ArgumentValidationError`. Każdy `npx convex deploy --prod` po dłuższej przerwie wymaga sprawdzenia jak daleko poszedł kod między deployami. Reguła diagnostyczna: zawsze sprawdź `Last deployed` w prod dashboard zanim ruszysz Vercel deploy z nowym kodem. Dla Hotel Lenart booking — *najpierw* deploy Convex prod (synchronizuje warstwę backend), *potem* deploy Vercel (frontend uderza w aktualny backend). Kolejność krytyczna. Promocja: `concepts/convex-deploy-staleness-breaks-contract.md` (do napisania).
+- **Handoff szacunek scope często krzywdzi rzeczywistość — A6 ×8** — handoff sesji 2026-06-16 opisał A6 jako „mała pozycja przed prod". W rzeczywistości to **8 kroków, 2-3h skupionej pracy, multi-session minimum**: DNS + Stripe webhook + Clerk prod create + Convex prod env + `convex deploy --prod` + Vercel env reszta + Vercel deploy + smoke test. Reguła planowania na przyszłość: jak zadanie dotyka **prod env / external services / integrations** → mnożnik ×3-5 na czas/scope w stosunku do pierwszego oszacowania. Dla samego dev-side refactoru mnożnik ×1-1.5 wystarczy. Im więcej cudzych systemów w grze (Clerk, Stripe, Vercel, DNS, Brevo), tym większy rozjazd plan↔rzeczywistość.
+- **Identity vs credential — wzorzec uniwersalny dla każdego serwisu** — pytanie sprawdzające o `BREVO_API_KEY` ujawniło częsty błąd: uczeń odpowiedział „mam mieć dostęp tylko ja do mojego adresu email". Pomyłka: pomieszał `BREVO_FROM_EMAIL` (etykieta, wycieka w nagłówku każdego maila) z `BREVO_API_KEY` (władza wysyłania w czyimś imieniu). Wzorzec uniwersalny: **każdy serwis (Brevo, Stripe, Clerk, Convex, Twilio, AWS) ma dwie warstwy: public ID (etykieta „to mój projekt") + secret credential (siła sprawcza). Mylenie ich = wyciek.** Stripe celowo daje `pk_*` (public, do payment intent client-side) + `sk_*` (secret). Clerk daje `pk_*` + `sk_*`. Reguła diagnostyczna dla każdego nowego env var: (1) co dokładnie wartość zawiera — adres/ID/klucz/token, (2) co atakujący zrobi mając tę wartość — nic / wyśle requesty w moim imieniu / zaloguje się jako admin. Jeśli (2) = „cokolwiek czego sam nie zrobiłbym dobrowolnie" → private. Promocja: `concepts/public-id-vs-secret-credential.md` (do napisania).
+- **PUBLIC_ prefix to świadoma deklaracja „MOŻE wyciec"** — SvelteKit `$env/static/public` bundle do JS browsera, `$env/static/private` zostaje na serwerze node. PUBLIC_CONVEX_URL OK (adres do gadania, sam nie daje uprawnień, dalej jest auth gateway), CONVEX_ADMIN_KEY private CRITICAL (bypass auth-Z, każdy posiadacz = admin prod). Reguła zapamiętana: prefix to nie convenience — to oświadczenie kontraktu bezpieczeństwa.
+- **Mój błąd: zgadnięty URL bez regionu zamiast wzięcia z dashboardu** — w pierwszej iteracji A6 dałem `https://qualified-crab-196.convex.cloud` (bez regionu), poprawne to `https://qualified-crab-196.eu-west-1.convex.cloud` (z regionem). Tomek wpisał na Vercel, potem dostał z dashboardu prawdziwą wartość, musi poprawiać. Lekcja procesowa: **zawsze brać wartości env prosto ze źródła (dashboard), nie zgadywać po wzorze nazwy**. Powiedziałem to też uczniowi explicit — „nawet ja zgaduję czasem, weryfikuj z dashboard nie z czata". Cenne dla nauki: pokazanie że nauczyciel popełnia błędy, weryfikacja zewnętrzna ważna.
+- **Auth-N vs auth-Z z 2026-05-23 — utrwalone, używane jako narzędzie diagnostyczne 3 tygodnie później** — Tomek nie pomylił auth-N (URL = adres, sam nie daje wstępu, browser przy Convex pyta o JWT) z auth-Z (admin key = bypass całej kontroli ról). Bez przypomnienia — wyciągnął koncept sam. Wzorzec utrwalania: koncept poznany ~3 tygodnie temu zastosowany w nowym kontekście bez ponownego tłumaczenia = utrwalony. Lekcja meta dla mnie: ekspozycja konceptu w 1 sesji + naturalne użycie w 2-3 kolejnych = bezpiecznie utrwalone.
+- **Analogie ratują rozumienie — Convex Cloud vs self-hosted = mieszkanie vs dom** — uczeń wprost „nie potrafię odpowiedzieć bo nie rozumiem Self-hosted Convex czy Convex Cloud na prod". Próba tłumaczenia czystej definicji = mgła. Analogia (Cloud = wynajem mieszkania, właściciel dba o rury; self-hosted = kupujesz dom, wszystko twoje) odblokowała. Trzecia ekspozycja patternu po analogii paszport/lotnisko 2026-06-16. Reguła nauki: gdy uczeń mówi „nie rozumiem", wracaj do konkretnego obrazka z aktorami i akcjami zanim wrócisz do koncepcji. Promocja: `concepts/learning-by-concrete-analogy.md` (kandydat zidentyfikowany 2026-06-16, dziś druga ekspozycja — czas pisać).
+
+### Następne kroki
+
+#### Next (sesja jutro, dedykowana 2-3h)
+
+**A6 dokończenie — Convex Cloud prod env + pierwszy prod deploy.** Plan 8 kroków:
+
+1. **DNS + Vercel domain** najpierw (DNS propaguje w tle, mija się z resztą pracy). Ustal docelową domenę prod (`sailing-architects.wysokijohn.pl` z `.env.example` czy inna), wskaż w Vercel project settings, DNS records do Vercel u registrar'a.
+2. **Stripe live mode setup** — utworzyć prod webhook endpoint na docelowym URL (`https://docelowa-domena/api/stripe/webhook`), zapisać signing secret.
+3. **Clerk prod instance** — kliknij `Create production instance`, skonfiguruj:
+   - JWT template `convex` (`aud: "convex"`, custom claim `role: {{user.public_metadata.role}}`) — tak jak dev sesja 2026-05-23
+   - Sign-in methods (email + password? Google?)
+   - Verify production domain (CNAME records do Clerk, czeka na DNS)
+   - Email templates jeśli były dostosowane w dev
+4. **Convex prod env vars** (dashboard prod albo `npx convex env set --prod`):
+   - `CLERK_JWT_ISSUER_DOMAIN` = prod Clerk Frontend API URL (bez `https://`)
+   - `BREVO_API_KEY` = prod Brevo key
+   - `BREVO_FROM_EMAIL` = verified sender
+   - `HANDOFF_REPORT_TO` lub `ADMIN_ALERT_EMAIL` = admin email
+5. **`npx convex deploy --prod`** — pierwszy real deploy 2 miesięcy zmian. Sprawdzić output deploya pod kątem schema migrations / function diff.
+6. **Vercel env reszta** (Production scope) — 9 zmiennych:
+   - **Poprawka:** `PUBLIC_CONVEX_URL` zmienić wartość na `https://qualified-crab-196.eu-west-1.convex.cloud` (z regionem) — wpisany bez regionu, trzeba edytować
+   - `PUBLIC_CLERK_PUBLISHABLE_KEY` + `CLERK_SECRET_KEY` (prod Clerk)
+   - `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` + `PUBLIC_STRIPE_PUBLISHABLE_KEY` (prod Stripe live)
+   - `BREVO_API_KEY` + `BREVO_FROM_EMAIL` + `CONTACT_EMAIL`
+   - `PUBLIC_APP_URL` (docelowa domena)
+7. **Vercel deploy** — push branch który wymusi rebuild z nowymi env vars (albo redeploy z UI).
+8. **Smoke test prod** — login, browse, book happy path, payment małą kwotą, webhook hit, mail confirmation.
+
+#### Blocked / Later / Open questions
+
+- **Pre-condition dla A6 sesji jutro:** zarezerwować realny 2-3h block. Mniej ryzykownie iść na sesję 2x100min z przerwą niż wbić 3h ciągłe na zmęczonych oczach przy konfiguracji prod (gdzie pomyłka = realna stratą).
+- **Convex 1.36 → 1.41 upgrade** — prod backend ma starszą wersję Convex SDK. Sprawdzić release notes 1.37/1.38/1.39/1.40/1.41 przed prod deploy — breaking changes mogą zmusić do osobnego rollout'u.
+- **Deploy key rotation** — Tomek wybrał `No expiration`. Dopisać do backlog `docs/admin-post-mvp-decisions.md`: „rotacja Convex prod deploy keys raz w roku, dopisać do operacyjnego checklist".
+- **Clerk MAU pricing** — sprawdzić plan Clerk Hobby + jak skaluje się na prod (czy free tier wystarczy na start Hotel Lenart, ile rejestracji oczekiwane w 1 sezonie).
+- **Stripe live keys + KYC** — handoff 2026-06-16 mówił że to async-blocker Michała. Dziś Tomek powiedział „mam dostęp do wszystkich" — sprawdzić czy KYC zakończony **realnie** (sk_live_* działają) czy klucze są w panelu ale konto jeszcze nie zweryfikowane.
+- **A7** — Stripe `charge.refunded` → release koi (zwrot berth do inventory). Po A6 zamknięte.
+- **Wiki article `concepts/convex-deploy-staleness-breaks-contract.md`** — nowy kandydat z dziś.
+- **Wiki article `concepts/public-id-vs-secret-credential.md`** — nowy kandydat z dziś.
+- **Wiki article `concepts/learning-by-concrete-analogy.md`** — kandydat z 2026-06-16, dziś druga ekspozycja patternu (Cloud vs self-hosted) — czas pisać.
+
+---
+
 ## Sesja 2026-06-16 — powrót po 10 dniach urlopu: B14 dokończenie + PR #11 merge + reactive clock fix
 
 ### Zmiany
