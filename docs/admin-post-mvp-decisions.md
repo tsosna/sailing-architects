@@ -4,14 +4,6 @@ Backlog rzeczy, które są świadomie odłożone po Etapach 1-7. Nic z tej listy
 
 ## Bezpieczeństwo i auth
 
-### Hardening Convex side dla admin mutations
-
-**Stan:** SvelteKit guard (`requireAdmin`) chroni stronę `/admin`. Convex mutations admina (`reserveComplimentary`, `cancelAdminBooking`, `migrateCaptainBerths`, `upsertSegmentPaymentPlan`, `adminUpdateParticipantData`, `sendAdhocPaymentReminder`, `sendAdhocCrewDataReminder`, `sendCrewConfirmationLink`, `adminMarkConfirmedManually`) przyjmują `adminUserId: string` jako arg bez weryfikacji autorytatywnej.
-
-**Trigger do zaadresowania:** drugi operator dołącza do projektu, lub audyt bezpieczeństwa.
-
-**Kierunek:** dodać `convex/auth.config.ts` z Clerk JWT issuer, używać `ctx.auth.getUserIdentity()` w mutations zamiast string arg, weryfikować rolę przez `clerkClient.users.getUser` w internal action / cache.
-
 ### Allowlista user IDs / dev-only env
 
 **Stan:** `ADMIN_DEV_ALLOWLIST` w `.env` działa wyłącznie pod `import { dev } from '$app/environment'`. Prod używa Clerk publicMetadata.role.
