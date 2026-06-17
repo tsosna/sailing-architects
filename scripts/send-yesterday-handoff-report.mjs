@@ -130,6 +130,12 @@ function pickHighlights(changeBullets) {
 
 	if (highlights.length) return highlights.slice(0, 2)
 
+	if (lower.some((b) => b.includes('harmonogram') || b.includes('rat'))) {
+		highlights.push(
+			'Dodaliśmy dodatkowe zabezpieczenia w harmonogramie płatności, żeby nie dało się zapisać niekompletnych rat.'
+		)
+	}
+
 	if (lower.some((b) => b.includes('poradnik') || b.includes('crew guide'))) {
 		highlights.push(
 			'Dodaliśmy „Poradnik załogi” z checklistami i odpowiedziami na najczęstsze pytania.'
@@ -183,6 +189,66 @@ function normalizeChangeBullet(bullet) {
 	const text = stripJargon(bullet)
 	const lower = text.toLowerCase()
 
+	if (!text) return null
+
+	if (lower.startsWith('—')) {
+		// Kontynuacje z dziennika: próbujemy wyłapać sens biznesowy, resztę pomijamy.
+		if (
+			(lower.includes('walid') && (lower.includes('due') || lower.includes('termin') || lower.includes('dat'))) ||
+			(lower.includes('dat') && lower.includes('płatno'))
+		) {
+			return 'Dodaliśmy kontrolę, aby nie dało się zapisać harmonogramu płatności (rat) bez wymaganych terminów.'
+		}
+
+		if (lower.includes('toast') || lower.includes('komunikat')) {
+			return 'Uspójniliśmy komunikaty w panelu administracyjnym, żeby były czytelniejsze w sytuacjach błędu i zapisu.'
+		}
+
+		if (lower.includes('problem z językiem') || lower.includes('wuchale') || lower.includes('locale')) {
+			return 'Poprawiliśmy stabilność wersji językowych w panelu administracyjnym, żeby treści wyświetlały się poprawnie.'
+		}
+
+		return null
+	}
+
+	if (
+		lower.includes('pr [#') ||
+		lower.includes('merged') ||
+		lower.includes('delta produkcyjna') ||
+		lower.includes('linie') ||
+		lower.includes('netto') ||
+		lower.includes('lint') ||
+		lower.includes('prettier') ||
+		lower.includes('git ') ||
+		lower.includes('worktree') ||
+		lower.includes('branch') ||
+		lower.includes('import ')
+	) {
+		return null
+	}
+
+	if (
+		lower.includes('.env') ||
+		lower.includes('env.example') ||
+		lower.includes('config.json') ||
+		lower.includes('zmienn') && lower.includes('środow')
+	) {
+		return null
+	}
+
+	if (
+		lower.includes('internalmutation') ||
+		lower.includes('internalquery') ||
+		lower.includes('setadminauth') ||
+		lower.includes('admin key') ||
+		lower.includes('deploy key') ||
+		lower.includes('convexhttpclient') ||
+		lower.includes('functionreturntype') ||
+		lower.includes('could not find public function')
+	) {
+		return 'Wzmocniliśmy zabezpieczenia po stronie serwera, aby wrażliwe operacje były dostępne tylko dla uprawnionych.'
+	}
+
 	if (
 		lower.includes('kolejność warunków') ||
 		lower.includes('race condition') ||
@@ -191,6 +257,14 @@ function normalizeChangeBullet(bullet) {
 		lower.includes('finished ===')
 	) {
 		return 'Ustabilizowaliśmy ekran potwierdzania danych, żeby po wykonaniu akcji od razu wyświetlał właściwy komunikat.'
+	}
+
+	if (
+		(lower.includes('walidacja') && lower.includes('due')) ||
+		(lower.includes('dat') && lower.includes('płatno')) ||
+		(lower.includes('harmonogram') && lower.includes('dat'))
+	) {
+		return 'Dodaliśmy kontrolę, aby nie dało się zapisać harmonogramu płatności (rat) bez wymaganych terminów.'
 	}
 
 	if (lower.includes('walidacja') || lower.includes('0 błęd') || lower.includes('ostrzeż')) {
@@ -205,8 +279,16 @@ function normalizeChangeBullet(bullet) {
 		return null
 	}
 
-	if (lower.includes('.po') || lower.includes('wuchale') || lower.includes('regeneracja') || lower.includes('locale')) {
+	if (lower.includes('.po') || lower.includes('regeneracja')) {
 		return null
+	}
+
+	if (lower.includes('problem z językiem') || lower.includes('wczytanie języka') || lower.includes('wuchale') || lower.includes('locale')) {
+		return 'Poprawiliśmy stabilność wersji językowych w panelu administracyjnym, żeby treści wyświetlały się poprawnie.'
+	}
+
+	if (lower.includes('toast') || lower.includes('toaster') || lower.includes('komunikat')) {
+		return 'Uspójniliśmy komunikaty w panelu administracyjnym, żeby były czytelniejsze w sytuacjach błędu i zapisu.'
 	}
 
 	if (lower.includes('poradnik') || lower.includes('crew guide') || lower.includes('checklist')) {
@@ -284,11 +366,43 @@ function normalizeNextStepBullet(bullet) {
 	const text = stripJargon(bullet)
 	const lower = text.toLowerCase()
 
+	if (!text) return null
+
+	if (
+		lower.includes('pr #') ||
+		lower.includes('merged') ||
+		lower.includes('profilu ucznia') ||
+		lower.includes('worktree') ||
+		lower.includes('branch') ||
+		lower.includes('git ')
+	) {
+		return null
+	}
+
 	if (lower.includes('patrz sekcja') || lower.includes('ux/drobne') || lower.includes('pozycj')) {
 		return null
 	}
 
 	if (lower.includes('diagnoza') || lower.includes('root cause') || lower.includes('@-reset') || lower.includes('wuchale') || lower.includes('route')) {
+		return null
+	}
+
+	if (lower.includes('wiki') || lower.includes('concepts/') || lower.includes('.md')) {
+		return null
+	}
+
+	if (lower.includes('promise') || lower.includes('async') || lower.includes('fundament')) {
+		return null
+	}
+
+	if (
+		lower.includes('audyt') ||
+		lower.includes('hardening') ||
+		lower.includes('mutation') ||
+		lower.includes('query') ||
+		lower.includes('ctx.auth') ||
+		lower.includes('useridentity')
+	) {
 		return null
 	}
 
