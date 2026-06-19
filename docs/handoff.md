@@ -65,6 +65,42 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
+## Sesja 2026-06-19 (wieczór) — fix atrybucji routine + batch wiki backlog (7 artykułów, kolejka zamknięta 10/10)
+
+### Zmiany
+
+- **Profil ucznia i handoff:** poprawka fałszywej atrybucji. Wpis 2026-06-19 (A6) przypisał Tomkowi propozycję „1 artykuł per sesja jako routine"; w rzeczywistości była to moja sugestia oznaczona „do uzgodnienia" w handoff.md. Profil rewrote'ował to jako decyzję Tomka. Fix: usunięcie atrybucji + skreślenie sztywnej reguły. Commit `590f809` (sailing) + `d1fc8b5` (vault).
+- **Wiki backlog grupa 1 — 3 nowe artykuły:** `procedures/prod-deployment-from-scratch` (pełna procedura 6 dostawców prod deploy), `concepts/vercel-convex-build-vs-runtime-keys` (separacja deploy keys per rola), `concepts/webhook-url-canonical-no-redirect` (pre-flight curl -I dla webhook URL). Plus 2 z poprzedniej sesji uncommitted (cloudflare-proxy + public-id). Commit `eb8d5c9`.
+- **Wiki backlog grupa 2 — 4 nowe artykuły:** `concepts/jwt-auth-convex-clerk` (analogia paszport/lotnisko, wzorzec B, 3 warstwy security), `concepts/convex-deploy-staleness-breaks-contract` (strict validator, kolejność deploy), `concepts/learning-by-concrete-analogy` (pedagogia — zmień warstwę gdy „mgła"), `concepts/git-three-trees-mental-model` (4 drzewa, mapa komend). Commit `d0687c3`. snapshot-vs-reference-in-storage już istniał (70 linii).
+- **Razem: 7 nowych artykułów wiki w jednej sesji** (+2 dopisane do commitu z poprzedniej sesji). Indeks vault zaktualizowany. Kolejka backlog 10/10 ✔.
+
+### Decyzje
+
+- **Sztywny routine „1 artykuł per close session" odrzucony.** Procedura wiki ustalona z Tomkiem: artykuły powstają w trakcie nauki gdy koncept dojrzeje (świeża pamięć kontekstu > pisanie z notatki tygodnie później). Bez sztywnego limitu „N per sesja". `close session` realizuje tylko procedurę CLAUDE.md (handoff entry + ocena Wniosków → ewentualna promocja).
+- **Batch processing kolejki backlog akceptowalny.** Empirycznie: 7 artykułów w jednej sesji bez utraty jakości (każdy ma own analogię/przykład/antywzorce/diagnostykę). Kontekst handoff + profil wystarcza za źródło dla artykułów do 2-4 tygodni wstecz.
+- **Nie wracamy do „re-close" starych sesji.** Handoff entries już są — wystarczają za kontekst. Promocja artykułów może iść z opóźnieniem.
+- **Decyzja per artykuł, nie per sesja:** wartość teraz (świeży kontekst?), nie liczba sesji wstecz.
+
+### Wnioski
+
+- **Drift atrybucji w meta-dokumentach — realny pattern do pilnowania.** Moja sugestia z handoff („do uzgodnienia") została przepisana w profilu jako decyzja Tomka. Mechanizm: kompresja kontekstu między dokumentami gubi flagi tymczasowości („sugestia", „TBD", „do uzgodnienia"). **Reguła:** w profilu wiki cytuj wprost kto co powiedział, oznacz świadomie kto jest źródłem propozycji vs decyzji. Kandydat do wiki ponadprojektowo: `concepts/attribution-drift-in-meta-docs` (gdyby pojawił się drugi raz).
+- **Batch writing artykułów z handoff/profil jako źródło — działa do 2-4 tyg wstecz.** Wszystkie 7 artykułów dziś bazowały na materiale z handoff entries + profile lessons. Świeże (do tygodnia) — pisanie szybkie, dużo szczegółów. Starsze (3+ tyg jak jwt-auth z 2026-05-23) — wymagało rekonstrukcji z profilu, ale możliwe. Granica gdzie batch się załamuje: prawdopodobnie >2 miesiące (kontekst zbyt zdekompresowany).
+- **Mnożnik artykułów: 1 sesja A6 marathon = 4 artykuły wiki + 2 uzupełnienia.** Sesje gęste w nowe koncepty (prod deploy, pierwszy raz coś robione) generują dużo backlog'u. Sesje rutynowe (kolejny scenariusz checklisty) — 0-1 artykuł. Planowanie kolejnych sesji intensywnych: budżet 30-60 min na end-of-session na artykuł świeży, batch zostawić na sesję dedykowaną.
+- **Procesowe: zawsze sprawdzaj atrybucję przy refactor profilu.** Profil ucznia jako żywa pamięć między sesjami = critical asset. Jeden zły wpis i kolejne sesje opierają decyzje na fałszywym fundamencie.
+
+### Następne kroki
+
+#### Next
+
+- Powrót do nauki/kodu: backlog pre-prod (B1-B13, A7) lub nowy temat. Tomek decyduje.
+- Smoke test prod live payment (Stripe) odłożony — wymaga osobnej sesji z kartą.
+
+#### Blocked / Later / Open questions
+
+- (brak nowych blockerów z tej sesji)
+
+---
+
 ## Sesja 2026-06-19 — A6 zakończone: pierwszy prod deploy (Convex + Clerk + Stripe + Brevo + Vercel + Cloudflare)
 
 ### Zmiany
