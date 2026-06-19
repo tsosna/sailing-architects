@@ -131,14 +131,14 @@ npx wuchale                 # ekstrakcja stringów i18n
 - ~~[[concepts/webhook-url-canonical-no-redirect]]~~ ✔ napisane 2026-06-19
 
 **Wcześniej kandydaci (z handoff i profile, nadal otwarte):**
-- [[concepts/snapshot-vs-reference-in-storage]] — od 2026-05-22
-- [[concepts/jwt-auth-convex-clerk]] — od 2026-05-23
-- [[concepts/convex-deploy-staleness-breaks-contract]] — od 2026-06-17
+- ~~[[concepts/snapshot-vs-reference-in-storage]]~~ ✔ już istniał w wiki (70 linii)
+- ~~[[concepts/jwt-auth-convex-clerk]]~~ ✔ napisane 2026-06-19 (batch 2)
+- ~~[[concepts/convex-deploy-staleness-breaks-contract]]~~ ✔ napisane 2026-06-19 (batch 2)
 - ~~[[concepts/public-id-vs-secret-credential]]~~ ✔ napisane 2026-06-19 (poprzednia sesja)
-- [[concepts/learning-by-concrete-analogy]] — od 2026-06-16 (druga ekspozycja 2026-06-17 + dziś trzecia → czas pisać)
-- [[concepts/git-three-trees-mental-model]] — od 2026-06-16
+- ~~[[concepts/learning-by-concrete-analogy]]~~ ✔ napisane 2026-06-19 (batch 2)
+- ~~[[concepts/git-three-trees-mental-model]]~~ ✔ napisane 2026-06-19 (batch 2)
 
-**Stan kolejki: 5/10 napisane** (4 z grupy 1 dziś + public-id z poprzedniej sesji). **Pozostało 5:** snapshot-vs-reference, jwt-auth-convex-clerk, convex-deploy-staleness, learning-by-concrete-analogy, git-three-trees.
+**Kolejka wiki zamknięta: 10/10.** ✔
 
 **Kolejka 10 artykułów do napisania.** Procedura: artykuły pisze Claude w trakcie nauki gdy koncept dojrzeje (świeża pamięć kontekstu). Brak sztywnego limitu „N per sesja". `close session` realizuje procedurę z `CLAUDE.md` (handoff entry + ocena Wniosków → ewentualna promocja). Priorytet kolejny w kolejce: `prod-deployment-from-scratch` (świeże, 2026-06-19), potem `cloudflare-proxy-off-for-third-party-ssl`, potem reszta.
 
