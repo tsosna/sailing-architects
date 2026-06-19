@@ -140,7 +140,7 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 **Razem: 10 artykułów.**
 
-**Sugestia routine (do uzgodnienia):** zamiast „wiki writing day" (4-6h ciągiem = zmęczenie), **1 artykuł na koniec każdej sesji jako closing routine**. Pisanie podczas świeżej pamięci kontekstu > pisanie z czystej notatki tygodnie później. Priorytet kolejny: `prod-deployment-from-scratch` (świeże, dziś), potem `cloudflare-proxy-off-for-third-party-ssl` (jasna pułapka), potem reszta. Trigger: `close session + write [[X]]`.
+**Kolejka 10 artykułów do napisania.** Procedura: artykuły pisze Claude w trakcie nauki gdy koncept dojrzeje (świeża pamięć kontekstu). Brak sztywnego limitu „N per sesja". `close session` realizuje procedurę z `CLAUDE.md` (handoff entry + ocena Wniosków → ewentualna promocja). Priorytet kolejny w kolejce: `prod-deployment-from-scratch` (świeże, 2026-06-19), potem `cloudflare-proxy-off-for-third-party-ssl`, potem reszta.
 
 #### Blocked / Later / Open questions
 
