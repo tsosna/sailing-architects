@@ -65,6 +65,95 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
+## Sesja 2026-06-19 — A6 zakończone: pierwszy prod deploy (Convex + Clerk + Stripe + Brevo + Vercel + Cloudflare)
+
+### Zmiany
+
+- **Stripe live webhook** utworzony — endpoint `https://www.sailing-architect.com/api/stripe/webhook`, 3 events (`payment_intent.succeeded`, `payment_intent.payment_failed`, `charge.refunded`). API version `2026-04-22.dahlia`. Signing secret `whsec_*` w 1Password.
+- **Clerk prod instance** utworzona (clone z dev) — primary application `sailing-architect.com`, JWT template `convex` z prod issuer `https://clerk.sailing-architect.com`, claims `aud`/`role` + extras. Facebook + GitHub disabled, Email + Google enabled.
+- **5 CNAME w Cloudflare** dla Clerk (proxy OFF dla wszystkich): `clerk` → `frontend-api.clerk.services`, `accounts` → `accounts.clerk.services`, `clkmail` → `mail.am5g0ag8i3ry.clerk.services`, `clk._domainkey` → `dkim1.am5g0ag8i3ry.clerk.services`, `clk2._domainkey` → `dkim2.am5g0ag8i3ry.clerk.services`. Verify w Clerk wszystkie ✅. SSL pending (Clerk wystawi w tle).
+- **Google Cloud OAuth** custom credentials — projekt z OAuth consent screen (audience External, opublikowany do Production), OAuth client „sailing-architects prod" z redirect URI `https://clerk.sailing-architect.com/v1/oauth_callback`. Client ID + Secret w 1Password, wpisane w Clerk Social Connections → Google.
+- **Brevo prod** — sender `noreply@sailing-architect.com` utworzony (domena już zweryfikowana wcześniej). Nowy API key `sailing-architects prod` w 1Password.
+- **Convex prod env vars** (5) ustawione na `qualified-crab-196`: `CLERK_JWT_ISSUER_DOMAIN`, `BREVO_API_KEY`, `BREVO_FROM_EMAIL=noreply@sailing-architect.com`, `PUBLIC_APP_URL=https://www.sailing-architect.com`, `HANDOFF_REPORT_TO=msmolarski@jmsstudio.com`.
+- **`npx convex deploy` z CONVEX_DEPLOY_KEY** — pierwszy prawdziwy prod deploy po 2 miesiącach pracy w dev. Schema validation clean (tabele puste = zero ryzyka), indexes preserved, functions pushed. ✔ `Deployed Convex functions to https://qualified-crab-196.eu-west-1.convex.cloud`.
+- **Drugi Convex deploy key** wygenerowany — `cli-deploy-sailing-architects`, permission **tylko** `deployment:deploy`, 1 year expiration. Pierwszy klucz z 2026-06-17 miał tylko `runInternal*` (runtime), brak `deployment:deploy` → CLI deploy padał `403 Forbidden`. Klucz w 1Password.
+- **Vercel env vars Production** (11) — poprawiony `PUBLIC_CONVEX_URL` na `https://qualified-crab-196.eu-west-1.convex.cloud` (z regionem), dodane: `CONVEX_DEPLOY_KEY` (build-time = CLI deploy key), Clerk `pk_live_*` + `sk_live_*`, Stripe `sk_live_*` + `whsec_*` + `pk_live_*`, Brevo API key + `noreply@sailing-architect.com`, `CONTACT_EMAIL=msmolarski@jmsstudio.com`, `PUBLIC_APP_URL`. `CONVEX_ADMIN_KEY` z 2026-06-17 (runtime) zostaje bez zmian.
+- **Vercel redeploy** bez build cache — 32s, clean. Build hook to `npx convex deploy --cmd 'vite build'` (Convex+SvelteKit integration), w buildzie też push do Convex prod. Header `x-clerk-auth-reason` zmienił się z `dev-browser-missing` (przed) na `session-token-and-uat-missing` (po) — prod Clerk active.
+- **Smoke test partial:** strona główna OK, sign-up email+password (kod verification z prod Clerk), panel żeglarza renderuje (Convex prod query OK). Google sign-in test pominięty na osobną sesję. Stripe live payment test pominięty (seed wstawia segmenty 1800-3200 PLN, 30% zaliczki = 540 zł — risk vs reward refund nie warty).
+- Brak commitów w repo — A6 to wyłącznie konfiguracja środowisk i kluczy.
+
+### Decyzje
+
+- **A6 zatrzymane przed Stripe live payment test** — pierwszy realny booking będzie real testem. Webhook URL skonfigurowany, klucze live na Vercel, infrastruktura gotowa. Alternatywa „seed mini cenami + test 5 zł + clear + reseed real" rozważana — odrzucona jako overhead.
+- **Trzy klucze Convex prod (separacja per role)** — finalnie:
+  - Runtime key (3 perms `runInternal*`) na Vercel jako `CONVEX_ADMIN_KEY` — używany przez `ConvexHttpClient.setAdminAuth` w SvelteKit server.
+  - CLI deploy key (`deployment:deploy` only) na Vercel jako `CONVEX_DEPLOY_KEY` — używany w build hook + lokalnie do manualnych deployów.
+  - Oba w 1Password, oba least-privilege. Mix-up = build albo runtime fail z 401/403.
+- **Cloudflare proxy OFF** dla wszystkich 5 Clerk CNAMEs i istniejących rekordów Vercel — proxy ON łamie SSL verification (Cloudflare terminuje TLS swoim certem, zewnętrzny serwis widzi cudzy cert). Apex `sailing-architect.com` resolves prosto na Vercel anycast IPs (zweryfikowane `dig +short`).
+- **Domena kanoniczna = `www.sailing-architect.com`** — apex 308 redirect → www. Wszystkie env vars (`PUBLIC_APP_URL`, Clerk redirect URIs, Stripe webhook URL) używają www. Powód: Stripe POST nie podąża za 308.
+- **Google OAuth audience = External + Publish do Production od razu** — nie testing mode. Basic scopes (email+profile) nie wymagają weryfikacji Google. Limit „100 użytkowników" dla unverified sensitive scopes nie obowiązuje (basic = unlimited).
+- **Email + Google jako jedyne auth methods w prod** — Facebook/GitHub disable. Mniej setupu OAuth, czystszy UI dla bookingu Hotel Lenart.
+- **`BREVO_FROM_EMAIL = noreply@sailing-architect.com`** — Sailing Architects jako From Name. Domena była już zweryfikowana w Brevo, dziś tylko utworzenie Sender record.
+- **`CONTACT_EMAIL = msmolarski@jmsstudio.com`** — kontakt do klientów hotelu poprzez Michała.
+
+### Wnioski
+
+- **CONVEX_DEPLOY_KEY (build) ≠ CONVEX_ADMIN_KEY (runtime) — najmocniejsza techniczna lekcja sesji**. Vercel-Convex integration to dwa różne aktorzy klucza: build hook robi `npx convex deploy` (wymaga `deployment:deploy`), runtime SvelteKit robi `setAdminAuth` (wymaga `runInternal*`). Sesja 2026-06-17 wygenerowała JEDEN klucz z runtime perms i nazwała go `CONVEX_ADMIN_KEY` — dziś build padał `401 Unauthorized` aż dodaliśmy drugi klucz z deploy perm. Reguła: dla każdego external service z deploy+runtime split — osobne klucze per role, nie jeden uniwersalny. Pattern uniwersalny też dla GitHub Actions z deploy permission. Promocja: [[concepts/vercel-convex-build-vs-runtime-keys]].
+- **Cloudflare proxy OFF dla CNAMEs do zewnętrznych SSL providers — krytyczna pułapka konfiguracyjna**. Każdy serwis który wystawia CNAME do swojej infrastruktury i sam zarządza SSL (Clerk, Resend, SendGrid, Brevo verification, Vercel domain) wymaga proxy OFF w Cloudflare. Proxy ON = Cloudflare terminuje TLS swoim wildcardem → zewnętrzny CA nie może wystawić cert na cudzą domenę → „SSL pending forever". Reguła diagnostyczna: gdy zewnętrzny dashboard mówi „DNS records not pointing correctly" mimo prawidłowych CNAME, sprawdź proxy. Promocja: [[concepts/cloudflare-proxy-off-for-third-party-ssl]].
+- **Webhook URL MUSI być canonical (no redirect)** — `curl -I` na webhook URL powinien zwracać 200/4xx, nie 3xx. Stripe POST do apex `sailing-architect.com` → 308 redirect do www → Stripe NIE podąża za POST redirect → cały webhook fail bez wyraźnego logu (event sent OK, response read jako fail). Reguła ogólna dla każdego webhook external service. Promocja: [[concepts/webhook-url-canonical-no-redirect]].
+- **Convex CLI flag drift — `--prod` deprecated w 1.40+** — sesja 2026-06-17 zaplanowała `npx convex deploy --prod`, dziś flag nie istnieje. Nowy mechanizm: `CONVEX_DEPLOY_KEY` env var + komenda bez flagi. Reguła: gdy CLI usuwa flag, alternative path jest często env var (CI/CD friendly). Pre-deploy zawsze `--help` na CLI gdy nie używana >2 tygodnie. Powiązane z [[concepts/convex-deploy-staleness-breaks-contract]] — kontrakty rozjeżdżają się też po stronie CLI.
+- **OAuth consent screen Publish jako jawny krok** — pierwsza wersja OAuth client była w trybie Testing (komunikat „Dostęp OAuth ograniczony do użytkowników testowych"). Bez Publish app w consent screen → tylko whitelistowani users mogą się logować, max 100. Reguła: każdy Google OAuth client dla prod app wymaga **dwóch** kroków: utworzenie client + opublikowanie consent screen.
+- **Brevo: domain verified ≠ sender created** — domena `sailing-architect.com` dodana wcześniej (DNS SPF/DKIM gotowe), ale każdy `BREVO_FROM_EMAIL` wymaga osobno utworzonego Sender record. Pomyłka „skoro domena verified, mogę wpisać dowolny @domain" → błąd API przy pierwszym wysłaniu.
+- **Vercel build cache vs env vars** — redeploy z „Use existing Build Cache" ON może nie pobrać nowych env vars do bundle (PUBLIC_* są baked w build). Dla zmian env: redeploy BEZ cache.
+- **Procesowe: A6 marathon ~5h, szacunek 2-3h — drugi raz w rzędzie pattern się potwierdza** (sesja 2026-06-17 sama przewidziała mnożnik ×3-5 dla prod env tasków). Hotel Lenart booking deploy = 4 dostawcy SaaS + 2 infra + DNS propagation. Każdy ma swoje quirks ujawniane dopiero w trakcie pracy. Empiryczna potwierdzona zasada planowania.
+- **Procesowe: dwa razy z rzędu zgadywałem coś co dashboard mówiłby na pewno** — 2026-06-17 URL bez regionu, dziś `--prod` jako działająca komenda. Reguła wzmocniona: zewnętrzna weryfikacja > zaufanie do pamięci/sesji poprzedniej. Pre-deploy sprawdzaj `--help` i dashboard wartości, nie polegaj na notatkach starszych niż tydzień.
+- **Procesowe (Tomka prośba): potrzebna procedura prod-deployment from scratch** — dziś przeszliśmy 6 dostawców w jednej sesji, kolejność krytyczna, decyzje (proxy, key separacja, scope env vars) nie są oczywiste z dokumentacji każdego z osobna. Replicowalne dla następnego projektu. Promocja: [[procedures/prod-deployment-from-scratch]].
+
+### Następne kroki
+
+#### Next (osobna sesja, świeża głowa)
+
+- **A7 — Stripe `charge.refunded` → release koi.** Design decisions przed kodem:
+  1. Partial vs full refund: zwalniać koi tylko przy full refund (`amount_refunded === amount`), czy też przy każdym? Rekomendacja: tylko full — partial może być negocjowany rabat.
+  2. Email do usera o refundzie: yes/no? Osobny template w `email.ts`?
+  3. Nowa internal mutation `releaseBookingAfterRefund` czy rozszerzenie `cancelBooking`? `cancelBooking` ma komentarz „releases berths only when PI was first checkout" — semantyka inna od refundu.
+  4. Stripe Polska refund fee — sprawdzić czy 100% fee returns.
+- **Po A7: Stripe live payment smoke** — przez Stripe CLI symulacja `charge.refunded` w dev (bez realnej karty), test end-to-end.
+- **Google sign-in test prod** — incognito browser → „Sign in with Google" → callback `clerk.sailing-architect.com/v1/oauth_callback` → app.
+- **Convex 1.36 → 1.41 upgrade** — minor available. CHANGELOG review. Po deploy dziś backend = 1.41, klient lokalnie nadal 1.36 — rozjazd do zsynchronizowania.
+
+#### Wiki — kolejka 10 artykułów (Tomka prośba o jasną procedurę pisania)
+
+**Nowe z dziś (priorytet):**
+- [[procedures/prod-deployment-from-scratch]] — **Tomka request**, najmocniejszy kandydat: pełna procedura prod deploy (Convex + Clerk + Brevo + Stripe + Vercel + Cloudflare) z kolejnością kroków, decyzjami (proxy OFF, key separacja, scope env vars, no-redirect URLs) i checklistą per dostawca. Replicowalne dla następnego projektu.
+- [[concepts/vercel-convex-build-vs-runtime-keys]] — CONVEX_DEPLOY_KEY (build) vs CONVEX_ADMIN_KEY (runtime), separacja per role.
+- [[concepts/cloudflare-proxy-off-for-third-party-ssl]] — proxy OFF dla CNAMEs do zewnętrznych SSL providers (Clerk, Brevo, Vercel, Resend, SendGrid).
+- [[concepts/webhook-url-canonical-no-redirect]] — webhook URL = canonical domain bez 3xx redirect (Stripe, Clerk webhooks, GitHub webhooks).
+
+**Wcześniej kandydaci (z handoff i profile, nadal otwarte):**
+- [[concepts/snapshot-vs-reference-in-storage]] — od 2026-05-22
+- [[concepts/jwt-auth-convex-clerk]] — od 2026-05-23
+- [[concepts/convex-deploy-staleness-breaks-contract]] — od 2026-06-17
+- [[concepts/public-id-vs-secret-credential]] — od 2026-06-17
+- [[concepts/learning-by-concrete-analogy]] — od 2026-06-16 (druga ekspozycja 2026-06-17 + dziś trzecia → czas pisać)
+- [[concepts/git-three-trees-mental-model]] — od 2026-06-16
+
+**Razem: 10 artykułów.**
+
+**Sugestia routine (do uzgodnienia):** zamiast „wiki writing day" (4-6h ciągiem = zmęczenie), **1 artykuł na koniec każdej sesji jako closing routine**. Pisanie podczas świeżej pamięci kontekstu > pisanie z czystej notatki tygodnie później. Priorytet kolejny: `prod-deployment-from-scratch` (świeże, dziś), potem `cloudflare-proxy-off-for-third-party-ssl` (jasna pułapka), potem reszta. Trigger: `close session + write [[X]]`.
+
+#### Blocked / Later / Open questions
+
+- **Stripe live keys** — działają (zweryfikowane dziś, `sk_live_*` i `pk_live_*` w Vercel + 1Password).
+- **Deploy key rotation routine** — runtime key (2026-06-17) ma `No expiration`, CLI deploy key (dziś) ma 1 year. Dopisać do operacyjnego checklist: rotacja raz w roku.
+- **Stripe Polska refund fee policy** — sprawdzić przy A7 design (czy 100% fee returns).
+- **Cloudflare-Vercel proxy** — na razie OFF dla wszystkich rekordów (proxy ON łamie zarówno Clerk SSL jak i Vercel SSL). W przyszłości można rozważyć ON dla static assets (cache + DDoS), ale wymaga osobnej analizy.
+- **OAuth user limit awareness** — Google 100 użytkowników dla unverified sensitive scopes — nie aktualne, backlog jeśli kiedyś dodamy Gmail/Drive scopes.
+- **Stripe webhook UI changed** — nowy multi-step flow. Stare docs i pamięć z dev przestarzałe. Pre-flight dla Stripe operacji: weryfikacja w aktualnym dashboard.
+- **Fundament Promise/async** (od 2026-05-17) — nadal nie sformalizowany do wiki. Dziś dotykany przez `await convex.mutation` × 5 w webhook, bez nowych potknięć.
+
+---
+
 ## Sesja 2026-06-17 20:25 — backlog cleanup + start A6 (Convex Cloud prod env)
 
 ### Zmiany
