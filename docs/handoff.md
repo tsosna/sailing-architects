@@ -125,20 +125,20 @@ npx wuchale                 # ekstrakcja stringów i18n
 #### Wiki — kolejka 10 artykułów (Tomka prośba o jasną procedurę pisania)
 
 **Nowe z dziś (priorytet):**
-- [[procedures/prod-deployment-from-scratch]] — **Tomka request**, najmocniejszy kandydat: pełna procedura prod deploy (Convex + Clerk + Brevo + Stripe + Vercel + Cloudflare) z kolejnością kroków, decyzjami (proxy OFF, key separacja, scope env vars, no-redirect URLs) i checklistą per dostawca. Replicowalne dla następnego projektu.
-- [[concepts/vercel-convex-build-vs-runtime-keys]] — CONVEX_DEPLOY_KEY (build) vs CONVEX_ADMIN_KEY (runtime), separacja per role.
-- [[concepts/cloudflare-proxy-off-for-third-party-ssl]] — proxy OFF dla CNAMEs do zewnętrznych SSL providers (Clerk, Brevo, Vercel, Resend, SendGrid).
-- [[concepts/webhook-url-canonical-no-redirect]] — webhook URL = canonical domain bez 3xx redirect (Stripe, Clerk webhooks, GitHub webhooks).
+- ~~[[procedures/prod-deployment-from-scratch]]~~ ✔ napisane 2026-06-19 (sesja routine)
+- ~~[[concepts/vercel-convex-build-vs-runtime-keys]]~~ ✔ napisane 2026-06-19
+- ~~[[concepts/cloudflare-proxy-off-for-third-party-ssl]]~~ ✔ napisane 2026-06-19
+- ~~[[concepts/webhook-url-canonical-no-redirect]]~~ ✔ napisane 2026-06-19
 
 **Wcześniej kandydaci (z handoff i profile, nadal otwarte):**
 - [[concepts/snapshot-vs-reference-in-storage]] — od 2026-05-22
 - [[concepts/jwt-auth-convex-clerk]] — od 2026-05-23
 - [[concepts/convex-deploy-staleness-breaks-contract]] — od 2026-06-17
-- [[concepts/public-id-vs-secret-credential]] — od 2026-06-17
+- ~~[[concepts/public-id-vs-secret-credential]]~~ ✔ napisane 2026-06-19 (poprzednia sesja)
 - [[concepts/learning-by-concrete-analogy]] — od 2026-06-16 (druga ekspozycja 2026-06-17 + dziś trzecia → czas pisać)
 - [[concepts/git-three-trees-mental-model]] — od 2026-06-16
 
-**Razem: 10 artykułów.**
+**Stan kolejki: 5/10 napisane** (4 z grupy 1 dziś + public-id z poprzedniej sesji). **Pozostało 5:** snapshot-vs-reference, jwt-auth-convex-clerk, convex-deploy-staleness, learning-by-concrete-analogy, git-three-trees.
 
 **Kolejka 10 artykułów do napisania.** Procedura: artykuły pisze Claude w trakcie nauki gdy koncept dojrzeje (świeża pamięć kontekstu). Brak sztywnego limitu „N per sesja". `close session` realizuje procedurę z `CLAUDE.md` (handoff entry + ocena Wniosków → ewentualna promocja). Priorytet kolejny w kolejce: `prod-deployment-from-scratch` (świeże, 2026-06-19), potem `cloudflare-proxy-off-for-third-party-ssl`, potem reszta.
 
