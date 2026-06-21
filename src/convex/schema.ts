@@ -87,7 +87,9 @@ export default defineSchema({
 				v.literal('partially_paid'),
 				v.literal('paid'),
 				v.literal('overdue'),
-				v.literal('cancelled')
+				v.literal('cancelled'),
+				v.literal('refunded'),
+				v.literal('partially_refunded')
 			)
 		),
 		paidAt: v.optional(v.number()),
@@ -129,6 +131,7 @@ export default defineSchema({
 		),
 		stripePaymentIntentId: v.optional(v.string()),
 		paidAt: v.optional(v.number()),
+		refundedAmount: v.number(),
 		createdAt: v.number(),
 		updatedAt: v.number(),
 		reminderCount: v.optional(v.number()),
@@ -232,5 +235,101 @@ export default defineSchema({
 		sailingExperience: v.string(),
 		dietaryRequirements: v.optional(v.string()),
 		medicalNotes: v.optional(v.string())
-	}).index('by_user', ['userId'])
+	}).index('by_user', ['userId']),
+
+	refundPolicies: defineTable({
+		name: v.string(), // 'default' dla MVP; w przyszłości per-segment lub per-event
+		tiers: v.array(
+			v.object({
+				minDaysBefore: v.number(), // próg w dniach przed rejsem
+				refundPercent: v.number() // 0.0 - 1.0 (np. 0.5 = 50%)
+			})
+		),
+		isActive: v.boolean(),
+		updatedAt: v.number(),
+		updatedBy: v.string() // identity.subject z JWT admina
+	}).index('by_is_active', ['isActive']),
+
+	adminAuditLog: defineTable({
+		adminUserId: v.string(), // identity.subject z JWT
+		action: v.union(
+			v.literal('refund_initiated'),
+			v.literal('refund_completed'),
+			v.literal('refund_failed'),
+			v.literal('reblock_berth'),
+			v.literal('release_berth_manual'),
+			v.literal('policy_updated')
+		),
+		bookingId: v.optional(v.id('bookings')), // optional bo policy_updated nie dotyczy bookingu
+		metadata: v.any() // payload zależny od action
+	})
+		.index('by_booking', ['bookingId'])
+		.index('by_admin', ['adminUserId'])
+		.index('by_action', ['action']),
+
+	refunds: defineTable({
+		bookingId: v.id('bookings'),
+		bookingPaymentId: v.id('bookingPayments'),
+		refundBatchId: v.string(), // UUID grupujący gdy 1 refund Michała = N charges
+		stripeRefundId: v.optional(v.string()), // re_xxx; optional bo pre-insert PRZED Stripe call
+		stripeChargeId: v.string(), // ch_xxx z bookingPayments.stripePaymentIntentId
+		amountRequested: v.number(), // grosze — co Michał wpisał (per ten row)
+		amountRefunded: v.optional(v.number()), // grosze — co Stripe potwierdził (po webhook)
+		currency: v.string(),
+		status: v.union(
+			v.literal('pending'), // wysłane do Stripe, czekamy webhook
+			v.literal('succeeded'), // webhook charge.refunded
+			v.literal('failed') // webhook refund.failed
+		),
+		initiatedByAdminId: v.string(), // identity.subject; null gdy initiatedOutsideApp
+		initiatedOutsideApp: v.boolean(), // true gdy refund z Stripe Dashboard (Problem 4)
+		policySnapshot: v.optional(
+			v.object({
+				// optional bo outsideApp nie ma policy
+				suggestedPercent: v.number(),
+				suggestedAmount: v.number(),
+				daysBeforeDeparture: v.number(),
+				policyName: v.string(),
+				policyId: v.id('refundPolicies')
+			})
+		),
+		releaseBerth: v.boolean(), // co Michał zaznaczył w UI
+		berthReleasedAt: v.optional(v.number()), // gdy releaseBerth=true → kiedy faktycznie zwolniono
+		reblockedAt: v.optional(v.number()), // gdy Michał później zablokował koję
+		reblockedBy: v.optional(v.string()),
+		reblockReason: v.optional(v.string()),
+		customerEmailSentAt: v.optional(v.number()),
+		customerEmailMessageId: v.optional(v.string()),
+		adminEmailSentAt: v.optional(v.number()),
+		adminEmailMessageId: v.optional(v.string()),
+		failureReason: v.optional(v.string()) // refund.failure_reason z Stripe
+	})
+		.index('by_booking', ['bookingId'])
+		.index('by_booking_payment', ['bookingPaymentId'])
+		.index('by_refund_batch', ['refundBatchId'])
+		.index('by_stripe_refund_id', ['stripeRefundId']) // KLUCZOWE dla idempotency webhook
+		.index('by_status', ['status']), // dla failed refunds banner
+
+	unhandledStripeEvents: defineTable({
+		eventType: v.string(), // 'charge.refunded', 'charge.refund.updated' itd.
+		stripeEventId: v.string(), // evt_xxx — unique per event w Stripe (idempotency)
+		stripeChargeId: v.optional(v.string()), // ch_xxx jeśli event powiązany z charge
+		stripeRefundId: v.optional(v.string()), // re_xxx jeśli refund event
+		rawPayload: v.any(), // pełny event Stripe do późniejszej analizy
+		detectedAt: v.number(), // kiedy webhook to dostał
+		resolvedAt: v.optional(v.number()), // gdy Michał kliknął decyzję
+		resolvedBy: v.optional(v.string()), // identity.subject admina
+		resolution: v.optional(
+			v.union(
+				v.literal('release_berth'), // Michał: „tak, zwolnij koję"
+				v.literal('keep_berth'), // Michał: „nie zwalniaj"
+				v.literal('orphan') // Michał: „to refund niezwiązany z tym bookingiem"
+			)
+		),
+		notes: v.optional(v.string()), // opcjonalna notatka Michała
+		matchedBookingId: v.optional(v.id('bookings')) // znaleziony przy detection po chargeId
+	})
+		.index('by_event_id', ['stripeEventId']) // idempotency webhook
+		.index('by_resolution', ['resolvedAt']) // 'pokaż nieobsłużone' = resolvedAt undefined
+		.index('by_matched_booking', ['matchedBookingId'])
 })

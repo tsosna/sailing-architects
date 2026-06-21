@@ -174,7 +174,8 @@ async function createBookingPaymentSchedule({
 			status: 'pending',
 			createdAt: now,
 			updatedAt: now,
-			reminderCount: 0
+			reminderCount: 0,
+			refundedAmount: 0
 		})
 		inserted.push(id)
 
@@ -206,7 +207,8 @@ async function createBookingPaymentSchedule({
 			status: 'pending',
 			createdAt: now,
 			updatedAt: now,
-			reminderCount: 0
+			reminderCount: 0,
+			refundedAmount: 0
 		})
 		inserted.push(id)
 	}
@@ -225,7 +227,8 @@ async function createBookingPaymentSchedule({
 			status: 'pending',
 			createdAt: now,
 			updatedAt: now,
-			reminderCount: 0
+			reminderCount: 0,
+			refundedAmount: 0
 		})
 		inserted.push(id)
 	}
@@ -1073,7 +1076,8 @@ export const backfillLegacyBookingPayments = mutation({
 				paidAt: rowStatus === 'paid' ? booking.paidAt : undefined,
 				createdAt: booking._creationTime,
 				updatedAt: now,
-				reminderCount: 0
+				reminderCount: 0,
+				refundedAmount: 0
 			})
 			insertedRows++
 

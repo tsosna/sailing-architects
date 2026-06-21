@@ -65,7 +65,79 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
-## Sesja 2026-06-19 (wieczór) — fix atrybucji routine + batch wiki backlog (7 artykułów, kolejka zamknięta 10/10)
+## Sesja 2026-06-20 (długa, ~5h) — A7a 15/17: schema refundów + widen-migrate-narrow ćwiczony na żywo
+
+### Zmiany
+
+- **Nowy moduł A7 (Stripe refundy) — design + schema gotowe.** 14-wiadomościowy dry-run koncepcji z Tomkiem, mail do Michała wysłany (do akceptacji 4 decyzji biznesowych: progi polityki, prowizja Stripe, własny email, edge case'y).
+- **Architektura refund'ów uzgodniona (pełen scope w 5 sub-etapach A7a-A7e):** wariant Y (`bookingPayments.refundedAmount` + osobna `refunds` tabela), cascade od najnowszej charge, auto-release koi przy full refund (Michał decyduje partial), 2 emaile po webhook potwierdzeniu (Brevo własny template), ad-hoc Stripe Dashboard refundy obsługiwane w MVP (`unhandledStripeEvents` tabela + reconciliation UI w A7e).
+- **`@convex-dev/migrations@0.3.5` zainstalowany** + `src/convex/convex.config.ts` + `src/convex/migrations.ts` z bazową instancją + runner. Pierwszy komponent Convex w projekcie.
+- **Pełny pattern widen-migrate-narrow ćwiczony na żywo** dla pola `bookingPayments.refundedAmount`:
+  - Deploy 1 (widen): `refundedAmount: v.optional(v.number())`
+  - Migration `backfillRefundedAmount` (idempotent guard `if (payment.refundedAmount === undefined)` + shorthand `return { refundedAmount: 0 }`)
+  - Dry run → 22 rekordów, jeden batch, no changes committed
+  - Real run → 22 rekordów zmigrowanych
+  - Deploy 2 (narrow): `refundedAmount: v.number()` (required)
+- **5 nowych tabel w `schema.ts`:** `refundPolicies` (tiers embedded array), `adminAuditLog` (z 6 typami akcji + metadata: v.any()), `refunds` (5 indexów, najważniejszy `by_stripe_refund_id` dla webhook idempotency), `unhandledStripeEvents` (ad-hoc reconciliation), oraz rozszerzenie `bookings.paymentStatus` union o `'refunded'` + `'partially_refunded'`.
+- **Nowy plik `src/convex/refunds.ts`** z 2 queries: `calculateRefundPolicySuggestion(bookingId)` (zwraca `{ suggestedPercent, suggestedAmount, daysBeforeDeparture, totalPaid, availableToRefund, ... }`) + `allocateRefundCascade(bookingId, totalAmount)` (cascade allocation desc po `_creationTime`, walidacja `totalAmount <= totalAvailable`, integer guard `Number.isInteger`).
+- **4 inserty `bookingPayments` w `mutations.ts` uzupełnione o `refundedAmount: 0`** — konsekwencja narrow schema. „Let compiler guide refactor" w akcji (z lekcji 2026-05-21).
+- Pozostały kawałek A7a: seed default policy (`>30d=100%, 14-30d=50%, <14d=0%`) — `wiki` zatwierdzony do regulaminu po akcept Michała.
+
+### Decyzje
+
+- **Wariant Y > event ledger w bookingPayments > osobna tabela `bookingLedger`** — porównane wszystkie trzy. Wybrano Y (pole `refundedAmount` + osobna tabela `refunds`) bo: minimalne zmiany w istniejącym kodzie, snapshot vs reference utrwalone (historia `bookingPayments.amount` nietknięta), `refunds` jako osobny event log. Event ledger w `bookingPayments` odrzucony bo łamie semantykę „schedule of payments" + audyt wszystkich call-site filtrów = wysokie ryzyko regresji.
+- **Polityka zwrotów w bazie (`refundPolicies`)** nie w kodzie — wzorzec na przyszłe projekty (Hotel Lenart booking, inne sprzedaże). Tiers jako embedded array (cardinality <10, lifecycle z polityką, atomic update).
+- **`@convex-dev/migrations` > small table shortcut** — chociaż 22 wiersze pozwalają na shortcut (`.collect() + forEach`), wybrano komponent bo: pattern transferowalny, infra raz na projekt, każda przyszła migracja idzie tym samym mechanizmem, skaluje się na duże tabele.
+- **Cascade od najnowszej charge + auto-validation** `amount <= sum(paid)`. Walidacja dwuwarstwowa (UI + backend handler).
+- **Ad-hoc Stripe Dashboard refund w MVP, nie backlog.** Defensive design: webhook nie crashuje na unmatched refund, tworzy row w `unhandledStripeEvents` z natychmiastowym alertem do Michała, UI reconciliation w A7e (decyzja release/keep/orphan).
+- **`v.any()` na `metadata` w `adminAuditLog`** — pragmatyczny choice nad discriminated union. Audit log głównie do odczytu przez ludzi, elastyczność > walidacja shape'u. Jeśli okaże się że metadata jest queryowane → refactor.
+- **Integer guard w handler, nie w validator.** `v.number()` w Convex akceptuje floaty. Grosze są integer (business rule), `Number.isInteger(totalAmount)` w handler. Validator robi walidację kształtu, nie business rules.
+- **Email do Michała pisze i wysyła Tomek z prywatnego adresu** (nie z `noreply@`). Treść drafted by Claude jako proposal, Tomek wysłał z Gmaila → kontekst rozmowy biznesowej utrzymany.
+
+### Wnioski
+
+- **`import type` vs `import` — runtime erasure to nie tylko styl.** `import type` znika z JS bundle przy kompilacji. Konsekwencje: zero bytes w bundle, brak side effects, bezpieczne przy cyclic deps. Reguła: używasz tylko w sygnaturach typów (parametry, return, generic args)? → `import type`. Używasz runtime (instancja, wywołanie, instanceof)? → zwykły. Promocja: [[concepts/import-type-vs-runtime-erasure]].
+- **Embed vs separate table w document databases — 5 pytań decyzyjnych.** (1) cardinality (<20 ograniczone → embed), (2) lifecycle (item bez parenta sensowny? → separate), (3) niezależny query (tak → separate), (4) update frequency per item (high → separate, unikaj write contention), (5) atomic invariants (wiele items naraz → embed). `refundPolicies.tiers` przeszło 5/5 → embed. `bookingPayments` względem `bookings` przeszło 4/5 → separate. Pattern fundamentalnie różny od SQL (tam normalizacja 3NF default). Promocja: [[concepts/embed-vs-separate-table-document-databases]].
+- **Convex validator vs handler guard — różne odpowiedzialności.** Validator (`v.number()`) sprawdza **kształt** (czy JS number). Handler guard sprawdza **business rules** (czy integer, czy >0, czy ≤ available). `v.int64()` istnieje ale ma typ BigInt — niespójne z resztą systemu używającą `number`. Projekt konwencja: `number` wszędzie + explicit `Number.isInteger` guards. Promocja: [[concepts/convex-validator-shape-vs-handler-business-rules]].
+- **Widen-migrate-narrow ćwiczone na żywo z prawdziwą tabelą** — 22 rekordy. Trzy deploye + jeden migration call. Dry run pokazał before/after każdego rekordu (Convex domyślnie loguje 10 przykładów). Real run zakończony w 1 batchu (małe tabele). Komponent `@convex-dev/migrations` jest idempotent — re-run mówi „already completed, no work to do". Pattern jasny: pierwszy raz najtrudniejszy, każdy następny mechaniczny.
+- **Convex schema validation @ deploy time = bezpieczna sieć przed rozjazdem schema↔dane.** Próba `v.optional(v.number())` → `v.number()` bez migracji = deploy REJECTED z konkretnym komunikatem „Document X missing required field Y". Inne bazy (Mongo bez schema, raw SQL bez constraints) tego nie mają — bug ujawnia się w runtime. Convex pedantyczny by design.
+- **Idempotency w migracjach — guard pattern.** `if (payment.refundedAmount === undefined) return { refundedAmount: 0 }` chroni przed nadpisaniem podczas re-run. Bez guardu: każdy rekord (też już zmigrowany) dostaje patch → utrata danych refundu. Reguła: każda migracja musi być idempotent przez guard lub warunek tak silny że re-run nie szkodzi.
+- **Cursor robi insertion w mutations.ts po dodaniu pola — TS dał nazwę 4 spotów do naprawy.** Klasyczne „let compiler guide refactor" (utrwalone z 2026-05-21, dziś empirycznie zastosowane). Bez TS musiałbyś grepować po `insert('bookingPayments'` ręcznie.
+- **Procesowe: dynamika 2-warstwowa (koncept + kod) działa.** Dziś najpierw 14 wiadomości czystego designu (Stripe webhook flow, polityka, edge cases), potem dopiero schema. Tomek wprost stwierdził „jest logiczny, ale też najpierw przejdźmy wszystko na sucho" → dry-run wykrył 6 problemów projektowych ZANIM napisaliśmy linijkę kodu. Procesowe wzmocnienie z 2026-05-25.
+- **Procesowe: Tomek wyłapał brak integer guard po dodaniu walidacji `<= 0`.** Pytanie sprawdzające trafiło, sam zauważył lukę między schema validator a business rule. Sygnał: rozumienie warstw walidacji utrwalone, nie ma już mgły między „typ" a „walidacja business'owa".
+- **Procesowe: 5h sesja, ale dwie fazy energetycznie różne.** Pierwsze ~3h gęste design + dyskusja Michał email — wymagało myślenia. Ostatnie 2h schema additions + helpery — mechaniczne po dzisiejszym fundamencie. Reguła: po długich design discussions zostawić energię na schema/code patterns które „idą same".
+
+### Następne kroki
+
+#### Next (jutro / kolejna sesja, świeża głowa)
+
+- **Chunk 7 A7a — seed default policy** (`>30d=100%, 14-30d=50%, <14d=0%`). ~15 min. Mutation seed + odpalenie raz. Po nim A7a zamknięte 17/17.
+- **A7b** — Convex action `adminInitiateRefund` (idempotencyKey Stripe) + webhook handlers (`charge.refunded`, `charge.refund.updated`, `refund.failed`) + processStripeRefund mutation + 5s retry race fix. To jest najtrudniejszy chunk A7 — webhook idempotency + Stripe API.
+- **A7c** — UI booking-drawer RefundDialog modal + 2 email templates Brevo + failure banner /admin.
+- **A7d** — UI `/admin/automation` polityka tiers + reblock berth + tekst regulaminu.
+- **A7e** — Webhook ad-hoc detection + `/admin/refunds` reconciliation UI.
+
+#### Wiki — kolejka 4 nowe artykuły z dziś (+ kontynuacja)
+
+**Nowe z dziś (priorytet):**
+- `concepts/import-type-vs-runtime-erasure` — fundament TS, świeża nauka
+- `concepts/embed-vs-separate-table-document-databases` — 5-question heuristic, transferowalne na każdy projekt z document DB
+- `concepts/convex-validator-shape-vs-handler-business-rules` — niuans Convex
+- `concepts/widen-migrate-narrow-live-walkthrough` (opcjonalnie) — case study z prawdziwej migracji, mógłby uzupełnić ogólny pattern
+
+**Strategia:** spróbuję napisać pierwsze 2-3 dziś (najświeższy kontekst). Reszta backlog na osobne sesje.
+
+#### Blocked / Later / Open questions
+
+- **Michał email** wysłany — odpowiedź dyktuje implementację A7d (treść regulaminu, akceptacja progów). Nieblokujące dla A7a-c (schema + flow tech-side), ale A7d wymaga decyzji.
+- **`CONVEX_TMPDIR` warning** (cross-filesystem) — backlog. Fix: `export CONVEX_TMPDIR=/Volumes/HomeX-MacMini/.tmp/convex` w `~/.zshrc`.
+- **pnpm outdated** — backlog. `npm install -g pnpm@latest` przy najbliższej okazji.
+- **Convex 1.36 → 1.41 upgrade** — od 2026-06-19, niepilne.
+- **A7e scope** (ad-hoc Stripe Dashboard refundy) — w scope MVP wg decyzji dziś. Pomyśleć czy nie obciąć do „minimal alert + log" jeśli A7b-d okażą się większe niż założono.
+
+---
+
+
 
 ### Zmiany
 

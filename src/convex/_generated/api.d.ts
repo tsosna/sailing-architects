@@ -15,8 +15,10 @@ import type * as admin from "../admin.js";
 import type * as crewConfirmation from "../crewConfirmation.js";
 import type * as crons from "../crons.js";
 import type * as http from "../http.js";
+import type * as migrations from "../migrations.js";
 import type * as mutations from "../mutations.js";
 import type * as queries from "../queries.js";
+import type * as refunds from "../refunds.js";
 import type * as reminders from "../reminders.js";
 import type * as seed from "../seed.js";
 
@@ -34,8 +36,10 @@ declare const fullApi: ApiFromModules<{
   crewConfirmation: typeof crewConfirmation;
   crons: typeof crons;
   http: typeof http;
+  migrations: typeof migrations;
   mutations: typeof mutations;
   queries: typeof queries;
+  refunds: typeof refunds;
   reminders: typeof reminders;
   seed: typeof seed;
 }>;
@@ -66,4 +70,6 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  migrations: import("@convex-dev/migrations/_generated/component.js").ComponentApi<"migrations">;
+};
