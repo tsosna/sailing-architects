@@ -272,7 +272,7 @@ export default defineSchema({
 		bookingPaymentId: v.id('bookingPayments'),
 		refundBatchId: v.string(), // UUID grupujący gdy 1 refund Michała = N charges
 		stripeRefundId: v.optional(v.string()), // re_xxx; optional bo pre-insert PRZED Stripe call
-		stripeChargeId: v.string(), // ch_xxx z bookingPayments.stripePaymentIntentId
+		stripeChargeId: v.optional(v.string()), // ch_xxx z bookingPayments.stripePaymentIntentId
 		amountRequested: v.number(), // grosze — co Michał wpisał (per ten row)
 		amountRefunded: v.optional(v.number()), // grosze — co Stripe potwierdził (po webhook)
 		currency: v.string(),

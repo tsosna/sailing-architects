@@ -3,7 +3,7 @@ import type { MutationCtx } from './_generated/server'
 import type { Doc, Id } from './_generated/dataModel'
 import { v } from 'convex/values'
 import { requireConvexAdmin } from './_lib/requireAdmin'
-import { calculatePaymentStatusAfterRefund } from './_lib/refund-status'
+import { calculatePaymentStatusAfterRefund } from './_lib/refundStatus'
 
 const HOLD_DURATION_MS = 15 * 60 * 1000
 const DEFAULT_CURRENCY = 'pln'
@@ -1348,5 +1348,67 @@ export const processStripeRefund = internalMutation({
 			status: 'processed' as const,
 			refundStatus: args.stripeRefundStatus
 		}
+	}
+})
+
+export const insertPendingRefundRow = internalMutation({
+	args: {
+		bookingId: v.id('bookings'),
+		bookingPaymentId: v.id('bookingPayments'),
+		refundBatchId: v.string(),
+		amountRequested: v.number(),
+		currency: v.string(),
+		initiatedByAdminId: v.string(),
+		initiatedOutsideApp: v.boolean(),
+		policySnapshot: v.optional(
+			v.object({
+				suggestedPercent: v.number(),
+				suggestedAmount: v.number(),
+				daysBeforeDeparture: v.number(),
+				policyName: v.string(),
+				policyId: v.id('refundPolicies')
+			})
+		),
+		releaseBerth: v.boolean()
+	},
+	handler: async (ctx, args) => {
+		const id = await ctx.db.insert('refunds', {
+			...args,
+			status: 'pending'
+		})
+		return id
+	}
+})
+
+export const updateRefundWithStripeId = internalMutation({
+	args: {
+		refundId: v.id('refunds'),
+		stripeRefundId: v.string(),
+		stripeChargeId: v.string()
+	},
+	handler: async (ctx, args) => {
+		await ctx.db.patch(args.refundId, {
+			stripeRefundId: args.stripeRefundId,
+			stripeChargeId: args.stripeChargeId
+		})
+	}
+})
+
+export const insertAdminAuditLog = internalMutation({
+	args: {
+		adminUserId: v.string(),
+		action: v.union(
+			v.literal('refund_initiated'),
+			v.literal('refund_completed'),
+			v.literal('refund_failed'),
+			v.literal('reblock_berth'),
+			v.literal('release_berth_manual'),
+			v.literal('policy_updated')
+		),
+		bookingId: v.optional(v.id('bookings')),
+		metadata: v.any()
+	},
+	handler: async (ctx, args) => {
+		await ctx.db.insert('adminAuditLog', args)
 	}
 })
