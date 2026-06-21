@@ -45,10 +45,13 @@ export const POST: RequestHandler = async ({ request }) => {
 	switch (event.type) {
 		case 'payment_intent.succeeded': {
 			const paymentIntentId = event.data.object.id
-			const result = await convex.mutation(internal.mutations.applyStripePayment, {
-				stripePaymentIntentId: paymentIntentId,
-				paidAt: Date.now()
-			})
+			const result = await convex.mutation(
+				internal.mutations.applyStripePayment,
+				{
+					stripePaymentIntentId: paymentIntentId,
+					paidAt: Date.now()
+				}
+			)
 
 			if (result.paymentEmailSentAt) break
 
@@ -138,6 +141,27 @@ export const POST: RequestHandler = async ({ request }) => {
 			} catch (sendErr) {
 				console.error('Payment confirmation email failed:', sendErr)
 			}
+			break
+		}
+		case 'charge.refund.updated': {
+			const refund = event.data.object as Stripe.Refund
+
+			// Skip non-terminal statuses ('pending', 'canceled', 'requires_action')
+			if (refund.status !== 'succeeded' && refund.status !== 'failed') break
+
+			await convex.mutation(internal.mutations.processStripeRefund, {
+				stripeRefundId: refund.id,
+				stripeRefundStatus: refund.status,
+				amountRefunded: refund.amount,
+				failureReason: refund.failure_reason ?? undefined,
+				stripeEventId: event.id,
+				eventType: event.type,
+				stripeChargeId:
+					typeof refund.charge === 'string'
+						? refund.charge
+						: (refund.charge?.id ?? undefined),
+				rawPayload: event
+			})
 			break
 		}
 		case 'payment_intent.payment_failed':

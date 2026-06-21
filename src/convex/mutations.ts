@@ -3,6 +3,7 @@ import type { MutationCtx } from './_generated/server'
 import type { Doc, Id } from './_generated/dataModel'
 import { v } from 'convex/values'
 import { requireConvexAdmin } from './_lib/requireAdmin'
+import { calculatePaymentStatusAfterRefund } from './_lib/refund-status'
 
 const HOLD_DURATION_MS = 15 * 60 * 1000
 const DEFAULT_CURRENCY = 'pln'
@@ -1224,5 +1225,128 @@ export const expireCheckoutHolds = internalMutation({
 		}
 
 		return { expiredBookings: expiredBookings.length, releasedBerths }
+	}
+})
+
+export const processStripeRefund = internalMutation({
+	args: {
+		stripeRefundId: v.string(),
+		stripeRefundStatus: v.union(v.literal('succeeded'), v.literal('failed')),
+		amountRefunded: v.optional(v.number()),
+		failureReason: v.optional(v.string()),
+		stripeEventId: v.string(),
+		eventType: v.string(),
+		stripeChargeId: v.optional(v.string()),
+		rawPayload: v.any()
+	},
+	handler: async (ctx, args) => {
+		//1. Lookup refunds row
+		const refund = await ctx.db
+			.query('refunds')
+			.withIndex('by_stripe_refund_id', (q) =>
+				q.eq('stripeRefundId', args.stripeRefundId)
+			)
+			.first()
+		//2. Null -> unhandled path (Problem 4: ad-hoc Stripe Dashboard refund)
+		if (!refund) {
+			// Idempotency: czy juz zapisany
+			const existing = await ctx.db
+				.query('unhandledStripeEvents')
+				.withIndex('by_event_id', (q) =>
+					q.eq('stripeEventId', args.stripeEventId)
+				)
+				.first()
+			if (existing) return { status: 'already_unhandled' as const }
+
+			await ctx.db.insert('unhandledStripeEvents', {
+				eventType: args.eventType,
+				stripeEventId: args.stripeEventId,
+				stripeChargeId: args.stripeChargeId,
+				stripeRefundId: args.stripeRefundId,
+				rawPayload: args.rawPayload,
+				detectedAt: Date.now()
+			})
+			return { status: 'unhandled' as const }
+		}
+		//3. Idempotency dla normal path
+		if (refund.status !== 'pending') {
+			return { status: 'already_processed' as const }
+		}
+
+		//1b: patch refunds row + bookingPayments accumulation
+		await ctx.db.patch(refund._id, {
+			status: args.stripeRefundStatus,
+			amountRefunded: args.amountRefunded,
+			failureReason: args.failureReason
+		})
+
+		if (args.stripeRefundStatus === 'succeeded') {
+			if (args.amountRefunded === undefined) {
+				throw new Error('amountRefunded required for succeeded refund')
+			}
+			const payment = await ctx.db.get(refund.bookingPaymentId)
+			if (!payment) {
+				throw new Error('bookingPayment not found')
+			}
+			await ctx.db.patch(refund.bookingPaymentId, {
+				refundedAmount: payment.refundedAmount + args.amountRefunded
+			})
+			//1c: paymentStatus re-calc + berth release
+
+			const allPayments = await ctx.db
+				.query('bookingPayments')
+				.withIndex('by_booking', (q) => q.eq('bookingId', refund.bookingId))
+				.collect()
+
+			const paidPayments = allPayments.filter((p) => p.status === 'paid')
+			const totalPaid = paidPayments.reduce((s, p) => s + p.amount, 0)
+			const totalRefunded = paidPayments.reduce(
+				(s, p) => s + p.refundedAmount,
+				0
+			)
+
+			const booking = await ctx.db.get(refund.bookingId)
+			if (!booking) throw new Error('Booking not found')
+
+			const newStatus = calculatePaymentStatusAfterRefund({
+				totalPaid,
+				totalRefunded,
+				currentStatus: booking.paymentStatus ?? 'unpaid'
+			})
+			await ctx.db.patch(refund.bookingId, { paymentStatus: newStatus })
+
+			//1c: berth release (gdy Michal zaznaczyl w UI)
+			if (refund.releaseBerth) {
+				for (const berthId of booking.berthIds) {
+					await ctx.db.patch(berthId, {
+						status: 'available',
+						bookingPaymentIntentId: undefined
+					})
+				}
+				await ctx.db.patch(refund._id, {
+					berthReleasedAt: Date.now()
+				})
+			}
+		}
+		// 1d: audit log
+
+		await ctx.db.insert('adminAuditLog', {
+			adminUserId: refund.initiatedByAdminId,
+			action:
+				args.stripeRefundStatus === 'succeeded'
+					? 'refund_completed'
+					: 'refund_failed',
+			bookingId: refund.bookingId,
+			metadata: {
+				stripeRefundId: args.stripeRefundId,
+				amountRefunded: args.amountRefunded,
+				failureReason: args.failureReason,
+				refundId: refund._id
+			}
+		})
+		return {
+			status: 'processed' as const,
+			refundStatus: args.stripeRefundStatus
+		}
 	}
 })
