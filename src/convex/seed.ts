@@ -97,3 +97,39 @@ export const initializeVoyage = mutation({
 		}
 	}
 })
+
+export const initializeRefundPolicy = mutation({
+	args: {},
+	handler: async (ctx) => {
+		const existing = await ctx.db
+			.query('refundPolicies')
+			.withIndex('by_is_active', (q) => q.eq('isActive', true))
+			.first()
+		if (existing) return { status: 'already_seeded' as const }
+
+		await ctx.db.insert('refundPolicies', {
+			name: 'default',
+			tiers: [
+				{
+					minDaysBefore: 30,
+					refundPercent: 1.0
+				},
+				{
+					minDaysBefore: 14,
+					refundPercent: 0.5
+				},
+				{
+					minDaysBefore: 0,
+					refundPercent: 0.0
+				}
+			],
+			isActive: true,
+			updatedAt: Date.now(),
+			updatedBy: 'system'
+		})
+
+		return {
+			status: 'seeded' as const
+		}
+	}
+})
