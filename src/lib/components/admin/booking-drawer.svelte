@@ -4,6 +4,7 @@
 	import { PUBLIC_APP_URL } from '$env/static/public'
 	import type { Id } from '$convex/dataModel'
 	import { toastState } from '$lib/state/toast.svelte'
+	import RefundDialog from './refund-dialog.svelte'
 
 	type Props = {
 		bookingId: Id<'bookings'> | null
@@ -19,8 +20,9 @@
 	)
 
 	let busyId = $state<string | null>(null)
-	let copiedAt = $state<number | null>(null)
 	let notifyAdmin = $state(true)
+	let copiedAt = $state<number | null>(null)
+	let refundForBookingId = $state<Id<'bookings'> | null>(null)
 
 	type ParticipantForm = {
 		invitedEmail: string
@@ -281,6 +283,10 @@
 			.reduce((sum, p) => sum + p.amount, 0) ?? 0
 	)
 	const remainingAmount = $derived(Math.max(0, totalAmount - paidAmount))
+	const totalRefunded = $derived(
+		detail.data?.payments.reduce((sum, p) => sum + (p.refundedAmount ?? 0), 0) ??
+			0
+	)
 
 	async function sendPaymentReminder(paymentId: Id<'bookingPayments'>) {
 		busyId = paymentId
@@ -549,6 +555,12 @@
 							<span>Pozostało</span>
 							<strong>{formatPLN(remainingAmount)}</strong>
 						</div>
+						{#if totalRefunded > 0}
+							<div>
+								<span>Zwrócono</span>
+								<strong>{formatPLN(totalRefunded)}</strong>
+							</div>
+						{/if}
 					</div>
 
 					<section class="block">
@@ -612,6 +624,17 @@
 									</li>
 								{/each}
 							</ul>
+						{/if}
+						{#if data.payments.some((p) => p.status === 'paid')}
+							<div class="actions">
+								<button
+									class="mini mini--brass"
+									type="button"
+									onclick={() => (refundForBookingId = data.booking._id)}
+								>
+									Inicjuj zwrot
+								</button>
+							</div>
 						{/if}
 					</section>
 
@@ -911,6 +934,12 @@
 			{/if}
 		</aside>
 	</div>
+	{#key refundForBookingId}
+		<RefundDialog
+			bookingId={refundForBookingId}
+			onclose={() => (refundForBookingId = null)}
+		/>
+	{/key}
 {/if}
 
 <style>
@@ -1273,7 +1302,14 @@
 		height: 16px;
 		accent-color: var(--admin-brass, #c4923a);
 	}
-
+	.actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 8px;
+		margin-top: 8px;
+		margin-bottom: 12px;
+		padding-right: 16px; /* dodaj — odsuń od krawędzi */
+	}
 	@media (max-width: 600px) {
 		.detail-strip {
 			grid-template-columns: 1fr;

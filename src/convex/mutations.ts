@@ -1346,7 +1346,8 @@ export const processStripeRefund = internalMutation({
 		})
 		return {
 			status: 'processed' as const,
-			refundStatus: args.stripeRefundStatus
+			refundStatus: args.stripeRefundStatus,
+			bookingId: refund.bookingId
 		}
 	}
 })

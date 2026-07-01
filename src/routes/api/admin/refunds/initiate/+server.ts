@@ -5,6 +5,9 @@ import { requireAdmin } from '$lib/server/admin-guard'
 import { api, internal } from '$convex/api'
 import type { RequestHandler } from './$types'
 import type { Id } from '$convex/dataModel'
+import { sendRefundEmail } from '$lib/server/email'
+import { PUBLIC_APP_URL } from '$env/static/public'
+import { panelUrl } from '../../../../../convex/_brevo'
 
 const convex = createConvexAdminClient()
 
@@ -78,7 +81,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				bookingPaymentId: entry.bookingPaymentId as Id<'bookingPayments'>,
 				refundBatchId,
 				amountRequested: entry.amount,
-				currency: suggestion.currency,
+				currency: suggestion.currency ?? 'pln',
 				initiatedByAdminId: admin.userId,
 				initiatedOutsideApp: false,
 				policySnapshot: suggestion.policyId
@@ -144,6 +147,28 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			stripeRefundIds: refundResults.map((r) => r.stripeRefundId)
 		}
 	})
+
+	try {
+		const detail = await convex.query(api.admin.bookingDetailById, {
+			bookingId: bookingIdT
+		})
+		if (detail?.buyer.email) {
+			await sendRefundEmail({
+				type: 'initiated',
+				to: {
+					email: detail.buyer.email,
+					name: detail.buyer.name ?? undefined
+				},
+				bookingRef: detail.booking.bookingRef,
+				customerName: detail.buyer.name ?? 'Kliencie',
+				amount: totalAmount,
+				currency: suggestion.currency,
+				panelUrl: `${PUBLIC_APP_URL}/dashboard`
+			})
+		}
+	} catch (emailErr) {
+		console.error('sendRefundEmail error:', emailErr)
+	}
 
 	return json({
 		ok: true,

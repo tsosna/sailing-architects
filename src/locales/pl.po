@@ -1142,6 +1142,7 @@ msgstr "SKP"
 #~ msgstr "Koje · {0}"
 
 #: src/lib/components/admin/booking-drawer.svelte
+#: src/lib/components/admin/refund-dialog.svelte
 msgid "Anuluj"
 msgstr "Anuluj"
 
@@ -2004,6 +2005,8 @@ msgstr "Escape"
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/lib/components/admin/booking-drawer.svelte
+#: src/lib/components/admin/refund-dialog.svelte
+#: src/lib/components/admin/refund-dialog.svelte
 #: src/lib/components/toast/toast.svelte
 msgid "Zamknij"
 msgstr "Zamknij"
@@ -2050,6 +2053,7 @@ msgstr "{0} · termin {1} <0/>"
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/lib/components/admin/booking-drawer.svelte
+#: src/lib/components/admin/refund-dialog.svelte
 #: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
 msgid "Wysyłam…"
 msgstr "Wysyłam…"
@@ -3018,3 +3022,67 @@ msgstr "Ta płatność jest w trakcie przetwarzania. Spróbuj ponownie za chwil�
 
 #~ msgid "Każda pozycja musi mieć datę."
 #~ msgstr "Każda pozycja musi mieć datę."
+
+#: src/lib/components/admin/booking-drawer.svelte
+#: src/lib/components/admin/refund-dialog.svelte
+#: src/lib/components/admin/refund-dialog.svelte
+msgid "Inicjuj zwrot"
+msgstr "Inicjuj zwrot"
+
+#. 0: formatPLN(amountGrosze)
+#: src/lib/components/admin/refund-dialog.svelte
+msgid "Zwrot {0} PLN zainicjowany. Czeka na potwierdzenie Stripe."
+msgstr "Zwrot {0} PLN zainicjowany. Czeka na potwierdzenie Stripe."
+
+#: src/lib/components/admin/refund-dialog.svelte
+msgid "Błąd zwrotu."
+msgstr "Błąd zwrotu."
+
+#: src/lib/components/admin/refund-dialog.svelte
+msgid "Wczytuję politykę zwrotów…"
+msgstr "Wczytuję politykę zwrotów…"
+
+#~ msgid "Sugerowany zwrot: <0>{0} PLN</0> ({0}% wg polityki — {1} dni przed wypłynięciem).<1/>"
+#~ msgstr "Sugerowany zwrot: <0>{0} PLN</0> ({0}% wg polityki — {1} dni przed wypłynięciem).<1/>"
+
+#: src/lib/components/admin/refund-dialog.svelte
+msgid "Brak sugestii (poza polityką lub nic do zwrotu)"
+msgstr "Brak sugestii (poza polityką lub nic do zwrotu)"
+
+#. 0: formatPLN(s.totalPaid); 1: formatPLN( s.availableToRefund )
+#: src/lib/components/admin/refund-dialog.svelte
+msgid "<0/> Wpłacone: {0} PLN · Dostępne do zwrotu: {1} PLN."
+msgstr "<0/> Wpłacone: {0} PLN · Dostępne do zwrotu: {1} PLN."
+
+#: src/lib/components/admin/refund-dialog.svelte
+msgid "Kwota zwrotu (PLN)"
+msgstr "Kwota zwrotu (PLN)"
+
+#: src/lib/components/admin/refund-dialog.svelte
+msgid "Powód (opcjonalnie)"
+msgstr "Powód (opcjonalnie)"
+
+#~ msgid "Zwolnij koje (dostępne dla nowej rezerwacji)"
+#~ msgstr "Zwolnij koje (dostępne dla nowej rezerwacji)"
+
+#. 0: formatPLN(s.availableToRefund)
+#: src/lib/components/admin/refund-dialog.svelte
+msgid "Kwota przekracza dostępne {0} PLN."
+msgstr "Kwota przekracza dostępne {0} PLN."
+
+#: src/lib/components/admin/refund-dialog.svelte
+msgid "Zatwierdź zwrot"
+msgstr "Zatwierdź zwrot"
+
+#. 0: s.suggestedPercent * 100; 1: s.daysBeforeDeparture
+#: src/lib/components/admin/refund-dialog.svelte
+msgid "Sugerowany zwrot: <0>{0} PLN</0> ({0} % wg polityki — {1} dni przed wypłynięciem).<1/>"
+msgstr "Sugerowany zwrot: <0>{0} PLN</0> ({0} % wg polityki — {1} dni przed wypłynięciem).<1/>"
+
+#: src/lib/components/admin/refund-dialog.svelte
+msgid "Zwolnij koje (stanie się dostępna dla nowej rezerwacji)"
+msgstr "Zwolnij koje (stanie się dostępna dla nowej rezerwacji)"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Zwrócono"
+msgstr "Zwrócono"

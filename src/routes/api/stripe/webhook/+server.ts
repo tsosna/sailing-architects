@@ -14,6 +14,8 @@ import { STRIPE_WEBHOOK_SECRET } from '$env/static/private'
 import type { RequestHandler } from './$types'
 import { api, internal } from '$convex/api'
 import { createConvexAdminClient } from '$lib/server/convex-admin'
+import { sendRefundEmail } from '$lib/server/email'
+
 const convex = createConvexAdminClient()
 
 function emailTypeFor(
@@ -149,19 +151,47 @@ export const POST: RequestHandler = async ({ request }) => {
 			// Skip non-terminal statuses ('pending', 'canceled', 'requires_action')
 			if (refund.status !== 'succeeded' && refund.status !== 'failed') break
 
-			await convex.mutation(internal.mutations.processStripeRefund, {
-				stripeRefundId: refund.id,
-				stripeRefundStatus: refund.status,
-				amountRefunded: refund.amount,
-				failureReason: refund.failure_reason ?? undefined,
-				stripeEventId: event.id,
-				eventType: event.type,
-				stripeChargeId:
-					typeof refund.charge === 'string'
-						? refund.charge
-						: (refund.charge?.id ?? undefined),
-				rawPayload: event
-			})
+			const result = await convex.mutation(
+				internal.mutations.processStripeRefund,
+				{
+					stripeRefundId: refund.id,
+					stripeRefundStatus: refund.status,
+					amountRefunded: refund.amount,
+					failureReason: refund.failure_reason ?? undefined,
+					stripeEventId: event.id,
+					eventType: event.type,
+					stripeChargeId:
+						typeof refund.charge === 'string'
+							? refund.charge
+							: (refund.charge?.id ?? undefined),
+					rawPayload: event
+				}
+			)
+			if (
+				result.status === 'processed' &&
+				result.refundStatus === 'succeeded'
+			) {
+				try {
+					const detail = await convex.query(api.admin.bookingDetailById, {
+						bookingId: result.bookingId
+					})
+					if (detail?.buyer.email && refund.amount != null) {
+						await sendRefundEmail({
+							type: 'completed',
+							to: {email: detail.buyer.email, name:detail.buyer.name ?? undefined},
+							bookingRef: detail.booking.bookingRef,
+							customerName: detail.buyer.name ?? 'Kliencie',
+							amount: refund.amount,
+							currency: (refund.currency ?? 'pln'),
+							panelUrl: `${PUBLIC_APP_URL}/dashboard`,
+							settledAt: Date.now(),
+						})
+					}
+				} catch (emailErr) {
+					console.error('sendRefundEmail (comleted) failed:', emailErr);
+					
+				}
+			}
 			break
 		}
 		case 'payment_intent.payment_failed':

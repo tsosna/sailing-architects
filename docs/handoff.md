@@ -65,6 +65,156 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
+## Sesja 2026-07-01 (długa, ~8h) — A7c kroki 4+5: sendRefundEmail (discriminated union) + wire endpoint + webhook
+
+### Zmiany
+
+- **RefundDialog fixy (3, przed krokiem 4):**
+  - `src/lib/components/admin/booking-drawer.svelte`: `totalRefunded` `$derived` + warunkowe KPI „Zwrócono" (Opcja B — osobne pole, POZOSTAŁO bez zmian) + `{#key refundForBookingId}` wokół `<RefundDialog>` — wymusza remount na zmianę bookingId, fresh state przy reopen.
+  - `src/lib/components/admin/refund-dialog.svelte`: `releaseBerthTouched` flag + `$effect` derive `releaseBerth = amountGrosze === availableToRefund` + checkbox `onchange` handler zamiast `bind:checked`. Full refund default checked, partial default unchecked, user override freeze przez touched flag.
+- **A7c krok 4 — `sendRefundEmail` w `src/lib/server/email.ts`:**
+  - Nowy typ `SendRefundEmailInput` — **pierwszy discriminated union w projekcie** (`type: 'initiated' | 'completed'`, `settledAt` tylko w 'completed').
+  - Funkcja z `switch (input.type)` + narrowing.
+  - HTML zrefaktoryzowany na spójny styl z `sendPaymentConfirmationEmail` — ramka gradientowa (border-left brass, tło beż), heading H2, CTA button „Otwórz panel" (brass), stopka „Do zobaczenia".
+  - `panelUrl: string` w typie jako wymagane pole (caller buduje z `PUBLIC_APP_URL`).
+- **Wire endpoint `POST /api/admin/refunds/initiate/+server.ts`:**
+  - Import `sendRefundEmail` + `PUBLIC_APP_URL` z `$env/static/public`.
+  - Po `insertAdminAuditLog`, przed `return json`: pobranie `bookingDetailById` + `sendRefundEmail({type: 'initiated', ...})` w try/catch (email best-effort, nie failujemy refund).
+- **A7c krok 5 — wire w webhook `charge.refund.updated`:**
+  - `src/convex/mutations.ts`: return `processStripeRefund` rozszerzony o `bookingId: refund.bookingId` (tylko w `'processed'` — discriminated union TS narrowing).
+  - `src/routes/api/stripe/webhook/+server.ts`: `case 'charge.refund.updated'` — złap `result` mutation, jeśli `result.status === 'processed' && result.refundStatus === 'succeeded'` → pobierz `bookingDetailById` → `sendRefundEmail({type: 'completed', ..., settledAt: Date.now()})` w try/catch.
+- **Debug w połowie sesji: `BadAdminKey` na POST endpoint.** Klucz w `.env` (`CONVEX_ADMIN_KEY=local-tomek_sosinski-...`) nie pasował do aktualnego local backendu Convex (anonymous). Świeży klucz w `.convex/local/default/config.json`. Podmiana + restart `pnpm dev` → naprawione.
+- **Smoke test A7c krok 4 zaliczony:** real refund 100 PLN → toast success → email `type: 'initiated'` przyszedł ze spójnym layoutem (ramka gradientowa, CTA button). Terminal `pnpm dev` bez błędów.
+- **Feedback w memory:** `feedback_who_writes_code.md` napisane — reguła „podczas nauki kod pisze Tomek, nie Claude" + dodane do `MEMORY.md`.
+
+### Decyzje
+
+- **UX POZOSTAŁO vs Zwrócono — Opcja B** (osobne pole „Zwrócono" tylko gdy > 0, POZOSTAŁO bez zmian semantycznych). Powód: najmniejsza inwazja, brak ryzyka „klient zalega" konfuzji.
+- **`{#key refundForBookingId}` zamiast `{#if refundForBookingId}` w parent** — dialog wewnętrznie ma już `{#if bookingId}` do ukrycia markup. `{#key}` gwarantuje remount komponentu na zmianę value (null → id → null → id), świeży state każdy raz.
+- **Discriminated union `SendRefundEmailInput`** > obiekt z `type: 'a'|'b'` + `settledAt?`. Powód: TS wymusza że `settledAt` MUSI być podane razem z `'completed'`. Wcześniej w projekcie tylko prosty union literal (`PaymentEmailType`) — dziś pierwszy raz discriminated union z zależnymi polami.
+- **HTML refund email jednym `switch` z `heading` + `subject` + `textLine` per case, wspólny HTML wrapper poza switchem.** Mniej duplikacji niż full HTML w każdym case. Wspólne części (wrapper div, ramka, CTA, stopka) raz.
+- **`panelUrl: string` jako pole typu, caller buduje wartość** — nie `PUBLIC_APP_URL` bezpośrednio w funkcji. Powód: caller (endpoint / webhook) wie co jest właściwym destination, funkcja email tylko wysyła. Też pattern z `sendPaymentConfirmationEmail`.
+- **`sendRefundEmail` w try/catch (obejmujący również pobranie `bookingDetailById`)** — email = best-effort, refund już się wykonał na Stripe + w Convex, nie chcemy failować całego endpointu z powodu problemu email.
+- **`settledAt: Date.now()` w webhook (nie `refund.created * 1000`)** — moment webhook ≈ moment succeeded. `refund.created` = moment CREATE (refund pending). Semantyka „zaksięgowano" bliższa webhook time.
+- **Fix `BadAdminKey` przez podmianę klucza w `.env`, nie regenerację lokalnego backendu.** Backend miał świeży klucz w config, `.env` stary — najprostsza korekta.
+
+### Wnioski
+
+- **Discriminated union w TS — pierwszy pattern w projekcie** — `type: 'initiated' | 'completed'` + pola zależne (`settledAt` tylko w 'completed'). TS narrowing w `switch (input.type)` gwarantuje że w `case 'completed'` `input.settledAt` istnieje, w `case 'initiated'` NIE. Reguła diagnostyczna: gdy warianty funkcji różnią się nie tylko wartością pola ale też jego OBECNOŚCIĄ → discriminated union > obiekt z optional. Pattern powtórzony w Convex return `processStripeRefund` (`bookingId` tylko w `'processed'`). Kandydat wiki priorytet 1 (piszę dziś).
+- **Convex mutation return type discriminated — narrowing w callerze przez `if (result.status === 'processed')`.** Ten sam pattern co discriminated union w TS input. Callera musi zwęzić żeby TS pozwolił na `result.bookingId`. Uniwersalna zasada: kiedy funkcja zwraca kilka „scenariuszy" z różnymi payloadami, dyskryminuj przez pole literal + wymuś narrow w callerze.
+- **Component state leak w Svelte 5 gdy komponent bez `{#if}` w parent — instance żyje między open/close.** `<RefundDialog>` renderowany bezwarunkowo w parent, wewnętrzne `{#if bookingId}` chowa markup ale komponent LIVE, `$state` variables persist. Reopen z nowym bookingId → `$effect` widzi `preloaded === true` z poprzedniej sesji → nie preloaduje. Fix: `{#key value}` w parent wymusza unmount+mount na zmianę value. Kandydat wiki backlog.
+- **PUBLIC_ prefix env vars — Vite bakuje wartości w bundle przy buildzie.** Restart `pnpm dev` po zmianie `.env`. `$env/static/public` = statycznie zbindowane. Konwencjonalnie tylko `PUBLIC_` mogą wyciec do browsera. Tomek pierwszy raz świadomie przerobił distinction env var ≠ ciasteczko.
+- **`escapeHtml` = defence przed XSS + wymóg tam gdzie wchodzi user input.** Wewnętrznie generowane stringi (`formatMoney`, `formatDate`) — nadmiarowo. User input (`customerName`), external data (`bookingRef` z bazy) — obowiązkowo. Zasada: escape all input coming from user/DB, skip internal helpers.
+- **HTML template w string literal — brak zamknięć tagów TS nie łapie.** Debug wizualnie przy pierwszym render, TS przechodzi bo string OK. Pattern diagnostyczny: przy nowym HTML template zawsze pierwszy raz renderuj i zobacz.
+- **Refactor emaila na spójny styl przez kopię wzorca z `sendPaymentConfirmationEmail`** — pattern: header wrapper (font, max-width), ramka gradientowa (`border-left: 3px solid #c4923a; background: #f7efdc;`), CTA button (`background: #c4923a; color: #0d1b2e; text-transform: uppercase;`), stopka (`color: #607089`). Utrwalone jako sygnatura wizualna projektu.
+- **`BadAdminKey` po `convex dev` restart — anonymous local backend generuje klucz osobno.** Convex 1.42 + anonymous backend: klucz w `.convex/local/default/config.json`. `.env` NIE aktualizuje się automatycznie. Reguła diagnostyczna: `BadAdminKey` → sprawdź czy klucz w `.env` == klucz w `.convex/local/default/config.json`.
+- **Procesowe: kod pisze Tomek podczas nauki, nawet dla „mechanicznych" edycji.** Regression w połowie sesji: napisałem 3 fixy dialog (`{#key}`, KPI Zwrócono, checkbox derive) sam bo „mechaniczne + zmęczenie ucznia". Tomek wprost: „piszę zawsze ja i to ty musisz mi podnosić trudności". Feedback zapisany do memory `feedback_who_writes_code.md`. Od tej pory: Claude wskazuje file:line + pattern + dlaczego, Tomek edytuje w Cursor. Dzisiejsze fixy zostały (rollback = strata czasu), reset trybu.
+- **Procesowe: dyslektyk + late-session — literówki (`sendRefundEmailInput` jako nazwa funkcji, `subject:` zamiast `=`, `comleted` w log). Wskazywać delikatnie, konkretny znak.** Reguła utrwalona: krytyczne literówki w kodzie WSKAZAĆ jednym zdaniem (nie diagnozować), w wiadomościach do mnie NIGDY.
+- **Procesowe: obserwacje UX z żywej pracy — user ma >1 booking, panel żeglarza vs admin drawer pokazują różne.** Wybieranie „którego bookingu widzieć" w panelu żeglarza niejawne, utrudnia debug/support. Blocker analizy dalszych rozjazdów (harmonogram, statusy) — najpierw uspójnić reguły wyboru. Do backlog.
+
+### Następne kroki
+
+#### Next
+
+- **A7c krok 6** — failure banner `/admin` dla stuck refunds (query pending >X min lub `status: 'failed'`, UI alert). Scope do uzgodnienia: `/admin` Sales Board? `/admin/automation`? osobna strona?
+- **Smoke test A7c krok 5** — real refund → wait Stripe webhook `charge.refund.updated` z `status='succeeded'` → email `type: 'completed'` przychodzi (spójny styl, `settledAt` renderuje datę).
+- **Panel żeglarza — reguła wyboru bookingu przy >1 booking na usera.** Blocker uspójnienia panel/admin.
+
+#### Wiki — kolejka backlog kandydatów (do napisania w innej sesji)
+
+- `concepts/discriminated-union-in-typescript` — pierwszy w projekcie, pattern do wielokrotnego użytku (✔ pisany dziś)
+- `concepts/svelte5-component-state-leak-without-remount` — `{#key}` pattern, `<RefundDialog>` case study
+- `concepts/convex-runtime-vs-sveltekit-runtime-bundle-split` — dwa runtime, dwa bundle, cross tylko HTTP (backlog z 2026-06-28)
+- `concepts/modal-stacking-with-scrim-z-index` — DOM order + z-index na panel (backlog z 2026-06-28)
+- `concepts/convex-generated-api-pattern` — `$convex/api` alias, mechanizm regeneracji, frontend ↔ backend boundary (backlog z 2026-06-28)
+- `concepts/nullable-prop-vs-open-flag` — single source of truth dla widoczności komponentu (backlog z 2026-06-28)
+- `concepts/env-vars-public-vs-private-sveltekit` — `$env/static/public` vs `$env/static/private`, cache przy buildzie, restart po zmianie
+- `concepts/escapehtml-when-needed` — user input vs internal strings, defence-in-depth pattern
+
+#### Blocked / Later / Open questions
+
+- **Stripe live payment test** — nadal odłożone, czeka na pierwszy realny booking.
+- **Convex 1.36 → 1.41 upgrade** — nadal otwarte (Convex CLI już 1.42.1).
+- **`CONVEX_TMPDIR` warning** — backlog.
+- **Tailwind decyzja dla Hotel Lenart booking platform** — według [[concepts/tailwind-when-is-it-needed]] checklist, podjąć przed start projektu.
+- **A7c krok 6 scope** — decyzja umiejscowienia banner (Sales Board / automation / osobna strona).
+- **Panel żeglarza — polityka wyboru bookingu przy wielu bookingach** — do rozstrzygnięcia na osobną sesję.
+
+---
+
+## Sesja 2026-06-28 (długa, ~6h) — A7c kroki 1-3: RefundDialog UI + wpięcie w booking-drawer
+
+### Zmiany
+
+- **Nowy komponent `src/lib/components/admin/refund-dialog.svelte`** (~260 linii) — modal dla admina inicjującego zwrot.
+  - Props: `bookingId: Id<'bookings'> | null` (nullable jako single source of truth dla visibility) + `onclose: () => void`.
+  - `useQuery(api.refunds.calculateRefundPolicySuggestion)` z `'skip'` gdy `bookingId === null`.
+  - State: `amountPln` (PLN, konwersja Math.round * 100 dla grosze), `reason`, `releaseBerth` (checkbox, default true), `submitting`, `preloaded` (init flag).
+  - `$effect` preload kwoty z `suggestion.data.suggestedAmount / 100` (sentinel-vs-flag pattern — bo user może legalnie wykasować input do null).
+  - `$derived` `amountGrosze` + `canSubmit`.
+  - `handleSubmit` POST do `/api/admin/refunds/initiate` (z A7b krok 3) z toast success/error.
+  - Loading state `{#if !suggestion.data}`, null guard `suggestion.data.suggestedAmount !== null` (TS 18047 fix).
+  - UI: scrim + panel centered, brass primary CTA + neutral cancel (konwencja przeciw czerwony/zielony Tomka pierwszej iteracji).
+  - Number input bez spinner (webkit + moz appearance off).
+- **Wpięcie w `src/lib/components/admin/booking-drawer.svelte`** — import komponentu, `refundForBookingId` `$state`, button `mini--brass` w sekcji `.actions` (guard `data.payments.some(p => p.status === 'paid')`), render `<RefundDialog />` po `</aside></div>` zewnętrznym.
+- **Z-index fix:** drawer ma `z-index: 60`, refund dialog overlay bumped na `70` żeby modal-nad-modalem renderował się poprawnie.
+- **2 nowe artykuły wiki napisane:**
+  - `concepts/tailwind-when-is-it-needed.md` — checklist decyzyjna (Tomka explicit prośba o pamiętanie kwestii Tailwind w przyszłych projektach)
+  - `concepts/svelte5-state-initializer-and-effect-init-flag.md` — `$state(expr)` ewaluuje raz + sentinel vs flag dla `$effect` preload
+- **Indeks vault zaktualizowany** o 2 nowe concepts.
+- **`feedback_worktree_workflow.md` zapisane do memory** + dopisane do `MEMORY.md` — reguła „Tomek tylko na main, nie w worktree".
+
+### Decyzje
+
+- **RefundDialog jako oddzielny komponent**, nie inline w booking-drawer. Powód: 260 linii markup + logic powiększyłoby drawer (już 1285 linii) o ~20%, plus naturalna separacja modal-w-modalu z własnym overlay/scrim/panel.
+- **`bookingId: Id<'bookings'> | null` zamiast `open: boolean` + osobny `bookingId`** — single source of truth, niemożliwe „open bez bookingId" bug.
+- **Input kwoty w PLN, nie groszach** — user myśli „540 zł", nie „54000 gr". Konwersja `Math.round(amountPln * 100)` w `$derived` na boundary do POST.
+- **Konwencja przyciski brass primary + neutral cancel** — Tomek zaproponował czerwony Anuluj + zielony Zatwierdź, po krótkiej dyskusji UX (czerwony Anuluj = mylące, nie destructive) przeszedł na konwencjonalny pattern.
+- **`releaseBerth` checkbox** zamiast auto-decyzji per refund amount — decyzja Michała z 2026-06-20: admin decyduje.
+- **2 artykuły wiki priorytetowo dziś (Tailwind + svelte5 state initializer)** — najświeższy kontekst po empirycznym bugu „900 zostaje po backspace". Reszta backlog (4 dodatkowe kandydaci, patrz Next).
+
+### Wnioski
+
+- **`$state(expr)` ewaluuje `expr` dokładnie raz przy mount, nie subskrybuje.** Najczęstszy gotcha Svelte 5 dla osób z React intuicji. Pattern: dla async preload użyj `$state(null)` + `$effect` ustawiający wartość gdy źródło asyncowe się pojawi. Promocja: [[concepts/svelte5-state-initializer-and-effect-init-flag]].
+- **Sentinel value (`null = nie tknięte`) koliduje z legalnym user state gdy user może legalnie wpisać null.** Empiryczny bug: input number, user backspace → `amountPln = null` → `$effect` warunek `=== null` true → nadpisuje preload → nie da się wpisać 9 zamiast 900. Fix: separate boolean flag `preloaded`. Reguła: gdy state ma >2 znaczenia (nie ma + nie tknięte + konkretna wartość) → rozdziel state od flag. Wpisane w ten sam artykuł.
+- **Tailwind w projekcie z bespoke design + scoped Svelte styles daje ~20% wartości** — tylko `@theme` parser + preflight reset. Zero utility class w markup po audycie sailing-architects. Decyzja: zostawić (koszt utrzymania zero, koszt usunięcia 1-2h), ale przed nowym projektem ocenić na świeżo. Promocja: [[concepts/tailwind-when-is-it-needed]] (Tomka explicit prośba).
+- **`!!x` to wymuszenie boolean (`Boolean(x)` skrócone)** — kluczowe dla `$derived` flagów (canSubmit, isReady), żeby type był pure boolean a nie `T | undefined | boolean` union. Bez `!!` JS `a && b && c` zwraca ostatnią truthy lub pierwszą falsy — szeroki type. Mapa kompetencji: utrwalone.
+- **`$convex` alias mapuje na `src/convex/_generated/`, nie raw `src/convex/`** — frontend importuje wyłącznie kontrakt API (regenerowany przez `npx convex dev`), nigdy raw backend. Tomek pytał gdzie konwencja, znaleziona w `svelte.config.js` linia 4. Kandydat wiki (backlog).
+- **Convex i SvelteKit to dwa runtime'y, dwa osobne bundle JS** — `_emails.ts` w `src/convex/` żyje TYLKO na Convex Cloud, `email.ts` w `src/lib/server/` TYLKO na Vercel. Cross-runtime tylko przez HTTP/WS. Każdy runtime ma własny Brevo helper. Kandydat wiki (backlog).
+- **Convex crons wbudowane** — `crons.ts` rejestruje internalMutation/internalAction do uruchomienia per minute / daily. Niezależne od Vercel cron. Pattern: „who owns the data owns the schedule".
+- **Modal-w-modalu pattern wymaga świadomego z-index** — drawer ma `z-index: 60`, refund dialog overlay musi być wyżej (70). Pattern: pierwszy modal ustanawia stacking context, każdy następny modal bump wyżej.
+- **Procesowe: po ~5h koncept-heavy sesji przełączamy na ja-piszę-ty-akceptujesz.** Tomek wprost zgłosił „nie jestem w stanie sobie poradzić z wszystkim" przy logice kroku 3. Wcześniejsza decyzja z 2026-06-21 utrwalona empirycznie. Reguła: świadomy switch trybu nauki gdy sygnał zmęczenia, nie wymuszanie kontynuacji.
+- **Procesowe: literówki w user-facing kodzie WSKAZAĆ delikatnie**, w wiadomościach NIGDY. Granica: kod produkcyjny = inny case od wiadomości tekstowych. Tomka dysleksja nie powinna trafić na produkcję, ale komentowanie literówek w jego wpisach do mnie = łamanie reguły z `user_dyslexia_dysgraphia.md`. Reguła wzmocniona.
+- **Procesowe: TS error guidance dla refactoru** zadziałało drugi raz — narrow schema na required → TS wskazał 4 inserty (2026-06-20), tutaj null check na `suggestedAmount` → TS wskazał 2 miejsca do guard. „Let compiler guide refactor" utrwalone.
+- **Procesowe: Tomka wprost prośba o memory note „pamiętać Tailwind w przyszłych projektach"** — sygnał że wiki to dla niego reusable reference, nie tylko archiwum sesji. Drugi raz w rzędzie (po prod-deployment-from-scratch 2026-06-19). Wzorzec utrwalony.
+
+### Następne kroki
+
+#### Next
+
+- **A7c krok 4** — `sendRefundEmail` w `src/lib/server/email.ts` (discriminator `type: 'initiated' | 'completed'`), wire w `POST /api/admin/refunds/initiate` po response Convex.
+- **A7c krok 5** — wire `sendRefundEmail({type: 'completed'})` w webhook handler `charge.refund.updated` po commit `processStripeRefund`.
+- **A7c krok 6** — failure banner `/admin` — query stuck refunds (pending >X min lub status 'failed') + UI alert.
+- **A7d, A7e** zostają w backlogu.
+- **Test smoke A7c krok 3 przed mergem** — sprawdzić że refund dialog rendererje się NAD drawerem (z-index 70), preload działa, edycja kwoty trzyma, POST kończy się 200, toast success.
+
+#### Wiki — kolejka backlog (kandydaci do napisania w innej sesji)
+
+- `concepts/convex-runtime-vs-sveltekit-runtime-bundle-split` — dwa runtime, dwa bundle, cross tylko HTTP, każdy własny Brevo helper
+- `concepts/modal-stacking-with-scrim-z-index` — DOM order + z-index na panel (nie scrim), bump dla nested modal
+- `concepts/convex-generated-api-pattern` — `$convex/api` alias, mechanizm regeneracji, frontend ↔ backend boundary
+- `concepts/nullable-prop-vs-open-flag` — single source of truth dla widoczności komponentu
+
+#### Blocked / Later / Open questions
+
+- **Stripe live payment test** — nadal odłożone, czeka na pierwszy realny booking.
+- **Convex 1.36 → 1.41 upgrade** — nadal otwarte.
+- **`CONVEX_TMPDIR` warning** — backlog.
+- **Tailwind decyzja dla Hotel Lenart booking platform** — według [[concepts/tailwind-when-is-it-needed]] checklist, podjąć przed start projektu.
+- **A7c krok 6 scope** — czy banner ma być w `/admin` Sales Board, w `/admin/automation`, czy w osobnym `/admin/refunds`? Decyzja przy starcie kroku.
+
+---
+
 ## Sesja 2026-06-20 (długa, ~5h) — A7a 15/17: schema refundów + widen-migrate-narrow ćwiczony na żywo
 
 ### Zmiany

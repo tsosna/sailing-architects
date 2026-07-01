@@ -37,6 +37,27 @@ export type SendDailyReportEmailInput = {
 	text?: string
 }
 
+export type SendRefundEmailInput =
+	| {
+			type: 'initiated'
+			to: EmailRecipient
+			bookingRef: string
+			customerName: string
+			amount: number
+			currency: string
+			panelUrl: string
+	  }
+	| {
+			type: 'completed'
+			to: EmailRecipient
+			bookingRef: string
+			customerName: string
+			amount: number
+			currency: string
+			panelUrl: string
+			settledAt: number
+	  }
+
 export type SendTransactionalEmailResult = {
 	messageId?: string
 	response: unknown
@@ -227,6 +248,47 @@ export async function sendDailyReportEmail({
 		html,
 		text
 	})
+}
+
+export async function sendRefundEmail(input: SendRefundEmailInput) {
+	let subject
+	let html
+	let textLine = ''
+	let head = ''
+	switch (input.type) {
+		case 'initiated':
+			subject = `Zainicjowano zwrot — rezerwacja ${input.bookingRef} · Sailing Architects`
+			head = 'Zainicjowano zwrot środków pieniężnych'
+			textLine = `Środki powinny pojawić się na Twoim koncie w ciągu 1-3 dni roboczych`
+			break
+		case 'completed':
+			textLine = `Zwrot został zaksięgowany ${formatDate(input.settledAt)}`
+			head = 'Zwrot środków pieniężnych'
+			subject = `Zwrot zaksięgowany — rezerwacja ${input.bookingRef} · Sailing Architects`
+			break
+	}
+	html = `<div style="font-family: Arial, sans-serif; max-width: 640px; color: #0d1b2e;">
+		<h2 style="margin: 0 0 16px;">${escapeHtml(head)}</h2>
+		<p style="margin: 0 0 12px;">Cześć ${escapeHtml(input.customerName)},</p>
+		<div style="margin: 0 0 18px; padding: 14px 18px; border-left: 3px solid #c4923a; background: #f7efdc;">
+			<p style="margin: 4px 0;">Numer rezerwacji: <strong>${escapeHtml(input.bookingRef)}</strong></p>
+			<p style="margin: 4px 0;">Kwota zwrotu: <strong>${escapeHtml(formatMoney(input.amount, input.currency))}</strong></p>
+		</div>
+		 <p style="margin: 4px 0;">${escapeHtml(textLine)}</p>
+		<p style="margin: 18px 0;">
+		<a
+			href="${escapeHtml(input.panelUrl)}"
+			style="display: inline-block; padding: 12px 24px; background: #c4923a; color: #0d1b2e; text-decoration: none; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; font-size: 12px;"
+		>
+			Otwórz panel
+		</a>
+		</p>
+		<p style="margin: 0; color: #607089;">
+			Do zobaczenia,<br />Sailing Architects
+		</p>
+	</div>`
+
+	return sendTransactionalEmail({ to: input.to, subject, html })
 }
 
 export type PaymentEmailType = 'deposit' | 'installment' | 'fully-paid'
