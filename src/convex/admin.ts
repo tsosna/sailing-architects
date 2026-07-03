@@ -10,6 +10,7 @@ import {
 const DAY_MS = 24 * 60 * 60 * 1000
 const DUE_SOON_WINDOW_MS = 7 * DAY_MS
 const HOLD_NEAR_EXPIRY_MS = 15 * 60 * 1000
+const REFUND_STUCK_PENDING_MS = 15 * 60 * 1000
 
 type AlertLevel = 'danger' | 'warn' | 'info'
 
@@ -22,6 +23,7 @@ type AlertItem = {
 		| 'data_missing'
 		| 'data_pending_confirmation'
 		| 'hold_expiring'
+		| 'refund_stuck'
 	title: string
 	subtitle: string
 	bookingRef?: string
@@ -313,6 +315,48 @@ export const overviewBySegment = query({
 					suggestedActions: ['open_booking']
 				})
 			}
+		}
+
+		const failedRefunds = await ctx.db
+			.query('refunds')
+			.withIndex('by_status', (q) => q.eq('status', 'failed'))
+			.collect()
+
+		const pendingRefunds = await ctx.db
+			.query('refunds')
+			.withIndex('by_status', (q) => q.eq('status', 'pending'))
+			.collect()
+
+		const segmentBookingIds = new Set(bookings.map((b) => b._id))
+
+		const stuckFailed = failedRefunds.filter((r) =>
+			segmentBookingIds.has(r.bookingId)
+		)
+
+		const stuckPending = pendingRefunds.filter(
+			(r) =>
+				segmentBookingIds.has(r.bookingId) &&
+				r._creationTime < now - REFUND_STUCK_PENDING_MS
+		)
+
+		const stuckRefunds = [...stuckFailed, ...stuckPending]
+
+		for (const b of stuckRefunds) {
+			alerts.push({
+				id: `ref-${b._id}`,
+				level: b.status === 'failed' ? 'danger' : 'warn',
+				kind: 'refund_stuck',
+				title:
+					b.status === 'failed'
+						? 'Zwrot odrzucony przez Stripe'
+						: `Zwrot utknął — przekroczono o ${Math.round(
+								(now - REFUND_STUCK_PENDING_MS - b._creationTime) / 60000
+							)} min`,
+				subtitle: `Kwota refundacji: ${formatPLN(b.amountRequested)}`,
+				bookingId: b.bookingId,
+				priority:b.status === 'failed' ? 2000 : 300,
+				suggestedActions: ['open_booking']
+			})
 		}
 
 		for (const b of heldBerths) {

@@ -13,11 +13,11 @@
 		| 'paid'
 
 	let now = $state(Date.now())
-	$effect(()=>{
-		const id = setInterval(()=>{
+	$effect(() => {
+		const id = setInterval(() => {
 			now = Date.now()
 		}, 60000)
-		return ()=>clearInterval(id)
+		return () => clearInterval(id)
 	})
 
 	let selectedSegment = $state(voyageSegments[0].id)
@@ -50,13 +50,15 @@
 		}
 	})
 
-
 	function formatPLN(grosze: number): string {
 		const zlote = Math.round(grosze / 100)
 		return zlote.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
 	}
 
-	function formatHoldCountdown(timestamp: number | null, currentTime: number): string {
+	function formatHoldCountdown(
+		timestamp: number | null,
+		currentTime: number
+	): string {
 		if (!timestamp) return '—'
 		const minutes = Math.max(0, Math.round((timestamp - currentTime) / 60000))
 		if (minutes < 1) return 'teraz'
@@ -64,7 +66,6 @@
 		const hours = Math.floor(minutes / 60)
 		return `${hours} h`
 	}
-
 </script>
 
 <svelte:head>
@@ -143,7 +144,9 @@
 		<div class="kpi">
 			<span>Held</span>
 			<strong>{data.kpi.heldCount}</strong>
-			<em>{formatHoldCountdown(data.kpi.nextHoldExpiresAt, now)} do wygaśnięcia</em>
+			<em
+				>{formatHoldCountdown(data.kpi.nextHoldExpiresAt, now)} do wygaśnięcia</em
+			>
 		</div>
 		<div class="kpi">
 			<span>Specjalne</span>
@@ -253,7 +256,9 @@
 												? 'Dane'
 												: alert.kind === 'hold_expiring'
 													? 'Checkout'
-													: 'Info'}
+													: alert.kind === 'refund_stuck'
+														? 'Zwrot'
+														: 'Info'}
 								</span>
 							</div>
 							{#if alert.bookingId}

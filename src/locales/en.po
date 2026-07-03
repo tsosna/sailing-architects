@@ -2615,6 +2615,7 @@ msgid "W dół"
 msgstr ""
 
 #: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
 msgid "Usuń"
 msgstr ""
 
@@ -3085,4 +3086,40 @@ msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
 msgid "Zwrócono"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Zwrot"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Polityka zwrotów"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Progi zwrotu wg dni przed rejsem. Globalna - aktywna jedna"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Dodaj próg"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Zapisuję..."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Zapisz politykę"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "ilość dni przed"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Procent zwrotu"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Polityka zwrotów zapisana"
 msgstr ""

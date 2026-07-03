@@ -353,6 +353,50 @@ export const upsertSegmentPaymentPlan = mutation({
 	}
 })
 
+export const updateRefundPolicy = mutation({
+	args: {
+		tiers: v.array(
+			v.object({
+				minDaysBefore: v.number(),
+				refundPercent: v.number()
+			})
+		)
+	},
+	handler: async (ctx, args) => {
+		const adminIdentity = await requireConvexAdmin(ctx)
+		if (
+			args.tiers.some(
+				(t) => t.refundPercent < 0 || t.refundPercent > 1 || t.minDaysBefore < 0
+			)
+		) {
+			throw new Error('Plan refundacji nie moze mieć błędnych danych')
+		}
+		const policy = await ctx.db
+			.query('refundPolicies')
+			.withIndex('by_is_active', (q) => q.eq('isActive', true))
+			.first()
+		if (!policy) {
+			throw new Error('Brak aktywnej polityki refundacji/zwrotu')
+		}
+
+		const sortedTiers = args.tiers.sort((a,b)=>b.minDaysBefore - a.minDaysBefore)
+
+		await ctx.db.patch(policy._id, {
+			tiers: sortedTiers,
+			updatedAt: Date.now(),
+			updatedBy: adminIdentity.subject
+		})
+		await ctx.db.insert('adminAuditLog', {
+			adminUserId: adminIdentity.subject,
+			action: 'policy_updated',
+			metadata: {
+				before: policy.tiers,
+				after: sortedTiers
+			}
+		})
+	}
+})
+
 /**
  * Create a pending booking and temporarily hold all berths.
  * Called server-side from /api/stripe/create-intent after the PaymentIntent is created.

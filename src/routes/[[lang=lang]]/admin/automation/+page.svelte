@@ -20,6 +20,12 @@
 		dueAt: string // YYYY-MM-DD or empty
 	}
 
+	type TierDraft = {
+		key: string
+		minDaysBefore: number
+		refundPercent: number
+	}
+
 	type TemplateKey = 'deposit_2' | 'deposit_3' | 'full' | 'custom'
 
 	const convex = useConvexClient()
@@ -30,6 +36,9 @@
 	let planName = $state('')
 	let items = $state<DraftItem[]>([])
 	let saving = $state(false)
+	let tiers = $state<TierDraft[]>([])
+	let loaded = $state(false)
+	let savingPolicy = $state(false)
 
 	const planQuery = useQuery(api.queries.activePaymentPlanBySlug, () => ({
 		slug: selectedSegment
@@ -63,6 +72,22 @@
 			allowFullPayment = true
 			template = 'deposit_2'
 			generateItems('deposit_2', pricePerBerthPLN)
+		}
+	})
+
+	const policyQuery = useQuery(api.refunds.getActiveRefundPolicy, () => ({}))
+
+	$effect(() => {
+		if (policyQuery.isLoading) return
+		if (loaded) return
+		loaded = true
+		const policy = policyQuery.data?.policy
+		if (policy) {
+			tiers = policy.tiers.map((t, index) => ({
+				key: `${index}`,
+				minDaysBefore: t.minDaysBefore,
+				refundPercent: t.refundPercent * 100
+			}))
 		}
 	})
 
@@ -267,6 +292,43 @@
 			saving = false
 		}
 	}
+
+	function addTier() {
+		tiers = [
+			...tiers,
+			{ key: crypto.randomUUID(), minDaysBefore: 0, refundPercent: 0 }
+		]
+	}
+
+	function removeTier(key: string) {
+		tiers = tiers.filter((i) => i.key !== key)
+	}
+
+	async function savePolicy() {
+		savingPolicy = true
+		try {
+			await convex.mutation(api.mutations.updateRefundPolicy, {
+				tiers: tiers.map((t) => ({
+					minDaysBefore: t.minDaysBefore,
+					refundPercent: t.refundPercent / 100
+				}))
+			})
+			toastState.addToast({
+				message: 'Polityka zwrotów zapisana',
+				status: 'success'
+			})
+			loaded = false
+		} catch (err) {
+			toastState.addToast({
+				message:
+					err instanceof Error ? err.message : PAYMENT_PLAN_TOAST.saveFailed,
+				status: 'error',
+				duration: 0
+			})
+		} finally {
+			savingPolicy = false
+		}
+	}
 </script>
 
 <svelte:head>
@@ -426,6 +488,49 @@
 				{sumStatus === 'ok' ? 'Valid' : sumStatus === 'under' ? 'Pod' : 'Ponad'}
 			</span>
 		</li>
+	</ul>
+</section>
+
+<section class="panel">
+	<div class="panel-head">
+		<div>
+			<h2>Polityka zwrotów</h2>
+			<p>Progi zwrotu wg dni przed rejsem. Globalna - aktywna jedna</p>
+		</div>
+		<div class="head-action">
+			<button type="button" class="btn" onclick={addTier}>Dodaj próg</button>
+			<button
+				type="button"
+				class="btn btn--primary"
+				onclick={savePolicy}
+				disabled={savingPolicy}
+			>
+				{savingPolicy ? 'Zapisuję...' : 'Zapisz politykę'}
+			</button>
+		</div>
+	</div>
+	<ul class="plan-list">
+		{#each tiers as tier, index (tier.key)}
+			<li class="plan-item">
+				<div class="plan-item__order">{index + 1}</div>
+				<div class="plan-item__fields">
+					<label class="inline">
+						<span>ilość dni przed</span>
+						<input type="number" min="0" bind:value={tier.minDaysBefore} />
+					</label>
+					<label class="inline">
+						<span>Procent zwrotu</span>
+						<input type="number" min="0" bind:value={tier.refundPercent} />
+					</label>
+				</div>
+
+				<button
+					type="button"
+					class="mini mini--danger"
+					onclick={() => removeTier(tier.key)}>Usuń</button
+				>
+			</li>
+		{/each}
 	</ul>
 </section>
 

@@ -143,3 +143,14 @@ export const allocateRefundCascade = query({
 		}
 	}
 })
+
+export const getActiveRefundPolicy = query({
+	args: {},
+	handler: async (ctx) => {
+		const policy = await ctx.db
+			.query('refundPolicies')
+			.withIndex('by_is_active', (q) => q.eq('isActive', true))
+			.first()
+		return { policy }
+	}
+})
