@@ -379,7 +379,9 @@ export const updateRefundPolicy = mutation({
 			throw new Error('Brak aktywnej polityki refundacji/zwrotu')
 		}
 
-		const sortedTiers = args.tiers.sort((a,b)=>b.minDaysBefore - a.minDaysBefore)
+		const sortedTiers = args.tiers.sort(
+			(a, b) => b.minDaysBefore - a.minDaysBefore
+		)
 
 		await ctx.db.patch(policy._id, {
 			tiers: sortedTiers,
@@ -392,6 +394,45 @@ export const updateRefundPolicy = mutation({
 			metadata: {
 				before: policy.tiers,
 				after: sortedTiers
+			}
+		})
+	}
+})
+
+export const reblockBerth = mutation({
+	args: {
+		refundId: v.id('refunds'),
+		reason: v.optional(v.string())
+	},
+	handler: async (ctx, args) => {
+		const adminIdentity = await requireConvexAdmin(ctx)
+
+		const refund = await ctx.db.get(args.refundId)
+		if (!refund) throw new Error('Nie znaleziono zwrotu')
+		if (!refund.berthReleasedAt) throw new Error('Koja nie była zwolniona')
+		if (refund.reblockedAt) throw new Error('Koja już zablokowana ponownie')
+
+		const booking = await ctx.db.get(refund.bookingId)
+		if (!booking) throw new Error('Rezerwacja nie istnieje')
+
+		for (const berthId of booking.berthIds) {
+			await ctx.db.patch(berthId, { status: 'complimentary' })
+		}
+
+		await ctx.db.patch(args.refundId, {
+			reblockedAt: Date.now(),
+			reblockedBy: adminIdentity.subject,
+			reblockReason: args.reason
+		})
+
+		await ctx.db.insert('adminAuditLog', {
+			adminUserId: adminIdentity.subject,
+			action: 'reblock_berth',
+			bookingId: refund.bookingId,
+			metadata: {
+				refundId: args.refundId,
+				berthId: booking.berthIds,
+				reason: args.reason
 			}
 		})
 	}

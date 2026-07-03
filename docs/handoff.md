@@ -39,6 +39,7 @@
 
 - **Refund policy — snapshot vs reference (gap prawny, wybór A).** Obecnie zwrot liczy się wg **żywej** aktywnej polityki (`refundPolicies` po `by_is_active`), a booking NIE snapshotuje polityki przy zakupie (schema `bookings` bez `refundPolicyId`). Konsekwencja: klient kupił przy 100%/6mies, admin zaostrza na 50%, klient żąda zwrotu → dostaje 50% (nie 100% z zakupu). Łamie zasadę „konsument podlega regulaminowi z chwili zawarcia umowy". `refunds.policySnapshot` (:87 initiate) to tylko forensic po fakcie, nie ochrona. **Decyzja Tomka: Opcja A — snapshot polityki do bookingu przy zakupie** (booking zamraża warunki jak faktura, ten sam wzorzec co `bookingPayments`; `refundPolicies` zostaje edytowalny jako polityka przyszła, refund liczy z bookingowego snapshotu). Dotyka checkout flow + refund calc — osobny etap. Dopytać Michała czy potwierdza A (zwrot wg polityki z zakupu). Nie blokuje A7d.
 - **Faktury + KSeF (nowy duży moduł, research 2026-07-03).** Nabywca-przedsiębiorca wymaga faktury (nie paragonu). Potrzebne: (1) dane sprzedawcy (firma Michała), (2) dane nabywcy (firma klienta — NIP/VAT-ID, adres, **kraj — także zagraniczni nabywcy**, B2B UE / eksport), (3) w PL obowiązek **KSeF**. **Stan KSeF 2.0 (na 2026-07):** obowiązek dla wszystkich czynnych podatników VAT od **1 kwi 2026** (duzi >200 mln PLN od 1 lut 2026); tokeny do 31 gru 2026, od 1 sty 2027 tylko **certyfikaty KSeF**. Auth: cert KSeF typ 1 (uwierzytelnianie) / podpis / pieczęć kwalifikowana; flow `POST /api/v2/auth/challenge` → podpisany XAdES → `/auth/xades-signature`; klucz symetryczny szyfrowany RSAES-OAEP (SHA-256) publicznym kluczem KSeF (`GET /api/v2/security/public-key-certificates`). Faktura = struktura **FA(3)** XML. REST v2 endpointy: `/auth/`, `/sessions/`, `/invoices/send`, `/certificates/`. **Architektura:** Convex action (external API jak Stripe) — cert/klucz Michała jako sekret, generowanie FA(3) XML, wysyłka + status polling. **Otwarte pytania:** (a) czy faktury dla zagranicznych nabywców idą przez KSeF czy poza (KSeF głównie B2B krajowe); (b) termin obowiązku dla Michała wg obrotu; (c) Michał musi wygenerować/dostarczyć certyfikat KSeF typ 1. Docs: https://ksef.podatki.gov.pl, https://github.com/CIRFMF/ksef-api
+- **Audit log — brak UI listowania.** `adminAuditLog` zapisuje akcje (`refund_initiated/completed/failed`, `policy_updated`, `reblock_berth`, `release_berth_manual`) — dziś odczyt tylko przez `npx convex data adminAuditLog` / dashboard. Michał nie ma widoku historii akcji admina. Potrzeba: strona/sekcja w `/admin` listująca audit log (filtry po `action`/`admin`/`booking`, sort malejąco po `_creationTime`, render `metadata` per typ akcji). Indeksy już gotowe: `by_booking`, `by_admin`, `by_action`. Query + UI, zero zmian schema.
 
 ---
 
@@ -65,6 +66,70 @@ npx wuchale                 # ekstrakcja stringów i18n
 ---
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
+
+## Sesja 2026-07-03 (bardzo długa) — A7c domknięty (6/6) + A7d edycja tiers (dogfooding) + reblock backend
+
+### Zmiany
+
+- **A7c krok 5 — smoke test real zaliczony.** Refund → webhook `charge.refund.updated` (succeeded) → email `type: 'completed'` przyszedł. „Zwrócono" w drawerze akumuluje, „Pozostało" bez zmian (Opcja B potwierdzona jako poprawna, nie bug).
+- **A7c krok 6 — failure banner stuck refunds (Alert Queue `/admin`).** `src/convex/admin.ts`: nowa stała `REFUND_STUCK_PENDING_MS = 15 min`, odczyt `failed` + `pending` refundów (index `by_status`), filtr do segmentu (`Set(bookings.map(_id)).has`), filtr czasu dla pending (`_creationTime < now - próg`), pętla push z rozgałęzieniem `failed`/`pending` na `level`/`title`/`priority`. Nowy `kind: 'refund_stuck'` w union `AlertItem`. `/admin/+page.svelte`: badge label. Smoke obu gałęzi przez edycję `status` w Convex dashboard.
+- **A7d edycja tiers — query + mutation + UI form (pełny CRUD).**
+  - `src/convex/refunds.ts`: query `getActiveRefundPolicy` (zwraca `{ policy }`).
+  - `src/convex/mutations.ts`: mutation `updateRefundPolicy` — auth (łap identity dla `updatedBy`), walidacja tiers (De Morgan: percent poza [0,1] LUB dni <0), sort desc po `minDaysBefore`, patch (3 pola), audit `policy_updated` z `before`/`after`.
+  - `src/routes/[[lang=lang]]/admin/automation/+page.svelte`: sekcja „Polityka zwrotów" — `useQuery` + `$state` draft + `$effect` init-flag load (konwersja ×100), add/remove tier, save (konwersja ÷100).
+  - **Dogfooding:** realne progi Michała zapisane przez formę: `180/100%, 90/90%, 42/50%, 0/0%`. Audit log potwierdzony (`npx convex data adminAuditLog` — `policy_updated` z before/after, konwersja ÷100, sort).
+- **A7d reblock berth — mutation backend (`reblockBerth` w mutations.ts).** args `refundId` + optional `reason`, auth, lookup `ctx.db.get`, dwa guardy stanu (`!berthReleasedAt` → throw, `reblockedAt` → throw idempotency), pętla berthów → `status: 'complimentary'`, patch refunda (`reblockedAt/By/Reason`), audit `reblock_berth` z `bookingId` + metadata. Typecheck czysty. **UI jeszcze nie zrobione.**
+- **Commit `98e4548` + push do `main`** (krok 6 + A7d tiers; reblock mutation dopisana PO commicie, niezacommitowana na koniec sesji).
+- **Backlog (3 nowe pozycje w „Otwarte problemy"):** refund policy snapshot-at-purchase (opcja A), faktury + KSeF, audit log UI listing.
+- **Profil ucznia — checkpoint** (`save learning progress`): method chaining 0-1→2-3, Set/spread/De Morgan nowy wiersz, Convex mutation pełna 2-3→3.
+- **Memory `user_role_learning.md`** — meta-cel: orkiestracja wielu sesji CODE (tech lead); rozróżnienie kto pisze kod (istniejący = inna sesja CODE; sesja nauki = Tomek w main).
+
+### Decyzje
+
+- **A7c krok 6 scope: per-segment Alert Queue** (nie globalny). Globalny catch-all stuck refundów zostaje na A7e reconciliation — bez duplikacji.
+- **Refund tiers Michała: `180/100, 90/90, 42/50, 0/0` dni/%.** Granica środkowa niejednoznaczna (3 mies = 90 dni vs 12 tyg = 84); Tomek potwierdził **90 dni** (progi stykają się bez luki).
+- **Procent w UI 0-100, konwersja na granicy** (×100 load, ÷100 save) — jak PLN/grosze. Mutation waliduje 0-1.
+- **Sort tiers w backend mutation**, nie live UI (live = wiersze skaczą przy edycji; sort przy zapisie = stabilne).
+- **Reblock → `complimentary` (scenariusz B).** Michał później zwalnia koję w `/admin/special` (istniejący flow). Scenariusz A (przywróć `taken`) odrzucony — booking zrefundowany, `taken`=„opłacona" kłamałoby.
+- **Guard reblock: `!berthReleasedAt` wystarcza, bez dublowania `status === 'succeeded'`** — `berthReleasedAt` ustawiane tylko w bloku succeeded (:1351), więc implikuje succeeded. Nie dubluj guarda dla stanu już wykluczonego.
+- **Refund policy gap → Opcja A** (snapshot polityki do bookingu przy zakupie). Osobny etap, dopytać Michała.
+
+### Wnioski
+
+- **Method chaining fundament domknięty** (Tomek): kropka (pole vs metoda), `.map/.filter/.some`, chaining. Uczony przez analogię z żywym kodem repo.
+- **De Morgan na walidacji:** warunek DOBREGO (`AND`, porównania „ok") ≠ ZŁEGO (`OR`, porównania odwrócone). `.some()` szuka złego. Kandydat wiki.
+- **`() => {}` vs `() => ({})`** — arrow z `{` to blok (zwraca undefined); obiekt literalny wymaga `({})`. Klasyczny JS gotcha. Kandydat wiki.
+- **Init-flag `$effect` load pattern** — query read-only → lokalna kopia w `$state`, `$effect` z boolean flagą kopiuje raz. Ten sam wzorzec co sentinel/preloaded.
+- **Konwersja na granicy (boundary)** — symetria load ×100 / save ÷100; walidacja backendu (0-1) wymusza. Kandydat wiki „convert-on-boundary".
+- **`.sort()` mutuje in-place** → `[...arr].sort()`; sort przy zapisie nie live (UX skaczących wierszy).
+- **Guard coupling — nie dubluj dla stanu już wykluczonego** (`berthReleasedAt` implikuje `succeeded`). Kandydat wiki „guard-invariant-coupling".
+- **Audit before/after przez snapshot lokalny** — `policy.tiers` po `patch` nadal trzyma stare (patch pisze do db, nie mutuje zmiennej JS).
+- **KSeF 2.0** (research): obowiązek wszyscy VAT od 1 kwi 2026, cert typ 1, struktura FA(3) XML, REST v2 (`/auth/challenge`, `/invoices/send`). Integracja = Convex action (jak Stripe).
+
+### Następne kroki
+
+#### Next
+
+- **A7d reblock UI** — button + rozeznanie gdzie admin widzi zwolniony refund (guard widoczności: `berthReleasedAt && !reblockedAt`), wywołanie `reblockBerth` + toast. **Najpierw zacommitować reblock mutation.**
+- **A7d regulamin** — tekst z Worda Michała (obiecany na wieczór 2026-07-03).
+- **Dopytać Michała:** (a) refund policy snapshot-at-purchase (opcja A) OK? (b) faktury zagraniczne w KSeF czy poza? (c) certyfikat KSeF typ 1.
+
+#### Wiki — kandydaci (batch później)
+
+- `concepts/de-morgan-validation-good-vs-bad-condition`
+- `concepts/arrow-return-object-gotcha` (`() => ({})`)
+- `concepts/convert-on-boundary-ui-vs-storage` (×100/÷100, PLN/grosze, percent)
+- `concepts/svelte5-query-readonly-local-draft-init-flag`
+- `concepts/guard-invariant-coupling` (nie dubluj guarda dla stanu wykluczonego)
+
+#### Blocked / Later / Open questions
+
+- **Refund policy snapshot-at-purchase** (opcja A) — osobny etap, dotyka checkout + refund calc.
+- **Faktury + KSeF** — duży moduł, czeka na decyzje Michała + certyfikat.
+- **Audit log UI listing** — query + UI, indeksy gotowe.
+- **Stripe live payment test** — nadal odłożone.
+
+---
 
 ## Sesja 2026-07-01 (długa, ~8h) — A7c kroki 4+5: sendRefundEmail (discriminated union) + wire endpoint + webhook
 
