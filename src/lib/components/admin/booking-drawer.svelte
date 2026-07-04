@@ -284,9 +284,17 @@
 	)
 	const remainingAmount = $derived(Math.max(0, totalAmount - paidAmount))
 	const totalRefunded = $derived(
-		detail.data?.payments.reduce((sum, p) => sum + (p.refundedAmount ?? 0), 0) ??
+		detail.data?.payments.reduce(
+			(sum, p) => sum + (p.refundedAmount ?? 0),
 			0
+		) ?? 0
 	)
+
+	const reblockable = $derived(
+		detail.data?.refunds.filter((r) => r.berthReleasedAt && !r.reblockedAt) ??
+			[]
+	)
+	const isClosed = $derived(detail.data?.isClosed ?? false)
 
 	async function sendPaymentReminder(paymentId: Id<'bookingPayments'>) {
 		busyId = paymentId
@@ -385,6 +393,32 @@
 		} catch (err) {
 			toastState.addToast({
 				message: err instanceof Error ? err.message : 'Nie udało się oznaczyć.',
+				status: 'error',
+				duration: 0
+			})
+		} finally {
+			busyId = null
+		}
+	}
+
+	async function reblockBerth(refundId: Id<'refunds'>) {
+		if (
+			!confirm(
+				'Zablokować koję ponownie? Status wróci na "bezpłatny". Można zarządzać w "Miejsca specjalne".'
+			)
+		)
+			return
+		busyId = refundId
+		try {
+			await convex.mutation(api.mutations.reblockBerth, { refundId })
+			toastState.addToast({
+				message: 'Koja zablokowana ponownie',
+				status: 'success'
+			})
+		} catch (err) {
+			toastState.addToast({
+				message:
+					err instanceof Error ? err.message : 'Nie udało się zablokować koi',
 				status: 'error',
 				duration: 0
 			})
@@ -561,6 +595,18 @@
 								<strong>{formatPLN(totalRefunded)}</strong>
 							</div>
 						{/if}
+						{#if reblockable.length > 0}
+							{#each reblockable as refund (refund._id)}
+								<button
+									class="mini mini--brass"
+									type="button"
+									disabled={busyId === refund._id}
+									onclick={() => reblockBerth(refund._id)}
+								>
+									{busyId === refund._id ? 'Blokuję…' : 'Zablokuj koję'}
+								</button>
+							{/each}
+						{/if}
 					</div>
 
 					<section class="block">
@@ -598,7 +644,7 @@
 												<button
 													class="mini mini--brass"
 													type="button"
-													disabled={busyId === payment._id}
+													disabled={busyId === payment._id || isClosed}
 													onclick={() => sendPaymentReminder(payment._id)}
 												>
 													{busyId === payment._id ? 'Wysyłam…' : 'Wyślij monit'}
@@ -606,6 +652,7 @@
 												<button
 													class="mini"
 													type="button"
+													disabled={isClosed}
 													onclick={() =>
 														copyText(
 															buildPaymentWhatsapp({
@@ -630,6 +677,7 @@
 								<button
 									class="mini mini--brass"
 									type="button"
+									disabled={isClosed}
 									onclick={() => (refundForBookingId = data.booking._id)}
 								>
 									Inicjuj zwrot
@@ -717,7 +765,7 @@
 													<button
 														class="mini mini--brass"
 														type="button"
-														disabled={busyId === participant._id}
+														disabled={busyId === participant._id || isClosed}
 														onclick={() =>
 															sendConfirmationLink(participant._id)}
 													>
@@ -741,7 +789,7 @@
 													<button
 														class="mini mini--brass"
 														type="button"
-														disabled={busyId === participant._id}
+														disabled={busyId === participant._id || isClosed}
 														onclick={() => sendCrewReminder(participant._id)}
 													>
 														{busyId === participant._id
@@ -751,6 +799,7 @@
 													<button
 														class="mini"
 														type="button"
+														disabled={isClosed}
 														onclick={() =>
 															copyText(
 																buildCrewWhatsapp({

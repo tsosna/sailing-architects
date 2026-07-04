@@ -6,6 +6,7 @@ import {
 	sendCrewDataReminderEmail,
 	sendPaymentReminderEmail
 } from './_emails'
+import { isBookingClosed } from './_lib/bookingClosed'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 const DUE_SOON_WINDOW_MS = 7 * DAY_MS
@@ -48,6 +49,7 @@ type SalesRow = {
 		dataMissing: boolean
 		paid: boolean
 	}
+	isClosed: boolean
 }
 
 /**
@@ -120,6 +122,34 @@ export const overviewBySegment = query({
 				.map((id) => berthById.get(id)?.berthId)
 				.filter((label): label is string => Boolean(label))
 				.sort()
+
+			const isClosed = isBookingClosed(
+				booking,
+				booking.berthIds.map((id) => berthById.get(id))
+			)
+
+			if (isClosed) {
+				rows.push({
+					bookingId: booking._id,
+					bookingRef: booking.bookingRef,
+					buyerEmail: booking.buyerEmail ?? '—',
+					berthLabels,
+					paymentLabel: 'Zwrócone',
+					paymentLevel: 'info',
+					dataLabel: '—',
+					dataLevel: 'info',
+					nextAction: 'Brak',
+					flags: {
+						overdue: false,
+						dueSoon: false,
+						dataMissing: false,
+						paid: false
+					},
+					isClosed: true
+				})
+				continue
+			}
+
 			soldBerths += booking.berthIds.length
 
 			const totalAmount = payments.reduce((sum, p) => sum + p.amount, 0)
@@ -244,7 +274,8 @@ export const overviewBySegment = query({
 					dueSoon: dueSoonPayments.length > 0,
 					dataMissing: missingParticipants.length > 0,
 					paid: totalAmount > 0 && paid >= totalAmount
-				}
+				},
+				isClosed: false
 			})
 
 			for (const p of overduePayments) {
@@ -354,7 +385,7 @@ export const overviewBySegment = query({
 							)} min`,
 				subtitle: `Kwota refundacji: ${formatPLN(b.amountRequested)}`,
 				bookingId: b.bookingId,
-				priority:b.status === 'failed' ? 2000 : 300,
+				priority: b.status === 'failed' ? 2000 : 300,
 				suggestedActions: ['open_booking']
 			})
 		}
@@ -430,18 +461,23 @@ export const bookingDetailById = query({
 		const booking = await ctx.db.get(bookingId)
 		if (!booking) return null
 
-		const [segment, payments, participants, berthDocs] = await Promise.all([
-			ctx.db.get(booking.segmentId),
-			ctx.db
-				.query('bookingPayments')
-				.withIndex('by_booking', (q) => q.eq('bookingId', bookingId))
-				.collect(),
-			ctx.db
-				.query('bookingParticipants')
-				.withIndex('by_booking', (q) => q.eq('bookingId', bookingId))
-				.collect(),
-			Promise.all(booking.berthIds.map((id) => ctx.db.get(id)))
-		])
+		const [segment, payments, participants, refunds, berthDocs] =
+			await Promise.all([
+				ctx.db.get(booking.segmentId),
+				ctx.db
+					.query('bookingPayments')
+					.withIndex('by_booking', (q) => q.eq('bookingId', bookingId))
+					.collect(),
+				ctx.db
+					.query('bookingParticipants')
+					.withIndex('by_booking', (q) => q.eq('bookingId', bookingId))
+					.collect(),
+				ctx.db
+					.query('refunds')
+					.withIndex('by_booking', (q) => q.eq('bookingId', bookingId))
+					.collect(),
+				Promise.all(booking.berthIds.map((id) => ctx.db.get(id)))
+			])
 
 		const berths = berthDocs.filter(
 			(b): b is NonNullable<typeof b> => b !== null
@@ -456,6 +492,8 @@ export const bookingDetailById = query({
 			: null
 		const buyerEmail = buyerProfile?.email ?? booking.buyerEmail ?? null
 
+		const isClosed = isBookingClosed(booking, berthDocs)
+
 		return {
 			booking,
 			segment,
@@ -464,7 +502,9 @@ export const bookingDetailById = query({
 			payments: payments.sort((a, b) => a.sortOrder - b.sortOrder),
 			participants: participants.sort((a, b) =>
 				a.berthLabel.localeCompare(b.berthLabel)
-			)
+			),
+			refunds,
+			isClosed
 		}
 	}
 })

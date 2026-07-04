@@ -10,6 +10,7 @@
 
 import type * as _brevo from "../_brevo.js";
 import type * as _emails from "../_emails.js";
+import type * as _lib_bookingClosed from "../_lib/bookingClosed.js";
 import type * as _lib_refundStatus from "../_lib/refundStatus.js";
 import type * as _lib_requireAdmin from "../_lib/requireAdmin.js";
 import type * as admin from "../admin.js";
@@ -32,6 +33,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   _brevo: typeof _brevo;
   _emails: typeof _emails;
+  "_lib/bookingClosed": typeof _lib_bookingClosed;
   "_lib/refundStatus": typeof _lib_refundStatus;
   "_lib/requireAdmin": typeof _lib_requireAdmin;
   admin: typeof admin;

@@ -33,7 +33,9 @@
 	const error = $derived(overview.error)
 
 	const filteredRows = $derived.by(() => {
-		const rows = data?.bookings ?? []
+		const rows = [...(data?.bookings ?? [])].sort(
+			(a, b) => Number(a.isClosed) - Number(b.isClosed)
+		)
 		switch (activeFilter) {
 			case 'overdue':
 				return rows.filter((r) => r.flags.overdue)
@@ -193,7 +195,7 @@
 						</thead>
 						<tbody>
 							{#each filteredRows as row (row.bookingId)}
-								<tr>
+								<tr class:closed={row.isClosed}>
 									<td><span class="ref">{row.bookingRef}</span></td>
 									<td>
 										<div class="person">
@@ -626,6 +628,10 @@
 
 	.table-wrap {
 		overflow-x: auto;
+	}
+
+	tbody tr.closed {
+		opacity: 0.5;
 	}
 
 	@media (max-width: 1180px) {

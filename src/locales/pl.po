@@ -3123,3 +3123,26 @@ msgstr "Procent zwrotu"
 #: src/routes/[[lang=lang]]/admin/automation/+page.svelte
 msgid "Polityka zwrotów zapisana"
 msgstr "Polityka zwrotów zapisana"
+
+#~ msgid "Zablokować koję ponownie? Status wróci na \"bezpłatny\". Mona zarządzać w "
+#~ msgstr "Zablokować koję ponownie? Status wróci na \"bezpłatny\". Mona zarządzać w "
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Koja zablokowana ponownie"
+msgstr "Koja zablokowana ponownie"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Nie udało się zablokować koi"
+msgstr "Nie udało się zablokować koi"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Zablokować koję ponownie? Status wróci na \"bezpłatny\". Można zarządzać w \"Miejsca specjalne\"."
+msgstr "Zablokować koję ponownie? Status wróci na \"bezpłatny\". Można zarządzać w \"Miejsca specjalne\"."
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Zablokuj koję"
+msgstr "Zablokuj koję"
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Blokuję…"
+msgstr "Blokuję…"
