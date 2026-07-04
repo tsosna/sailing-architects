@@ -37,6 +37,7 @@
 
 ## Otwarte problemy
 
+- **🔴 BLOCKER PROD — panel żeglarza pokazuje zły/wygasły booking.** `bookingByUser` (`src/convex/queries.ts:94`) robi `.withIndex('by_user').order('desc').first()`: (1) zwraca tylko JEDEN booking — user z wieloma rejsami widzi wyłącznie najnowszy; (2) BRAK filtra statusu → bierze najnowszy *jakikolwiek*, łącznie z `expired`/`cancelled` (footy2 widzi wygasły SA-2026-7850 jako „swój"). Na produkcji z płacącym klientem = pokazuje cudzy/wygasły stan. Fix przed promocją: filtr do żywych (`confirmed`) + obsługa wielu bookingów (lista zamiast `.first()`). **Jedyna rzecz między obecnym stanem a startem prod.**
 - **Refund policy — snapshot vs reference (gap prawny, wybór A).** Obecnie zwrot liczy się wg **żywej** aktywnej polityki (`refundPolicies` po `by_is_active`), a booking NIE snapshotuje polityki przy zakupie (schema `bookings` bez `refundPolicyId`). Konsekwencja: klient kupił przy 100%/6mies, admin zaostrza na 50%, klient żąda zwrotu → dostaje 50% (nie 100% z zakupu). Łamie zasadę „konsument podlega regulaminowi z chwili zawarcia umowy". `refunds.policySnapshot` (:87 initiate) to tylko forensic po fakcie, nie ochrona. **Decyzja Tomka: Opcja A — snapshot polityki do bookingu przy zakupie** (booking zamraża warunki jak faktura, ten sam wzorzec co `bookingPayments`; `refundPolicies` zostaje edytowalny jako polityka przyszła, refund liczy z bookingowego snapshotu). Dotyka checkout flow + refund calc — osobny etap. Dopytać Michała czy potwierdza A (zwrot wg polityki z zakupu). Nie blokuje A7d.
 - **Faktury + KSeF (nowy duży moduł, research 2026-07-03).** Nabywca-przedsiębiorca wymaga faktury (nie paragonu). Potrzebne: (1) dane sprzedawcy (firma Michała), (2) dane nabywcy (firma klienta — NIP/VAT-ID, adres, **kraj — także zagraniczni nabywcy**, B2B UE / eksport), (3) w PL obowiązek **KSeF**. **Stan KSeF 2.0 (na 2026-07):** obowiązek dla wszystkich czynnych podatników VAT od **1 kwi 2026** (duzi >200 mln PLN od 1 lut 2026); tokeny do 31 gru 2026, od 1 sty 2027 tylko **certyfikaty KSeF**. Auth: cert KSeF typ 1 (uwierzytelnianie) / podpis / pieczęć kwalifikowana; flow `POST /api/v2/auth/challenge` → podpisany XAdES → `/auth/xades-signature`; klucz symetryczny szyfrowany RSAES-OAEP (SHA-256) publicznym kluczem KSeF (`GET /api/v2/security/public-key-certificates`). Faktura = struktura **FA(3)** XML. REST v2 endpointy: `/auth/`, `/sessions/`, `/invoices/send`, `/certificates/`. **Architektura:** Convex action (external API jak Stripe) — cert/klucz Michała jako sekret, generowanie FA(3) XML, wysyłka + status polling. **Otwarte pytania:** (a) czy faktury dla zagranicznych nabywców idą przez KSeF czy poza (KSeF głównie B2B krajowe); (b) termin obowiązku dla Michała wg obrotu; (c) Michał musi wygenerować/dostarczyć certyfikat KSeF typ 1. Docs: https://ksef.podatki.gov.pl, https://github.com/CIRFMF/ksef-api
 - **Audit log — brak UI listowania.** `adminAuditLog` zapisuje akcje (`refund_initiated/completed/failed`, `policy_updated`, `reblock_berth`, `release_berth_manual`) — dziś odczyt tylko przez `npx convex data adminAuditLog` / dashboard. Michał nie ma widoku historii akcji admina. Potrzeba: strona/sekcja w `/admin` listująca audit log (filtry po `action`/`admin`/`booking`, sort malejąco po `_creationTime`, render `metadata` per typ akcji). Indeksy już gotowe: `by_booking`, `by_admin`, `by_action`. Query + UI, zero zmian schema.
@@ -66,6 +67,56 @@ npx wuchale                 # ekstrakcja stringów i18n
 ---
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
+
+## Sesja 2026-07-04 — A7d reblock UI + closed-booking treatment (Sales Board + drawer) + jedno źródło prawdy
+
+### Zmiany
+
+- **A7d reblock UI zamknięte** (`booking-drawer.svelte`): funkcja `reblockBerth(refundId)` (confirm → `api.mutations.reblockBerth` → toast). Button „Zablokuj koję" renderowany per refund z `berthReleasedAt && !reblockedAt` (nowy `$derived reblockable`). Smoke: button→confirm→mutation→toast→`reblockedAt` set→button znika. Berth A1 → `complimentary` (widoczny w „Miejsca specjalne", decyzja B z 2026-07-03).
+- **`bookingDetailById` zwraca `refunds`** (`admin.ts`): dodane do `Promise.all` przez index `by_booking` + destrukturyzacja + return. Bez tego drawer nie wie o zwolnionych kojach.
+- **Closed-booking treatment (nowy zakres, zaakceptowany w sesji).** Definicja „zamknięty" = pełny zwrot (`paymentStatus === 'refunded'`) **AND** wszystkie koje oddane (`berth.bookingPaymentIntentId !== booking.stripePaymentIntentId`).
+  - **Sales Board** (`admin.ts overviewBySegment` + `/admin/+page.svelte`): zamknięty booking → wyszarzony wiersz (`class:closed` + opacity), sort na dół (`[...rows].sort` po `Number(isClosed)`), badge „Zwrócone", `nextAction: 'Brak'`, **wykluczony z `soldBerths`/KPI/alertów** (early `push` + `continue` w pętli — zero rozsypanych guardów).
+  - **Drawer**: 6 przycisków wysyłkowych zgaszonych przy `isClosed` (monit, 2× Kopiuj WhatsApp, prośba o dane, link potwierdzenia, Inicjuj zwrot). Zostawione: „Zablokuj koję" + „Otwórz".
+- **Jedno źródło prawdy** — nowy helper `src/convex/_lib/bookingClosed.ts` (`isBookingClosed(booking, berths)`), użyty w `overviewBySegment` i `bookingDetailById`. Reguła „co to zamknięty booking" w jednym pliku — board i drawer nie mogą się rozjechać.
+- **Commit `db86983` + push do `main`** (7 plików, +175/−21).
+- **`.gitignore`** — dodane `.pnpm-store/`.
+- **Proces (CLAUDE.md sekcja 6)** — dwie nowe reguły close session: (5) promocja decyzji biznesowych → `docs/business-decisions/` ADR; (6) przegląd `docs/feedback/` (uwagi Michała) → backlog.
+- **`docs/prompts/adr-distillation.md`** — prompt dla osobnej sesji CODE do zbudowania bazy ADR z handoff/wiki/kodu.
+
+### Decyzje
+
+- **Closed-booking approach B** (nie ukrywanie): wyciszenie + sort na dół + zdjęcie CTA. Zachowuje widoczność (Michał widzi że był zwrot), zeruje szum. Toggle „pokaż zamknięte" (wariant A) na później jak Board się rozrośnie.
+- **Definicja „zamknięty" wymaga OBU warunków.** „Pełny zwrot ale koja zostaje" (klient jednak płynie) = NIE zamknięty — słusznie ma wisieć jako żywy (może potrzebować danych załogi).
+- **Helper zamiast duplikacji client-side.** Reguła biznesowa w 2 queries → wyciągnięta do `_lib`. Odrzucone: liczenie `isClosed` po stronie klienta (reguła w 3 miejscach, drift).
+- **„Otwórz" zostaje aktywne dla zamkniętych** — to nawigacja do podglądu (audyt/historia zwrotu), nie akcja-na-bookingu. Chowanie odcięłoby wgląd.
+- **Widget AI dokumentacji odłożony na PO produkcji.** Kolejność: (0) prod, (1) `docs/business-decisions/` ADR, (2) Convex action + LLM (DeepSeek/Claude) + tabela eskalacji + mail Brevo, (3) widget w `/admin` + `/dashboard`. Retrieval: korpus mały → context-stuffing na start (bez embeddingów; Convex ma vector search jak urośnie). Scoping: system prompt „odpowiadaj wyłącznie z docs; brak → `ESCALATE`". „Wyślij pytanie" → tabela `openQuestions` + mail do Tomka.
+
+### Wnioski
+
+- **Optional chaining chroni tylko lewą stronę kropki.** `detail.data?.refunds.filter(...)` — `?.` chroni `detail.data`, NIE `.refunds`. Gdy `refunds` undefined → `.filter` crash, `?? []` nie łapie (błąd leci wcześniej). Objaw: drawer wisiał na „Wczytuję…"; przyczyna w konsoli przeglądarki. Kandydat wiki.
+- **Debug warstwowy: UI → konsola → dane → deploy.** „Drawer wisi" → konsola (`Cannot read 'filter' of undefined`) → backend nie zwraca `refunds` → `convex dev` watcher spał (nie wypchnął edycji). `npx convex dev --once` wymusił push. Nie zgaduj od góry. Reguła: query wisi na `isLoading` bez `error` → sprawdź czy funkcja w ogóle wdrożona (`npx convex run` bezpośrednio).
+- **Reaktywne źródło w gołym `const` = `state_referenced_locally`.** `const rows = [...data.bookings].sort()` na top-level komponentu łapie tylko pierwszą wartość `data`. Fix: `$derived(...)`. Wszystko pochodne od `data`/`$state` musi być `$derived`. Kandydat wiki.
+- **`[...arr].sort()` nie `[...arr.sort()]`.** Spread MUSI owinąć tablicę przed `.sort` (sort mutuje in-place). Zła kolejność nawiasów = mutacja oryginału mimo spreadu. Utrwalenie lekcji z 2026-07-03.
+- **`.every` = odwrotność `.some`.** „czy WSZYSTKIE true". Pusta tablica → `true` (brak kontrprzykładu). Nowa metoda dla Tomka.
+- **Wyciągaj regułę biznesową do helpera gdy używana >1 raz.** Ryzyko driftu (board „zamknięty" vs drawer „otwarty" = mylący bug) > koszt refaktoru działającego kodu. `isBookingClosed` jako predykat domenowy w `_lib`. Kandydat wiki.
+- **Booking = fakt historyczny (jak faktura).** `booking.berthIds` NIE czyści się przy zwrocie/release — zostaje zapisem „ta rezerwacja była na koję A1". Dyspozycja koi żyje osobno na `berth.status`. Drawer pokazuje A1 mimo zwolnienia — poprawnie. Rozszerzenie snapshot/historia vs stan żywy.
+- **Brudne dane testowe wymagają sprzątania.** Smoke wymuszał stany w Convex dashboard (`berthReleasedAt`, `paymentStatus='refunded'`, clear `bookingPaymentIntentId`). Po teście cofnięte ręcznie, żeby dev state był spójny.
+
+### Następne kroki
+
+#### Next
+
+- **BLOCKER PRZED PROD — panel żeglarza `bookingByUser`** (`src/convex/queries.ts:94`). `.order('desc').first()` = (1) tylko JEDEN booking (user z wieloma widzi najnowszy), (2) BRAK filtra statusu → bierze `expired`/`cancelled` (footy2 widzi wygasły SA-2026-7850 jako „swój"). Fix: filtr do żywych (`confirmed`) + obsługa wielu bookingów (lista, nie `.first()`). To jedyna rzecz między obecnym stanem a startem.
+- **Test Stripe live 5 zł** — PO fixie panelu (żeby po zapłacie zobaczyć poprawny stan). Prawdziwa karta → webhook live → booking `confirmed` → smoke panelu.
+- **A7d regulamin** — tekst z Worda Michała (nadal oczekiwany).
+
+#### Blocked / Later / Open questions
+
+- **Widget AI dokumentacji** — po prod (patrz Decyzje). Zależy od `docs/business-decisions/` (odpal `docs/prompts/adr-distillation.md` w osobnej sesji).
+- **Uwagi Michała `docs/feedback/2026-06-19-uwagi-do-strony.docx`** — 6 MB docx z 2026-06-19, jeszcze NIE przeczesane pod kątem backlogu. Do przejrzenia (nowa reguła close session pkt 6).
+- **A7e reconciliation** + refund policy snapshot (opcja A) + faktury/KSeF + audit log UI — bez zmian.
+
+---
 
 ## Sesja 2026-07-03 (bardzo długa) — A7c domknięty (6/6) + A7d edycja tiers (dogfooding) + reblock backend
 

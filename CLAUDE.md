@@ -108,7 +108,9 @@ Gdy użytkownik napisze `close session`:
 
 3. **Zapytaj użytkownika**: "Czy masz wolne myśli, obserwacje lub coś do dopisania?"
 4. **Oceń Wnioski**: jeśli wniosek to ponadprojektowy wzorzec — zaproponuj przeniesienie do `knowledge-vault/wiki/`
-5. **Dopisz wpis** do `docs/handoff.md`
+5. **Oceń decyzje biznesowe → ADR**: jeśli w sesji zapadła nietrywialna decyzja biznesowa/produktowa (reguła domeny, wybór między wariantami mającymi konsekwencje dla użytkownika/prawa/pieniędzy) — zaproponuj wpis w `docs/business-decisions/` w formacie ADR (`Kontekst / Decyzja / Uzasadnienie / Konsekwencje`). To źródło prawdy dla przyszłego agenta AI odpowiadającego na pytania o logikę biznesową.
+6. **Przejrzyj `docs/feedback/`**: uwagi Michała lądują tutaj. Nowe/niezaadresowane uwagi przełóż na konkretne pozycje backlogu w `docs/handoff.md` („Otwarte problemy" lub „Blocked / Later").
+7. **Dopisz wpis** do `docs/handoff.md`
 
 <!-- convex-ai-start -->
 
