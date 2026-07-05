@@ -37,7 +37,9 @@
 
 ## Otwarte problemy
 
-- **🔴 BLOCKER PROD — panel żeglarza pokazuje zły/wygasły booking.** `bookingByUser` (`src/convex/queries.ts:94`) robi `.withIndex('by_user').order('desc').first()`: (1) zwraca tylko JEDEN booking — user z wieloma rejsami widzi wyłącznie najnowszy; (2) BRAK filtra statusu → bierze najnowszy *jakikolwiek*, łącznie z `expired`/`cancelled` (footy2 widzi wygasły SA-2026-7850 jako „swój"). Na produkcji z płacącym klientem = pokazuje cudzy/wygasły stan. Fix przed promocją: filtr do żywych (`confirmed`) + obsługa wielu bookingów (lista zamiast `.first()`). **Jedyna rzecz między obecnym stanem a startem prod.**
+- **✅ ROZWIĄZANE 2026-07-05 — panel żeglarza pokazywał zły/wygasły booking.** `bookingByUser` naprawiony: `.collect()` + filtr `confirmed` + zwraca listę zamiast `.first()`. Dashboard dostał selektor rejsu (`aria-pressed`, keyed `_id`), pay/crew znajdują booking po `paymentId`/`participantId` z URL (`bookings.find(b => b.X.some(...))`). Commit `8ac60196`, na prod. Smoke footy2: wygasły zniknął. (Historia: `.first()` bez filtra statusu → footy2 widział wygasły SA-2026-7850.)
+- **🔴 PDF potwierdzenia leży na prod (Fix 2 — jedyny kod został).** `booking-confirmation-pdf.ts` robił `require.resolve('dejavu-fonts-ttf/...ttf')` na top-level modułu → plik `.ttf` z `node_modules` nie trafia do bundla Vercel serverless → crash przy IMPORCIE route → 500. Fix 1 (2026-07-05) przeniósł resolve do wnętrza funkcji (lazy) → moduł ładuje się, PDF pada w istniejącym try/catch → webhook 200, booking confirmed, ale **PDF nadal się nie generuje** (email bez załącznika + dashboard „Dokumenty → Potwierdzenie" nie działa). **Fix 2 przed launchem:** wbić czcionkę w bundle — vendorować `.ttf` do repo + `doc.registerFont(name, buffer)` z zaimportowanego Buffera (albo base64). Dotyczy `generateBookingConfirmationPdf` (webhook email + `/api/booking-confirmation`).
+- **Refund webhook prod — path niezwalidowany smoke'em.** Ścieżka `refund.updated → processStripeRefund → row succeeded → drawer ZWRÓCONO` naprawiona w kodzie (fall-through `charge.refund.updated` + `refund.updated`, commit po 8ac60196) i event zasubskrybowany na prod. Testowy row `kh78xjy...` został `pending` (Stripe blokuje resend eventu który ma nad sobą nowszy — nie dało się przepchnąć). Dev przeszedł w A7c. **Zwaliduje się na PIERWSZYM realnym zwrocie — obserwuj wtedy** (row → succeeded, drawer, email).
 - **Refund policy — snapshot vs reference (gap prawny, wybór A).** Obecnie zwrot liczy się wg **żywej** aktywnej polityki (`refundPolicies` po `by_is_active`), a booking NIE snapshotuje polityki przy zakupie (schema `bookings` bez `refundPolicyId`). Konsekwencja: klient kupił przy 100%/6mies, admin zaostrza na 50%, klient żąda zwrotu → dostaje 50% (nie 100% z zakupu). Łamie zasadę „konsument podlega regulaminowi z chwili zawarcia umowy". `refunds.policySnapshot` (:87 initiate) to tylko forensic po fakcie, nie ochrona. **Decyzja Tomka: Opcja A — snapshot polityki do bookingu przy zakupie** (booking zamraża warunki jak faktura, ten sam wzorzec co `bookingPayments`; `refundPolicies` zostaje edytowalny jako polityka przyszła, refund liczy z bookingowego snapshotu). Dotyka checkout flow + refund calc — osobny etap. Dopytać Michała czy potwierdza A (zwrot wg polityki z zakupu). Nie blokuje A7d.
 - **Faktury + KSeF (nowy duży moduł, research 2026-07-03).** Nabywca-przedsiębiorca wymaga faktury (nie paragonu). Potrzebne: (1) dane sprzedawcy (firma Michała), (2) dane nabywcy (firma klienta — NIP/VAT-ID, adres, **kraj — także zagraniczni nabywcy**, B2B UE / eksport), (3) w PL obowiązek **KSeF**. **Stan KSeF 2.0 (na 2026-07):** obowiązek dla wszystkich czynnych podatników VAT od **1 kwi 2026** (duzi >200 mln PLN od 1 lut 2026); tokeny do 31 gru 2026, od 1 sty 2027 tylko **certyfikaty KSeF**. Auth: cert KSeF typ 1 (uwierzytelnianie) / podpis / pieczęć kwalifikowana; flow `POST /api/v2/auth/challenge` → podpisany XAdES → `/auth/xades-signature`; klucz symetryczny szyfrowany RSAES-OAEP (SHA-256) publicznym kluczem KSeF (`GET /api/v2/security/public-key-certificates`). Faktura = struktura **FA(3)** XML. REST v2 endpointy: `/auth/`, `/sessions/`, `/invoices/send`, `/certificates/`. **Architektura:** Convex action (external API jak Stripe) — cert/klucz Michała jako sekret, generowanie FA(3) XML, wysyłka + status polling. **Otwarte pytania:** (a) czy faktury dla zagranicznych nabywców idą przez KSeF czy poza (KSeF głównie B2B krajowe); (b) termin obowiązku dla Michała wg obrotu; (c) Michał musi wygenerować/dostarczyć certyfikat KSeF typ 1. Docs: https://ksef.podatki.gov.pl, https://github.com/CIRFMF/ksef-api
 - **Audit log — brak UI listowania.** `adminAuditLog` zapisuje akcje (`refund_initiated/completed/failed`, `policy_updated`, `reblock_berth`, `release_berth_manual`) — dziś odczyt tylko przez `npx convex data adminAuditLog` / dashboard. Michał nie ma widoku historii akcji admina. Potrzeba: strona/sekcja w `/admin` listująca audit log (filtry po `action`/`admin`/`booking`, sort malejąco po `_creationTime`, render `metadata` per typ akcji). Indeksy już gotowe: `by_booking`, `by_admin`, `by_action`. Query + UI, zero zmian schema.
@@ -67,6 +69,60 @@ npx wuchale                 # ekstrakcja stringów i18n
 ---
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
+
+## Sesja 2026-07-05 — fix bookingByUser (nauka) + kaskada prod bugów z testu Stripe live 5 zł
+
+### Zmiany
+
+- **Fix `bookingByUser` (nauka, tryb ja-wskazuję-Tomek-pisze)** — `src/convex/queries.ts`: `.first()` → `.collect()` + filtr `confirmed`, zwraca **listę** wzbogaconych bookingów (`Promise.all(confirmed.map(async ...))`, wewnątrz `Promise.all([participants, payments])`). Trzy callery dostosowane bez zmiany reszty plików (trik: lokalny `bookingData` znów pojedynczy obiekt):
+  - `dashboard/+page.svelte` — `bookings` (`$derived`), `activeBookingId` (`$state`, keyed `_id`), selektor rejsu (`role="group"` + `aria-pressed`, widoczny gdy `bookings.length > 1`).
+  - `pay/[paymentId]` + `crew/[participantId]` — `bookings.find(b => b.X.some(p => p._id === urlId))`, `?? null` na cały `.find`.
+  - Commit `8ac60196`, push `main:production`, build zielony, smoke footy2 (wygasły zniknął) + pay/crew (900 zł, formularz OK).
+- **Fix 1 webhook — lazy font resolve** (`src/lib/server/booking-confirmation-pdf.ts`): `require.resolve` przeniesiony z top-level do wnętrza `generateBookingConfirmationPdf`. Odsprzęga crash-przy-imporcie od handlera → webhook 200, booking confirmed nawet gdy PDF pada. (Fix 2 = wbicie fontu w bundle, patrz Otwarte problemy.)
+- **Fix webhook — event `refund.updated`** (`src/routes/api/stripe/webhook/+server.ts`): fall-through `case 'charge.refund.updated': case 'refund.updated':` (Stripe API 2026-04 zmienił nazwę). Refund object ten sam kształt → ciało bez zmian.
+- **Prod config (dashboardy, nie kod):**
+  - Convex prod: `npx convex run seed:initializeRefundPolicy --prod` (świeży prod nie miał aktywnej polityki → `updateRefundPolicy` rzucał „Brak aktywnej polityki").
+  - Migracja `refundedAmount` na PROD: widen (`v.optional`) → `migrations:backfillRefundedAmount --prod` (processed: 1) → narrow (`v.number()`). Dev był zmigrowany, prod miał stary wiersz bez pola → `convex deploy` oblewał walidację.
+  - Brevo → Security → Authorized IPs → **Deactivate for API keys** (blokował maile: 401 „unrecognised IP" — Vercel ma dynamiczne IP).
+  - Stripe prod webhook → dodany event `refund.updated` (było tylko `charge.refunded` którego kod nie łapie).
+
+### Decyzje
+
+- **Fix bookingByUser: A+B (nie tylko hotfix).** Filtr `confirmed` (bug A, groźny — cudzy/wygasły) + lista wielu bookingów (bug B, przebudowa dashboardu). Wybór B1 (selektor rejsu) nad B2 (lista stacked) — mniejsza przebudowa, panel już ma zakładki.
+- **Webhook: ścieżka krytyczna odsprzężona od best-effort.** Potwierdzenie płatności (mutacja Convex) NIE może zależeć od PDF/email — inaczej crash dodatku → 500 → Stripe retry w kółko → „kasa pobrana, brak bookingu". PDF/email są best-effort (try/catch), a crash przy ŁADOWANIU modułu trzeba osobno wyeliminować (lazy).
+- **Stripe eventy: fall-through na obie nazwy.** `charge.refund.updated` (stara) + `refund.updated` (nowa API). Dopasowujemy config do kodu i kod do obu wersji — nie odwrotnie.
+- **Testowy refund row `pending` — odpuszczony.** Stripe blokuje resend eventu z nowszym nad nim. Nie warto walczyć o dane do skasowania; ścieżka zwaliduje się na realnym zwrocie.
+
+### Wnioski
+
+- **Crash przy ŁADOWANIU modułu ≠ crash w funkcji.** `require.resolve(asset)` na top-level modułu → import route pada → handler nigdy nie startuje → try/catch WEWNĄTRZ funkcji nie łapie. Stack wskazuje `plik.js:5` (top-level), nie linię wywołania. Fix: lazy (resolve w funkcji). Kandydat wiki.
+- **Convex `deploy` waliduje ISTNIEJĄCE dane prod względem schematu.** Dodanie wymaganego pola do tabeli z danymi = deploy oblewa na starych wierszach. Widen→migrate→narrow trzeba puścić NA PROD (dev migration ≠ prod). Kandydat wiki.
+- **Seedy per-środowisko.** Świeży prod = pusta baza. `initializeVoyage` + `initializeRefundPolicy` (i każdy przyszły seed) trzeba puścić ręcznie na prod, tak jak na dev. Brak → mutacje zależne rzucają.
+- **Dev Stripe CLI forwarduje WSZYSTKIE eventy; prod subskrybuje ręcznie wybrane.** Bug działający na dev, martwy na prod = event nie zasubskrybowany. + `charge.refund.updated` → `refund.updated` (rename w nowszym API). Kandydat wiki.
+- **Brevo IP allowlist zabija serverless.** Vercel ma dynamiczne IP — nie da się allowlistować. Dla klucza API: wyłącz ograniczenie IP (Deactivate for API keys). Rozszerzenie [[brevo-transactional-email-convex]].
+- **Prod Convex ukrywa komunikaty `throw` jako „Server Error [Request ID]".** Prawdziwy błąd w Convex Logs (po Request ID) albo Vercel Runtime Logs. Brak logu w Convex = błąd przed Convex (Vercel-side, np. crash importu).
+- **Optional chaining chroni tylko lewo od kropki** (`detail.data?.refunds.filter` — `?.` chroni `data`, nie `refunds`).
+
+### Następne kroki
+
+#### Next
+
+- **Fix 2 — font PDF w bundle** (patrz Otwarte problemy). Jedyny kod przed pełnym launchem. Bez tego: brak PDF w mailu + „Dokumenty → Potwierdzenie" nie działa.
+- **Cleanup testu SA-2026-7715** (Convex prod dashboard): berth A1 (`bookingPaymentIntentId = pi_3TpvH1RYqphE29fm1wSfpupK`) → `status: available` + wyczyść `bookingPaymentIntentId`; booking → `cancelled`; refund row `kh78xjy...` opcjonalnie skasuj. **Payment plan s1**: przywróć realną zaliczkę (edytuj wiersze `paymentPlanItems` bezpośrednio w dashboard — omija `requireConvexAdmin` i guard sumy; suma pozycji = `pricePerBerth`×100 grosze).
+- **Walidacja refund flow na PIERWSZYM realnym zwrocie** — obserwuj row → succeeded, drawer, email.
+
+#### Uwagi Michała / Tomka (docs/feedback/2026-07-05.md) → backlog
+
+- **Checkout krok 4 (`/book?segment=s1`): „Wróć" nie działa** przy kupowaniu.
+- **Po kliknięciu „Rezerwuj": klik na „Panel" nie działa** (a „Poradnik" działa) — prawdopodobnie stan/overlay blokuje część nawigacji.
+- **Mobile: kolejność CTA odwrotna** — najpierw „Zaloguj się do panelu", potem „Rezerwacja jako manifest pokładowy".
+
+#### Blocked / Later / Open questions
+
+- **A7d regulamin** — tekst z Worda Michała (nadal oczekiwany).
+- **Uwagi Michała `docs/feedback/2026-06-19-uwagi-do-strony.docx`** (6 MB) — wciąż nieprzeczesane pod backlog.
+- **A7e reconciliation + refund policy snapshot (opcja A) + faktury/KSeF + audit log UI** — bez zmian.
+- **Widget AI dokumentacji** — po prod (zależy od `docs/business-decisions/`).
 
 ## Sesja 2026-07-04 — A7d reblock UI + closed-booking treatment (Sales Board + drawer) + jedno źródło prawdy
 
