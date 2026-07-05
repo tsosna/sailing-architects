@@ -145,7 +145,8 @@ export const POST: RequestHandler = async ({ request }) => {
 			}
 			break
 		}
-		case 'charge.refund.updated': {
+		case 'charge.refund.updated': 
+		case 'refund.updated': {
 			const refund = event.data.object as Stripe.Refund
 
 			// Skip non-terminal statuses ('pending', 'canceled', 'requires_action')
