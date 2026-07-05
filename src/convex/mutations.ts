@@ -1374,7 +1374,7 @@ export const processStripeRefund = internalMutation({
 				throw new Error('bookingPayment not found')
 			}
 			await ctx.db.patch(refund.bookingPaymentId, {
-				refundedAmount: (payment.refundedAmount ?? 0) + args.amountRefunded
+				refundedAmount: payment.refundedAmount + args.amountRefunded
 			})
 			//1c: paymentStatus re-calc + berth release
 
@@ -1386,7 +1386,7 @@ export const processStripeRefund = internalMutation({
 			const paidPayments = allPayments.filter((p) => p.status === 'paid')
 			const totalPaid = paidPayments.reduce((s, p) => s + p.amount, 0)
 			const totalRefunded = paidPayments.reduce(
-				(s, p) => s + (p.refundedAmount ?? 0),
+				(s, p) => s + p.refundedAmount,
 				0
 			)
 
