@@ -18,7 +18,12 @@
 	const bookingQuery = useQuery(api.queries.bookingByUser, () => ({ userId }))
 	const convex = useConvexClient()
 
-	const bookingData = $derived(bookingQuery.data)
+	const bookings = $derived(bookingQuery.data ?? [])
+	let activeBookingId = $state<string | null>(null)
+
+	const bookingData = $derived(
+		bookings.find((b) => b._id === activeBookingId) ?? bookings[0] ?? null
+	)
 	const participants = $derived(bookingData?.participants ?? [])
 	const participantsCompleted = $derived(
 		participants.filter((p) => p.dataStatus === 'complete').length
@@ -242,7 +247,20 @@
 				<SignOutButton class="btn btn--signout">Wyloguj</SignOutButton>
 			</div>
 		</header>
-
+		{#if bookings.length > 1}
+			<div class="booking-switch" role="group" aria-label="Wybierz rejs">
+				{#each bookings as booking (booking._id)}
+					<button
+						type="button"
+						class="btn btn--signout m-0.5"
+						aria-pressed={bookingData?._id === booking._id}
+						onclick={() => (activeBookingId = booking._id)}
+					>
+						{booking.bookingRef}
+					</button>
+				{/each}
+			</div>
+		{/if}
 		<div class="tabs" role="tablist" aria-label="Sekcje panelu">
 			{#each tabs as t (t.id)}
 				<button
@@ -630,6 +648,24 @@
 		color: var(--color-warm-white);
 		border-color: var(--color-brass);
 		background: rgba(196, 146, 58, 0.06);
+	}
+
+	.booking-switch {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	.booking-switch :global(.btn--signout) {
+		flex: 1 1 clamp(136px, 22vw, 184px);
+		margin: 0;
+		text-align: center;
+	}
+
+	.booking-switch :global(.btn--signout[aria-pressed='true']) {
+		color: var(--color-brass-text);
+		border-color: var(--color-brass);
+		background: rgba(196, 146, 58, 0.12);
 	}
 
 	.dash__back {

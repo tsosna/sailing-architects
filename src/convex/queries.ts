@@ -91,35 +91,42 @@ export const activePaymentPlanBySlug = query({
 export const bookingByUser = query({
 	args: { userId: v.string() },
 	handler: async (ctx, { userId }) => {
-		const booking = await ctx.db
+		const bookings = await ctx.db
 			.query('bookings')
 			.withIndex('by_user', (q) => q.eq('userId', userId))
 			.order('desc')
-			.first()
-		if (!booking) return null
+			.collect()
 
-		const segment = await ctx.db.get(booking.segmentId)
-		const berthDocs = await Promise.all(
-			booking.berthIds.map((id) => ctx.db.get(id))
+		const confirmed = bookings.filter((b) => b.status === 'confirmed')
+
+		return Promise.all(
+			confirmed.map(async (booking) => {
+				const segment = await ctx.db.get(booking.segmentId)
+				const berthDocs = await Promise.all(
+					booking.berthIds.map((id) => ctx.db.get(id))
+				)
+				const [participants, payments] = await Promise.all([
+					ctx.db
+						.query('bookingParticipants')
+						.withIndex('by_booking', (q) => q.eq('bookingId', booking._id))
+						.collect(),
+					ctx.db
+						.query('bookingPayments')
+						.withIndex('by_booking', (q) => q.eq('bookingId', booking._id))
+						.collect()
+				])
+				const berths = berthDocs.filter(
+					(b): b is NonNullable<typeof b> => b !== null
+				)
+				return {
+					...booking,
+					segment,
+					berths,
+					participants,
+					payments: payments.sort((a, b) => a.sortOrder - b.sortOrder)
+				}
+			})
 		)
-		const participants = await ctx.db
-			.query('bookingParticipants')
-			.withIndex('by_booking', (q) => q.eq('bookingId', booking._id))
-			.collect()
-		const payments = await ctx.db
-			.query('bookingPayments')
-			.withIndex('by_booking', (q) => q.eq('bookingId', booking._id))
-			.collect()
-		const berths = berthDocs.filter(
-			(b): b is NonNullable<typeof b> => b !== null
-		)
-		return {
-			...booking,
-			segment,
-			berths,
-			participants,
-			payments: payments.sort((a, b) => a.sortOrder - b.sortOrder)
-		}
 	}
 })
 

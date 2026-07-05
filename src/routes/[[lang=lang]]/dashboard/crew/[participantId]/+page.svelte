@@ -67,7 +67,13 @@
 	const profileQuery = useQuery(api.queries.crewProfileByUser, () => ({
 		userId
 	}))
-	const bookingData = $derived(bookingQuery.data)
+
+	const bookings = $derived(bookingQuery.data ?? [])
+
+	const bookingData = $derived(
+		bookings.find((b) => b.participants.some((p) => p._id === participantId)) ??
+			null
+	)
 	const participant = $derived(
 		bookingData?.participants.find((p) => p._id === participantId) ?? null
 	)

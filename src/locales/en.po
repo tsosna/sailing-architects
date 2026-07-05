@@ -3146,3 +3146,7 @@ msgstr ""
 #: src/lib/components/admin/booking-drawer.svelte
 msgid "Blokuję…"
 msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Wybierz rejs"
+msgstr ""
