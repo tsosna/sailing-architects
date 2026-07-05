@@ -2,8 +2,6 @@ import { createRequire } from 'node:module'
 import PDFDocument from 'pdfkit'
 
 const require = createRequire(import.meta.url)
-const regularFontPath = require.resolve('dejavu-fonts-ttf/ttf/DejaVuSans.ttf')
-const boldFontPath = require.resolve('dejavu-fonts-ttf/ttf/DejaVuSans-Bold.ttf')
 
 type BookingConfirmationPayload = {
 	booking: {
@@ -167,6 +165,9 @@ export async function generateBookingConfirmationPdf(
 		}
 	})
 
+	const regularFontPath = require.resolve('dejavu-fonts-ttf/ttf/DejaVuSans.ttf')
+	const boldFontPath =
+		require.resolve('dejavu-fonts-ttf/ttf/DejaVuSans-Bold.ttf')
 	doc.registerFont('DejaVu', regularFontPath)
 	doc.registerFont('DejaVu-Bold', boldFontPath)
 
