@@ -28,7 +28,7 @@ export const calculateRefundPolicySuggestion = query({
 		const paidPayments = payments.filter((p) => p.status === 'paid')
 		const totalPaid = paidPayments.reduce((sum, p) => sum + p.amount, 0)
 		const totalAlreadyRefunded = paidPayments.reduce(
-			(sum, p) => sum + p.refundedAmount,
+			(sum, p) => sum + (p.refundedAmount ?? 0),
 			0
 		)
 		const availableToRefund = totalPaid - totalAlreadyRefunded
@@ -102,7 +102,7 @@ export const allocateRefundCascade = query({
 
 		// Walidacja: czy total mieści się w available
 		const totalAvailable = paidPayments.reduce(
-			(sum, p) => sum + (p.amount - p.refundedAmount),
+			(sum, p) => sum + (p.amount - (p.refundedAmount ?? 0)),
 			0
 		)
 		if (totalAmount > totalAvailable) {
@@ -123,7 +123,7 @@ export const allocateRefundCascade = query({
 		for (const payment of paidPayments) {
 			if (remaining <= 0) break
 
-			const available = payment.amount - payment.refundedAmount
+			const available = payment.amount - (payment.refundedAmount ?? 0)
 			if (available <= 0) continue
 
 			const allocatedToThisCharge = Math.min(remaining, available)

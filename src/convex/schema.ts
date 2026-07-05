@@ -131,7 +131,7 @@ export default defineSchema({
 		),
 		stripePaymentIntentId: v.optional(v.string()),
 		paidAt: v.optional(v.number()),
-		refundedAmount: v.number(),
+		refundedAmount: v.optional(v.number()),
 		createdAt: v.number(),
 		updatedAt: v.number(),
 		reminderCount: v.optional(v.number()),
