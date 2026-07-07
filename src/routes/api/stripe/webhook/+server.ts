@@ -12,6 +12,7 @@ import {
 } from '$lib/server/email'
 import { STRIPE_WEBHOOK_SECRET } from '$env/static/private'
 import type { RequestHandler } from './$types'
+import type { Id } from '$convex/dataModel'
 import { api, internal } from '$convex/api'
 import { createConvexAdminClient } from '$lib/server/convex-admin'
 import { sendRefundEmail } from '$lib/server/email'
@@ -145,7 +146,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			}
 			break
 		}
-		case 'charge.refund.updated': 
+		case 'charge.refund.updated':
 		case 'refund.updated': {
 			const refund = event.data.object as Stripe.Refund
 
@@ -156,6 +157,9 @@ export const POST: RequestHandler = async ({ request }) => {
 				internal.mutations.processStripeRefund,
 				{
 					stripeRefundId: refund.id,
+					refundRowId:
+						(refund.metadata?.refundRowId as Id<'refunds'> | undefined) ??
+						undefined,
 					stripeRefundStatus: refund.status,
 					amountRefunded: refund.amount,
 					failureReason: refund.failure_reason ?? undefined,
@@ -179,18 +183,20 @@ export const POST: RequestHandler = async ({ request }) => {
 					if (detail?.buyer.email && refund.amount != null) {
 						await sendRefundEmail({
 							type: 'completed',
-							to: {email: detail.buyer.email, name:detail.buyer.name ?? undefined},
+							to: {
+								email: detail.buyer.email,
+								name: detail.buyer.name ?? undefined
+							},
 							bookingRef: detail.booking.bookingRef,
 							customerName: detail.buyer.name ?? 'Kliencie',
 							amount: refund.amount,
-							currency: (refund.currency ?? 'pln'),
+							currency: refund.currency ?? 'pln',
 							panelUrl: `${PUBLIC_APP_URL}/dashboard`,
-							settledAt: Date.now(),
+							settledAt: Date.now()
 						})
 					}
 				} catch (emailErr) {
-					console.error('sendRefundEmail (comleted) failed:', emailErr);
-					
+					console.error('sendRefundEmail (comleted) failed:', emailErr)
 				}
 			}
 			break

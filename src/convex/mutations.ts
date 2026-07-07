@@ -1322,16 +1322,19 @@ export const processStripeRefund = internalMutation({
 		stripeEventId: v.string(),
 		eventType: v.string(),
 		stripeChargeId: v.optional(v.string()),
-		rawPayload: v.any()
+		rawPayload: v.any(),
+		refundRowId: v.optional(v.id('refunds'))
 	},
 	handler: async (ctx, args) => {
 		//1. Lookup refunds row
-		const refund = await ctx.db
-			.query('refunds')
-			.withIndex('by_stripe_refund_id', (q) =>
-				q.eq('stripeRefundId', args.stripeRefundId)
-			)
-			.first()
+		const refund = args.refundRowId
+			? await ctx.db.get(args.refundRowId)
+			: await ctx.db
+					.query('refunds')
+					.withIndex('by_stripe_refund_id', (q) =>
+						q.eq('stripeRefundId', args.stripeRefundId)
+					)
+					.first()
 		//2. Null -> unhandled path (Problem 4: ad-hoc Stripe Dashboard refund)
 		if (!refund) {
 			// Idempotency: czy juz zapisany
@@ -1362,7 +1365,9 @@ export const processStripeRefund = internalMutation({
 		await ctx.db.patch(refund._id, {
 			status: args.stripeRefundStatus,
 			amountRefunded: args.amountRefunded,
-			failureReason: args.failureReason
+			failureReason: args.failureReason,
+			stripeRefundId: args.stripeRefundId,
+			stripeChargeId: args.stripeChargeId
 		})
 
 		if (args.stripeRefundStatus === 'succeeded') {
