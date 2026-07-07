@@ -1,6 +1,6 @@
 # AI Handoff — sailing-architects
 
-> Ostatnia aktualizacja: 2026-05-03
+> Ostatnia aktualizacja: 2026-07-07
 
 ---
 
@@ -38,9 +38,9 @@
 ## Otwarte problemy
 
 - **✅ ROZWIĄZANE 2026-07-05 — panel żeglarza pokazywał zły/wygasły booking.** `bookingByUser` naprawiony: `.collect()` + filtr `confirmed` + zwraca listę zamiast `.first()`. Dashboard dostał selektor rejsu (`aria-pressed`, keyed `_id`), pay/crew znajdują booking po `paymentId`/`participantId` z URL (`bookings.find(b => b.X.some(...))`). Commit `8ac60196`, na prod. Smoke footy2: wygasły zniknął. (Historia: `.first()` bez filtra statusu → footy2 widział wygasły SA-2026-7850.)
-- **🔴 PDF potwierdzenia leży na prod (Fix 2 — jedyny kod został).** `booking-confirmation-pdf.ts` robił `require.resolve('dejavu-fonts-ttf/...ttf')` na top-level modułu → plik `.ttf` z `node_modules` nie trafia do bundla Vercel serverless → crash przy IMPORCIE route → 500. Fix 1 (2026-07-05) przeniósł resolve do wnętrza funkcji (lazy) → moduł ładuje się, PDF pada w istniejącym try/catch → webhook 200, booking confirmed, ale **PDF nadal się nie generuje** (email bez załącznika + dashboard „Dokumenty → Potwierdzenie" nie działa). **Fix 2 przed launchem:** wbić czcionkę w bundle — vendorować `.ttf` do repo + `doc.registerFont(name, buffer)` z zaimportowanego Buffera (albo base64). Dotyczy `generateBookingConfirmationPdf` (webhook email + `/api/booking-confirmation`).
-- **Refund webhook prod — path niezwalidowany smoke'em.** Ścieżka `refund.updated → processStripeRefund → row succeeded → drawer ZWRÓCONO` naprawiona w kodzie (fall-through `charge.refund.updated` + `refund.updated`, commit po 8ac60196) i event zasubskrybowany na prod. Testowy row `kh78xjy...` został `pending` (Stripe blokuje resend eventu który ma nad sobą nowszy — nie dało się przepchnąć). Dev przeszedł w A7c. **Zwaliduje się na PIERWSZYM realnym zwrocie — obserwuj wtedy** (row → succeeded, drawer, email).
-- **Refund policy — snapshot vs reference (gap prawny, wybór A).** Obecnie zwrot liczy się wg **żywej** aktywnej polityki (`refundPolicies` po `by_is_active`), a booking NIE snapshotuje polityki przy zakupie (schema `bookings` bez `refundPolicyId`). Konsekwencja: klient kupił przy 100%/6mies, admin zaostrza na 50%, klient żąda zwrotu → dostaje 50% (nie 100% z zakupu). Łamie zasadę „konsument podlega regulaminowi z chwili zawarcia umowy". `refunds.policySnapshot` (:87 initiate) to tylko forensic po fakcie, nie ochrona. **Decyzja Tomka: Opcja A — snapshot polityki do bookingu przy zakupie** (booking zamraża warunki jak faktura, ten sam wzorzec co `bookingPayments`; `refundPolicies` zostaje edytowalny jako polityka przyszła, refund liczy z bookingowego snapshotu). Dotyka checkout flow + refund calc — osobny etap. Dopytać Michała czy potwierdza A (zwrot wg polityki z zakupu). Nie blokuje A7d.
+- **✅ ROZWIĄZANE 2026-07-07 — PDF potwierdzenia na prod (Fix 2).** `booking-confirmation-pdf.ts` — `require.resolve('dejavu-fonts-ttf/...ttf')` (runtime string, nieśledzalny przez bundler → font poza bundlem Vercel serverless → `MODULE_NOT_FOUND`) zastąpiony statycznym `import regularFontUrl from 'dejavu-fonts-ttf/ttf/DejaVuSans.ttf?url'` + `read()` z `$app/server` → `Buffer.from(await read(url).arrayBuffer())` → `registerFont`. Usunięty `createRequire`. Commit `ab7378d4`. Potwierdzony na prod: PDF się generuje (dashboard „Dokumenty → Potwierdzenie" + załącznik maila). (Historia: Fix 1 z 2026-07-05 tylko lazy-resolve — odsprzęgł crash importu, ale font dalej brakował w bundlu.)
+- **✅ ROZWIĄZANE 2026-07-07 — refund webhook race (kaskada z realnych zakupów Michała).** Root: webhook `refund.updated` wyprzedzał zapis `stripeRefundId` do wiersza `refunds` (nadawany dopiero po odpowiedzi Stripe, `updateRefundWithStripeId`) → `processStripeRefund` szukał po `by_stripe_refund_id` → null → event lądował w `unhandledStripeEvents` → koja nie zwolniona + `refundedAmount` nie naliczony → guard `availableToRefund` nie blokował → podwójny refund (502 `charge_already_refunded`). Fix: dopasowanie po `metadata.refundRowId` (istnieje od pre-insertu, race-free) jako primary, fallback `stripeRefundId` dla outside-app; patch dopisuje `stripeRefundId`/`stripeChargeId` gdy webhook wygra wyścig. Commit `a3995b5d`, na prod (potwierdzone git ancestry). **Empiryczna walidacja na PIERWSZYM realnym zwrocie** — koja wraca na pierwszej dostawie webhooka (bez Resend). Cleanup: 6 wierszy-sierot `pending` usuniętych z prod.
+- **Refund policy — snapshot vs reference (gap prawny, wybór A) — REGULAMIN DOSTARCZONY 2026-07-07.** Obecnie zwrot liczy się wg **żywej** aktywnej polityki (`refundPolicies` po `by_is_active`), a booking NIE snapshotuje polityki przy zakupie (schema `bookings` bez `refundPolicyId`). Konsekwencja: klient kupił przy 100%/6mies, admin zaostrza na 50%, klient żąda zwrotu → dostaje 50% (nie 100% z zakupu). Łamie „konsument podlega regulaminowi z chwili zawarcia umowy". `refunds.policySnapshot` to tylko forensic, nie ochrona. **Decyzja Tomka: Opcja A — snapshot polityki do bookingu przy zakupie** (booking zamraża warunki jak faktura). **Michał wrzucił `docs/feedback/2026_07_07_SA_regulamin_rejsu.doc`** → odblokowane: przełożyć regulamin na warunki zwrotu + wdrożyć snapshot (checkout flow + refund calc) + **ADR** w `docs/business-decisions/`. Osobny etap.
 - **Faktury + KSeF (nowy duży moduł, research 2026-07-03).** Nabywca-przedsiębiorca wymaga faktury (nie paragonu). Potrzebne: (1) dane sprzedawcy (firma Michała), (2) dane nabywcy (firma klienta — NIP/VAT-ID, adres, **kraj — także zagraniczni nabywcy**, B2B UE / eksport), (3) w PL obowiązek **KSeF**. **Stan KSeF 2.0 (na 2026-07):** obowiązek dla wszystkich czynnych podatników VAT od **1 kwi 2026** (duzi >200 mln PLN od 1 lut 2026); tokeny do 31 gru 2026, od 1 sty 2027 tylko **certyfikaty KSeF**. Auth: cert KSeF typ 1 (uwierzytelnianie) / podpis / pieczęć kwalifikowana; flow `POST /api/v2/auth/challenge` → podpisany XAdES → `/auth/xades-signature`; klucz symetryczny szyfrowany RSAES-OAEP (SHA-256) publicznym kluczem KSeF (`GET /api/v2/security/public-key-certificates`). Faktura = struktura **FA(3)** XML. REST v2 endpointy: `/auth/`, `/sessions/`, `/invoices/send`, `/certificates/`. **Architektura:** Convex action (external API jak Stripe) — cert/klucz Michała jako sekret, generowanie FA(3) XML, wysyłka + status polling. **Otwarte pytania:** (a) czy faktury dla zagranicznych nabywców idą przez KSeF czy poza (KSeF głównie B2B krajowe); (b) termin obowiązku dla Michała wg obrotu; (c) Michał musi wygenerować/dostarczyć certyfikat KSeF typ 1. Docs: https://ksef.podatki.gov.pl, https://github.com/CIRFMF/ksef-api
 - **Audit log — brak UI listowania.** `adminAuditLog` zapisuje akcje (`refund_initiated/completed/failed`, `policy_updated`, `reblock_berth`, `release_berth_manual`) — dziś odczyt tylko przez `npx convex data adminAuditLog` / dashboard. Michał nie ma widoku historii akcji admina. Potrzeba: strona/sekcja w `/admin` listująca audit log (filtry po `action`/`admin`/`booking`, sort malejąco po `_creationTime`, render `metadata` per typ akcji). Indeksy już gotowe: `by_booking`, `by_admin`, `by_action`. Query + UI, zero zmian schema.
 
@@ -69,6 +69,59 @@ npx wuchale                 # ekstrakcja stringów i18n
 ---
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
+
+## Sesja 2026-07-07 — kaskada bugów z realnych zakupów Michała: webhook-DB race + PDF font bundle + closed booking (nauka, tryb ja-wskazuję-Tomek-pisze)
+
+### Zmiany
+
+- **Race fix refundów** (`src/convex/mutations.ts` `processStripeRefund` + `src/routes/api/stripe/webhook/+server.ts`): dopasowanie wiersza `refunds` po `metadata.refundRowId` (istnieje od pre-insertu) zamiast po `stripeRefundId` (nadawany dopiero po odpowiedzi Stripe → wyścig). Nowy arg `refundRowId: v.optional(v.id('refunds'))`, gałąź `ctx.db.get(refundRowId)` vs fallback `by_stripe_refund_id`, patch dopisuje `stripeRefundId`/`stripeChargeId` gdy webhook wygra. Webhook przekazuje `refund.metadata?.refundRowId` (cast `Id<'refunds'>`). Commit `a3995b5d`. Dev smoke: `unhandledStripeEvents` pusta, koja zwolniona, `refundedAmount` naliczony.
+- **PDF Fix 2 — fonty w bundle** (`src/lib/server/booking-confirmation-pdf.ts`): `require.resolve(...)` → statyczny `import ...?url` + `read()` z `$app/server` → Buffer → `registerFont`. Usunięty `createRequire`. Commit `ab7378d4`. Potwierdzony na prod.
+- **Closed booking ukryty w panelu żeglarza** (`src/convex/queries.ts` `bookingByUser` + `dashboard/+page.svelte`): query zwraca flagę `closed: isBookingClosed(booking, berths)` (reużycie helpera z 2026-07-04); dashboard renderuje w aktywnym panelu tylko `!closed`. Zwrócony booking (status wciąż `confirmed`, tylko `paymentStatus: refunded` + koje oddane) nie udaje aktywnej rezerwacji. Dane closed zostają w payloadzie na sekcję Historia (B-etapowe). Commit `efb399fc`. Potwierdzony: SA-2026-8022 `closed: true`, znikł z aktywnych.
+- **Cleanup prod**: 6 wierszy-sierot `refunds` `pending` (z podwójnych klików → 502) usuniętych ręcznie po potwierdzeniu że każdy booking ma prawdziwy `succeeded` z `berthReleasedAt`.
+
+### Decyzje
+
+- **Jeden korzeń, nie trzy bugi.** Webhook wyprzedzał zapis `stripeRefundId` → event do `unhandledStripeEvents` → koja nie zwolniona + `refundedAmount` nie naliczony → guard nie blokował → podwójny refund. Fix korzenia (match po `refundRowId`) leczy koję I podwójny refund naraz. UI guard (disable „Zwróć") odłożony — race fix blokuje w ~1-2s, zostaje sub-sekundowe okno.
+- **Closed booking: B-etapowe (flaga + render active-only), nie A (ukryj całkiem).** Norma branżowa: użytkownik widzi historię zakupów ze statusem; zwrócony booking nie znika (dostęp do PDF/faktury). Render active-only teraz, Historia to dosypanie UI. Wybór Tomka po dyskusji o praktykach.
+- **PDF: `?url` + `read()`, nie base64 ani vendorowanie.** Import statyczny = śledzalny przez bundler; idiomatyczny SvelteKit. Base64 jako plan B — nie trzeba.
+
+### Wnioski
+
+- **Webhook potrafi wyprzedzić zapis do bazy (external-api-pre-insert race).** Dopasowuj po kluczu istniejącym OD pre-insertu (`metadata.refundRowId`), nie po id nadawanym po zewnętrznym wywołaniu. **Kandydat wiki** — rozszerza [[external-api-pre-insert-pattern]], [[in-doubt-transactions-external-integration]].
+- **`require.resolve(asset)` = runtime string, niewidzialny dla bundlera serverless.** Statyczny `import ...?url` + `read()` z `$app/server` = poprawny sposób na asset binarny na serwerze SvelteKit/Vercel. **Kandydat wiki.**
+- **`pnpm check` nie łapie bugów buildowo-bundlingowych** — trzeba `pnpm build` (albo deploy). Lokalny build zablokowany nft/QuickLook → weryfikacja tylko na Vercelu.
+- **Deploy Convex idzie w buildzie Vercela.** Push na `production` = oba cele (Convex functions + frontend). Git ancestry = dowód że wcześniejszy commit jest live gdy późniejszy działa na prod.
+- **zsh gotchas w git:** `[[lang=lang]]` w ścieżce = glob (nomatch przerywa całą komendę) → cytuj `'...'`. Backticki w `-m "..."` = command substitution (double quotes NIE chronią) → usuń backticki albo single-quote.
+- **Cursor phantom modified** — `booking-drawer.svelte` pokazany jako zmieniony, `git diff` pusty. Zawsze `git diff` przed commitem pliku którego się nie ruszało.
+
+### Następne kroki
+
+#### Next
+
+- **UI guard double-refund** (krok 5): disable „Zwróć" po kliknięciu / gdy `availableToRefund === 0`.
+- **Walidacja race fix na PIERWSZYM realnym zwrocie** — koja wraca na pierwszej dostawie webhooka (bez Resend).
+- **Refund policy snapshot (Opcja A) + ADR** — regulamin dostarczony (`docs/feedback/2026_07_07_SA_regulamin_rejsu.doc`). Przełożyć na warunki zwrotu → snapshot polityki do bookingu przy zakupie → ADR w `docs/business-decisions/`.
+
+#### Uwagi Michała (docs/feedback/2026-07-07.md) → backlog
+
+- **„BRAK MIEJSC"** — wyraźny napis gdy segment/rejs wyprzedany.
+- **Kajuta boczna — cena niższa (opcjonalnie, na żądanie).** Zbiega się z Tomek#2 (koje po indywidualnych cenach: % rabatu per koja, albo koja refundowalna + istniejący mechanizm zwrotu).
+- **Multi-rejs / multi-segment (DUŻE):** przebudowa landing + schema pod wiele rejsów z wieloma segmentami. + zakładka „coming soon" (REJS GRECJA maj 2027): opis, „chcę szczegóły" → capture e-mail → powiadomienie przy starcie sprzedaży + 5% rabatu dla wczesnych. Landing + schema + lead capture + discount.
+- **Płeć żeglarza** — dodać do profilu; możliwe ujawnianie K/M na sprzedanych miejscach. Schema + UI.
+- **Wolne/zajęte miejsca wyraźniej** w layout strony.
+- **RODO** — strona `www.sailing-architect.com/rodo`.
+- **Polityka prywatności** + link w regulaminie (wzór: domy-modulowe.eu/polityka-prywatnosci).
+- **Percepcja/wyrazistość panelu** słaba (2 zrzuty WhatsApp 15.08.44 / 15.09.09) — podciągnąć polish wizualny.
+
+#### Tomek → backlog
+
+- `/admin/special` — podpiąć edycję żeglarza.
+- Sprzedaż koi po indywidualnych cenach (% rabatu per koja lub koja refundowalna + zwrot).
+
+#### Blocked / Later / Open questions
+
+- Lokalny `pnpm build` zepsuty (nft śledzi zepsuty symlink `~/Library/QuickLook`) — naprawić (znaleźć/usunąć symlink), inaczej build tylko na Vercelu.
+- Historia zakupów w panelu żeglarza (B-later): closed z badge „Zwrócona" + przycisk PDF.
 
 ## Sesja 2026-07-05 — fix bookingByUser (nauka) + kaskada prod bugów z testu Stripe live 5 zł
 
