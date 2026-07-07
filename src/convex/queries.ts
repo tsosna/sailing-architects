@@ -1,5 +1,6 @@
 import { query } from './_generated/server'
 import { v } from 'convex/values'
+import { isBookingClosed } from './_lib/bookingClosed'
 
 /** All voyage segments — for landing segment picker and booking page. */
 export const listSegments = query({
@@ -123,7 +124,8 @@ export const bookingByUser = query({
 					segment,
 					berths,
 					participants,
-					payments: payments.sort((a, b) => a.sortOrder - b.sortOrder)
+					payments: payments.sort((a, b) => a.sortOrder - b.sortOrder),
+					closed: isBookingClosed(booking,berths)
 				}
 			})
 		)

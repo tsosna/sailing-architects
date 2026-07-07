@@ -18,7 +18,7 @@
 	const bookingQuery = useQuery(api.queries.bookingByUser, () => ({ userId }))
 	const convex = useConvexClient()
 
-	const bookings = $derived(bookingQuery.data ?? [])
+	const bookings = $derived((bookingQuery.data ?? []).filter((b)=>!b.closed))
 	let activeBookingId = $state<string | null>(null)
 
 	const bookingData = $derived(
