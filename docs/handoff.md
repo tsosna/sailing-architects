@@ -1,6 +1,6 @@
 # AI Handoff — sailing-architects
 
-> Ostatnia aktualizacja: 2026-07-07
+> Ostatnia aktualizacja: 2026-07-08
 
 ---
 
@@ -69,6 +69,36 @@ npx wuchale                 # ekstrakcja stringów i18n
 ---
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
+
+## Sesja 2026-07-08 — A7c krok 5: UI guard double-refund (nauka, tryb ja-wskazuję-Tomek-pisze)
+
+### Zmiany
+
+- **Guard triggera „Inicjuj zwrot"** (`src/lib/components/admin/booking-drawer.svelte`): dwa nowe `$derived` + rozszerzony `disabled`. `hasPendingRefund = detail.data?.refunds.some((r) => r.status === 'pending') ?? false`; `availableToRefund = Math.max(0, paidAmount - totalRefunded)`. Przycisk: `disabled={isClosed || hasPendingRefund || availableToRefund <= 0}`. Hint pod przyciskiem gdy pending („Zwrot w toku — czekaj na potwierdzenie bramki płatniczej") + style `.hint` (`flex-basis:100%` + `flex-wrap:wrap` na `.actions` → własna linia). Wuchale wyciągnął string hint do `.po`.
+- Smoke OK: booking z opłaconą ratą → „Inicjuj zwrot" → zatwierdź → reopen zablokowany + hint; po webhooku `succeeded` przycisk wraca / trzyma disabled na `availableToRefund <= 0`.
+
+### Decyzje
+
+- **Guard na triggerze, nie w dialogu.** Trigger to jedyny wjazd do `RefundDialog` — blokada tam zamyka okno reopen. `submitting` (istniejący, refund-dialog:187) pokrywa podwójny klik w jednym otwartym dialogu; brakowało tylko blokady ponownego otwarcia w oknie `pending`.
+- **`hasPendingRefund` jako klucz, nie `availableToRefund`.** `refundedAmount` na `bookingPayments` rośnie dopiero po webhooku `succeeded` → w oknie `pending` `availableToRefund` wciąż pełny. Guard po statusie wiersza `refunds`, nie po przeliczonej kwocie. `availableToRefund <= 0` dołożony osobno (pokrywa fully-refunded-not-closed z wording handoff).
+
+### Wnioski
+
+- **Pending refund nie zmniejsza `availableToRefund`** — bo `refundedAmount` aktualizuje dopiero webhook `succeeded`. Blokować po statusie wiersza (`refunds.status === 'pending'`), nie po kwocie pochodnej. Root-fix z 2026-07-07 (match po `refundRowId`) zwęził race do sub-sekundy; ten guard zamyka okno reopen na poziomie UI.
+- **Trzy ścieżki cyklu życia zwrotu domknięte:** `pending`→disabled; `succeeded`→włączony na resztę; `failed`→włączony (retry). Guard po `some(status==='pending')` obsługuje wszystkie bez dodatkowej logiki.
+- **`?? false` na `.some(...)`** — gdy `detail.data` undefined (ładowanie) nie blokuj przedwcześnie i nie crashuj.
+
+### Następne kroki
+
+#### Next
+
+- **Walidacja race fix na PIERWSZYM realnym zwrocie** (przeniesione z 07-07) — koja wraca na pierwszej dostawie webhooka.
+- **Refund policy snapshot (Opcja A) + ADR** — regulamin dostarczony (`docs/feedback/2026_07_07_SA_regulamin_rejsu.doc`).
+- **A7e reconciliation** — globalny catch-all stuck refunds.
+
+#### Blocked / Later / Open questions
+
+- Backlog Michała (8 uwag) + Tomek (2) z sesji 07-07 nietknięty — patrz wpis 2026-07-07.
 
 ## Sesja 2026-07-07 — kaskada bugów z realnych zakupów Michała: webhook-DB race + PDF font bundle + closed booking (nauka, tryb ja-wskazuję-Tomek-pisze)
 

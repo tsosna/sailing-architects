@@ -3150,3 +3150,7 @@ msgstr ""
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Wybierz rejs"
 msgstr ""
+
+#: src/lib/components/admin/booking-drawer.svelte
+msgid "Zwrot w toku - czekaj na potwierdzenie bramki płatniczej"
+msgstr ""

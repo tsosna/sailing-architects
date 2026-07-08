@@ -290,9 +290,14 @@
 		) ?? 0
 	)
 
+	const availableToRefund = $derived(Math.max(0, paidAmount - totalRefunded))
+
 	const reblockable = $derived(
 		detail.data?.refunds.filter((r) => r.berthReleasedAt && !r.reblockedAt) ??
 			[]
+	)
+	const hasPendingRefund = $derived(
+		detail.data?.refunds.some((r) => r.status === 'pending') ?? false
 	)
 	const isClosed = $derived(detail.data?.isClosed ?? false)
 
@@ -677,11 +682,18 @@
 								<button
 									class="mini mini--brass"
 									type="button"
-									disabled={isClosed}
+									disabled={isClosed ||
+										hasPendingRefund ||
+										availableToRefund <= 0}
 									onclick={() => (refundForBookingId = data.booking._id)}
 								>
 									Inicjuj zwrot
 								</button>
+								{#if hasPendingRefund}
+									<p class="hint">
+										Zwrot w toku - czekaj na potwierdzenie bramki płatniczej
+									</p>
+								{/if}
 							</div>
 						{/if}
 					</section>
@@ -1354,10 +1366,18 @@
 	.actions {
 		display: flex;
 		justify-content: flex-end;
+		flex-wrap: wrap;
 		gap: 8px;
 		margin-top: 8px;
 		margin-bottom: 12px;
 		padding-right: 16px; /* dodaj — odsuń od krawędzi */
+	}
+	.hint {
+		flex-basis: 100%;
+		margin: 4px 0 0;
+		text-align: right;
+		font-size: 12px;
+		color: var(--admin-muted, #8aa0b8);
 	}
 	@media (max-width: 600px) {
 		.detail-strip {
