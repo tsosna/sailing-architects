@@ -12,9 +12,14 @@ type ConvexHttpClientWithAdmin = ConvexHttpClient & {
 	setAdminAuth(token: string): void
 }
 
+type InternalQuery = FunctionReference<'query', 'internal'>
 type InternalMutation = FunctionReference<'mutation', 'internal'>
 
 export type ConvexAdminClient = ConvexHttpClientWithAdmin & {
+	query<Query extends InternalQuery>(
+		query: Query,
+		...args: OptionalRestArgs<Query>
+	): Promise<FunctionReturnType<Query>>
 	mutation<Mutation extends InternalMutation>(
 		mutation: Mutation,
 		...args: OptionalRestArgs<Mutation>

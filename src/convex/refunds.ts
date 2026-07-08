@@ -1,5 +1,5 @@
 import { v } from 'convex/values'
-import { query } from './_generated/server'
+import { query, internalQuery } from './_generated/server'
 
 export const calculateRefundPolicySuggestion = query({
 	args: { bookingId: v.id('bookings') },
@@ -152,5 +152,23 @@ export const getActiveRefundPolicy = query({
 			.withIndex('by_is_active', (q) => q.eq('isActive', true))
 			.first()
 		return { policy }
+	}
+})
+
+export const listStuckPendingRefunds = internalQuery({
+	args: { staleMs: v.number() },
+	handler: async (ctx, { staleMs }) => {
+		const cutoff = Date.now() - staleMs
+		const pending = await ctx.db
+			.query('refunds')
+			.withIndex('by_status', (q) => q.eq('status', 'pending'))
+			.collect()
+		return pending
+			.filter((r) => r._creationTime < cutoff && r.stripeRefundId != undefined)
+			.map((r) => ({
+				refundRowId: r._id,
+				stripeRefundId: r.stripeRefundId!,
+				bookingId: r.bookingId
+			}))
 	}
 })

@@ -70,6 +70,43 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
+## Sesja 2026-07-08 (II) — A7e reconciliation: cron safety-net na zgubiony webhook refundu (nauka, tryb ja-wskazuję-Tomek-pisze)
+
+### Zmiany
+
+- **`internalQuery listStuckPendingRefunds`** (`src/convex/refunds.ts`): listuje `refunds` `status='pending'` starsze niż `staleMs` z ustawionym `stripeRefundId`. Zwraca `{refundRowId, stripeRefundId, bookingId}`. Indeks `by_status` + filtr w pamięci (pending mało, nowy indeks zbędny). Smoke `npx convex run` → `[]`.
+- **Endpoint `GET /api/admin/refunds/reconcile`** (`src/routes/api/admin/refunds/reconcile/+server.ts`): guard `Authorization: Bearer ${CRON_SECRET}` (401 bez) → `listStuckPendingRefunds({staleMs: 3min})` → per wiersz `stripe.refunds.retrieve` → terminal status → `processStripeRefund` (ten sam idempotentny silnik co webhook, mapowanie 1:1 z webhook:156-174) → best-effort mail `sendRefundEmail('completed')` gdy `processed+succeeded`. Zwraca `{checked, reconciled}`. Smoke: zły sekret→401, dobry→`{"checked":0,"reconciled":0}`.
+- **`ConvexAdminClient` rozszerzony o overload `query<InternalQuery>`** (`src/lib/server/convex-admin.ts`): publiczny `query` z `ConvexHttpClient` ma constraint `"public"` → typowane wołanie `internal.refunds.*` wymagało analogicznego overloadu jak istniejący `mutation<InternalMutation>` (A3).
+- **`vercel.json`** (nowy): Vercel Cron `GET /api/admin/refunds/reconcile` `schedule: "0 3 * * *"` (daily — plan Hobby, brak minutowej granulacji).
+
+### Decyzje
+
+- **Approach A: Vercel Cron → endpoint SvelteKit, nie Convex action.** Stripe SDK żyje tylko w SvelteKit (`$lib/server/stripe`, webhook, initiate) → reconciliation tam = Stripe w jednym miejscu. Convex action z `"use node"`+Stripe dublowałaby sekret i rozbijała logikę Stripe. Odrzucone.
+- **Zakres: tylko pending-poll (klasa #1).** Auto-reconcile stuck pending refundów vs Stripe. Subsumuje pominięty A7b-3d („5s retry safety net") — cron poll to lepsza ogólna siatka niż per-refund timer. `unhandledStripeEvents` (refundy z Stripe Dashboard, „Problem 4", wymagają decyzji admina release/keep/orphan) → osobny feature UI, do backlogu.
+- **Daily schedule (Hobby).** Webhook normalnie dochodzi w sekundy; reconcile łapie tylko rzadki zgubiony webhook. W najgorszym razie stuck refund czeka ~24h na auto-naprawę — akceptowalne (nie ścieżka krytyczna). Pro plan → można `*/15`.
+- **Mail tylko przy `result.status === 'processed'`**, nie `already_processed` — inaczej dublujesz mail który webhook już wysłał. Best-effort try/catch (zwrot zaksięgowany w bazie nie może paść przez mail).
+
+### Wnioski
+
+- **Reconciliation = aktywne pogodzenie stanu, dashboard banner = pasywne pokazanie.** A7c krok 6 (banner refund_stuck) tylko surfuje; A7e faktycznie odpytuje Stripe i domyka. Root-fix z 07-07 leczył *race*, A7e leczy *zgubiony webhook* — inne korzenie.
+- **Reużycie idempotentnego silnika przez syntetyczny `stripeEventId`.** `processStripeRefund` przyjmuje `stripeEventId` (idempotency unhandled-path); w reconcile mamy `refundRowId` → nigdy nie wchodzimy w unhandled → `stripeEventId` nieużywany w happy-path, ale required → `reconcile:${id}:${status}`. Ten sam silnik, zero duplikacji logiki domenowej.
+- **`$env/static/private` vs `/public`** — SvelteKit dzieli po prefiksie `PUBLIC_`. `PUBLIC_APP_URL` tylko z `/public` (build error jeśli w `/private`). `CRON_SECRET` z `/private`.
+- **`$env/static/private` czyta się przy starcie serwera, nie hot-reload** — dodanie `CRON_SECRET` wymaga restartu `pnpm dev`.
+- **Vercel Cron auth: auto-nagłówek `Authorization: Bearer $CRON_SECRET`** gdy env ustawiony w projekcie. Guard endpointu to sprawdza — zero dodatkowej roboty.
+
+### Następne kroki
+
+#### Next
+
+- **Deploy A7e** — env `CRON_SECRET` w Vercel (prod), push `main:production`, weryfikacja że cron się rejestruje (Vercel dashboard → Crons). Nie zrobione tej sesji.
+- **Walidacja reconcile na realnym stuck** — zbiega z „walidacja race fix na 1. realnym zwrocie". Wymusić pending bez webhooka → cron/ręczny `curl` z sekretem → koja wraca + mail.
+- **Refund policy snapshot (Opcja A) + ADR**; **audit log UI**.
+
+#### Backlog (nowe z tej sesji)
+
+- **unhandledStripeEvents resolution UI** (klasa #2 reconciliation) — lista nieobsłużonych eventów Stripe (refundy z Dashboard) + przyciski decyzji admina (release_berth / keep_berth / orphan, `resolution` enum już w schema) + mutation resolving. Osobny feature.
+- **Edge #3** — pending bez `stripeRefundId` (initiate padł między `stripe.refunds.create` a `updateRefundWithStripeId`) — nie reconciluje się (brak po czym retrieve). Dashboard banner pokazuje, ręcznie. Rzadkie.
+
 ## Sesja 2026-07-08 — A7c krok 5: UI guard double-refund (nauka, tryb ja-wskazuję-Tomek-pisze)
 
 ### Zmiany
