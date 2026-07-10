@@ -21,9 +21,11 @@
 - **BUG-6 — Admin: brak akcji „Wyloguj" w `/admin` w ogóle** + brak avatar/user-menu (standard „zalogowany"). Dashboard żeglarza ma surowy `<SignOutButton>` (`dashboard/+page.svelte:247`) do zawinięcia. Idiom: svelte-clerk `<UserButton />`. *(dup: admin-post-mvp „Brak akcji Wyloguj w layoucie /admin"; Tomek 07-10)*
 - **BUG-7 — Walidacja formy edycji uczestnika w drawerze.** `adminUpdateParticipantData` przyjmuje surowe stringi bez format/enum check (email, data, enumy). Fix: współdziel zod z booking flow. *(admin-post-mvp „Walidacja pól formy…")*
 
-## 🚀 Deploy (czeka, niezacommitowane w main)
+## 🚀 Deploy
 
-- **DEP-1 — Deploy zbiorczy:** snapshot polityki (widen, 07-09) + A7e reconciliation cron (`CRON_SECRET` w Vercel) + audit log UI + admin nav shell. Jeden `convex deploy` + push `main:production`. Po deployu: test odporności snapshotu na prod + walidacja A7e na realnym stuck refund.
+- ~~**DEP-1 — Deploy zbiorczy:** snapshot polityki + A7e cron + audit UI + admin nav shell.~~ **✅ ZDEPLOYOWANE 2026-07-10** (`push origin main:production` → `efb399fc..f289608b`; CRON_SECRET w Vercel; build zielony; Vercel Cron zarejestrowany). Zostaje **walidacja na prod** (nie sam deploy):
+  - **DEP-1a — Test odporności snapshotu na prod** (właściwy dowód prawny): kup rejs → snapshot zamraża % → admin zmienia próg → zwrot → sugestia trzyma snapshot, nie żywą.
+  - **DEP-1b — A7e na realnym stuck refund:** wymuś pending bez webhooka → cron/curl z `CRON_SECRET` → koja wraca + mail.
 
 ## ✨ Features (większe)
 
