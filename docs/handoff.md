@@ -147,8 +147,8 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 #### Next
 
-- **Deploy zbiorczy** — snapshot polityki (widen, z 07-09) + A7e cron (`CRON_SECRET` w Vercel) + audit log UI. Jeden `convex deploy` + push `main:production`. **Wszystko niezacommitowane w main** (snapshot 07-09 + A + B).
-- **Test odporności + A7e walidacja na prod** — po deployu, na realnym stuck refund.
+- **✅ Deploy zbiorczy — ZROBIONE 2026-07-10.** `push origin main:production` (`efb399fc..f289608b`, 7 commitów) + `CRON_SECRET` w Vercel (Production) → build zielony, `convex deploy` przeszedł (snapshot optional, stare wiersze OK), Vercel Cron zarejestrowany. Live: snapshot polityki + audit UI + admin nav shell + A7e cron + A7c guard. Commity origin/main: `780f3a78` (snapshot) / `3d612a11` (audit+nav) / `f289608b` (backlog) + reconcile `38f18684`. Vault: `ae0281d`.
+- **Zostaje walidacja na prod (nie deploy):** DEP-1a test odporności snapshotu (kup → zmień politykę → sugestia trzyma snapshot) + DEP-1b A7e na realnym stuck refund. Szczegóły: `docs/backlog.md`.
 - **Audit log — rozbudowa** (gdy potrzeba): filtry server-side, `policy_updated` before→after diff.
 - **Backlog Michała 06-19** — 22 pozycje gotowe (copy najłatwiejsze, mapa najtrudniejsza).
 
