@@ -34,11 +34,18 @@ export const calculateRefundPolicySuggestion = query({
 		const availableToRefund = totalPaid - totalAlreadyRefunded
 		const currency = paidPayments[0]?.currency ?? 'pln'
 
-		// 4. Active policy lookup (może być null)
-		const policy = await ctx.db
-			.query('refundPolicies')
-			.withIndex('by_is_active', (q) => q.eq('isActive', true))
-			.first()
+		// 4. Policy: snapshot z bookingu (zamrozenie przy zakupie) -> fallback na zywą (stare bookingi)
+		const snapshot = booking.refundPolicySnapshot
+		const policy = snapshot
+			? {
+					_id: snapshot.policyId,
+					name: snapshot.policyName,
+					tiers: snapshot.tiers
+				}
+			: await ctx.db
+					.query('refundPolicies')
+					.withIndex('by_is_active', (q) => q.eq('isActive', true))
+					.first()
 
 		if (!policy) {
 			return {

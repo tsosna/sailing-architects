@@ -95,7 +95,19 @@ export default defineSchema({
 		paidAt: v.optional(v.number()),
 		confirmationEmailSentAt: v.optional(v.number()),
 		confirmationEmailMessageId: v.optional(v.string()),
-		bookingRef: v.string() // "SA-2026-XXXX"
+		bookingRef: v.string(), // "SA-2026-XXXX"
+		refundPolicySnapshot: v.optional(
+			v.object({
+				policyId: v.id('refundPolicies'), //forensic: z którego wiersza
+				policyName: v.string(), // 'default' dla MVP; w przyszłości per-segment lub per-event
+				tiers: v.array(
+					v.object({
+						minDaysBefore: v.number(), // próg w dniach przed rejsem
+						refundPercent: v.number() // 0.0 - 1.0 (np. 0.5 = 50%)
+					})
+				)
+			})
+		)
 	})
 		.index('by_user', ['userId'])
 		.index('by_buyer_user', ['buyerUserId'])

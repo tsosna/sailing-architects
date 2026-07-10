@@ -482,6 +482,12 @@ export const createBooking = internalMutation({
 			resolved.push(berth)
 		}
 
+		// 4. Active policy lookup (może być null)
+		const activePolicy = await ctx.db
+			.query('refundPolicies')
+			.withIndex('by_is_active', (q) => q.eq('isActive', true))
+			.first()
+
 		const bookingId = await ctx.db.insert('bookings', {
 			userId: args.userId,
 			buyerUserId: args.userId,
@@ -493,7 +499,14 @@ export const createBooking = internalMutation({
 			holdExpiresAt,
 			paidAmount: 0,
 			paymentStatus: 'unpaid',
-			bookingRef: args.bookingRef
+			bookingRef: args.bookingRef,
+			refundPolicySnapshot: activePolicy
+				? {
+						policyId: activePolicy._id,
+						policyName: activePolicy.name,
+						tiers: activePolicy.tiers
+					}
+				: undefined
 		})
 
 		const paymentSchedule = await createBookingPaymentSchedule({
