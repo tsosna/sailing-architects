@@ -1,5 +1,7 @@
 # Admin Operations Console — decyzje po MVP
 
+> Zindeksowane w `docs/backlog.md` (sekcja „Post-MVP admin") od 2026-07-10. Ten plik = szczegóły (Stan/Trigger/Kierunek); `backlog.md` = wskaźnik + hot bugi. Po naprawie pozycji skreśl w OBU miejscach.
+
 Backlog rzeczy, które są świadomie odłożone po Etapach 1-7. Nic z tej listy nie jest blokerem MVP. Każda pozycja ma być zaadresowana wtedy, kiedy realna sprzedaż / feedback kapitana to wymusi — nie wcześniej.
 
 ## Bezpieczeństwo i auth

@@ -1,6 +1,6 @@
 # AI Handoff — sailing-architects
 
-> Ostatnia aktualizacja: 2026-07-08
+> Ostatnia aktualizacja: 2026-07-10
 
 ---
 
@@ -37,12 +37,58 @@
 
 ## Otwarte problemy
 
+> ⚠️ Od 2026-07-10 jedyne źródło prawdy dla otwartych pozycji = **`docs/backlog.md`**. Poniższe wpisy zostają jako narracja/kontekst; przy pracy patrz do `backlog.md`.
+
 - **✅ ROZWIĄZANE 2026-07-05 — panel żeglarza pokazywał zły/wygasły booking.** `bookingByUser` naprawiony: `.collect()` + filtr `confirmed` + zwraca listę zamiast `.first()`. Dashboard dostał selektor rejsu (`aria-pressed`, keyed `_id`), pay/crew znajdują booking po `paymentId`/`participantId` z URL (`bookings.find(b => b.X.some(...))`). Commit `8ac60196`, na prod. Smoke footy2: wygasły zniknął. (Historia: `.first()` bez filtra statusu → footy2 widział wygasły SA-2026-7850.)
 - **✅ ROZWIĄZANE 2026-07-07 — PDF potwierdzenia na prod (Fix 2).** `booking-confirmation-pdf.ts` — `require.resolve('dejavu-fonts-ttf/...ttf')` (runtime string, nieśledzalny przez bundler → font poza bundlem Vercel serverless → `MODULE_NOT_FOUND`) zastąpiony statycznym `import regularFontUrl from 'dejavu-fonts-ttf/ttf/DejaVuSans.ttf?url'` + `read()` z `$app/server` → `Buffer.from(await read(url).arrayBuffer())` → `registerFont`. Usunięty `createRequire`. Commit `ab7378d4`. Potwierdzony na prod: PDF się generuje (dashboard „Dokumenty → Potwierdzenie" + załącznik maila). (Historia: Fix 1 z 2026-07-05 tylko lazy-resolve — odsprzęgł crash importu, ale font dalej brakował w bundlu.)
 - **✅ ROZWIĄZANE 2026-07-07 — refund webhook race (kaskada z realnych zakupów Michała).** Root: webhook `refund.updated` wyprzedzał zapis `stripeRefundId` do wiersza `refunds` (nadawany dopiero po odpowiedzi Stripe, `updateRefundWithStripeId`) → `processStripeRefund` szukał po `by_stripe_refund_id` → null → event lądował w `unhandledStripeEvents` → koja nie zwolniona + `refundedAmount` nie naliczony → guard `availableToRefund` nie blokował → podwójny refund (502 `charge_already_refunded`). Fix: dopasowanie po `metadata.refundRowId` (istnieje od pre-insertu, race-free) jako primary, fallback `stripeRefundId` dla outside-app; patch dopisuje `stripeRefundId`/`stripeChargeId` gdy webhook wygra wyścig. Commit `a3995b5d`, na prod (potwierdzone git ancestry). **Empiryczna walidacja na PIERWSZYM realnym zwrocie** — koja wraca na pierwszej dostawie webhooka (bez Resend). Cleanup: 6 wierszy-sierot `pending` usuniętych z prod.
-- **Refund policy — snapshot vs reference (gap prawny, wybór A) — REGULAMIN DOSTARCZONY 2026-07-07.** Obecnie zwrot liczy się wg **żywej** aktywnej polityki (`refundPolicies` po `by_is_active`), a booking NIE snapshotuje polityki przy zakupie (schema `bookings` bez `refundPolicyId`). Konsekwencja: klient kupił przy 100%/6mies, admin zaostrza na 50%, klient żąda zwrotu → dostaje 50% (nie 100% z zakupu). Łamie „konsument podlega regulaminowi z chwili zawarcia umowy". `refunds.policySnapshot` to tylko forensic, nie ochrona. **Decyzja Tomka: Opcja A — snapshot polityki do bookingu przy zakupie** (booking zamraża warunki jak faktura). **Michał wrzucił `docs/feedback/2026_07_07_SA_regulamin_rejsu.doc`** → odblokowane: przełożyć regulamin na warunki zwrotu + wdrożyć snapshot (checkout flow + refund calc) + **ADR** w `docs/business-decisions/`. Osobny etap.
+- **✅ ROZWIĄZANE 2026-07-09 — refund policy snapshot przy zakupie (Opcja A, gap prawny).** `bookings.refundPolicySnapshot` (optional: `policyId`/`policyName`/`tiers`) kopiuje aktywną politykę w `createBooking` (moment rezerwacji = zawarcie umowy). `calculateRefundPolicySuggestion` czyta snapshot z bookingu, fallback na żywą politykę dla starych bookingów (pole optional na stałe, bez migracji wstecznej — nie znamy polityki z chwili zakupu starych). Powód snapshotu (nie referencji): `updateRefundPolicy` nadpisuje `tiers` **w miejscu** (`patch`) → wiersz mutowalny → sama referencja kłamałaby po edycji. Warunki regulaminu §3.8 (≥6mies 100% / 3-6mies 90% / 6-12tyg 50% / <6tyg 0%) pokrywają progi Michała 180/90/42/0. ADR-002 zaktualizowany → Zaakceptowana. `pnpm check` zielony, fallback zweryfikowany. **NIE zdeployowane** — patrz niżej. (Historia: booking liczył z żywej polityki → zaostrzenie progów przez admina działało retroaktywnie.)
+- **Snapshot polityki — deploy + test odporności (NOWE 2026-07-09).** (1) **Deploy:** widen schematu na prod — `convex deploy` (stare wiersze przejdą, pole optional) + push `main:production`. Dev-only na razie. (2) **Test odporności (właściwy dowód prawny, niezrobiony):** kup rejs → snapshot zamraża np. 100%/6mies → admin zmienia próg w `/admin/automation` na 50% → zwrot tego bookingu → sugestia dalej pokazuje **snapshot** (100%), nie żywą (50%). Zweryfikować na dev przed deployem.
 - **Faktury + KSeF (nowy duży moduł, research 2026-07-03).** Nabywca-przedsiębiorca wymaga faktury (nie paragonu). Potrzebne: (1) dane sprzedawcy (firma Michała), (2) dane nabywcy (firma klienta — NIP/VAT-ID, adres, **kraj — także zagraniczni nabywcy**, B2B UE / eksport), (3) w PL obowiązek **KSeF**. **Stan KSeF 2.0 (na 2026-07):** obowiązek dla wszystkich czynnych podatników VAT od **1 kwi 2026** (duzi >200 mln PLN od 1 lut 2026); tokeny do 31 gru 2026, od 1 sty 2027 tylko **certyfikaty KSeF**. Auth: cert KSeF typ 1 (uwierzytelnianie) / podpis / pieczęć kwalifikowana; flow `POST /api/v2/auth/challenge` → podpisany XAdES → `/auth/xades-signature`; klucz symetryczny szyfrowany RSAES-OAEP (SHA-256) publicznym kluczem KSeF (`GET /api/v2/security/public-key-certificates`). Faktura = struktura **FA(3)** XML. REST v2 endpointy: `/auth/`, `/sessions/`, `/invoices/send`, `/certificates/`. **Architektura:** Convex action (external API jak Stripe) — cert/klucz Michała jako sekret, generowanie FA(3) XML, wysyłka + status polling. **Otwarte pytania:** (a) czy faktury dla zagranicznych nabywców idą przez KSeF czy poza (KSeF głównie B2B krajowe); (b) termin obowiązku dla Michała wg obrotu; (c) Michał musi wygenerować/dostarczyć certyfikat KSeF typ 1. Docs: https://ksef.podatki.gov.pl, https://github.com/CIRFMF/ksef-api
 - **Audit log — brak UI listowania.** `adminAuditLog` zapisuje akcje (`refund_initiated/completed/failed`, `policy_updated`, `reblock_berth`, `release_berth_manual`) — dziś odczyt tylko przez `npx convex data adminAuditLog` / dashboard. Michał nie ma widoku historii akcji admina. Potrzeba: strona/sekcja w `/admin` listująca audit log (filtry po `action`/`admin`/`booking`, sort malejąco po `_creationTime`, render `metadata` per typ akcji). Indeksy już gotowe: `by_booking`, `by_admin`, `by_action`. Query + UI, zero zmian schema.
+
+- **Avatar / user-menu + wylogowanie w panelu i adminie (Tomek, 2026-07-10).** Standardowy affordance „zalogowany": ikona postaci → menu. (1) **`/dashboard` (panel żeglarza)** — dziś surowy `<SignOutButton>Wyloguj</SignOutButton>` (`dashboard/+page.svelte:247`); zawinąć w avatar-menu. (2) **`/admin` shell (`+layout@.svelte`)** — dziś **BRAK wylogowania w ogóle** (reset `@` odciął SiteNav, a logout i tak był tylko w dashboardzie); dodać avatar-menu z wylogowaniem do sidebara + mobilebara. Idiomatyczne: svelte-clerk `<UserButton />` (avatar + menu + sign-out z pudełka), alternatywnie własny dropdown z `SignOutButton`.
+
+- **Panel żeglarza — „Cała trasa rejsu" zawsze podświetla Gibraltar→Madera (bug, korzeń zlokalizowany 2026-07-10).** Tablica `ports` (`dashboard/+page.svelte:202-208`) ma **hardcoded `active: true`** na Gibraltar (204) i Madera (205); `legActive()` (210) podświetla odcinek gdy oba końce `active` → zawsze ten sam odcinek, niezależnie od kupionego segmentu (komentarz 201: „static for Sail Adventure 2026"). Fix: wyprowadź `active` z faktycznego segmentu bookingu (`bookingData` ma segment; mapowanie slug→odcinek: s1 Palma→Gibraltar, s2 Gibraltar→Madera, s3 Madera→Teneryfa, s4 Teneryfa→Cabo Verde). Zastępuje starą notkę „hardcode w `dashboard.jsx:7`" (linia 1104, stale — dziś Svelte). Item #1 z tamtej pary („jedna koja") już rozwiązany 07-05.
+
+### Backlog Michała — landing (2026-06-19, przeczesane 2026-07-10)
+
+Źródło: `docs/feedback/2026-06-19-uwagi-do-strony.docx` (zrzut WhatsApp 15-06-2026 + 13 screenshotów, wyciągnięte do scratchpada `mi0619/`). Landing preview: `itects.wysokijohn.pl`. 22 uwagi. Kategorie/priorytety = propozycja Claude, do potwierdzenia przez Tomka/Michała. Cytaty w `„…"` to dosłowne słowa Michała.
+
+**🐛 Bugi**
+- **[DUP — już w backlogu 07-05, „Krok 4 Wróć"]** ta sama uwaga; nie dublować.
+- **Ramka wokół logo (hero).** Brązowa ramka „przycisku" otacza logo SA w hero (`image1`). Usunąć obramowanie/button-frame — Michał: „wokół logo jest ramka przycisku, może da się ją zniknąć?".
+
+**✍️ Copy / treść**
+- **Jacht — label „ŻAGIEL GŁÓWNY" → „OŻAGLOWANIE"** + treść „Grot + Genua" (dziś „Lazy bag + furling", `image2`).
+- **Jacht — ELEKTRONIKA pełna lista:** „Ploter map, AIS, VHF, DSC, autopilot, EPIRB, internet sat." (dziś skrót „Ploter, AIS, VHF, automat", `image2`).
+- **Jacht — KAJUTY** „5 × 2 koje = 10 miejsc" — na `image2` już tak wygląda; zweryfikować czy zgodne, prawdopodobnie brak zmian.
+- **ETAP 01 (Palma→Gibraltar):** dziś „…przez Cieśninę Gibraltarską — jedną z najważniejszych…" → **„…wzdłuż wschodniego wybrzeża Hiszpanii, do Gibraltaru, jednej z najważniejszych morskich bram świata."** (`image3`, „przez" przekreślone).
+- **ETAP 02/03/04 (Madera/Teneryfa/Cabo Verde):** teksty na żywym landingu (`image4/5/6`) już bardzo bliskie wersji Michała — zostają drobne dopieszczenia słów. Docelowe brzmienie z docx:
+  - Madera: „Kurs na południowy-zachód. Pierwszy etap oceaniczny. Madera — zielona perła Atlantyku, to wulkaniczne klify, tarasowe winnice, oraz historyczne Funchal."
+  - Teneryfa: „Wyspy Kanaryjskie, oferują piękne wulkany, w tym majestatyczny Teide na Teneryfie. Turkusowe plaże i doskonałą kuchnię — idealny odpoczynek po rejsie przez ocean."
+  - Cabo Verde: „Finalny odcinek — tydzień na oceanie. Pasaty, wieloryby, delfiny i oceaniczna przestrzeń. Cabo Verde to esencja egzotyki: afrykańskie rytmy, wulkaniczne krajobrazy, cudowna przyroda i piękne plaże."
+- **„kapitan" → „skipper" wszędzie.** Brak stopnia żeglarskiego → „kapitan" sugeruje kwalifikacje których nie ma. M.in. FAQ „Czy trzeba mieć uprawnienia żeglarskie?" (`image8`, zakółkowane „kapitan").
+- **FAQ uprawnienia — przeredagować odpowiedź:** usunąć „Jeśli masz doś…będziesz mógł/mogła…" → „Jako członek załogi, po instruktażu będziesz aktywnie uczestniczyć w prowadzeniu…".
+- **Mały tekst (gwarancja miejsca):** ustalić brzmienie „Rezerwacja i jej opłacenie gwarantuje udział w rejsie.".
+- **Dodać: cena NIE obejmuje kosztów jedzenia** — w sekcji ceny/„w cenie" ORAZ w FAQ.
+- **„w cenie" — usunąć „+doświadczona załoga"** → „Aktywny udział załogi/uczestników rejsu w wachtach nawigacyjnych i prowadzeniu jachtu".
+- **„w cenie" — dodać:** „pościel i ręcznik"; „pełne ubezpieczenie jachtu i kaucji".
+
+**🎨 UI / mapa (mobile)**
+- **Za małe napisy i kropki (mobile).** Numery etapów 01–04 + kropki punktów mapy za małe, na telefonie ciężko czytać, podświetlenie słabo widać. Michał: „napisy i kropki są odrobinę za małe", „na telefonie nie bardzo widać".
+- **Mapa poglądowa — realne położenie geograficzne.** Dziś prosta ukośna linia; Majorka wrzucona na górę-prawo = geograficznie fałszywe (`image9`). Michał: „najbardziej razi Majorka… jak ktoś zna mapę to dziwnie=nieprofesjonalnie". Rozmieścić punkty +/- wg realnej geografii.
+
+**✨ Feature (nowe)**
+- **PDF itinerary rejsu do pobrania — tylko dla zalogowanych (uczestników).** UWAGA: to INNY PDF niż istniejące „Potwierdzenie rezerwacji" (patrz linia „Zaimplementowane" / PDF potwierdzenia). Tu: plan/itinerary rejsu, gated za auth = uczestnik. (Potwierdzone z Tomkiem 2026-07-10: itinerary, nie potwierdzenie.)
+- **Link do Instagrama** gdzieś na stronie. Michał: „dodał bym gdzieś podlinkowane konta instagramowego".
+
+**🕐 Later (Michał sam odłożył)**
+- **Przycisk galerii** (jacht, inne rejsy) — „insta wystarczy na początek zamiast galerii, ewentualnie utube można też potem".
+- **Zakładka „O nas"** — „na przyszłość… ale to po tym jak już zrobimy ten ocean i będziemy mieli doświadczenie oceaniczne".
+
+**❓ Wymaga wejścia autora**
+- **Blok opisu którego „ani ja ani Jola nie wiemy o co chodzi"** — Michał prosi przeredagować na polski, ale NIE zna idei tekstu. Potrzebny sens/intencja od autora zanim przepiszemy. Zlokalizować który blok (w docx bez jednoznacznego kotwiczenia do screenshotu).
 
 ---
 
@@ -69,6 +115,91 @@ npx wuchale                 # ekstrakcja stringów i18n
 ---
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
+
+## Sesja 2026-07-10 — test odporności snapshotu (A) + triaga uwag Michała 06-19 (C) + audit log UI (B) (nauka, tryb ja-wskazuję-Tomek-pisze)
+
+### Zmiany
+
+- **A — test odporności snapshotu polityki (dev, empiryczny).** Nowy booking `SA-TEST-SNAP` (s4, hold przez `npx convex run mutations:createBooking`) dostał snapshot 90%; żywą politykę zmieniono na 0% w `/admin/automation`; sugestia zwrotu: snapshot booking trzymał **90%**, fallback booking (`SA-2026-2145`, bez snapshotu) spadł na **0%**. Dowód prawny „zaostrzenie polityki nie działa wstecz na kupiony booking" domknięty (był „niezrobiony" z 07-09). Cleanup: cron `expireCheckoutHolds` sam zwolnił koję A1, booking→`expired`.
+- **C — uwagi Michała `docs/feedback/2026-06-19-uwagi-do-strony.docx` przeczesane do backlogu.** 22 pozycje (2 bugi, ~13 copy, 2 UI/mapa, 2 feature, 2 later, 1 wymaga wejścia autora) → sekcja „Backlog Michała — landing (2026-06-19)" w Otwartych problemach. Screenshoty (`image1–13`) wyciągnięte, kotwiczą uwagi. #18 = PDF itinerary rejsu (nie potwierdzenie rezerwacji). Dwa stare wskaźniki „nieprzeczesane" → ✅. Ustalenie z obrazów: opisy segmentów Madera/Teneryfa/Cabo Verde **już prawie wdrożone** (drobne dopieszczenia słów), mapa poglądowa **geograficznie fałszywa** (Majorka na górze-prawo).
+- **B — audit log UI (nowy feature, od zera).**
+  - Query `admin.listRecentAuditLog` — `.order('desc').take(100)`, rozwiązuje `bookingId→bookingRef` i `adminUserId→adminName` (przez `crewProfiles.by_user`, reużycie wzorca `buyerName`).
+  - Strona `src/routes/[[lang=lang]]/admin/audit/+page.svelte` — 3 stany subskrypcji (`isLoading/error/data`), keyed each, render `metadata` per akcja (switch po `action`), grosze→zł `/100`.
+  - Styl scoped + tokeny `--admin-*` (spójny z adminem).
+  - Link „Historia akcji →" w headerze `/admin`.
+  - `pnpm check` zielony.
+
+### Decyzje
+
+- **A: test przez kontrast dwóch bookingów.** Snapshot vs fallback pod TĄ SAMĄ zmianą polityki dowodzi obu gałęzi `if` naraz (snapshot trzyma / fallback podąża). Sam „snapshot trzyma" nie wystarcza — mógłby znaczyć że polityka w ogóle nic nie zmienia (kontrola inwariantu, jak krok 4 z 2026-05-22).
+- **B altitude: MVP.** Lista `desc` + render per typ; filtry server-side (indeksy `by_action`/`by_booking` gotowe) i `policy_updated` before→after diff **świadomie odłożone**. Działający szkielet przed rozbudową.
+- **B auth: wzorzec istniejący.** `listRecentAuditLog` bez `requireConvexAdmin` — spójne z `overviewBySegment` (adminowe read-query polegają na guardzie trasy `admin/+layout.server.ts`). Tradeoff zaznaczony (audit log jest wrażliwy — do rozważenia guard per-query jak urośnie liczba adminów).
+- **B admin→nazwisko przez `crewProfiles`, fallback surowy id.** Admin może nie mieć profilu uczestnika; wtedy id. Twarda mapa `{id: 'Michał'}` odrzucona (fragile).
+
+### Wnioski
+
+- **Pojedynczy odczyt potrafi kłamać — reprodukuj przed wnioskiem.** Przejściowe `suggestedPercent: 0` na starym bookingu wyglądało na bug; okazało się wcześniejszą ręczną zmianą polityki na 0% przez Tomka (dowód: `updatedBy`=jego konto, `updatedAt`=dziś na wierszu `refundPolicies`). Anomalia → powtórz + sprawdź metadane rekordu, nie goń ducha. Kandydat wiki (debugging).
+- **`metadata: v.any()` = kontrakt „front zna kształt per dyskryminator".** `action` (string literal) mówi które pola żyją w `metadata`; render = switch po `action`. Żywy discriminated union.
+- **Id→człowiek na granicy odczytu (query robi join), front zostaje głupi.** `bookingRef` i `adminName` rozwiązane w query, jak `buyerName`. Reużycie wzorca lookupu `crewProfiles.by_user`.
+- **Kwoty w groszach (integer), `/100` do wyświetlenia.** Brak błędów zmiennoprzecinkowych w bazie.
+
+### Następne kroki
+
+#### Next
+
+- **Deploy zbiorczy** — snapshot polityki (widen, z 07-09) + A7e cron (`CRON_SECRET` w Vercel) + audit log UI. Jeden `convex deploy` + push `main:production`. **Wszystko niezacommitowane w main** (snapshot 07-09 + A + B).
+- **Test odporności + A7e walidacja na prod** — po deployu, na realnym stuck refund.
+- **Audit log — rozbudowa** (gdy potrzeba): filtry server-side, `policy_updated` before→after diff.
+- **Backlog Michała 06-19** — 22 pozycje gotowe (copy najłatwiejsze, mapa najtrudniejsza).
+
+#### Blocked / Later / Open questions
+
+- **Nav admina** — brak `+layout.svelte` z nawigacją; wszystkie podstrony (`/automation`, `/special`, `/crew`, `/audit`) URL-only. Discoverability jako osobny temat.
+- unhandledStripeEvents resolution UI; faktury+KSeF; regulamin A7d; audit log filtry — bez zmian.
+
+### Dodatkowo w tej sesji (nav admina + system backlogu + feedback hygiene)
+
+- **Admin nav shell** (`admin/+layout@.svelte`, Tomek pisał) — sidebar + mobile-tabs + brand; tokeny `--admin-*` przeniesione z bypassowanego `[[lang=lang]]/+layout.svelte` (`@`-reset świadomy: admin ≠ strona publiczna); link do `/admin/audit`; bug `activeKey` (podwójny `/admin/special`) naprawiony. `pnpm check` zielony.
+- **`docs/backlog.md` — nowy, jedyne źródło prawdy otwartych pozycji.** Powód: otwarte pozycje były rozsypane i **zduplikowane** (BUG trasy + logout admina istniały i w handoffie, i w `admin-post-mvp-decisions.md`). backlog.md = cienki indeks (BUG-1..7, DEP-1, FEAT-1..9, LEGAL-1..2, UI-1..3) + wskaźniki do dużych list. handoff „Otwarte problemy" i `admin-post-mvp-decisions.md` oznaczone „zindeksowane w backlog.md".
+- **Feedback nie był czytany automatycznie** (hooki wstrzykują tylko wiki-index + daily log). Dodane: sekcja „Feedback — status przetworzenia" w backlog.md + krok 6 CLAUDE.md doprecyzowany na `ls`+diff. Weryfikacja wykryła nigdy-nie-striażowany `2026-07-07.md` (10 poz., w tym **RODO + polityka prywatności**) + `2026-07-05.md`#3 → striażowane do FEAT-5..9/LEGAL-1..2/UI-1..3.
+- **CLAUDE.md** (main): krok 6 = diff feedbacku, krok 7 = reconcile `backlog.md`, krok 8 = wpis handoff.
+- **Wiki (nowe):** concept `reproduce-before-concluding`, procedure `run-convex-functions-from-terminal` (+ wpisy w index). **Memory:** `feedback-one-step-not-menu`.
+
+## Sesja 2026-07-09 — refund policy snapshot przy zakupie + ADR-002 (nauka, tryb ja-wskazuję-Tomek-pisze)
+
+### Zmiany
+
+- **`bookings.refundPolicySnapshot`** (`src/convex/schema.ts`): nowe pole `optional` — `policyId` (forensic), `policyName`, `tiers` (skopiowana tablica). Widen na prod (bez narrow — zostaje opcjonalne, stare bookingi go nie mają).
+- **`createBooking`** (`src/convex/mutations.ts`): odczyt aktywnej polityki (`by_is_active`) przed insertem + kopia do snapshotu. `activePolicy ? {...} : undefined` — booking nie może paść przez brak polityki (hold koi > snapshot; incydent 07-05 gdy świeży prod bez seedu).
+- **`calculateRefundPolicySuggestion`** (`src/convex/refunds.ts`): czyta `booking.refundPolicySnapshot`, normalizuje kształt (`policyId`→`_id`) do wspólnego z żywą polityką → dół handlera nietknięty. Fallback na żywą `by_is_active` gdy brak snapshotu (stare bookingi). Guard `if (!policy)` zostaje — chroni tylko gałąź fallback.
+- **ADR-002** (`docs/business-decisions/ADR-002-refund-policy-snapshot-at-purchase.md`): status `do potwierdzenia` → **Zaakceptowana** (wdrożona 2026-07-09). Dopisane: warunki regulaminu §3.8 (tabela progów), mutowalność wiersza polityki jako powód snapshotu-nie-referencji, fallback dla starych bookingów, stan wdrożenia.
+
+### Decyzje
+
+- **Snapshot (kopia `tiers`), nie referencja (`policyId` sam).** `updateRefundPolicy` nadpisuje `tiers` w miejscu (`ctx.db.patch`) → wiersz mutowalny → referencja pokazywałaby zmienione progi po edycji admina = retroaktywne. Kopia zamraża. Spójne z ADR-008 (payment plan snapshot) i `pricePerBerth`.
+- **Snapshot w `createBooking` (moment rezerwacji/hold), nie przy potwierdzeniu płatności.** Regulamin §3.10 „koszt z dnia dokonania rezerwacji" = zawarcie umowy przy rezerwacji. Ten sam moment co snapshot ceny/planu rat.
+- **Fallback dla starych bookingów, nie backfill (wybór Tomka).** Brak snapshotu → calc czyta żywą politykę. Zero migracji danych. Backfill dziś-aktywną polityką odrzucony — nie znamy polityki z chwili zakupu starych bookingów, wpisanie jej jako „prawdy" byłoby zgadywaniem. Ryzyko retroaktywne zawężone do znanego, malejącego zbioru rezerwacji sprzed wdrożenia. Pole `optional` na stałe.
+- **Snapshot wpięty w jedno miejsce (`calculateRefundPolicySuggestion`).** Jedyny odczyt polityki liczący kwotę zwrotu. Reszta odczytów żywej polityki (`getActiveRefundPolicy`, guard `updateRefundPolicy`) to admin UI / edycja — celowo zostają żywe.
+
+### Wnioski
+
+- **Referencja vs snapshot rozstrzyga mutowalność źródła.** Gdyby `updateRefundPolicy` wersjonował (insert nowej rewizji + deactivate starej), sama `policyId` byłaby stabilnym snapshotem. Bo nadpisuje w miejscu — musi być kopia. Reguła diagnostyczna: „czy wiersz na który wskazuję może się zmienić pod nogami? tak → kopiuj wartości, nie wskaźnik". Rozszerza [[snapshot-vs-reference-in-storage]] o wymiar „mutowalność źródła decyduje".
+- **Normalizacja dwóch kształtów do wspólnego = zero zmian w konsumencie.** Snapshot (`policyId`) i żywa polityka (`_id`) zmapowane do jednego kształtu (`_id`/`name`/`tiers`) → 30 linii handlera poniżej nie wie skąd dane. Adapter na granicy odczytu.
+- **Widen bez narrow to poprawny stan końcowy.** Nie każde `optional` trzeba zwężać. Pole którego stare wiersze nigdy nie dostaną (bo dane historyczne nieodtwarzalne) zostaje opcjonalne na zawsze + fallback w kodzie czytającym. Kontrast z `refundedAmount` (07-05) gdzie narrow był celem.
+- **Regulamin jako źródło reguły domenowej.** Warunki zwrotu wyciągnięte z `.doc` Michała (§3.8) → potwierdziły istniejące progi 180/90/42/0. Kod nie wymyśla reguły biznesowej — czyta ją z dokumentu prawnego, ADR ją utrwala jako źródło prawdy dla przyszłego agenta.
+
+### Następne kroki
+
+#### Next
+
+- **Deploy snapshotu** — `convex deploy` (widen, stare wiersze przejdą) + push `main:production`. Zbiega z deployem A7e (`CRON_SECRET` + push) — jeden deploy domknie oba.
+- **Test odporności na dev** (właściwy dowód prawny): kup rejs → snapshot 100% → admin zmienia próg na 50% → sugestia zwrotu dalej 100%. Niezrobiony tej sesji.
+- **A7e deploy + walidacja na realnym stuck** (z 07-08 II).
+
+#### Blocked / Later / Open questions
+
+- Backlog Michała (8 uwag) + Tomek (2) z 07-07 nietknięty.
+- Audit log UI; unhandledStripeEvents resolution UI; faktury+KSeF — patrz Otwarte problemy.
 
 ## Sesja 2026-07-08 (II) — A7e reconciliation: cron safety-net na zgubiony webhook refundu (nauka, tryb ja-wskazuję-Tomek-pisze)
 
@@ -240,7 +371,7 @@ npx wuchale                 # ekstrakcja stringów i18n
 #### Blocked / Later / Open questions
 
 - **A7d regulamin** — tekst z Worda Michała (nadal oczekiwany).
-- **Uwagi Michała `docs/feedback/2026-06-19-uwagi-do-strony.docx`** (6 MB) — wciąż nieprzeczesane pod backlog.
+- **Uwagi Michała `docs/feedback/2026-06-19-uwagi-do-strony.docx`** — ✅ przeczesane 2026-07-10, patrz sekcja „Backlog Michała — landing (2026-06-19)" w Otwartych problemach.
 - **A7e reconciliation + refund policy snapshot (opcja A) + faktury/KSeF + audit log UI** — bez zmian.
 - **Widget AI dokumentacji** — po prod (zależy od `docs/business-decisions/`).
 
@@ -289,7 +420,7 @@ npx wuchale                 # ekstrakcja stringów i18n
 #### Blocked / Later / Open questions
 
 - **Widget AI dokumentacji** — po prod (patrz Decyzje). Zależy od `docs/business-decisions/` (odpal `docs/prompts/adr-distillation.md` w osobnej sesji).
-- **Uwagi Michała `docs/feedback/2026-06-19-uwagi-do-strony.docx`** — 6 MB docx z 2026-06-19, jeszcze NIE przeczesane pod kątem backlogu. Do przejrzenia (nowa reguła close session pkt 6).
+- **Uwagi Michała `docs/feedback/2026-06-19-uwagi-do-strony.docx`** — ✅ przeczesane 2026-07-10 → sekcja „Backlog Michała — landing (2026-06-19)" w Otwartych problemach.
 - **A7e reconciliation** + refund policy snapshot (opcja A) + faktury/KSeF + audit log UI — bez zmian.
 
 ---

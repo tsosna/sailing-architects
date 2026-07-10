@@ -109,8 +109,9 @@ Gdy użytkownik napisze `close session`:
 3. **Zapytaj użytkownika**: "Czy masz wolne myśli, obserwacje lub coś do dopisania?"
 4. **Oceń Wnioski**: jeśli wniosek to ponadprojektowy wzorzec — zaproponuj przeniesienie do `knowledge-vault/wiki/`
 5. **Oceń decyzje biznesowe → ADR**: jeśli w sesji zapadła nietrywialna decyzja biznesowa/produktowa (reguła domeny, wybór między wariantami mającymi konsekwencje dla użytkownika/prawa/pieniędzy) — zaproponuj wpis w `docs/business-decisions/` w formacie ADR (`Kontekst / Decyzja / Uzasadnienie / Konsekwencje`). To źródło prawdy dla przyszłego agenta AI odpowiadającego na pytania o logikę biznesową.
-6. **Przejrzyj `docs/feedback/`**: uwagi Michała lądują tutaj. Nowe/niezaadresowane uwagi przełóż na konkretne pozycje backlogu w `docs/handoff.md` („Otwarte problemy" lub „Blocked / Later").
-7. **Dopisz wpis** do `docs/handoff.md`
+6. **Przejrzyj `docs/feedback/`**: zrób `ls docs/feedback/` i porównaj z sekcją „Feedback — status przetworzenia" w `docs/backlog.md`. Każdy plik **nieoznaczony ✅** → striażuj (rozbij na konkretne pozycje w `backlog.md` z ID) i dopisz do tej listy ze statusem ✅ + datą. Diff katalog-vs-lista = żaden nowy feedback nie zginie.
+7. **Reconcile `docs/backlog.md`** (jedyne źródło prawdy otwartych pozycji): nowe otwarte pozycje z sesji dopisz (stabilne ID), rozwiązane skreśl `~~…~~` z datą albo usuń. `handoff.md` = narracja sesji, NIE backlog. Duże listy szczegółów (`admin-post-mvp-decisions.md`, „Backlog Michała") zostają w swoich plikach — `backlog.md` je tylko wskazuje.
+8. **Dopisz wpis** do `docs/handoff.md`
 
 <!-- convex-ai-start -->
 
