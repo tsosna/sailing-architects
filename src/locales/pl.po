@@ -1019,6 +1019,7 @@ msgid "Plan trasy szczegółowy"
 msgstr "Plan trasy szczegółowy"
 
 #: src/lib/components/admin/booking-drawer.svelte
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
 #: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Rezerwacja"
@@ -3128,6 +3129,7 @@ msgstr "Polityka zwrotów zapisana"
 #~ msgstr "Zablokować koję ponownie? Status wróci na \"bezpłatny\". Mona zarządzać w "
 
 #: src/lib/components/admin/booking-drawer.svelte
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
 msgid "Koja zablokowana ponownie"
 msgstr "Koja zablokowana ponownie"
 
@@ -3154,3 +3156,62 @@ msgstr "Wybierz rejs"
 #: src/lib/components/admin/booking-drawer.svelte
 msgid "Zwrot w toku - czekaj na potwierdzenie bramki płatniczej"
 msgstr "Zwrot w toku - czekaj na potwierdzenie bramki płatniczej"
+
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Historia akcji admina"
+msgstr "Historia akcji admina"
+
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Wczytuje"
+msgstr "Wczytuje"
+
+#. 0: auditQuery.error.message
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Błąd: {0}"
+msgstr "Błąd: {0}"
+
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Data"
+msgstr "Data"
+
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Akcja"
+msgstr "Akcja"
+
+#~ msgid "REzerwacja"
+#~ msgstr "REzerwacja"
+
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Admin"
+msgstr "Admin"
+
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Szczegóły"
+msgstr "Szczegóły"
+
+#. 0: (entry.metadata.totalAmount / 100).toFixed( 2 ); 1: entry.metadata.releaseBerth ? ' · koja zwolniona' \\: ''
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Zwrot zainicjowany :{0} zł {1}"
+msgstr "Zwrot zainicjowany :{0} zł {1}"
+
+#. 0: ( entry.metadata.amountRefunded / 100 ).toFixed(2)
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Zwrot potwierdzony: {0} zł"
+msgstr "Zwrot potwierdzony: {0} zł"
+
+#. 0: entry.metadata.failureReason ?? '-'
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Zwrot nieudany: {0}"
+msgstr "Zwrot nieudany: {0}"
+
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Koja zwolniona ręcznie"
+msgstr "Koja zwolniona ręcznie"
+
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Zmiana progów zwrotu"
+msgstr "Zmiana progów zwrotu"
+
+#: src/routes/[[lang=lang]]/admin/+layout@.svelte
+msgid "Akcje admina"
+msgstr "Akcje admina"

@@ -732,3 +732,30 @@ export const sendAdhocCrewDataReminder = action({
 		return { ok: true, messageId: result.messageId, adminCopySent }
 	}
 })
+
+export const listRecentAuditLog = query({
+	args: {},
+	handler: async (ctx) => {
+		const entries = await ctx.db.query('adminAuditLog').order('desc').take(100)
+		return await Promise.all(
+			entries.map(async (e) => {
+				const booking = e.bookingId ? await ctx.db.get(e.bookingId) : null
+				const adminProfile = await ctx.db
+					.query('crewProfiles')
+					.withIndex('by_user', (q) => q.eq('userId', e.adminUserId))
+					.first()
+				return {
+					_id: e._id,
+					_creationTime: e._creationTime,
+					adminUserId: e.adminUserId,
+					adminName: adminProfile
+						? `${adminProfile.firstName} ${adminProfile.lastName}`
+						: null,
+					action: e.action,
+					bookingRef: booking?.bookingRef ?? null,
+					metadata: e.metadata
+				}
+			})
+		)
+	}
+})

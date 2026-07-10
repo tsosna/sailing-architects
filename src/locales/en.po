@@ -1019,6 +1019,7 @@ msgid "Plan trasy szczegółowy"
 msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
 #: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Rezerwacja"
@@ -3128,6 +3129,7 @@ msgstr ""
 #~ msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
 msgid "Koja zablokowana ponownie"
 msgstr ""
 
@@ -3153,4 +3155,63 @@ msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
 msgid "Zwrot w toku - czekaj na potwierdzenie bramki płatniczej"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Historia akcji admina"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Wczytuje"
+msgstr ""
+
+#. 0: auditQuery.error.message
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Błąd: {0}"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Data"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Akcja"
+msgstr ""
+
+#~ msgid "REzerwacja"
+#~ msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Admin"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Szczegóły"
+msgstr ""
+
+#. 0: (entry.metadata.totalAmount / 100).toFixed( 2 ); 1: entry.metadata.releaseBerth ? ' · koja zwolniona' \\: ''
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Zwrot zainicjowany :{0} zł {1}"
+msgstr ""
+
+#. 0: ( entry.metadata.amountRefunded / 100 ).toFixed(2)
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Zwrot potwierdzony: {0} zł"
+msgstr ""
+
+#. 0: entry.metadata.failureReason ?? '-'
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Zwrot nieudany: {0}"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Koja zwolniona ręcznie"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/audit/+page.svelte
+msgid "Zmiana progów zwrotu"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+layout@.svelte
+msgid "Akcje admina"
 msgstr ""

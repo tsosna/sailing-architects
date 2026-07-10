@@ -7,7 +7,8 @@
 		{ href: '/admin', label: 'Sprzedaż i alerty', match: 'overview' },
 		{ href: '/admin/automation', label: 'Automatyzacje', match: 'automation' },
 		{ href: '/admin/crew', label: 'Dane załogi', match: 'crew' },
-		{ href: '/admin/special', label: 'Miejsca specjalne', match: 'special' }
+		{ href: '/admin/special', label: 'Miejsca specjalne', match: 'special' },
+		{ href: '/admin/audit', label: 'Akcje admina', match: 'auditlog' }
 	] as const
 
 	const activeKey = $derived.by(() => {
@@ -16,6 +17,7 @@
 		if (path.includes('/admin/automation')) return 'automation'
 		if (path.includes('/admin/crew')) return 'crew'
 		if (path.includes('/admin/special')) return 'special'
+		if (path.includes('/admin/audit')) return 'auditlog'
 		return 'overview'
 	})
 </script>
