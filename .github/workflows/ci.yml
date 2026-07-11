@@ -46,5 +46,8 @@ jobs:
       - name: Type check (svelte-check)
         run: pnpm check
 
+      - name: Unit tests (vitest)
+        run: pnpm test
+
       - name: Lint (prettier)
         run: pnpm lint
