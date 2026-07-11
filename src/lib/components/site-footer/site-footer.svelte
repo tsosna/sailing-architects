@@ -26,8 +26,7 @@
 			</div>
 			<div class="footer__actions">
 				<a class="footer__cta" href={resolve('/book')}>Zarezerwuj koję →</a>
-				<a class="footer__link" href={resolve('/poradnik')}
-					>Poradnik załogi →</a
+				<a class="footer__link" href={resolve('/poradnik')}>Poradnik załogi →</a
 				>
 			</div>
 		</div>

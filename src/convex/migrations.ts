@@ -6,10 +6,10 @@ export const migrations = new Migrations<DataModel>(components.migrations)
 export const run = migrations.runner()
 
 export const backfillRefundedAmount = migrations.define({
-    table: 'bookingPayments',
-    migrateOne: (_ctx, payment) => {
-      if (payment.refundedAmount === undefined) {
-        return { refundedAmount: 0 }
-      }
-    }
-  })
+	table: 'bookingPayments',
+	migrateOne: (_ctx, payment) => {
+		if (payment.refundedAmount === undefined) {
+			return { refundedAmount: 0 }
+		}
+	}
+})

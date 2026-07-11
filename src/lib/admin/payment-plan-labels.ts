@@ -15,8 +15,7 @@ export const PAYMENT_PLAN_ITEM_LABELS = {
 } as const
 
 export const PAYMENT_PLAN_TOAST = {
-	regenerated:
-		'Pozycje wygenerowane. Możesz teraz dopiąć kwoty i terminy.',
+	regenerated: 'Pozycje wygenerowane. Możesz teraz dopiąć kwoty i terminy.',
 	sumOver: 'Suma pozycji przekracza cenę za koję. Skoryguj kwoty.',
 	amountRequired: 'Każda pozycja musi mieć kwotę większą od zera.',
 	labelRequired: 'Każda pozycja musi mieć nazwę.',

@@ -5,9 +5,7 @@
 
 	const locales: ReadonlyArray<Lang> = ['pl', 'en']
 
-	const current = $derived<Lang>(
-		(page.params.lang as Lang | undefined) ?? 'pl'
-	)
+	const current = $derived<Lang>((page.params.lang as Lang | undefined) ?? 'pl')
 
 	function buildHref(target: Lang): string {
 		const pathname = page.url.pathname
@@ -15,11 +13,7 @@
 		const hash = page.url.hash
 		const stripped = pathname.replace(/^\/(en|pl)(?=\/|$)/, '') || '/'
 		const path =
-			target === 'pl'
-				? stripped
-				: stripped === '/'
-					? '/en'
-					: `/en${stripped}`
+			target === 'pl' ? stripped : stripped === '/' ? '/en' : `/en${stripped}`
 		return `${path}${search}${hash}`
 	}
 </script>

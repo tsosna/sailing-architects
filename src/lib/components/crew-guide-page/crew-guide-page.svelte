@@ -81,8 +81,7 @@
 			>
 			<a
 				class="sidebar__contact-link sidebar__contact-link--soft"
-				href="mailto:sailingarchitects@gmail.com"
-				>sailingarchitects@gmail.com</a
+				href="mailto:sailingarchitects@gmail.com">sailingarchitects@gmail.com</a
 			>
 		</div>
 	</aside>

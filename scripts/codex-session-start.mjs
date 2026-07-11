@@ -18,9 +18,7 @@ const dailyRoot =
 const outputPath = join(projectRoot, 'docs/codex-session-context.md')
 
 function stripGeneratedLine(text) {
-	return text
-		.replace(/^Generated: .*$/m, 'Generated: <normalized>')
-		.trim()
+	return text.replace(/^Generated: .*$/m, 'Generated: <normalized>').trim()
 }
 
 function readText(path) {

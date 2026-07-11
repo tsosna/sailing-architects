@@ -125,7 +125,7 @@ export const bookingByUser = query({
 					berths,
 					participants,
 					payments: payments.sort((a, b) => a.sortOrder - b.sortOrder),
-					closed: isBookingClosed(booking,berths)
+					closed: isBookingClosed(booking, berths)
 				}
 			})
 		)

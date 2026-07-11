@@ -97,7 +97,7 @@
 </script>
 
 <ClerkProvider localization={plPL} appearance={clerkAppearance}>
-	<ConvexClerkBridge/>
+	<ConvexClerkBridge />
 	{@render children()}
 	<Toaster />
 </ClerkProvider>

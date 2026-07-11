@@ -20,7 +20,9 @@
 
 	const bookingQuery = useQuery(api.queries.bookingByUser, () => ({ userId }))
 	const bookings = $derived(bookingQuery.data ?? [])
-	const bookingData = $derived(bookings.find((b)=>b.payments.some((p) => p._id === paymentId)) ?? null)
+	const bookingData = $derived(
+		bookings.find((b) => b.payments.some((p) => p._id === paymentId)) ?? null
+	)
 
 	const payment = $derived(
 		bookingData?.payments.find((p) => p._id === paymentId) ?? null

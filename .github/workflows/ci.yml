@@ -1,0 +1,50 @@
+# CI — bramka jakości przed deployem.
+# Vercel deployuje sam; ten workflow tylko blokuje zepsuty kod.
+name: CI
+
+# Kiedy się uruchamia:
+# - push: każdy commit wypchnięty na main lub production
+# - pull_request: każdy PR celujący w te gałęzie (sprawdza wynik PRZED merge)
+on:
+  push:
+    branches: [main, production]
+  pull_request:
+    branches: [main, production]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      # Pobiera kod repo do maszyny CI
+      - uses: actions/checkout@v4
+
+      # Instaluje pnpm (wersja jak lokalnie; package.json nie ma pola packageManager)
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      # Node 24 + cache pnpm store — kolejne buildy nie pobierają paczek od zera
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Build-time env: SvelteKit ($env/static/*) wymaga zdefiniowanych zmiennych
+      # przy `vite build`. Wartości z .env.example są placeholderami — CI nie
+      # łączy się z Convex/Stripe/Brevo, tylko kompiluje.
+      - name: Create placeholder .env
+        run: cp .env.example .env
+
+      # Build PRZED check: vite build generuje src/locales/.wuchale/
+      # (gitignored), bez którego svelte-check pada na main.loader.svelte.js
+      - name: Build
+        run: pnpm build
+
+      - name: Type check (svelte-check)
+        run: pnpm check
+
+      - name: Lint (prettier)
+        run: pnpm lint

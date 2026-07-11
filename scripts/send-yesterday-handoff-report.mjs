@@ -103,8 +103,13 @@ function pickHighlights(changeBullets) {
 	if (
 		lower.some(
 			(b) =>
-				(b.includes('admin operations console') || b.includes('panel administracyjny')) &&
-				(b.includes('kpi') || b.includes('sales board') || b.includes('harmonogram') || b.includes('uczestnik') || b.includes('potwierdz'))
+				(b.includes('admin operations console') ||
+					b.includes('panel administracyjny')) &&
+				(b.includes('kpi') ||
+					b.includes('sales board') ||
+					b.includes('harmonogram') ||
+					b.includes('uczestnik') ||
+					b.includes('potwierdz'))
 		)
 	) {
 		highlights.push(
@@ -116,13 +121,28 @@ function pickHighlights(changeBullets) {
 		return highlights
 	}
 
-	if (lower.some((b) => b.includes('loadlocale') || b.includes('i18n') || b.includes('problem z językiem'))) {
+	if (
+		lower.some(
+			(b) =>
+				b.includes('loadlocale') ||
+				b.includes('i18n') ||
+				b.includes('problem z językiem')
+		)
+	) {
 		highlights.push(
 			'Poprawiliśmy działanie wersji językowych w panelu administracyjnym, aby treści nie znikały i nie pokazywały błędów.'
 		)
 	}
 
-	if (lower.some((b) => b.includes('redirect') || b.includes('logow') || b.includes('next=') || b.includes('kod z e-maila'))) {
+	if (
+		lower.some(
+			(b) =>
+				b.includes('redirect') ||
+				b.includes('logow') ||
+				b.includes('next=') ||
+				b.includes('kod z e-maila')
+		)
+	) {
 		highlights.push(
 			'Uspójniliśmy zachowanie po zalogowaniu, żeby użytkownik trafiał dokładnie tam, gdzie powinien.'
 		)
@@ -140,7 +160,16 @@ function pickHighlights(changeBullets) {
 		highlights.push(
 			'Dodaliśmy „Poradnik załogi” z checklistami i odpowiedziami na najczęstsze pytania.'
 		)
-		if (lower.some((b) => b.includes('mobile') || b.includes('menu') || b.includes('hamburger') || b.includes('język') || b.includes('language'))) {
+		if (
+			lower.some(
+				(b) =>
+					b.includes('mobile') ||
+					b.includes('menu') ||
+					b.includes('hamburger') ||
+					b.includes('język') ||
+					b.includes('language')
+			)
+		) {
 			highlights.push(
 				'Jednocześnie dopracowaliśmy nawigację na telefonach i przełącznik języka, żeby treści były łatwiej dostępne.'
 			)
@@ -194,7 +223,10 @@ function normalizeChangeBullet(bullet) {
 	if (lower.startsWith('—')) {
 		// Kontynuacje z dziennika: próbujemy wyłapać sens biznesowy, resztę pomijamy.
 		if (
-			(lower.includes('walid') && (lower.includes('due') || lower.includes('termin') || lower.includes('dat'))) ||
+			(lower.includes('walid') &&
+				(lower.includes('due') ||
+					lower.includes('termin') ||
+					lower.includes('dat'))) ||
 			(lower.includes('dat') && lower.includes('płatno'))
 		) {
 			return 'Dodaliśmy kontrolę, aby nie dało się zapisać harmonogramu płatności (rat) bez wymaganych terminów.'
@@ -204,7 +236,11 @@ function normalizeChangeBullet(bullet) {
 			return 'Uspójniliśmy komunikaty w panelu administracyjnym, żeby były czytelniejsze w sytuacjach błędu i zapisu.'
 		}
 
-		if (lower.includes('problem z językiem') || lower.includes('wuchale') || lower.includes('locale')) {
+		if (
+			lower.includes('problem z językiem') ||
+			lower.includes('wuchale') ||
+			lower.includes('locale')
+		) {
 			return 'Poprawiliśmy stabilność wersji językowych w panelu administracyjnym, żeby treści wyświetlały się poprawnie.'
 		}
 
@@ -231,7 +267,7 @@ function normalizeChangeBullet(bullet) {
 		lower.includes('.env') ||
 		lower.includes('env.example') ||
 		lower.includes('config.json') ||
-		lower.includes('zmienn') && lower.includes('środow')
+		(lower.includes('zmienn') && lower.includes('środow'))
 	) {
 		return null
 	}
@@ -267,15 +303,27 @@ function normalizeChangeBullet(bullet) {
 		return 'Dodaliśmy kontrolę, aby nie dało się zapisać harmonogramu płatności (rat) bez wymaganych terminów.'
 	}
 
-	if (lower.includes('walidacja') || lower.includes('0 błęd') || lower.includes('ostrzeż')) {
+	if (
+		lower.includes('walidacja') ||
+		lower.includes('0 błęd') ||
+		lower.includes('ostrzeż')
+	) {
 		return null
 	}
 
-	if (lower.includes('cookie consent') || lower.includes('learning question') || lower.includes('pytanie')) {
+	if (
+		lower.includes('cookie consent') ||
+		lower.includes('learning question') ||
+		lower.includes('pytanie')
+	) {
 		return null
 	}
 
-	if (lower.includes('ux gap') || lower.includes('parking lot') || lower.includes('gap')) {
+	if (
+		lower.includes('ux gap') ||
+		lower.includes('parking lot') ||
+		lower.includes('gap')
+	) {
 		return null
 	}
 
@@ -283,27 +331,53 @@ function normalizeChangeBullet(bullet) {
 		return null
 	}
 
-	if (lower.includes('problem z językiem') || lower.includes('wczytanie języka') || lower.includes('wuchale') || lower.includes('locale')) {
+	if (
+		lower.includes('problem z językiem') ||
+		lower.includes('wczytanie języka') ||
+		lower.includes('wuchale') ||
+		lower.includes('locale')
+	) {
 		return 'Poprawiliśmy stabilność wersji językowych w panelu administracyjnym, żeby treści wyświetlały się poprawnie.'
 	}
 
-	if (lower.includes('toast') || lower.includes('toaster') || lower.includes('komunikat')) {
+	if (
+		lower.includes('toast') ||
+		lower.includes('toaster') ||
+		lower.includes('komunikat')
+	) {
 		return 'Uspójniliśmy komunikaty w panelu administracyjnym, żeby były czytelniejsze w sytuacjach błędu i zapisu.'
 	}
 
-	if (lower.includes('poradnik') || lower.includes('crew guide') || lower.includes('checklist')) {
+	if (
+		lower.includes('poradnik') ||
+		lower.includes('crew guide') ||
+		lower.includes('checklist')
+	) {
 		return 'Dodaliśmy „Poradnik załogi” z checklistami i odpowiedziami na najczęstsze pytania.'
 	}
 
-	if (lower.includes('faq') || lower.includes('najczęstsze pytania') || lower.includes('akordeon')) {
+	if (
+		lower.includes('faq') ||
+		lower.includes('najczęstsze pytania') ||
+		lower.includes('akordeon')
+	) {
 		return 'Uspójniliśmy sekcję FAQ i dodaliśmy wyraźne przejście do pełnego poradnika.'
 	}
 
-	if (lower.includes('mobile') || lower.includes('hamburger') || lower.includes('menu') || lower.includes('nawig')) {
+	if (
+		lower.includes('mobile') ||
+		lower.includes('hamburger') ||
+		lower.includes('menu') ||
+		lower.includes('nawig')
+	) {
 		return 'Ulepszyliśmy nawigację na telefonach (menu mobilne) i układ strony, żeby było czytelniej.'
 	}
 
-	if (lower.includes('problem z językiem') || lower.includes('wczytanie języka') || lower.includes('i18n')) {
+	if (
+		lower.includes('problem z językiem') ||
+		lower.includes('wczytanie języka') ||
+		lower.includes('i18n')
+	) {
 		return 'Naprawiliśmy problem z wyświetlaniem treści w panelu administracyjnym (wersje językowe działały niestabilnie).'
 	}
 
@@ -311,11 +385,18 @@ function normalizeChangeBullet(bullet) {
 		return 'Dodaliśmy wygodny przełącznik języka (PL/EN), widoczny także na telefonach.'
 	}
 
-	if (lower.includes('email') || lower.includes('przypomn') || lower.includes('link')) {
+	if (
+		lower.includes('email') ||
+		lower.includes('przypomn') ||
+		lower.includes('link')
+	) {
 		return 'Dopisaliśmy do wiadomości e‑mail link do poradnika, żeby ułatwić przygotowanie do rejsu.'
 	}
 
-	if (lower.includes('hero__contact') || (lower.includes('hero') && lower.includes('kontakt'))) {
+	if (
+		lower.includes('hero__contact') ||
+		(lower.includes('hero') && lower.includes('kontakt'))
+	) {
 		return 'Uporządkowaliśmy stronę główną, żeby kontakt i wezwania do działania były czytelniejsze.'
 	}
 
@@ -323,39 +404,78 @@ function normalizeChangeBullet(bullet) {
 		return 'Uporządkowaliśmy stronę główną, żeby była czytelniejsza na telefonach.'
 	}
 
-	if (lower.includes('guard') || (lower.includes('role') && lower.includes('admin'))) {
+	if (
+		lower.includes('guard') ||
+		(lower.includes('role') && lower.includes('admin'))
+	) {
 		return 'Dodaliśmy kontrolę dostępu do panelu administracyjnego (tylko dla uprawnionych operatorów).'
 	}
 
-	if (lower.includes('redirect') || lower.includes('logow') || lower.includes('next=') || lower.includes('kod z e‑maila')) {
+	if (
+		lower.includes('redirect') ||
+		lower.includes('logow') ||
+		lower.includes('next=') ||
+		lower.includes('kod z e‑maila')
+	) {
 		return 'Uspójniliśmy przekierowanie po zalogowaniu, żeby użytkownik wracał do właściwego panelu.'
 	}
 
-	if (lower.includes('kpi') || lower.includes('sales board') || lower.includes('alert')) {
+	if (
+		lower.includes('kpi') ||
+		lower.includes('sales board') ||
+		lower.includes('alert')
+	) {
 		return 'Dodaliśmy widok podsumowania rezerwacji (wskaźniki, lista spraw do pilnej obsługi).'
 	}
 
-	if (lower.includes('drawer') || lower.includes('szczegó') || lower.includes('detail') || lower.includes('historia kontaktu') || lower.includes('whatsapp')) {
+	if (
+		lower.includes('drawer') ||
+		lower.includes('szczegó') ||
+		lower.includes('detail') ||
+		lower.includes('historia kontaktu') ||
+		lower.includes('whatsapp')
+	) {
 		return 'Przygotowaliśmy widok szczegółów rezerwacji z historią kontaktu i gotowymi wiadomościami do klienta.'
 	}
 
-	if (lower.includes('harmonogram') || lower.includes('plan') || lower.includes('rat')) {
+	if (
+		lower.includes('harmonogram') ||
+		lower.includes('plan') ||
+		lower.includes('rat')
+	) {
 		return 'Dodaliśmy edytor harmonogramu płatności (raty) i ustandaryzowane szablony planów.'
 	}
 
-	if (lower.includes('uczestnik') || lower.includes('participant') || lower.includes('confirmationstatus') || lower.includes('potwierd')) {
+	if (
+		lower.includes('uczestnik') ||
+		lower.includes('participant') ||
+		lower.includes('confirmationstatus') ||
+		lower.includes('potwierd')
+	) {
 		return 'Dodaliśmy możliwość potwierdzania i korygowania danych uczestników oraz ich statusu w panelu.'
 	}
 
-	if (lower.includes('token') || lower.includes('link') || lower.includes('expiry')) {
+	if (
+		lower.includes('token') ||
+		lower.includes('link') ||
+		lower.includes('expiry')
+	) {
 		return 'Dodaliśmy bezpieczne linki dla załogi do potwierdzania danych (ważne czasowo).'
 	}
 
-	if (lower.includes('captain') || lower.includes('complimentary') || lower.includes('special')) {
+	if (
+		lower.includes('captain') ||
+		lower.includes('complimentary') ||
+		lower.includes('special')
+	) {
 		return 'Uporządkowaliśmy obsługę specjalnych miejsc (np. kapitańskie, miejsca gratisowe) w panelu.'
 	}
 
-	if (lower.includes('checklist') || lower.includes('backlog') || lower.includes('post-mvp')) {
+	if (
+		lower.includes('checklist') ||
+		lower.includes('backlog') ||
+		lower.includes('post-mvp')
+	) {
 		return 'Dopisaliśmy checklistę testów oraz listę dalszych decyzji i usprawnień po MVP.'
 	}
 
@@ -379,19 +499,37 @@ function normalizeNextStepBullet(bullet) {
 		return null
 	}
 
-	if (lower.includes('patrz sekcja') || lower.includes('ux/drobne') || lower.includes('pozycj')) {
+	if (
+		lower.includes('patrz sekcja') ||
+		lower.includes('ux/drobne') ||
+		lower.includes('pozycj')
+	) {
 		return null
 	}
 
-	if (lower.includes('diagnoza') || lower.includes('root cause') || lower.includes('@-reset') || lower.includes('wuchale') || lower.includes('route')) {
+	if (
+		lower.includes('diagnoza') ||
+		lower.includes('root cause') ||
+		lower.includes('@-reset') ||
+		lower.includes('wuchale') ||
+		lower.includes('route')
+	) {
 		return null
 	}
 
-	if (lower.includes('wiki') || lower.includes('concepts/') || lower.includes('.md')) {
+	if (
+		lower.includes('wiki') ||
+		lower.includes('concepts/') ||
+		lower.includes('.md')
+	) {
 		return null
 	}
 
-	if (lower.includes('promise') || lower.includes('async') || lower.includes('fundament')) {
+	if (
+		lower.includes('promise') ||
+		lower.includes('async') ||
+		lower.includes('fundament')
+	) {
 		return null
 	}
 
@@ -406,31 +544,60 @@ function normalizeNextStepBullet(bullet) {
 		return null
 	}
 
-	if (lower.includes('scenariusz 5') || lower.includes('scenariusze 6') || lower.includes('hold expiring')) {
+	if (
+		lower.includes('scenariusz 5') ||
+		lower.includes('scenariusze 6') ||
+		lower.includes('hold expiring')
+	) {
 		return 'Kontynuujemy dopracowanie procesu korekty danych przez uczestnika oraz obsługi przypadków typu wygasły link.'
 	}
 
-	if (lower.includes('scenariusz 2') || lower.includes('sales board') || lower.includes('kpi')) {
+	if (
+		lower.includes('scenariusz 2') ||
+		lower.includes('sales board') ||
+		lower.includes('kpi')
+	) {
 		return 'Kontynuujemy prace nad panelem administracyjnym: widok podsumowania rezerwacji i prosty „board” do obsługi sprzedaży.'
 	}
 
-	if (lower.includes('reactive') || lower.includes('subscription') || lower.includes('fetch')) {
+	if (
+		lower.includes('reactive') ||
+		lower.includes('subscription') ||
+		lower.includes('fetch')
+	) {
 		return null
 	}
 
-	if (lower.includes('403') || lower.includes('clerk') || lower.includes('konto')) {
+	if (
+		lower.includes('403') ||
+		lower.includes('clerk') ||
+		lower.includes('konto')
+	) {
 		return null
 	}
 
-	if (lower.includes('cookie') || lower.includes('consent') || lower.includes('banner')) {
+	if (
+		lower.includes('cookie') ||
+		lower.includes('consent') ||
+		lower.includes('banner')
+	) {
 		return null
 	}
 
-	if (lower.includes('wyloguj') || lower.includes('ux:') || lower.includes('parking lot')) {
+	if (
+		lower.includes('wyloguj') ||
+		lower.includes('ux:') ||
+		lower.includes('parking lot')
+	) {
 		return null
 	}
 
-	if (lower.includes('poradnik') || lower.includes('faq') || lower.includes('mobile') || lower.includes('manualna weryfikacja')) {
+	if (
+		lower.includes('poradnik') ||
+		lower.includes('faq') ||
+		lower.includes('mobile') ||
+		lower.includes('manualna weryfikacja')
+	) {
 		return 'Przejść szybkie testy na telefonie i komputerze, żeby upewnić się, że poradnik i nawigacja działają bez zgrzytów.'
 	}
 
@@ -450,11 +617,19 @@ function normalizeNextStepBullet(bullet) {
 		return 'Ustalić listę osób, które mają mieć dostęp do panelu administracyjnego.'
 	}
 
-	if (lower.includes('manual') || lower.includes('checklist') || lower.includes('test')) {
+	if (
+		lower.includes('manual') ||
+		lower.includes('checklist') ||
+		lower.includes('test')
+	) {
 		return 'Przejść checklistę testów panelu administracyjnego przed wdrożeniem.'
 	}
 
-	if (lower.includes('deploy') || lower.includes('production') || lower.includes('push')) {
+	if (
+		lower.includes('deploy') ||
+		lower.includes('production') ||
+		lower.includes('push')
+	) {
 		return 'Przygotować wdrożenie zmian na środowisko produkcyjne.'
 	}
 
