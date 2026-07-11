@@ -116,6 +116,42 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
+## Sesja 2026-07-11 (II) — LEARN-1: ekstrakcja logiki refundów do `_lib/` + 13 testów (nauka, tryb ja-wskazuję-Tomek-pisze)
+
+### Zmiany
+
+- **`src/convex/_lib/refundTiers.ts`** — `matchRefundTier({ tiers, daysBeforeDeparture, availableToRefund })` wyekstrahowane z handlera `calculateRefundPolicySuggestion` (sort desc + find + floor). Kod Tomek.
+- **`src/convex/_lib/refundTiers.test.ts`** — 5 testów: najostrzejszy próg, nieposortowane wejście (regresja sortu), granica `days === minDaysBefore`, brak dopasowania (dane niezerowe, żeby bug nie schował się za `floor(0×x)=0`), zaokrąglenie floor.
+- **`src/convex/_lib/refundCascade.ts`** — `allocateCascade({ payments, totalAmount })` wyekstrahowane z handlera `allocateRefundCascade`; granicę cięcia i sygnaturę wyznaczył Tomek sam. Wszystkie 3 walidacje weszły do czystej funkcji (kolejność: tanie argumenty → filter/sort/suma → limit). Wąski typ `export type CascadePayment` (7 pól zamiast `Doc<'bookingPayments'>`).
+- **`src/convex/_lib/refundCascade.test.ts`** — 8 testów: jedna rata starcza, przelanie na starszą (dowodzi też sort desc), filtr statusu+`stripePaymentIntentId`, zużyta rata (`continue` — bez niego poleciałby zero-złotowy refund do Stripe), granica 100%, throw ×3 (`<= 0`, non-integer, exceeds available) przez `expect(() => ...).toThrow`.
+- **`src/convex/refunds.ts`** — oba handlery cienkie: DB fetch + wywołanie funkcji z `_lib/`. Świadoma zmiana: walidacje argumentów odpalają się teraz po query, nie przed (kontrakt w jednym miejscu > jedno zbędne query przy śmieciowym wejściu).
+- Commit `451e0c6a` + push Tomka, CI zielone (22/22 testy w repo).
+
+### Decyzje
+
+- **Sekwencja ekstrakcji: funkcja → testy → podmiana w handlerze.** Stary kod żyje aż nowy ma testy — działająca logika nie ginie w połowie refactoru.
+- **Walidacje do czystej funkcji, nie do handlera** — jeden kontrakt w jednym pliku, throw testowalny jednostkowo. Tradeoff (walidacja po DB fetch) zaakceptowany świadomie.
+- **Dane testowe minimalne i rozróżnialne, nie realistyczne** — `p1`/`p2`, czasy `1`/`2`, kwoty `1000`. Pierwsza wersja testów kaskady utonęła w realistycznych kwotach i losowych id.
+
+### Wnioski
+
+- **`expect(() => fn()).toThrow()` — strzałka odracza wywołanie.** Wywołanie wprost wybucha przed asercją (surowy Error zamiast AssertionError). Tomek trafił 2× w dwóch formach (poza i wewnątrz `expect`). Promocja: [[concepts/expect-deferred-call-for-throw]].
+- **Testy zielone ≠ typy zielone.** Brak `export` przy typie — vitest przepuścił (esbuild wycina adnotacje, `import type` znika), złapał dopiero `pnpm check`. Zawsze oba.
+- **Zmiana w Arrange = przelicz Assert od nowa** — nawet jednoznakowa; test to równanie.
+- **Oczekiwania z kartki, nie z Received** — kopiowanie Received do Expected produkuje test dokumentujący bugi. Wątpliwość przy pisaniu Assert = sygnał wrócić do rachunku (trafne wahanie Tomka przy `totalAvailable` z zużytą ratą).
+- **Kompilator pamięci łapał stan mid-session** — wpisy vault z 18:11/21:06 opisywały LEARN-1 jako w połowie drogi („4 testy", „allocateCascade = następna lekcja"); reconcile przy close session skorygował. Liczby z auto-kompilacji weryfikować z finalnym stanem repo.
+
+### Następne kroki
+
+#### Next
+
+- **INFRA-1 — ESLint** (eslint + eslint-plugin-svelte), osobna sesja.
+- Backlog Michała 06-19 (22 pozycje, copy najłatwiejsze) — do wyboru zamiast INFRA-1.
+
+#### Blocked / Later / Open questions
+
+- Bez zmian względem sesji porannej (QuickLook symlink → lokalny `pnpm build`; vault scope-tagging backfill).
+
 ## Sesja 2026-07-11 — audyt projektu + CI + pierwsze testy jednostkowe (nauka, tryb ja-wskazuję-Tomek-pisze; infra pisał agent)
 
 ### Zmiany
@@ -141,9 +177,9 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 #### Next
 
-- Tomek: sprzątnięcie resztek w teście (puste `//`, stały nagłówek „TODO dla Tomka"), `pnpm format`, commit+push.
-- Lekcja ekstrakcji: tier matching + kaskada z `refunds.ts` → czyste funkcje w `_lib/` + testy (przypadki: dokładnie na progu tieru, 0 dni, refund > available).
-- ESLint (trzeci brak z audytu) — osobna sesja.
+- ~~Sprzątnięcie resztek w teście~~ — zrobione i wypchnięte w tej sesji (`acb16daf`).
+- **LEARN-1** — lekcja ekstrakcji: tier matching + kaskada z `refunds.ts` → czyste funkcje w `_lib/` + testy (→ backlog).
+- **INFRA-1** — ESLint, osobna sesja (→ backlog).
 
 #### Blocked / Later / Open questions
 

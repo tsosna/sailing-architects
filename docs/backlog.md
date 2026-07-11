@@ -58,6 +58,11 @@
 
 → **Szczegóły: `docs/admin-post-mvp-decisions.md`** (format Stan/Trigger/Kierunek). Bierz gdy trigger realny (sprzedaż/feedback kapitana). Główne: granularne role kapitan/operator, eksport CSV Sales Board, nightly admin e-mail, konfigurowalne reguły monitów, single-source `voyageSegments`, `+layout@` reset na `/crew/confirm/[token]`, „Poproś o nowy link", WhatsApp/SMS API. **Uwaga: BUG-1/4/5/6/7 pochodzą z tego pliku — po naprawie skreśl w obu miejscach.**
 
+## 📚 Nauka / jakość kodu
+
+- ~~**LEARN-1 — Lekcja ekstrakcji: logika refundów do `_lib/` + testy.**~~ ✅ 2026-07-11 (sesja II) — `matchRefundTier` → `_lib/refundTiers.ts` (5 testów) + `allocateCascade` → `_lib/refundCascade.ts` (8 testów, throw ×3), handlery cienkie, commit `451e0c6a`, CI zielone.
+- **INFRA-1 — ESLint** (eslint + eslint-plugin-svelte). Trzeci brak z audytu 07-11 (po CI ✅ i testach ✅). Prettier ≠ linting: brak kontroli a11y, unused vars, wzorców Svelte.
+
 ## ❓ Open questions
 
 - **A7d regulamin rejsu** — progi 180/90/42/0 potwierdzone (§3.8); dokument dostarczony 07-07. Czy coś jeszcze otwarte? Zweryfikować.
