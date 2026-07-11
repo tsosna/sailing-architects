@@ -10,6 +10,8 @@
 //   pnpm test:watch     — tryb watch przy pisaniu testów
 import { describe, it, expect } from 'vitest'
 import { calculatePaymentStatusAfterRefund } from './refundStatus'
+import { isBookingClosed } from './bookingClosed'
+import type { Doc } from '../_generated/dataModel'
 
 describe('calculatePaymentStatusAfterRefund', () => {
 	it('zwraca obecny status gdy nic nie zwrócono', () => {
@@ -64,16 +66,67 @@ describe('calculatePaymentStatusAfterRefund', () => {
 	})
 })
 
-// ── TODO dla Tomka ──────────────────────────────────────────────
 // it.todo = vitest pokazuje je jako "pending" w wynikach.
 // Zamień każde na działający test (usuń .todo, dopisz ciało).
 describe('isBookingClosed (src/convex/_lib/bookingClosed.ts)', () => {
-	it.todo('false gdy paymentStatus inny niż refunded')
-	it.todo(
-		'true gdy refunded i żadna koja nie wskazuje na paymentIntent bookingu'
-	)
-	it.todo(
-		'false gdy refunded ale koja nadal ma bookingPaymentIntentId bookingu'
-	)
-	it.todo('true gdy refunded a lista koi zawiera null/undefined')
+	it('false gdy paymentStatus inny niż refunded', () => {
+		// Arrange — booking, który NIE jest refunded
+		const booking = {
+			paymentStatus: 'cancelled'
+		} as Doc<'bookings'>
+
+		// Act
+		const result = isBookingClosed(booking, [])
+
+		// Assert
+		expect(result).toBe(false)
+	})
+	it('true gdy refunded i żadna koja nie wskazuje na paymentIntent bookingu', () => {
+		// Arrange — booking, który JEST refunded
+		const booking = {
+			paymentStatus: 'refunded',
+			stripePaymentIntentId: 'pi_123'
+		} as Doc<'bookings'>
+		const berth = {
+			bookingPaymentIntentId: 'pi_other'
+		} as Doc<'berths'>
+
+		// Act
+		const result = isBookingClosed(booking, [berth])
+
+		// Assert
+		expect(result).toBe(true)
+	})
+	it('false gdy refunded ale koja nadal ma bookingPaymentIntentId bookingu', () => {
+		// Arrange — booking, JEST refunded
+		const booking = {
+			paymentStatus: 'refunded',
+			stripePaymentIntentId: 'pi_123'
+		} as Doc<'bookings'>
+		const berth = {
+			bookingPaymentIntentId: 'pi_123'
+		} as Doc<'berths'>
+
+		// Act
+		const result = isBookingClosed(booking, [berth])
+
+		// Assert
+		expect(result).toBe(false)
+	})
+	it('true gdy refunded a lista koi zawiera null/undefined', () => {
+		// Arrange — booking, JEST refunded
+		const booking = {
+			paymentStatus: 'refunded',
+			stripePaymentIntentId: 'pi_123'
+		} as Doc<'bookings'>
+		const berth = {
+			bookingPaymentIntentId: 'pi_123'
+		} as Doc<'berths'>
+
+		// Act
+		const result = isBookingClosed(booking, [null, undefined, berth])
+
+		// Assert
+		expect(result).toBe(false)
+	})
 })

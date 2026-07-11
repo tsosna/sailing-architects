@@ -116,6 +116,40 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
+## Sesja 2026-07-11 — audyt projektu + CI + pierwsze testy jednostkowe (nauka, tryb ja-wskazuję-Tomek-pisze; infra pisał agent)
+
+### Zmiany
+
+- **Audyt projektu (agent Fable).** Werdykt: stack (Convex/Clerk/Vercel/Stripe/Brevo) optymalny; Strapi NIE istnieje w projekcie (mylony ze Stripe) i nie jest potrzebny. Trzy braki krytyczne: zero testów, zero CI, brak ESLint. Vault: ~10 sierot poza indeksem, duplikaty konceptów, pusta warstwa domen (propozycje = Prompt 3/4/5 w rozmowie audytowej).
+- **CI (Prompt 1, agent).** `.github/workflows/ci.yml`: push/PR na main+production → install → placeholder `.env` z `.env.example` → build → check → lint → test. `CRON_SECRET=` dodany do `.env.example` (build padał bez niego). `docs/` dodane do `.prettierignore` (25 plików designu/feedbacku nie do formatowania). Tomek: `pnpm format` na 22 plikach src (dług formatowania). Pierwszy run zielony w 38s.
+- **Testy jednostkowe (Prompt 2).** Vitest + `vitest.config.ts` (osobny — celowo omija pluginy z `vite.config.ts`) + skrypty `test`/`test:watch` + krok w CI (agent). `src/convex/_lib/refundStatus.test.ts`: 5 testów `calculatePaymentStatusAfterRefund` (agent, wzorzec AAA) + **4 testy `isBookingClosed` napisane przez Tomka** (szablon-z-lukami → lustrzane odbicie → w pełni sam). Wynik: 9/9 passed.
+
+### Decyzje
+
+- **Kolejność kroków CI: build PRZED check** — świeży clone nie ma `src/locales/.wuchale/` (gitignored, generuje go vite build), bez tego svelte-check pada.
+- **`docs/` poza Prettierem** — dumpy designu i feedback Michała to nie kod; formatowanie ich = szum w diffach.
+- **Testy tylko dla czystych funkcji w `_lib/`** — logika w handlerach Convex (tier matching `refunds.ts:64`, kaskada `refunds.ts:121`) czeka na ekstrakcję (następna lekcja).
+
+### Wnioski
+
+- **Lokalny `pnpm build` nadal pada na nft/QuickLook** (znane z 07-08) — ale kompilacja dochodzi do adaptera, więc placeholder env do CI zweryfikowany mimo to; na ubuntu działa.
+- **Nauka testów: szablon-z-lukami działa.** Tomek: luka „wejście vs wyjście" (oczekiwał stringa `'refunded'` zamiast boolean) — typ zwrotny funkcji czytać z sygnatury. Druga luka: `.every()` + `!b ||` wymagały rozbiórki na analogii (bosman sprawdza koje).
+- **Czerwony test = część nauki.** `Expected/Received` w błędzie asercji czyta się jak zdanie; test, którego nie widziało się czerwonym, może nie sprawdzać niczego.
+- **Komentarze z copy-paste kłamią** („booking, który NIE jest refunded" przy refunded bookingu) — zły komentarz gorszy niż brak.
+
+### Następne kroki
+
+#### Next
+
+- Tomek: sprzątnięcie resztek w teście (puste `//`, stały nagłówek „TODO dla Tomka"), `pnpm format`, commit+push.
+- Lekcja ekstrakcji: tier matching + kaskada z `refunds.ts` → czyste funkcje w `_lib/` + testy (przypadki: dokładnie na progu tieru, 0 dni, refund > available).
+- ESLint (trzeci brak z audytu) — osobna sesja.
+
+#### Blocked / Later / Open questions
+
+- Vault maintenance (Prompt 3: duplikaty, sieroty, domeny — częściowo zrobione: domeny już w indeksie) i scope-tagging (Prompt 4) — u agenta audytowego gotowe prompty.
+- Naprawić zepsuty symlink `~/Library/QuickLook` (odblokuje lokalny `pnpm build`).
+
 ## Sesja 2026-07-10 — test odporności snapshotu (A) + triaga uwag Michała 06-19 (C) + audit log UI (B) (nauka, tryb ja-wskazuję-Tomek-pisze)
 
 ### Zmiany
