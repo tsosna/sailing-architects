@@ -70,8 +70,6 @@
 		display: grid;
 		place-items: center;
 		background: transparent;
-		border: 1px solid rgba(196, 146, 58, 0.28);
-		box-shadow: inset 0 0 0 1px rgba(196, 146, 58, 0.08);
 		overflow: hidden;
 		flex: 0 0 auto;
 	}
