@@ -58,12 +58,36 @@
 	]
 
 	const ports = [
-		{ x: 200, y: 40, label: 'Palma de Mallorca', stage: 0 },
-		{ x: 220, y: 120, label: 'Gibraltar', stage: 1 },
-		{ x: 120, y: 200, label: 'Madera', stage: 2 },
-		{ x: 80, y: 280, label: 'Teneryfa', stage: 3 },
-		{ x: 40, y: 320, label: 'Cabo Verde', stage: 3 }
+		{ lat: 39.6, lon: 2.6, label: 'Palma de Mallorca', stage: 0 },
+		{ lat: 36.1, lon: -5.4, label: 'Gibraltar', stage: 1 },
+		{ lat: 32.7, lon: -16.9, label: 'Madera', stage: 2 },
+		{ lat: 28.3, lon: -16.6, label: 'Teneryfa', stage: 3 },
+		{ lat: 16.9, lon: -25.0, label: 'Cabo Verde', stage: 3 }
 	] as const
+
+	const LON_MIN = -25.0
+	const LON_MAX = 2.6
+	const LAT_MIN = 16.9
+	const LAT_MAX = 39.6
+
+	function project(port: { lat: number; lon: number }) {
+		// x: zachód→wschód = lewo→prawo, bez odwracania
+		const xFrac = (port.lon - LON_MIN) / (LON_MAX - LON_MIN)
+		const x = 30 + xFrac * (270 - 30)
+
+		// y: północ ma być NA GÓRZE (mały y), więc frakcję liczymy od LAT_MAX w dół
+		const yFrac = (LAT_MAX - port.lat) / (LAT_MAX - LAT_MIN)
+		const y = 30 + yFrac * (320 - 30)
+
+		return { x, y }
+	}
+
+	const routePoints = ports
+		.map((port) => {
+			const p = project(port)
+			return `${p.x},${p.y}`
+		})
+		.join(' ')
 
 	let activeStage = $state(0)
 	const stage = $derived(stages[activeStage])
@@ -89,13 +113,15 @@
 				<div class="map__caption">mapa poglądowa</div>
 				<svg viewBox="0 0 300 360" width="80%" class="map__svg">
 					<polyline
-						points="200,40 220,120 120,200 80,280 40,320"
+						points={routePoints}
 						fill="none"
 						stroke="rgba(196,146,58,0.35)"
 						stroke-width="1"
 						stroke-dasharray="4 3"
 					/>
 					{#each ports as port (port.label)}
+						{@const p = project(port)}
+						{@const labelLeft = p.x > 250}
 						<g
 							class="map__port"
 							class:map__port--active={activeStage === port.stage}
@@ -111,8 +137,8 @@
 							aria-label="Etap {port.label}"
 						>
 							<circle
-								cx={port.x}
-								cy={port.y}
+								cx={p.x}
+								cy={p.y}
 								r="5"
 								fill={activeStage === port.stage
 									? '#c4923a'
@@ -120,12 +146,14 @@
 								stroke="#c4923a"
 								stroke-width="1"
 							/>
+
 							<text
-								x={port.x + 10}
-								y={port.y + 4}
-								font-size="9"
+								x={labelLeft ? p.x - 15 : p.x + 15}
+								y={p.y + 4}
+								font-size="11px"
 								font-family="DM Sans, sans-serif"
-								fill="rgba(245,240,232,0.5)">{port.label}</text
+								fill="rgba(245,240,232,0.5)"
+								text-anchor={labelLeft ? 'end' : 'start'}>{port.label}</text
 							>
 						</g>
 					{/each}
@@ -232,9 +260,9 @@
 	.map__caption {
 		position: absolute;
 		top: 12px;
-		right: 12px;
+		left: 12px;
 		font-family: monospace;
-		font-size: 8px;
+		font-size: 14px;
 		color: var(--color-brass-text-soft);
 		letter-spacing: 1px;
 	}
@@ -367,6 +395,13 @@
 		.route__grid {
 			grid-template-columns: 1fr;
 			gap: 32px;
+		}
+		.map__port circle {
+			r: 8;
+		}
+
+		.map__port text {
+			font-size: 17px;
 		}
 	}
 </style>
