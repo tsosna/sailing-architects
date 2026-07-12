@@ -52,7 +52,7 @@
 
 ## 🎨 Landing — uwagi Michała 2026-06-19 (22 poz.)
 
-→ **Szczegóły: `handoff.md` sekcja „Backlog Michała — landing (2026-06-19)".** Kategorie: 2 bugi (ramka logo + krok4=BUG-2), ~13 copy, 2 mapa/UI, 2 feature (Instagram, galeria), 1 wymaga wejścia autora. Najłatwiejsze: copy. Najtrudniejsze: mapa geograficzna.
+→ **Szczegóły: `handoff.md` sekcja „Backlog Michała — landing (2026-06-19)".** ~~13 pozycji copy~~ ✅ 2026-07-12 (commit `9a02312e`: etapy 01-04, cennik + gwarancja miejsca, jacht, FAQ q2, kapitan→skipper w całym src). **Zostają:** ramka logo w hero (bug), mapa — realna geografia + większe napisy/kropki mobile, link Instagram, galeria (Later — Michał odłożył), blok „nikt nie wie o co chodzi" (czeka na autora); PDF itinerary = FEAT-1. Otwarte z copy: czy „Wachty nawigacyjne" zostaje osobno obok „aktywnego udziału załogi" (pytanie do Michała).
 
 ## ⚙️ Post-MVP admin (świadomie odłożone, ~33 poz.)
 
@@ -63,6 +63,11 @@
 - ~~**LEARN-1 — Lekcja ekstrakcji: logika refundów do `_lib/` + testy.**~~ ✅ 2026-07-11 (sesja II) — `matchRefundTier` → `_lib/refundTiers.ts` (5 testów) + `allocateCascade` → `_lib/refundCascade.ts` (8 testów, throw ×3), handlery cienkie, commit `451e0c6a`, CI zielone.
 - ~~**INFRA-1 — ESLint** (eslint + eslint-plugin-svelte). Trzeci brak z audytu 07-11 (po CI ✅ i testach ✅). Prettier ≠ linting: brak kontroli a11y, unused vars, wzorców Svelte.~~ ✅ 2026-07-12 — flat config (js+ts+svelte+prettier, ignores z `.gitignore`), triaga 54 znalezisk: 19 fixów (eqeqeq ×3, martwe inicjalizatory ×3, unused ×3, ctx `any`→`QueryCtx`/`DatabaseReader` ×6, prefer-const), 5 inline-disable z uzasadnieniem, wpięte w `pnpm lint` + CI.
 - **INFRA-2 — `svelte/no-navigation-without-resolve` (23 warningi).** Przejście linków/`goto()` na `resolve()` z `$app/paths` — typowane trasy. Reguła zdegradowana do `warn` w `eslint.config.js`; refactor 23 miejsc (site-nav ×6, book ×6, admin ×5, reszta pojedyncze) jako osobna sesja.
+
+## 🌍 i18n
+
+- **I18N-1 — Uruchomienie EN: teksty z plików danych `.ts` poza wuchale + pusty katalog.** (a) Config wuchale ma tylko adapter `svelte` → pliki danych (`src/lib/data/crew-guide.ts` — całe FAQ/poradnik) nie trafiają do `.po`; wersja EN pokaże je po polsku. Rozwiązanie do wyboru przy podjęciu: drugi adapter `vanilla` dla plików danych ALBO per-locale pliki (`crew-guide.pl.ts` / `crew-guide.en.ts` wybierane po `params.lang`). (b) `en.po` ma niemal wszystkie `msgstr` puste — EN treściowo nie istnieje; uruchomienie = realna praca tłumaczeniowa, nie tylko technika. *(wykryte 07-12 przy copy landing)*
+
 ## ❓ Open questions
 
 - **A7d regulamin rejsu** — progi 180/90/42/0 potwierdzone (§3.8); dokument dostarczony 07-07. Czy coś jeszcze otwarte? Zweryfikować.

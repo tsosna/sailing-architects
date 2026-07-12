@@ -116,6 +116,46 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
+## Sesja 2026-07-12 (II) — Landing copy wg feedbacku Michała 06-19 (nauka, tryb ja-wskazuję-Tomek-pisze)
+
+### Zmiany
+
+- **~13 pozycji copy z docx Michała 06-19** (commit `9a02312e`, kod Tomek, CI zielone):
+  - `route-section.svelte` — opisy etapów 01-04 (Gibraltar „do Gibraltaru", Madera, Teneryfa, Cabo Verde wg brzmienia Michała).
+  - `pricing-section.svelte` — „w cenie": `Skipper + doświadczona załoga` → `Aktywny udział załogi w prowadzeniu jachtu`, + `Pościel i ręcznik`, + `Pełne ubezpieczenie jachtu i kaucji`; „nie zawiera": + `Wyżywienie`; nowy mały tekst pod ceną karty: „Rezerwacja i jej opłacenie gwarantuje udział w rejsie." (reużyta klasa `card__per`).
+  - `vessel-section.svelte` — `Żagiel główny` → `Ożaglowanie` / „Grot + Genua"; Elektronika → pełna lista (Ploter map, AIS, VHF, DSC, autopilot, EPIRB, internet sat.).
+  - `crew-guide.ts` — FAQ q2 (uprawnienia) przeredagowane wg Michała („Jako członek załogi, po instruktażu…").
+  - **`kapitan` → `skipper` w całym src** (landing, admin ×3 strony, dashboard, crew-confirm, maile `_emails.ts`, aria-labels `boat-plan`) + mockup `docs/design/`. Grep po `kapitan` = zero trafień.
+- Bramki przed commitem: ESLint 0 errors (23 warn = INFRA-2, bez zmian), `pnpm check` 0 errors.
+- **`docs/backlog.md`**: nowe **I18N-1** (teksty z plików `.ts` poza wuchale), landing 06-19 zaktualizowany (copy ✅, zostają: ramka logo, mapa, Instagram).
+
+### Decyzje
+
+- **„Wachty nawigacyjne" zostają osobną pozycją cennika** — nowa pozycja skrócona do „Aktywny udział załogi w prowadzeniu jachtu", żeby nie dublować wacht. Do potwierdzenia z Michałem.
+- **skipper w całym src, nie tylko na landingu** — powód Michała (brak stopnia żeglarskiego → „kapitan" sugeruje kwalifikacje) dotyczy każdego miejsca, gdzie słowo widzi użytkownik (maile, panel, admin).
+- **EN locale nie naprawiamy teraz** — `en.po` ma puste `msgstr` niemal wszędzie, wersja angielska treściowo nie istnieje; dziura `.ts`-poza-wuchale idzie do backlogu (I18N-1) zamiast doraźnej łatki.
+
+### Wnioski
+
+- **Wuchale: literał w komponencie = `msgid` = klucz katalogu.** Zmiana polskiego tekstu = nowy klucz; stary wpis dostaje `#~` (obsolete, tłumaczenie odzyskiwalne przy powrocie brzmienia). `.po` edytuje się ręcznie tylko dla tłumaczeń, nigdy dla języka źródłowego. Kandydat wiki (stack).
+- **`[i18n-404:N]` po `npx wuchale` przy działającym dev serverze** = stale compiled catalog: komponent prosi o nowy indeks, załadowany katalog go nie zna. Fix: restart `pnpm dev` + hard reload. Inna przyczyna tego samego symptomu co w [[concepts/wuchale-sveltekit-loadlocale]] (tam: brak `loadLocale()`). Kandydat: dopisek do tamtego artykułu.
+- **Teksty w plikach danych `.ts` są niewidzialne dla i18n** — config ma tylko adapter `svelte`, więc `crew-guide.ts` (FAQ) nie trafia do `.po`; EN pokaże polski. Odwrotna strona lekcji z 05-24 („ekstrakcja stringów do `.ts`" jako ucieczka przed wrapowaniem — tu ta sama właściwość staje się dziurą). Rozwiązania na później: adapter `vanilla` albo per-locale pliki danych. → I18N-1.
+- **Copy-edit też ma bugi i też łapie je diff review** — nowa odpowiedź FAQ wylądowała w sąsiednim pytaniu (q3 „kondycja" dostało tekst o uprawnieniach, q2 zgubiło nowe zdanie); wykryte dopiero na `git diff`. Tekst to też kod: przegląd przed commitem obowiązuje.
+- **Szukając copy, szukaj też w plikach danych** — „nie mogę znaleźć" = tekst żyje w `.ts` (crew-guide), nie w `.svelte`, albo w ogóle nie istnieje (gwarancja miejsca była dopiskiem, nie edycją).
+
+### Następne kroki
+
+#### Next
+
+- **Reszta Michała 06-19:** ramka logo w hero (bug), mapa — realna geografia + większe napisy/kropki mobile, link do Instagrama.
+- Alternatywy: **DEP-1a/b** (walidacja snapshotu + A7e na prod) lub **INFRA-2** (`resolve()` ×23).
+
+#### Blocked / Later / Open questions
+
+- **I18N-1** — strategia tekstów z `.ts` przy uruchamianiu EN (adapter vanilla vs per-locale pliki) + przetłumaczenie katalogu `en.po`.
+- Blok opisu „nikt nie wie o co chodzi" — czeka na intencję autora (Michał nie zna idei tekstu).
+- Pytanie do Michała: czy „Wachty nawigacyjne" jako osobna pozycja „w cenie" zostaje obok „aktywnego udziału".
+
 ## Sesja 2026-07-12 — INFRA-1: ESLint flat config + triaga 54 znalezisk (nauka, tryb ja-wskazuję-Tomek-pisze)
 
 ### Zmiany
