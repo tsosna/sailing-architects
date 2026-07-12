@@ -162,6 +162,7 @@
 	)
 
 	function authUrl(mode: AuthMode): string {
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- one-shot builder, nie stan reaktywny
 		const params = new URLSearchParams(page.url.searchParams)
 		params.set('auth', mode)
 		const query = params.toString()
@@ -172,6 +173,7 @@
 	const signUpUrl = $derived(authUrl('signup'))
 
 	function bookingUrl(): string {
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- one-shot builder, nie stan reaktywny
 		const params = new URLSearchParams(page.url.searchParams)
 		params.set('segment', selectedSegment)
 		params.delete('auth')

@@ -252,7 +252,6 @@ export async function sendDailyReportEmail({
 
 export async function sendRefundEmail(input: SendRefundEmailInput) {
 	let subject
-	let html
 	let textLine = ''
 	let head = ''
 	switch (input.type) {
@@ -267,7 +266,7 @@ export async function sendRefundEmail(input: SendRefundEmailInput) {
 			subject = `Zwrot zaksięgowany — rezerwacja ${input.bookingRef} · Sailing Architects`
 			break
 	}
-	html = `<div style="font-family: Arial, sans-serif; max-width: 640px; color: #0d1b2e;">
+	const html = `<div style="font-family: Arial, sans-serif; max-width: 640px; color: #0d1b2e;">
 		<h2 style="margin: 0 0 16px;">${escapeHtml(head)}</h2>
 		<p style="margin: 0 0 12px;">Cześć ${escapeHtml(input.customerName)},</p>
 		<div style="margin: 0 0 18px; padding: 14px 18px; border-left: 3px solid #c4923a; background: #f7efdc;">

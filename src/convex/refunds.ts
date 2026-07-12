@@ -121,7 +121,7 @@ export const listStuckPendingRefunds = internalQuery({
 			.withIndex('by_status', (q) => q.eq('status', 'pending'))
 			.collect()
 		return pending
-			.filter((r) => r._creationTime < cutoff && r.stripeRefundId != undefined)
+			.filter((r) => r._creationTime < cutoff && r.stripeRefundId !== undefined)
 			.map((r) => ({
 				refundRowId: r._id,
 				stripeRefundId: r.stripeRefundId!,

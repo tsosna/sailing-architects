@@ -7,7 +7,6 @@ import type { RequestHandler } from './$types'
 import type { Id } from '$convex/dataModel'
 import { sendRefundEmail } from '$lib/server/email'
 import { PUBLIC_APP_URL } from '$env/static/public'
-import { panelUrl } from '../../../../../convex/_brevo'
 
 const convex = createConvexAdminClient()
 

@@ -3,6 +3,7 @@ import {
 	internalMutation,
 	internalQuery
 } from './_generated/server'
+import type { QueryCtx, ActionCtx } from './_generated/server'
 import { internal } from './_generated/api'
 import type { Id } from './_generated/dataModel'
 import { v } from 'convex/values'
@@ -69,15 +70,13 @@ export const markOverduePayments = internalMutation({
 })
 
 async function resolveBuyerRecipient(
-	ctx:
-		| { db: { query: typeof internalQuery extends never ? never : any } }
-		| any,
+	ctx: QueryCtx,
 	booking: { buyerUserId?: string; userId: string; buyerEmail?: string }
 ): Promise<{ email: string; name: string } | null> {
 	const buyerUserId = booking.buyerUserId ?? booking.userId
 	const profile = await ctx.db
 		.query('crewProfiles')
-		.withIndex('by_user', (q: any) => q.eq('userId', buyerUserId))
+		.withIndex('by_user', (q) => q.eq('userId', buyerUserId))
 		.first()
 	const email = profile?.email ?? booking.buyerEmail ?? null
 	if (!email) return null
@@ -291,7 +290,7 @@ export const sendCrewDataReminders = internalAction({
 })
 
 async function dispatchPaymentReminders(
-	ctx: { runMutation: any },
+	ctx: Pick<ActionCtx, 'runMutation'>,
 	candidates: PaymentReminderCandidate[]
 ) {
 	let sent = 0

@@ -55,7 +55,7 @@ export async function resolveAdmin(
 	}
 
 	let role: string | undefined
-	let emails: string[] = []
+	let emails: string[]
 	try {
 		const user = await clerkClient.users.getUser(auth.userId)
 		const meta = (user.publicMetadata ?? {}) as { role?: unknown }

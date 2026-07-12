@@ -5,6 +5,7 @@ import {
 	mutation,
 	query
 } from './_generated/server'
+import type { DatabaseReader } from './_generated/server'
 import { internal } from './_generated/api'
 import type { Id } from './_generated/dataModel'
 import { v } from 'convex/values'
@@ -247,7 +248,7 @@ type PublicConfirmationView =
 	  }
 
 async function findActiveTokenRow(
-	db: any,
+	db: DatabaseReader,
 	tokenHash: string
 ): Promise<{
 	_id: Id<'crewConfirmationTokens'>
@@ -257,7 +258,7 @@ async function findActiveTokenRow(
 } | null> {
 	const row = await db
 		.query('crewConfirmationTokens')
-		.withIndex('by_token_hash', (q: any) => q.eq('tokenHash', tokenHash))
+		.withIndex('by_token_hash', (q) => q.eq('tokenHash', tokenHash))
 		.first()
 	return row
 }

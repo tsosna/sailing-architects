@@ -21,7 +21,7 @@ export const GET: RequestHandler = async ({ request }) => {
 	let reconciled = 0
 	for (const row of stuck) {
 		const refund = await stripe.refunds.retrieve(row.stripeRefundId)
-		if (refund.status !== 'succeeded' && refund.status != 'failed') continue
+		if (refund.status !== 'succeeded' && refund.status !== 'failed') continue
 
 		const result = await convex.mutation(
 			internal.mutations.processStripeRefund,
@@ -46,7 +46,7 @@ export const GET: RequestHandler = async ({ request }) => {
 				const detail = await convex.query(api.admin.bookingDetailById, {
 					bookingId: result.bookingId
 				})
-				if (detail?.buyer.email && refund.amount != null) {
+				if (detail?.buyer.email && refund.amount !== null) {
 					await sendRefundEmail({
 						type: 'completed',
 						to: {

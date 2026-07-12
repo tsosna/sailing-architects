@@ -1138,7 +1138,7 @@ export const backfillLegacyBookingPayments = mutation({
 			const currency = booking.currency ?? DEFAULT_CURRENCY
 			const buyerUserId = booking.buyerUserId ?? booking.userId
 
-			let rowStatus: 'paid' | 'pending' | 'cancelled' = 'pending'
+			let rowStatus: 'paid' | 'pending' | 'cancelled'
 			let bookingPaymentStatus:
 				| 'unpaid'
 				| 'deposit_paid'

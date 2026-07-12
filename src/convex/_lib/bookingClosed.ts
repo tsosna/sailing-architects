@@ -6,6 +6,6 @@ export function isBookingClosed(
 ): boolean {
 	if (booking.paymentStatus !== 'refunded') return false
 	return berths.every(
-		(b) => !b || b.bookingPaymentIntentId != booking.stripePaymentIntentId
+		(b) => !b || b.bookingPaymentIntentId !== booking.stripePaymentIntentId
 	)
 }

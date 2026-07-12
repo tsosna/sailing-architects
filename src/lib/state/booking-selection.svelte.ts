@@ -30,6 +30,7 @@ class BookingSelection {
 	}
 
 	bookingPath(base: string, segmentId = this.selectedSegment) {
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- one-shot builder, nie stan reaktywny
 		const params = new URLSearchParams({ segment: segmentId })
 
 		if (this.hasSelectedBerths && segmentId === this.selectedSegment) {

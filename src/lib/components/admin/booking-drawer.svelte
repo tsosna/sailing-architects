@@ -21,7 +21,6 @@
 
 	let busyId = $state<string | null>(null)
 	let notifyAdmin = $state(true)
-	let copiedAt = $state<number | null>(null)
 	let refundForBookingId = $state<Id<'bookings'> | null>(null)
 
 	type ParticipantForm = {
@@ -516,7 +515,6 @@
 	async function copyText(text: string) {
 		try {
 			await navigator.clipboard.writeText(text)
-			copiedAt = Date.now()
 			toastState.addToast({
 				message: 'Skopiowano do schowka.',
 				status: 'success'
@@ -528,12 +526,6 @@
 				duration: 0
 			})
 		}
-	}
-
-	function handleScrim(e: KeyboardEvent | MouseEvent) {
-		if ('key' in e && e.key !== 'Escape' && e.key !== 'Enter' && e.key !== ' ')
-			return
-		onclose()
 	}
 </script>
 

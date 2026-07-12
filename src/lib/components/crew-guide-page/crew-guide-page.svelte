@@ -9,6 +9,7 @@
 	} from '$lib/data/crew-guide'
 
 	const questionsByCategory = $derived.by(() => {
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- Mapa odtwarzana w całości przez $derived, brak mutacji po zbudowaniu
 		const map = new Map<CrewGuideCategoryId, typeof crewGuideQuestions>()
 		for (const cat of crewGuideCategories) {
 			map.set(
@@ -39,6 +40,7 @@
 	})
 
 	function toggleCheck(listId: CrewGuideChecklistId, index: number) {
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- immutable-update: kopia + podmiana przypisaniem
 		const next = new Set(checklistChecks[listId])
 		if (next.has(index)) next.delete(index)
 		else next.add(index)
