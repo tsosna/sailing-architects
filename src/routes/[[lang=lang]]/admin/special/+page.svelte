@@ -143,14 +143,14 @@
 		<div class="panel-head">
 			<div>
 				<h2>Captain</h2>
-				<p>Stała blokada koi kapitana — nie podlega rezerwacji.</p>
+				<p>Stała blokada koi skippera — nie podlega rezerwacji.</p>
 			</div>
 		</div>
 		{#if berthsQuery.isLoading && !berthsQuery.data}
 			<p class="empty-row">Wczytuję koje…</p>
 		{:else if captainBerths.length === 0}
 			<p class="empty-row">
-				Brak oznaczonej koi kapitana dla {segmentMeta.name}. Użyj narzędzia
+				Brak oznaczonej koi skippera dla {segmentMeta.name}. Użyj narzędzia
 				technicznego poniżej, jeśli baza nie była seedowana z Block 2.
 			</p>
 		{:else}
@@ -230,7 +230,7 @@
 					<input
 						type="text"
 						bind:value={formNote}
-						placeholder="np. żona kapitana, partner medialny"
+						placeholder="np. żona skippera, partner medialny"
 					/>
 				</label>
 			</div>

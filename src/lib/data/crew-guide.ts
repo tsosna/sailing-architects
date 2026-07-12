@@ -103,7 +103,7 @@ export const crewGuideQuestions: ReadonlyArray<CrewGuideQuestion> = [
 		featured: true,
 		phase: 'Przed rezerwacją',
 		q: 'Czy trzeba mieć uprawnienia żeglarskie?',
-		a: 'Nie. Jacht prowadzi kapitan z odpowiednimi kwalifikacjami. Jeśli jednak masz doświadczenie — będziesz mógł/mogła aktywnie uczestniczyć w prowadzeniu jednostki. Jeżeli masz patent lub planujesz kurs, daj nam znać — po rejsie wystawiamy opinię zgodną z wymogami PZŻ.'
+		a: 'Nie. Jacht prowadzi skipper z odpowiednimi kwalifikacjami. Jako członek załogi, po instruktażu, będziesz aktywnie uczestniczyć w prowadzeniu jachtu. Jeżeli masz patent lub planujesz kurs, daj nam znać — po rejsie wystawiamy opinię zgodną z wymogami PZŻ.'
 	},
 	{
 		id: 'q3',
@@ -204,7 +204,7 @@ export const crewGuideQuestions: ReadonlyArray<CrewGuideQuestion> = [
 		category: 'zycie-na-pokladzie',
 		phase: 'Na pokładzie',
 		q: 'Co jeśli pojawi się konflikt w załodze?',
-		a: 'Rejs opiera się na jasnych zasadach komunikacji i szacunku. Kapitan i organizator dbają o dobrą atmosferę oraz mediację w razie potrzeby. Każdą sytuację da się rozwiązać.'
+		a: 'Rejs opiera się na jasnych zasadach komunikacji i szacunku. Skipper i organizator dbają o dobrą atmosferę oraz mediację w razie potrzeby. Każdą sytuację da się rozwiązać.'
 	},
 	{
 		id: 'q17',
@@ -218,7 +218,7 @@ export const crewGuideQuestions: ReadonlyArray<CrewGuideQuestion> = [
 		category: 'bezpieczenstwo',
 		phase: 'Przed rejsem',
 		q: 'Czy brak kontaktu z lądem jest bezpieczny?',
-		a: 'Tak. Jacht wyposażony jest w łączność satelitarną, radio VHF, AIS, GPS i zapasowe systemy nawigacyjne, tratwę ratunkową oraz środki bezpieczeństwa zgodne z przepisami oceanicznymi. Kapitan monitoruje prognozy i podejmuje decyzje zgodnie z zasadą pełnego bezpieczeństwa.'
+		a: 'Tak. Jacht wyposażony jest w łączność satelitarną, radio VHF, AIS, GPS i zapasowe systemy nawigacyjne, tratwę ratunkową oraz środki bezpieczeństwa zgodne z przepisami oceanicznymi. Skipper monitoruje prognozy i podejmuje decyzje zgodnie z zasadą pełnego bezpieczeństwa.'
 	},
 	{
 		id: 'q19',
@@ -232,14 +232,14 @@ export const crewGuideQuestions: ReadonlyArray<CrewGuideQuestion> = [
 		category: 'bezpieczenstwo',
 		phase: 'Przed rejsem',
 		q: 'Czy mogą wystąpić trudne warunki pogodowe?',
-		a: 'Tak — to morze i ocean. Możemy doświadczyć silniejszego wiatru, fali czy deszczu. Jacht i kapitan są przygotowani na trudne warunki, a decyzje nawigacyjne zawsze podejmowane są z priorytetem bezpieczeństwa załogi.'
+		a: 'Tak — to morze i ocean. Możemy doświadczyć silniejszego wiatru, fali czy deszczu. Jacht i skipper są przygotowani na trudne warunki, a decyzje nawigacyjne zawsze podejmowane są z priorytetem bezpieczeństwa załogi.'
 	},
 	{
 		id: 'q21',
 		category: 'bezpieczenstwo',
 		phase: 'Na pokładzie',
 		q: 'Co z chorobą morską?',
-		a: 'Nie każdy jej doświadcza. Zazwyczaj mija po 1–3 dniach. Warto zabrać leki przeciw chorobie lokomocyjnej, być na świeżym powietrzu, patrzeć w horyzont i pić dużo wody. Kapitan ma na pokładzie specjalistyczne tabletki na trudniejsze przypadki.'
+		a: 'Nie każdy jej doświadcza. Zazwyczaj mija po 1–3 dniach. Warto zabrać leki przeciw chorobie lokomocyjnej, być na świeżym powietrzu, patrzeć w horyzont i pić dużo wody. Skipper ma na pokładzie specjalistyczne tabletki na trudniejsze przypadki.'
 	},
 	{
 		id: 'q22',

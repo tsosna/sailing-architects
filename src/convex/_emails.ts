@@ -192,7 +192,7 @@ export async function sendCrewDataReminderEmail(
 					<p style="margin:0 0 6px;color:rgba(245,240,232,0.66);font-size:12px;">Koja: <strong style="color:#f5f0e8;">${escapeHtml(input.berthLabel)}</strong></p>
 				</td></tr>
 			</table>
-			<p style="margin:0 0 14px;">Kapitan potrzebuje kompletnych danych każdego uczestnika — dokument tożsamości, kontakt alarmowy i doświadczenie żeglarskie. Wpisanie ich w panelu zajmie chwilę.</p>
+			<p style="margin:0 0 14px;">Skipper potrzebuje kompletnych danych każdego uczestnika — dokument tożsamości, kontakt alarmowy i doświadczenie żeglarskie. Wpisanie ich w panelu zajmie chwilę.</p>
 			${ctaButton(link, 'Uzupełnij dane')}
 			<p style="margin:18px 0 0;font-size:13px;color:rgba(245,240,232,0.55);">Przed rejsem przejrzyj <a href="${escapeHtml(guideLink)}" style="color:#d4aa5a;text-decoration:underline;">poradnik załogi</a> — checklisty, pakowanie i odpowiedzi na najczęstsze pytania.</p>
 		`

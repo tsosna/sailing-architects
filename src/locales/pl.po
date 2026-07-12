@@ -142,7 +142,6 @@ msgstr "Wybrano"
 msgid "Rezerwuj →"
 msgstr "Rezerwuj →"
 
-#: src/lib/components/admin/booking-drawer.svelte
 #: src/lib/components/boat-plan/boat-plan.svelte
 #: src/lib/components/route-section/route-section.svelte
 msgid "Enter"
@@ -206,7 +205,7 @@ msgstr "B"
 msgid "C"
 msgstr "C"
 
-#. 0: berth.id; 1: state === 'captain' ? 'kapitan' \\: state === 'complimentary' ? 'bezpłatna' \\: state === 'held' ? 'czasowo zablokowana' \\: state === 'taken' ? 'zajęta' \\: state === 'selected' ? 'wybrana' \\: 'dostępna'
+#. 0: berth.id; 1: state === 'captain' ? 'skipper' \\: state === 'complimentary' ? 'bezpłatna' \\: state === 'held' ? 'czasowo zablokowana' \\: state === 'taken' ? 'zajęta' \\: state === 'selected' ? 'wybrana' \\: 'dostępna'
 #: src/lib/components/boat-plan/boat-plan.svelte
 msgid "Koja {0} — {1}"
 msgstr "Koja {0} — {1}"
@@ -295,9 +294,8 @@ msgstr "Wybrana"
 msgid "Koja na jachcie"
 msgstr "Koja na jachcie"
 
-#: src/lib/components/pricing-section/pricing-section.svelte
-msgid "Skipper + doświadczona załoga"
-msgstr "Skipper + doświadczona załoga"
+#~ msgid "Skipper + doświadczona załoga"
+#~ msgstr "Skipper + doświadczona załoga"
 
 #: src/lib/components/pricing-section/pricing-section.svelte
 msgid "Wachty nawigacyjne"
@@ -382,9 +380,8 @@ msgstr "Palma de Mallorca"
 msgid "Gibraltar"
 msgstr "Gibraltar"
 
-#: src/lib/components/route-section/route-section.svelte
-msgid "Start wyprawy. Żegluga wzdłuż wschodniego wybrzeża Hiszpanii, przez Cieśninę Gibraltarską — jedną z najważniejszych morskich bram świata."
-msgstr "Start wyprawy. Żegluga wzdłuż wschodniego wybrzeża Hiszpanii, przez Cieśninę Gibraltarską — jedną z najważniejszych morskich bram świata."
+#~ msgid "Start wyprawy. Żegluga wzdłuż wschodniego wybrzeża Hiszpanii, przez Cieśninę Gibraltarską — jedną z najważniejszych morskich bram świata."
+#~ msgstr "Start wyprawy. Żegluga wzdłuż wschodniego wybrzeża Hiszpanii, przez Cieśninę Gibraltarską — jedną z najważniejszych morskich bram świata."
 
 #: src/lib/components/route-section/route-section.svelte
 #: src/lib/components/route-section/route-section.svelte
@@ -393,9 +390,8 @@ msgstr "Start wyprawy. Żegluga wzdłuż wschodniego wybrzeża Hiszpanii, przez 
 msgid "Madera"
 msgstr "Madera"
 
-#: src/lib/components/route-section/route-section.svelte
-msgid "Kurs na południe-zachód. Pierwsze etapy oceaniczne. Madera — zielona perła Atlantyku, wulkaniczne klify, tarasowe winnice, historyczne Funchal."
-msgstr "Kurs na południe-zachód. Pierwsze etapy oceaniczne. Madera — zielona perła Atlantyku, wulkaniczne klify, tarasowe winnice, historyczne Funchal."
+#~ msgid "Kurs na południe-zachód. Pierwsze etapy oceaniczne. Madera — zielona perła Atlantyku, wulkaniczne klify, tarasowe winnice, historyczne Funchal."
+#~ msgstr "Kurs na południe-zachód. Pierwsze etapy oceaniczne. Madera — zielona perła Atlantyku, wulkaniczne klify, tarasowe winnice, historyczne Funchal."
 
 #: src/lib/components/route-section/route-section.svelte
 #: src/lib/components/route-section/route-section.svelte
@@ -404,9 +400,8 @@ msgstr "Kurs na południe-zachód. Pierwsze etapy oceaniczne. Madera — zielona
 msgid "Teneryfa"
 msgstr "Teneryfa"
 
-#: src/lib/components/route-section/route-section.svelte
-msgid "Wyspy Kanaryjskie. Teneryfa oferuje majestatyczny wulkan Teide, turkusowe plaże i doskonałą kuchnię — idealny odpoczynek przed ostatnim etapem."
-msgstr "Wyspy Kanaryjskie. Teneryfa oferuje majestatyczny wulkan Teide, turkusowe plaże i doskonałą kuchnię — idealny odpoczynek przed ostatnim etapem."
+#~ msgid "Wyspy Kanaryjskie. Teneryfa oferuje majestatyczny wulkan Teide, turkusowe plaże i doskonałą kuchnię — idealny odpoczynek przed ostatnim etapem."
+#~ msgstr "Wyspy Kanaryjskie. Teneryfa oferuje majestatyczny wulkan Teide, turkusowe plaże i doskonałą kuchnię — idealny odpoczynek przed ostatnim etapem."
 
 #: src/lib/components/route-section/route-section.svelte
 #: src/lib/components/route-section/route-section.svelte
@@ -414,9 +409,8 @@ msgstr "Wyspy Kanaryjskie. Teneryfa oferuje majestatyczny wulkan Teide, turkusow
 msgid "Cabo Verde"
 msgstr "Cabo Verde"
 
-#: src/lib/components/route-section/route-section.svelte
-msgid "Finał — prawdziwy ocean. Pasaty, wieloryby i delfiny. Cabo Verde to esencja egzotyki: afrykańskie rytmy, oceaniczna przestrzeń, wulkaniczne krajobrazy."
-msgstr "Finał — prawdziwy ocean. Pasaty, wieloryby i delfiny. Cabo Verde to esencja egzotyki: afrykańskie rytmy, oceaniczna przestrzeń, wulkaniczne krajobrazy."
+#~ msgid "Finał — prawdziwy ocean. Pasaty, wieloryby i delfiny. Cabo Verde to esencja egzotyki: afrykańskie rytmy, oceaniczna przestrzeń, wulkaniczne krajobrazy."
+#~ msgstr "Finał — prawdziwy ocean. Pasaty, wieloryby i delfiny. Cabo Verde to esencja egzotyki: afrykańskie rytmy, oceaniczna przestrzeń, wulkaniczne krajobrazy."
 
 #: src/lib/components/route-section/route-section.svelte
 msgid "Trasa rejsu"
@@ -507,21 +501,18 @@ msgstr "Silnik"
 msgid "Volvo Penta 55 KM"
 msgstr "Volvo Penta 55 KM"
 
-#: src/lib/components/vessel-section/vessel-section.svelte
-msgid "Żagiel główny"
-msgstr "Żagiel główny"
+#~ msgid "Żagiel główny"
+#~ msgstr "Żagiel główny"
 
-#: src/lib/components/vessel-section/vessel-section.svelte
-msgid "Lazy bag + furling"
-msgstr "Lazy bag + furling"
+#~ msgid "Lazy bag + furling"
+#~ msgstr "Lazy bag + furling"
 
 #: src/lib/components/vessel-section/vessel-section.svelte
 msgid "Elektronika"
 msgstr "Elektronika"
 
-#: src/lib/components/vessel-section/vessel-section.svelte
-msgid "Ploter, AIS, VHF, automat"
-msgstr "Ploter, AIS, VHF, automat"
+#~ msgid "Ploter, AIS, VHF, automat"
+#~ msgstr "Ploter, AIS, VHF, automat"
 
 #: src/lib/components/vessel-section/vessel-section.svelte
 msgid "Nowoczesny, wygodny jacht oceaniczny zaprojektowany z myślą o długich rejsach. Pięć niezależnych kajut dwuosobowych zapewnia prywatność i komfort na każdym etapie podróży."
@@ -1109,9 +1100,8 @@ msgstr "Dostępna"
 msgid "Zajęta"
 msgstr "Zajęta"
 
-#: src/lib/components/boat-plan/boat-plan.svelte
-msgid "Kapitan ⚓"
-msgstr "Kapitan ⚓"
+#~ msgid "Kapitan ⚓"
+#~ msgstr "Kapitan ⚓"
 
 #: src/lib/components/boat-plan/boat-plan.svelte
 msgid "Bezpłatna"
@@ -1691,9 +1681,8 @@ msgstr "Dane nieuzupełnione"
 msgid "Błąd zapisu"
 msgstr "Błąd zapisu"
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Dane wymagane przez kapitana — osobno dla każdej koi. Możesz je aktualizować do 30 dni przed rejsem."
-msgstr "Dane wymagane przez kapitana — osobno dla każdej koi. Możesz je aktualizować do 30 dni przed rejsem."
+#~ msgid "Dane wymagane przez kapitana — osobno dla każdej koi. Możesz je aktualizować do 30 dni przed rejsem."
+#~ msgstr "Dane wymagane przez kapitana — osobno dla każdej koi. Możesz je aktualizować do 30 dni przed rejsem."
 
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Brak uczestników. Po opłaceniu rezerwacji pojawią się tu karty per koja."
@@ -1884,9 +1873,8 @@ msgstr "Otwórz"
 msgid "Alert Queue"
 msgstr "Alert Queue"
 
-#: src/routes/[[lang=lang]]/admin/+page.svelte
-msgid "Priorytety do ręcznej reakcji kapitana."
-msgstr "Priorytety do ręcznej reakcji kapitana."
+#~ msgid "Priorytety do ręcznej reakcji kapitana."
+#~ msgstr "Priorytety do ręcznej reakcji kapitana."
 
 #: src/routes/[[lang=lang]]/admin/+page.svelte
 msgid "Brak aktywnych alertów. Czysto."
@@ -1999,7 +1987,6 @@ msgstr "Skopiowano do schowka."
 msgid "Nie udało się skopiować — zaznacz ręcznie."
 msgstr "Nie udało się skopiować — zaznacz ręcznie."
 
-#: src/lib/components/admin/booking-drawer.svelte
 #: src/lib/components/site-nav/site-nav.svelte
 msgid "Escape"
 msgstr "Escape"
@@ -2424,9 +2411,8 @@ msgstr "Admin Console"
 msgid "Sekcje admina"
 msgstr "Sekcje admina"
 
-#: src/routes/[[lang=lang]]/admin/+layout@.svelte
-msgid "Clerk role: admin. Produkcja: kapitan / operator. Dev: dodatkowy operator testowy. Brevo aktywne."
-msgstr "Clerk role: admin. Produkcja: kapitan / operator. Dev: dodatkowy operator testowy. Brevo aktywne."
+#~ msgid "Clerk role: admin. Produkcja: kapitan / operator. Dev: dodatkowy operator testowy. Brevo aktywne."
+#~ msgstr "Clerk role: admin. Produkcja: kapitan / operator. Dev: dodatkowy operator testowy. Brevo aktywne."
 
 #: src/routes/[[lang=lang]]/admin/+error.svelte
 #: src/routes/[[lang=lang]]/admin/+layout@.svelte
@@ -2723,18 +2709,15 @@ msgstr "Captain i complimentary trzymamy poza Sales Board, żeby nie mieszały s
 msgid "Captain"
 msgstr "Captain"
 
-#: src/routes/[[lang=lang]]/admin/special/+page.svelte
-msgid "Stała blokada koi kapitana — nie podlega rezerwacji."
-msgstr "Stała blokada koi kapitana — nie podlega rezerwacji."
+#~ msgid "Stała blokada koi kapitana — nie podlega rezerwacji."
+#~ msgstr "Stała blokada koi kapitana — nie podlega rezerwacji."
 
 #: src/routes/[[lang=lang]]/admin/special/+page.svelte
 msgid "Wczytuję koje…"
 msgstr "Wczytuję koje…"
 
-#. 0: segmentMeta.name
-#: src/routes/[[lang=lang]]/admin/special/+page.svelte
-msgid "Brak oznaczonej koi kapitana dla {0}. Użyj narzędzia technicznego poniżej, jeśli baza nie była seedowana z Block 2."
-msgstr "Brak oznaczonej koi kapitana dla {0}. Użyj narzędzia technicznego poniżej, jeśli baza nie była seedowana z Block 2."
+#~ msgid "Brak oznaczonej koi kapitana dla {0}. Użyj narzędzia technicznego poniżej, jeśli baza nie była seedowana z Block 2."
+#~ msgstr "Brak oznaczonej koi kapitana dla {0}. Użyj narzędzia technicznego poniżej, jeśli baza nie była seedowana z Block 2."
 
 #. 0: berth.berthId
 #: src/routes/[[lang=lang]]/admin/special/+page.svelte
@@ -2940,9 +2923,8 @@ msgstr "Skontaktuj się z organizatorem rejsu — możemy wystawić nowy link."
 msgid "Dziękujemy za potwierdzenie"
 msgstr "Dziękujemy za potwierdzenie"
 
-#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
-msgid "Dane uczestnika zostały zatwierdzone. Możesz zamknąć tę stronę — kapitan dostanie informację automatycznie."
-msgstr "Dane uczestnika zostały zatwierdzone. Możesz zamknąć tę stronę — kapitan dostanie informację automatycznie."
+#~ msgid "Dane uczestnika zostały zatwierdzone. Możesz zamknąć tę stronę — kapitan dostanie informację automatycznie."
+#~ msgstr "Dane uczestnika zostały zatwierdzone. Możesz zamknąć tę stronę — kapitan dostanie informację automatycznie."
 
 #: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
 msgid "Otrzymaliśmy zgłoszenie poprawki"
@@ -3215,3 +3197,113 @@ msgstr "Zmiana progów zwrotu"
 #: src/routes/[[lang=lang]]/admin/+layout@.svelte
 msgid "Akcje admina"
 msgstr "Akcje admina"
+
+#: src/lib/components/route-section/route-section.svelte
+msgid "Start wyprawy. Żegluga wzdłuż wschodniego wybrzeża Hiszpanii, do Gibraltaru, jednej z najważniejszych morskich bram świata."
+msgstr "Start wyprawy. Żegluga wzdłuż wschodniego wybrzeża Hiszpanii, do Gibraltaru, jednej z najważniejszych morskich bram świata."
+
+#~ msgid "Madera: Kurs na południowy-zachód. Pierwszy etap oceaniczny. Madera — zielona perła Atlantyku, to wulkaniczne klify, tarasowe winnice, oraz historyczne Funchal."
+#~ msgstr "Madera: Kurs na południowy-zachód. Pierwszy etap oceaniczny. Madera — zielona perła Atlantyku, to wulkaniczne klify, tarasowe winnice, oraz historyczne Funchal."
+
+#~ msgid "Teneryfa: Wyspy Kanaryjskie, oferują piękne wulkany, w tym majestatyczny Teide na Teneryfie. Turkusowe plaże i doskonałą kuchnię — idealny odpoczynek po rejsie przez ocean."
+#~ msgstr "Teneryfa: Wyspy Kanaryjskie, oferują piękne wulkany, w tym majestatyczny Teide na Teneryfie. Turkusowe plaże i doskonałą kuchnię — idealny odpoczynek po rejsie przez ocean."
+
+#~ msgid "Cabo Verde: Finalny odcinek — tydzień na oceanie. Pasaty, wieloryby, delfiny i oceaniczna przestrzeń. Cabo Verde to esencja egzotyki: afrykańskie rytmy, wulkaniczne krajobrazy, cudowna przyroda i piękne plaże."
+#~ msgstr "Cabo Verde: Finalny odcinek — tydzień na oceanie. Pasaty, wieloryby, delfiny i oceaniczna przestrzeń. Cabo Verde to esencja egzotyki: afrykańskie rytmy, wulkaniczne krajobrazy, cudowna przyroda i piękne plaże."
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "Skipper ⚓"
+msgstr "Skipper ⚓"
+
+#~ msgid "Aktywny udział załogi w wachtach nawigacyjnych i prowadzeniu jachtu"
+#~ msgstr "Aktywny udział załogi w wachtach nawigacyjnych i prowadzeniu jachtu"
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Pościel i ręcznik"
+msgstr "Pościel i ręcznik"
+
+#~ msgid "Pełne ubezpieczenie jachtu i kaucji."
+#~ msgstr "Pełne ubezpieczenie jachtu i kaucji."
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Wyżywienie"
+msgstr "Wyżywienie"
+
+#~ msgid "OŻAGLOWANIE"
+#~ msgstr "OŻAGLOWANIE"
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Grot + Genua"
+msgstr "Grot + Genua"
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Ploter map, AIS, VHF, DSC, autopilot, EPIRB, internet sat."
+msgstr "Ploter map, AIS, VHF, DSC, autopilot, EPIRB, internet sat."
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Rezerwacja i jej opłacenie gwarantuje udział w rejsie."
+msgstr "Rezerwacja i jej opłacenie gwarantuje udział w rejsie."
+
+#: src/routes/[[lang=lang]]/admin/+layout@.svelte
+msgid "Clerk role: admin. Produkcja: skipper / operator. Dev: dodatkowy operator testowy. Brevo aktywne."
+msgstr "Clerk role: admin. Produkcja: skipper / operator. Dev: dodatkowy operator testowy. Brevo aktywne."
+
+#~ msgid "Priorytety do ręcznej reakcji skipper."
+#~ msgstr "Priorytety do ręcznej reakcji skipper."
+
+#~ msgid "Dane wymagane przez skipper'a — osobno dla każdej koi. Możesz je aktualizować do 30 dni przed rejsem."
+#~ msgstr "Dane wymagane przez skipper'a — osobno dla każdej koi. Możesz je aktualizować do 30 dni przed rejsem."
+
+#~ msgid "Stała blokada koi skipper'a — nie podlega rezerwacji."
+#~ msgstr "Stała blokada koi skipper'a — nie podlega rezerwacji."
+
+#~ msgid "Brak oznaczonej koi skipper'a dla {0}. Użyj narzędzia technicznego poniżej, jeśli baza nie była seedowana z Block 2."
+#~ msgstr "Brak oznaczonej koi skipper'a dla {0}. Użyj narzędzia technicznego poniżej, jeśli baza nie była seedowana z Block 2."
+
+#: src/routes/[[lang=lang]]/crew/confirm/[token]/+page.svelte
+msgid "Dane uczestnika zostały zatwierdzone. Możesz zamknąć tę stronę — skipper dostanie informację automatycznie."
+msgstr "Dane uczestnika zostały zatwierdzone. Możesz zamknąć tę stronę — skipper dostanie informację automatycznie."
+
+#: src/lib/components/route-section/route-section.svelte
+msgid "Kurs na południowy-zachód. Pierwszy etap oceaniczny. Madera — zielona perła Atlantyku, to wulkaniczne klify, tarasowe winnice, oraz historyczne Funchal."
+msgstr "Kurs na południowy-zachód. Pierwszy etap oceaniczny. Madera — zielona perła Atlantyku, to wulkaniczne klify, tarasowe winnice, oraz historyczne Funchal."
+
+#: src/lib/components/route-section/route-section.svelte
+msgid "Wyspy Kanaryjskie, oferują piękne wulkany, w tym majestatyczny Teide na Teneryfie. Turkusowe plaże i doskonałą kuchnię — idealny odpoczynek po rejsie przez ocean."
+msgstr "Wyspy Kanaryjskie, oferują piękne wulkany, w tym majestatyczny Teide na Teneryfie. Turkusowe plaże i doskonałą kuchnię — idealny odpoczynek po rejsie przez ocean."
+
+#: src/lib/components/route-section/route-section.svelte
+msgid "Finalny odcinek — tydzień na oceanie. Pasaty, wieloryby, delfiny i oceaniczna przestrzeń. Cabo Verde to esencja egzotyki: afrykańskie rytmy, wulkaniczne krajobrazy, cudowna przyroda i piękne plaże."
+msgstr "Finalny odcinek — tydzień na oceanie. Pasaty, wieloryby, delfiny i oceaniczna przestrzeń. Cabo Verde to esencja egzotyki: afrykańskie rytmy, wulkaniczne krajobrazy, cudowna przyroda i piękne plaże."
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Aktywny udział załogi w prowadzeniu jachtu"
+msgstr "Aktywny udział załogi w prowadzeniu jachtu"
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Pełne ubezpieczenie jachtu i kaucji"
+msgstr "Pełne ubezpieczenie jachtu i kaucji"
+
+#~ msgid "Oaglowanie"
+#~ msgstr "Oaglowanie"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Dane wymagane przez skippera — osobno dla każdej koi. Możesz je aktualizować do 30 dni przed rejsem."
+msgstr "Dane wymagane przez skippera — osobno dla każdej koi. Możesz je aktualizować do 30 dni przed rejsem."
+
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Stała blokada koi skippera — nie podlega rezerwacji."
+msgstr "Stała blokada koi skippera — nie podlega rezerwacji."
+
+#. 0: segmentMeta.name
+#: src/routes/[[lang=lang]]/admin/special/+page.svelte
+msgid "Brak oznaczonej koi skippera dla {0}. Użyj narzędzia technicznego poniżej, jeśli baza nie była seedowana z Block 2."
+msgstr "Brak oznaczonej koi skippera dla {0}. Użyj narzędzia technicznego poniżej, jeśli baza nie była seedowana z Block 2."
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Ożaglowanie"
+msgstr "Ożaglowanie"
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Priorytety do ręcznej reakcji skippera."
+msgstr "Priorytety do ręcznej reakcji skippera."

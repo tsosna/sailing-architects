@@ -121,7 +121,7 @@
 		{
 			fill: 'rgba(8,18,36,0.92)',
 			stroke: 'rgba(196,146,58,0.5)',
-			label: 'Kapitan ⚓'
+			label: 'Skipper ⚓'
 		},
 		{
 			fill: 'rgba(196,146,58,0.06)',
@@ -491,7 +491,7 @@
 					state === 'selected'
 						? 0
 						: -1}
-					aria-label={`Koja ${berth.id} — ${state === 'captain' ? 'kapitan' : state === 'complimentary' ? 'bezpłatna' : state === 'held' ? 'czasowo zablokowana' : state === 'taken' ? 'zajęta' : state === 'selected' ? 'wybrana' : 'dostępna'}`}
+					aria-label={`Koja ${berth.id} — ${state === 'captain' ? 'skipper' : state === 'complimentary' ? 'bezpłatna' : state === 'held' ? 'czasowo zablokowana' : state === 'taken' ? 'zajęta' : state === 'selected' ? 'wybrana' : 'dostępna'}`}
 					aria-pressed={state === 'selected'}
 					aria-disabled={state !== 'available' &&
 						state !== 'hovered' &&

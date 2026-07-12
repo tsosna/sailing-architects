@@ -235,7 +235,7 @@
 			<div class="panel-head">
 				<div>
 					<h2>Alert Queue</h2>
-					<p>Priorytety do ręcznej reakcji kapitana.</p>
+					<p>Priorytety do ręcznej reakcji skippera.</p>
 				</div>
 			</div>
 			<div class="alert-list">

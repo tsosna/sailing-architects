@@ -478,7 +478,7 @@
 		{#if tab === 'profile'}
 			<div id="panel-profile" role="tabpanel">
 				<p class="lead">
-					Dane wymagane przez kapitana — osobno dla każdej koi. Możesz je
+					Dane wymagane przez skippera — osobno dla każdej koi. Możesz je
 					aktualizować do 30 dni przed rejsem.
 				</p>
 				{#if participants.length === 0}

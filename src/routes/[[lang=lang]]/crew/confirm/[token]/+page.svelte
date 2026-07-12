@@ -172,7 +172,7 @@
 		<div class="result result--ok">
 			<h2>Dziękujemy za potwierdzenie</h2>
 			<p>
-				Dane uczestnika zostały zatwierdzone. Możesz zamknąć tę stronę — kapitan
+				Dane uczestnika zostały zatwierdzone. Możesz zamknąć tę stronę — skipper
 				dostanie informację automatycznie.
 			</p>
 		</div>

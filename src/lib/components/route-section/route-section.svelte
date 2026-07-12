@@ -23,7 +23,7 @@
 			days: 7,
 			price: 1800,
 			segmentId: voyageSegments[0].id,
-			desc: 'Start wyprawy. Żegluga wzdłuż wschodniego wybrzeża Hiszpanii, przez Cieśninę Gibraltarską — jedną z najważniejszych morskich bram świata.'
+			desc: 'Start wyprawy. Żegluga wzdłuż wschodniego wybrzeża Hiszpanii, do Gibraltaru, jednej z najważniejszych morskich bram świata.'
 		},
 		{
 			num: '02',
@@ -33,7 +33,7 @@
 			days: 9,
 			price: 2300,
 			segmentId: voyageSegments[1].id,
-			desc: 'Kurs na południe-zachód. Pierwsze etapy oceaniczne. Madera — zielona perła Atlantyku, wulkaniczne klify, tarasowe winnice, historyczne Funchal.'
+			desc: 'Kurs na południowy-zachód. Pierwszy etap oceaniczny. Madera — zielona perła Atlantyku, to wulkaniczne klify, tarasowe winnice, oraz historyczne Funchal.'
 		},
 		{
 			num: '03',
@@ -43,7 +43,7 @@
 			days: 9,
 			price: 2300,
 			segmentId: voyageSegments[2].id,
-			desc: 'Wyspy Kanaryjskie. Teneryfa oferuje majestatyczny wulkan Teide, turkusowe plaże i doskonałą kuchnię — idealny odpoczynek przed ostatnim etapem.'
+			desc: 'Wyspy Kanaryjskie, oferują piękne wulkany, w tym majestatyczny Teide na Teneryfie. Turkusowe plaże i doskonałą kuchnię — idealny odpoczynek po rejsie przez ocean.'
 		},
 		{
 			num: '04',
@@ -53,7 +53,7 @@
 			days: 13,
 			price: 3200,
 			segmentId: voyageSegments[3].id,
-			desc: 'Finał — prawdziwy ocean. Pasaty, wieloryby i delfiny. Cabo Verde to esencja egzotyki: afrykańskie rytmy, oceaniczna przestrzeń, wulkaniczne krajobrazy.'
+			desc: 'Finalny odcinek — tydzień na oceanie. Pasaty, wieloryby, delfiny i oceaniczna przestrzeń. Cabo Verde to esencja egzotyki: afrykańskie rytmy, wulkaniczne krajobrazy, cudowna przyroda i piękne plaże.'
 		}
 	]
 

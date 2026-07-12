@@ -6,8 +6,11 @@
 		['Szerokość', '4,6 m'],
 		['Kajuty', '5 × 2 koje = 10 miejsc'],
 		['Silnik', 'Volvo Penta 55 KM'],
-		['Żagiel główny', 'Lazy bag + furling'],
-		['Elektronika', 'Ploter, AIS, VHF, automat']
+		['Ożaglowanie', 'Grot + Genua'],
+		[
+			'Elektronika',
+			'Ploter map, AIS, VHF, DSC, autopilot, EPIRB, internet sat.'
+		]
 	] as const
 
 	const galleryImages = [

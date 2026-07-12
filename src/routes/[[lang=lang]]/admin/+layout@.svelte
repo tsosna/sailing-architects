@@ -44,7 +44,7 @@
 		</nav>
 		<div class="sidebar-note">
 			<p>
-				Clerk role: admin. Produkcja: kapitan / operator. Dev: dodatkowy
+				Clerk role: admin. Produkcja: skipper / operator. Dev: dodatkowy
 				operator testowy. Brevo aktywne.
 			</p>
 		</div>

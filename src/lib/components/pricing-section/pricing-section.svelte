@@ -5,17 +5,20 @@
 
 	const includes = [
 		'Koja na jachcie',
-		'Skipper + doświadczona załoga',
+		'Aktywny udział załogi w prowadzeniu jachtu',
 		'Wachty nawigacyjne',
 		'Wspólne gotowanie na pokładzie',
-		'Sprzęt bezpieczeństwa'
+		'Sprzęt bezpieczeństwa',
+		'Pościel i ręcznik',
+		'Pełne ubezpieczenie jachtu i kaucji'
 	]
 
 	const excludes = [
 		'Dojazd do mariny',
 		'Opłaty portowe i paliwo (~150–200 EUR/os)',
 		'Ubezpieczenie turystyczne (~250 zł/os)',
-		'Napoje i wycieczki lądowe'
+		'Napoje i wycieczki lądowe',
+		'Wyżywienie'
 	]
 
 	function bookingHref(segmentId: string) {
@@ -43,6 +46,9 @@
 						>
 					</p>
 					<p class="card__per">za osobę · 1 koja</p>
+					<p class="card__per">
+						Rezerwacja i jej opłacenie gwarantuje udział w rejsie.
+					</p>
 					<a class="card__cta" href={bookingHref(seg.id)}>Zarezerwuj</a>
 				</article>
 			{/each}
