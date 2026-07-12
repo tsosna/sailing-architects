@@ -1,6 +1,6 @@
 # AI Handoff — sailing-architects
 
-> Ostatnia aktualizacja: 2026-07-10
+> Ostatnia aktualizacja: 2026-07-12
 
 ---
 
@@ -115,6 +115,47 @@ npx wuchale                 # ekstrakcja stringów i18n
 ---
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
+
+## Sesja 2026-07-12 — INFRA-1: ESLint flat config + triaga 54 znalezisk (nauka, tryb ja-wskazuję-Tomek-pisze)
+
+### Zmiany
+
+- **`eslint.config.js`** (nowy) — flat config: `js.configs.recommended` + `typescript-eslint` + `eslint-plugin-svelte` + `eslint-config-prettier` (Prettier ma ostatnie słowo) + parser TS w plikach `.svelte`. Ignory z `.gitignore` przez `includeIgnoreFile` z `@eslint/compat` (jedno źródło prawdy) + dodatkowo `src/convex/_generated/` (commitowane do gita, więc nie w `.gitignore`). Reguły własne: `eqeqeq: ['error', 'always', { null: 'ignore' }]`, `no-navigation-without-resolve: 'warn'`, `no-unused-vars` z `^_` ignore patterns. Kod Tomek.
+- **Paczki:** eslint 10, typescript-eslint, eslint-plugin-svelte, eslint-config-prettier, globals, @eslint/js, @eslint/compat (devDependencies).
+- **`package.json`** — `lint: "prettier --check . && eslint ."` → CI dostał ESLint bez zmiany workflow (CI woła skrypt, nie narzędzie).
+- **19 fixów w src z triage'u** (commit `530ff068`): eqeqeq ×3 (`bookingClosed.ts`, `refunds.ts`, `reconcile`, `webhook` — `!= null` w reconcile/webhook zostały jako celowy idiom); martwe inicjalizatory ×3 (`_brevo.ts` `parsed`, `mutations.ts` `rowStatus`, `admin-guard.ts` `emails`); nieużywane ×3 usunięte po sprawdzeniu (`copiedAt`, `handleScrim` — brak w markupie, `panelUrl`); `ctx: any` → typy Convex ×6 (`DatabaseReader` w `crewConfirmation.ts`, `QueryCtx` + `Pick<ActionCtx, 'runMutation'>` w `reminders.ts`, `(q: any)` → inference); `prefer-const` w `email.ts`. 5 × inline disable `prefer-svelte-reactivity` z uzasadnieniami.
+- Commity `3469e8d7` (infra) + `530ff068` (fixy), push, CI zielone. Testy `bookingClosed` potwierdziły zamianę `!=` → `!==`.
+- **`docs/backlog.md`**: INFRA-1 ✅, nowe **INFRA-2** (refactor 23 miejsc na `resolve()` — warningi).
+
+### Decyzje
+
+- **Ignory z `.gitignore` (`includeIgnoreFile`), nie ręczna lista** — dwie listy tego samego zawsze się rozjeżdżają; pierwsza wersja ręczna nie łapała `.claude/worktrees/` (7 kopii repo → 4473 fałszywe problemy).
+- **`eqeqeq` z `{ null: 'ignore' }`** — `x != null` łapie `null` i `undefined` naraz; zamiana na `!==` zmieniałaby zachowanie. Konwencja w configu, nie w pamięci.
+- **`no-navigation-without-resolve` → `warn` + backlog (INFRA-2)** — reguła słuszna (typowane trasy), ale adopcja = refactor 23 miejsc, nie zadanie sesji „postaw ESLint". Warningi nie blokują CI, dług jawny.
+- **`prefer-svelte-reactivity`: zostaje `error`, 5 false positives punktowo** — wszystkie 5 to bezpieczne wzorce (one-shot builder ×3, Mapa odtwarzana w `$derived`, immutable-update Seta); inline disable z `-- powodem` zamiast wyłączenia reguły.
+- **Dwa commity: infra osobno, fixy osobno** — czytelnik `git log` odróżnia narzędzie od zmian zachowania kodu.
+
+### Wnioski
+
+- **Triaga lintu = trzy decyzje per reguła** (napraw / skonfiguruj / wyłącz z uzasadnieniem) — promowane: [[concepts/lint-triage-three-decisions]].
+- **Martwy inicjalizator okłamuje czytelnika i wyłącza definite assignment TS** — usunięcie śmiecia włącza strażnika. Promowane: [[concepts/dead-initializer-hides-control-flow]].
+- **`any` zaślepia cały łańcuch za sobą; `X | any ≡ any`; `Pick<Ctx, 'pole'>` = wąski typ operatorem** — promowane: [[concepts/any-disables-downstream-checking]].
+- **Trzy wzorce gdzie zwykłe Map/Set/URLSearchParams są OK mimo reguły** — promowane (stack): [[concepts/svelte-reactivity-map-set-vs-immutable-update]].
+- **eqeqeq złapał 3 realne `!=` w prod kodzie refundów** — dokładnie nawyk „`!==` nie `!=`" z sesji 07-08 opisany w profilu jako nieautomatyczny; od dziś pilnuje maszyna.
+- **Nieużywana zmienna = czasem symptom zgubionego podpięcia** — `handleScrim` sprawdzony w markupie przed skasowaniem (nie był wpięty → śmieć).
+- **Cursor phantom po raz kolejny** — pierwszy run ESLinta poszedł na niezapisanym configu (ignory „nie działały"); reguła `git diff`/weryfikacja po zapisie nadal aktualna.
+
+### Następne kroki
+
+#### Next
+
+- **Backlog Michała 06-19** (22 pozycje, copy najłatwiejsze) — naturalny kandydat na następną sesję.
+- Alternatywnie: **DEP-1** (deploy snapshotu polityki + audit UI) lub **INFRA-2** (resolve() refactor).
+
+#### Blocked / Later / Open questions
+
+- Drawer nie zamyka się klikiem w tło (scrim) — `handleScrim` był martwy; jeśli UX ma to robić, osobna pozycja (do potwierdzenia z Tomkiem/Michałem).
+- Bez zmian: QuickLook symlink → lokalny `pnpm build`; vault scope-tagging backfill.
 
 ## Sesja 2026-07-11 (II) — LEARN-1: ekstrakcja logiki refundów do `_lib/` + 13 testów (nauka, tryb ja-wskazuję-Tomek-pisze)
 

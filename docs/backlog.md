@@ -61,8 +61,8 @@
 ## 📚 Nauka / jakość kodu
 
 - ~~**LEARN-1 — Lekcja ekstrakcji: logika refundów do `_lib/` + testy.**~~ ✅ 2026-07-11 (sesja II) — `matchRefundTier` → `_lib/refundTiers.ts` (5 testów) + `allocateCascade` → `_lib/refundCascade.ts` (8 testów, throw ×3), handlery cienkie, commit `451e0c6a`, CI zielone.
-- **INFRA-1 — ESLint** (eslint + eslint-plugin-svelte). Trzeci brak z audytu 07-11 (po CI ✅ i testach ✅). Prettier ≠ linting: brak kontroli a11y, unused vars, wzorców Svelte.
-
+- ~~**INFRA-1 — ESLint** (eslint + eslint-plugin-svelte). Trzeci brak z audytu 07-11 (po CI ✅ i testach ✅). Prettier ≠ linting: brak kontroli a11y, unused vars, wzorców Svelte.~~ ✅ 2026-07-12 — flat config (js+ts+svelte+prettier, ignores z `.gitignore`), triaga 54 znalezisk: 19 fixów (eqeqeq ×3, martwe inicjalizatory ×3, unused ×3, ctx `any`→`QueryCtx`/`DatabaseReader` ×6, prefer-const), 5 inline-disable z uzasadnieniem, wpięte w `pnpm lint` + CI.
+- **INFRA-2 — `svelte/no-navigation-without-resolve` (23 warningi).** Przejście linków/`goto()` na `resolve()` z `$app/paths` — typowane trasy. Reguła zdegradowana do `warn` w `eslint.config.js`; refactor 23 miejsc (site-nav ×6, book ×6, admin ×5, reszta pojedyncze) jako osobna sesja.
 ## ❓ Open questions
 
 - **A7d regulamin rejsu** — progi 180/90/42/0 potwierdzone (§3.8); dokument dostarczony 07-07. Czy coś jeszcze otwarte? Zweryfikować.
