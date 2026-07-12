@@ -49,5 +49,5 @@ jobs:
       - name: Unit tests (vitest)
         run: pnpm test
 
-      - name: Lint (prettier)
+      - name: Lint (prettier + eslint)
         run: pnpm lint
