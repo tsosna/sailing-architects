@@ -154,7 +154,7 @@ Wszystko na prod (`main:production`), kod Tomka, bramki (format/lint/check) ziel
 
 #### Next
 
-- **Pytania Tomka o bezpieczeństwo danych na tej architekturze** (zapowiedziane na po sesji) — Convex/Clerk/Stripe, RODO w tle (LEGAL-1/2).
+- ~~Pytania Tomka o bezpieczeństwo danych~~ ✅ odbyte 07-13 po close session → **SEC-1/2/3 w backlogu**: szyfrowanie pól dokumentów (hash≠szyfrowanie; granica = SvelteKit server, nie klient); region EU **potwierdzony** (prod `eu-west-1` Irlandia od startu, zero migracji; nota kosztowa przy upgrade); backup prod zrobiony+zaszyfrowany, strategia 2-warstwowa ustalona. Po stronie Tomka: FileVault na Mac mini (jest OFF).
 - Bugi: BUG-4 (Held countdown zamrożony — klasa reactive clock), BUG-6 (Wyloguj w adminie), BUG-5, BUG-7.
 - **FEAT-10** — skonsultować z Michałem miejsce kroku 3 w checkoucie.
 - **FEAT-5 + feedback Seszele (07-12)** — decyzja architektoniczna multi-rejs; katamaran Lagoon 40, Seszele maj 2027, 2 terminy (8-18 i 18-29 maja), 1150 EUR + przelot + pokładówka; plakat w `docs/assets/`, termin na plakacie błędny.
