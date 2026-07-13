@@ -198,17 +198,22 @@
 		}
 	}
 
-	// Timeline ports — static for Sail Adventure 2026
+	const SLUG_TO_LEG: Record<string, number> = { s1: 0, s2: 1, s3: 2, s4: 3 }
+	const activeLeg = $derived(
+		SLUG_TO_LEG[bookingData?.segment?.slug ?? ''] ?? -1
+	)
+
+	// Timeline ports — for Sail Adventure 2026
 	const ports = [
-		{ port: 'Palma de Mallorca', date: '4.10', active: false },
-		{ port: 'Gibraltar', date: '11.10', active: true },
-		{ port: 'Madera', date: '21.10', active: true },
-		{ port: 'Teneryfa', date: '31.10', active: false },
-		{ port: 'Cabo Verde', date: '14.11', active: false }
+		{ port: 'Palma de Mallorca', date: '4.10' },
+		{ port: 'Gibraltar', date: '11.10' },
+		{ port: 'Madera', date: '21.10' },
+		{ port: 'Teneryfa', date: '31.10' },
+		{ port: 'Cabo Verde', date: '14.11' }
 	]
 
 	function legActive(i: number): boolean {
-		return ports[i]?.active === true && ports[i + 1]?.active === true
+		return i === activeLeg
 	}
 
 	const docs = [
@@ -441,7 +446,8 @@
 						{#each ports as p, i (p.port)}
 							<li
 								class="timeline__port"
-								class:timeline__port--active={p.active}
+								class:timeline__port--active={i === activeLeg ||
+									i === activeLeg + 1}
 							>
 								<span class="timeline__diamond" aria-hidden="true"></span>
 								<span class="timeline__name">{p.port}</span>
