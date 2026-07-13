@@ -45,6 +45,11 @@
 - **LEGAL-1 — Strona RODO pod `/rodo`** (`www.sailing-architect.com/rodo`). Wymagane prawnie. *(Michał 07-07 #6)*
 - **LEGAL-2 — Polityka prywatności** + link wklejony do regulaminu. Wzór: https://domy-modulowe.eu/polityka-prywatnosci *(Michał 07-07 #7)*
 
+## 🔐 Security / dane wrażliwe
+
+- **SEC-1 — Szyfrowanie pól wrażliwych + minimalizacja/retencja.** `bookingParticipants.documentNumber` (nr dowodu/paszportu) w Convex jako szyfrogram (AES-256-GCM), klucz w env Vercela — **poza Convexem** (wyciek dumpa bazy = bełkot; szyfrowanie pola jest tak dobre jak separacja klucza od bazy). Granica szyfr/deszyfr = SvelteKit server, NIE klient (klucz w przeglądarce = problem dystrybucji; serwer i tak musi widzieć plaintext: PDF, manifest, maile). Konsekwencja: zapis wrażliwych pól z klienta musi przejść przez endpoint SvelteKit + `internalMutation` (wzorzec z `/api/admin/refunds/*`), dziś idzie prosto do `upsertBookingParticipant`; tracimy indeksy po zaszyfrowanym polu (nie szukamy po nim). NAJPIERW minimalizacja: czy pole musi istnieć i jak długo — retencja po rejsie + okresie roszczeń → kasować. Haszowanie NIE (jednokierunkowe — dane trzeba odczytywać). *(dyskusja Tomek 07-13, kontekst: handoff sesja 07-12/13)*
+- **SEC-2 — Weryfikacja regionu hostingu Convex (EU?) + komplet DPA.** (a) Sprawdzić czy Convex Cloud oferuje region EU (dashboard/cennik; historycznie AWS US) — rozstrzyga, czy wolno obiecać żeglarzom „dane w Europie"; bez regionu EU uczciwa obietnica = „pola dokumentów szyfrowane, klucz poza bazą, dostęp audytowany" (→ SEC-1). (b) RODO niezależnie od regionu: transfer do USA legalny przy DPF/SCC — zebrać DPA od Convex, Clerk, Stripe, Brevo (wiąże się z LEGAL-2); obowiązek zgłoszenia naruszenia 72h istnieje zawsze. *(dyskusja Tomek 07-13)*
+
 ## 🎨 UI / landing (drobne, spoza Michał 06-19)
 
 - **UI-1 — Mobile: odwrócić kolejność CTA** po „Rezerwuj" — najpierw „Zaloguj się do panelu", potem „Rezerwacja jako manifest pokładowy". *(feedback 07-05 #3)*
