@@ -22,6 +22,31 @@
 					<a href="mailto:sailingarchitects@gmail.com"
 						>sailingarchitects@gmail.com</a
 					>
+					<a
+						class="footer__insta"
+						href="https://www.instagram.com/sailing_architects"
+						target="_blank"
+						rel="noopener"
+						><svg
+							viewBox="0 0 24 24"
+							width="18"
+							height="18"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							aria-hidden="true"
+						>
+							<rect x="2" y="2" width="20" height="20" rx="5" />
+							<circle cx="12" cy="12" r="4" />
+							<circle
+								cx="17.5"
+								cy="6.5"
+								r="1"
+								fill="currentColor"
+								stroke="none"
+							/>
+						</svg>Instagram</a
+					>
 				</div>
 			</div>
 			<div class="footer__actions">
@@ -100,7 +125,6 @@
 		font-family: var(--font-sans);
 		display: flex;
 		flex-wrap: wrap;
-		align-items: baseline;
 		gap: 8px 14px;
 		margin: 0;
 	}
@@ -198,6 +222,11 @@
 		font-size: 11px;
 		color: rgba(245, 240, 232, 0.2);
 		margin: 0;
+	}
+	.footer__insta {
+		display: inline-flex;
+		align-self: center;
+		gap: 8px;
 	}
 
 	@media (max-width: 720px) {

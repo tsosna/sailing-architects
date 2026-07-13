@@ -3307,3 +3307,13 @@ msgstr "Ożaglowanie"
 #: src/routes/[[lang=lang]]/admin/+page.svelte
 msgid "Priorytety do ręcznej reakcji skippera."
 msgstr "Priorytety do ręcznej reakcji skippera."
+
+#~ msgid "instagram"
+#~ msgstr "instagram"
+
+#: src/lib/components/site-footer/site-footer.svelte
+msgid "<0/>Instagram"
+msgstr "<0/>Instagram"
+
+#~ msgid "Instagram — sailing_architects"
+#~ msgstr "Instagram — sailing_architects"
