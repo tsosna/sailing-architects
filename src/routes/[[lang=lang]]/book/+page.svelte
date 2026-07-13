@@ -287,9 +287,19 @@
 	})
 
 	$effect(() => {
+		if (authParam !== 'signin' && authParam !== 'signup') return
+		if (isSignedIn) {
+			// eslint-disable-next-line svelte/no-navigation-without-resolve -- panelTarget() zwraca resolve()
+			void goto(panelTarget())
+			return
+		}
+		if (step !== 2) step = 2
+	})
+	$effect(() => {
 		if (!isSignedIn || step !== 2) return
 
 		if (panelLoginMode) {
+			// eslint-disable-next-line svelte/no-navigation-without-resolve -- panelTarget() zwraca resolve()
 			void goto(panelTarget())
 			return
 		}
