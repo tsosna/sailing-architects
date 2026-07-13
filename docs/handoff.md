@@ -116,6 +116,54 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
+## Sesja 2026-07-12/13 — Landing 06-19 domknięty + BUG-1/2/3 (nauka, tryb ja-wskazuję-Tomek-pisze)
+
+### Zmiany
+
+Wszystko na prod (`main:production`), kod Tomka, bramki (format/lint/check) zielone przy każdym commicie:
+
+- **`ff60d02c`** — ramka „przycisku" wokół logo usunięta (`site-nav` + `site-footer`, `border` + `box-shadow inset` z `.brand__mark`/`.footer__mark`). Michał 06-19.
+- **`875e731a`** — mapa poglądowa: realna geografia. `ports[]` dostały `lat`/`lon`, funkcja `project()` (projekcja liniowa lat/lon → viewBox, y odwrócone), `polyline` generowana z `ports` przez `.map().join()` (usunięta duplikacja współrzędnych), etykiety przy prawej krawędzi `text-anchor=end`. Mobile: większe kropki/napisy przez media query; `r`/`font-size` zostają atrybutami jako fallback (CSS `r` bez wsparcia w starszym Safari — wykryte na realnym iPhone po LAN). Michał 06-19.
+- **`462e492c`** — Instagram w stopce (`https://www.instagram.com/sailing_architects`, potwierdzone przez Michała): inline SVG glif (3 kształty), `currentColor`, `target=_blank rel=noopener`, `align-self: center` w rzędzie kontaktu (baseline z ikony — patrz Wnioski). Michał 06-19.
+- **`15261fa4`** — **BUG-2**: „Wróć" na kroku 4 checkoutu. Ping-pong: `back()` ustawiał `step=2`, `$effect` (auto-skip auth dla zalogowanych) natychmiast cofał na 4. Łańcuch wstecz zalogowanego = lustro ścieżki w przód: 4→3→1. Kompromis: detour „Uzupełnij teraz" wraca na 1, nie na 4.
+- **`a55962d7`** — **BUG-3**: „Panel" z `/book` nie działał. NIE overlay: same-route nav (`/book`→`/book?auth=`) nie remountuje komponentu, a `initialAuthParam` czytany raz w init. Nowy `$effect` na reaktywnym `authParam`: zalogowany → `goto(panelTarget())`, wylogowany → krok 2.
+- **`a5f659c3`** — **BUG-1**: timeline w panelu żeglarza zawsze podświetlał Gibraltar→Madera. Hardcoded `active` usunięte z `ports[]`; `activeLeg = $derived(SLUG_TO_LEG[slug] ?? -1)` ze `slug` segmentu bookingu (s1..s4→0..3); porty/kreska liczone z indeksu; reaguje na selektor multi-booking; brak bookingu → nic (-1).
+- **`docs/backlog.md`**: BUG-1/2/3 skreślone, **FEAT-10** dodane (przemyśleć krok 3 checkoutu — obserwacja Tomka przy BUG-2), feedback 07-12 striażowany (Seszele → FEAT-5), lista statusów feedbacku uzupełniona.
+
+### Decyzje
+
+- **Ikona na landingu jako inline SVG, bez biblioteki ikon** — 3 kształty, `currentColor`, zero zależności.
+- **Wsteczna nawigacja checkoutu zalogowanego: 4→3→1** (lustro ścieżki w przód; krok 2 auth nie istnieje dla zalogowanego). Świadomy kompromis na detour.
+- **BUG-3 fix minimalny**: `panelLoginMode` nadal liczy się z koi (nie z param `next`) — niezalogowany z wybranymi kojami klikający „Panel" po loginie trafi do checkoutu, nie panelu. Narożnik zostawiony świadomie; poprawa = przedefiniowanie `panelLoginMode` przy realnym sygnale.
+- **`svelte/no-navigation-without-resolve` przy `goto(panelTarget())`**: goły warning do zbiorczego INFRA-2 tam gdzie reguła nie widzi `resolve()` w głębi wywołania; inline disable z powodem tylko tam gdzie faktycznie `panelTarget()` (nie `authUrl()` — pierwszy disable Tomka miał przekopiowany fałszywy powód, cofnięty).
+- **FEAT-10 do decyzji z Michałem**, nie robione ad-hoc przy BUG-2 (scope discipline).
+
+### Wnioski
+
+- **Dwie „opinie" o tym samym stanie = martwy UI.** BUG-2: handler pisze `step=2`, `$effect` czytający `step` odpala się po zmianie i nadpisuje na 4. Objaw: klik „nie działa", choć handler działa. Diagnoza: nie debuguj przycisku — szukaj, kto jeszcze pisze do stanu. → wiki (stack).
+- **Same-route navigation nie remountuje komponentu strony.** BUG-3: `const x = page.url.searchParams.get(...)` w init = snapshot z montowania; nawigacja query-only aktualizuje tylko reaktywne `page.url`. Odczyt z URL na trasie, która może nawigować sama do siebie → zawsze `$derived`. → wiki (stack).
+- **CSS-owa geometria SVG (`r`, `cx`) to nowość — starsze Safari ignoruje.** „Działa w Chrome" ≠ działa; realny iPhone po LAN pokazał brak kropek. Wzorzec: atrybut prezentacyjny = baza działająca wszędzie, CSS w media query = enhancement (CSS zawsze wygrywa z atrybutem gdy wspierany). caniuse przed użyciem świeżych własności. → wiki (universal).
+- **Projekcja liniowa (normalizacja) lat/lon → piksele**: `frakcja = (v-min)/(max-min)`, `px = start + frakcja·długość`; oś Y ekranu rośnie w dół, lat na północ → frakcja od `latMax`. Kontrola brzegowa na kartce (min→start, max→koniec) łapie `/` zamiast `*` zanim uruchomisz. → wiki (universal).
+- **„Popraw jedno miejsce, nie trzy."** Rachunek wskazał jeden zły operator; Tomek zmienił operator + stałą + bazę — wyszło równoważne przypadkiem (frakcja 0..−1, komentarz kłamał). Gdy test wskazuje błąd punktowy, zmiana jest punktowa.
+- **Baseline inline-flex bierze się z pierwszego dziecka** — svg bez baseline tekstu → link z ikoną „sterczy" w rzędzie `align-items: baseline`. Fix: `align-self: center` (opt-out jednego elementu).
+- **Fakt per-user nie mieszka w danych wspólnych** (BUG-1): `active: true` w statycznej tablicy portów = zapisane kłamstwo; podświetlenie derive ze `slug` bookingu. Kolejna odsłona storage-vs-derive.
+- **Przekopiowany powód w `eslint-disable` kłamie jak przekopiowany komentarz** — uzasadnienie musi opisywać TĘ linię (`authUrl()` ≠ `panelTarget()`).
+- **Diagnoza „stan na dysku vs stan w przeglądarce”**: gdy kod mówi jedno a przeglądarka drugie — najpierw devtools Computed (co realnie załadowane), nie debugowanie kodu. Pułapka odwrotna: wbudowany browser (Chromium) nie pokaże buga Safari — testuj na realnym urządzeniu, gdy platform-specific.
+
+### Następne kroki
+
+#### Next
+
+- **Pytania Tomka o bezpieczeństwo danych na tej architekturze** (zapowiedziane na po sesji) — Convex/Clerk/Stripe, RODO w tle (LEGAL-1/2).
+- Bugi: BUG-4 (Held countdown zamrożony — klasa reactive clock), BUG-6 (Wyloguj w adminie), BUG-5, BUG-7.
+- **FEAT-10** — skonsultować z Michałem miejsce kroku 3 w checkoucie.
+- **FEAT-5 + feedback Seszele (07-12)** — decyzja architektoniczna multi-rejs; katamaran Lagoon 40, Seszele maj 2027, 2 terminy (8-18 i 18-29 maja), 1150 EUR + przelot + pokładówka; plakat w `docs/assets/`, termin na plakacie błędny.
+
+#### Blocked / Later / Open questions
+
+- BUG-3 narożnik: `panelLoginMode` z koi vs param `next` (patrz Decyzje).
+- I18N-1, INFRA-2, DEP-1a/b — bez zmian.
+
 ## Sesja 2026-07-12 (II) — Landing copy wg feedbacku Michała 06-19 (nauka, tryb ja-wskazuję-Tomek-pisze)
 
 ### Zmiany

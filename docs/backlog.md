@@ -33,7 +33,7 @@
 - **FEAT-2 — Faktury + KSeF** (duży moduł, research 2026-07-03). Convex action, FA(3) XML, cert KSeF typ 1 Michała. Szczegóły: handoff „Otwarte problemy".
 - **FEAT-3 — Audit log rozbudowa:** filtry server-side (`by_action`/`by_booking`) + `policy_updated` before→after diff. MVP już żyje (`/admin/audit`).
 - **FEAT-4 — unhandledStripeEvents resolution UI** (refundy z Stripe Dashboard) — lista + decyzje admina (release/keep/orphan), `resolution` enum już w schema.
-- **FEAT-5 — Multi-rejs / multi-segment platform + teaser przyszłych rejsów.** Przerobić landing + bazę pod wiele rejsów, tak by współistniały: aktualny (wyprzedany lub w sprzedaży) + zapowiadany nowy. Elementy: (a) zakładka np. „REJS GRECJA maj 2027" z opisem + „termin wkrótce"; (b) **wysuwana belka pod menu** „chcę szczegóły" → email capture → powiadomienie przy starcie sprzedaży + **5% rabat** early-bird; (c) **rozbudowa menu — przechodzenie między rejsami**. DUŻY, przemyśleć cały landing. *(Michał 07-07 #3 + Tomek 07-10 #1-3)*
+- **FEAT-5 — Multi-rejs / multi-segment platform + teaser przyszłych rejsów.** Przerobić landing + bazę pod wiele rejsów, tak by współistniały: aktualny (wyprzedany lub w sprzedaży) + zapowiadany nowy. Elementy: (a) zakładka np. „REJS GRECJA maj 2027" z opisem + „termin wkrótce"; (b) **wysuwana belka pod menu** „chcę szczegóły" → email capture → powiadomienie przy starcie sprzedaży + **5% rabat** early-bird; (c) **rozbudowa menu — przechodzenie między rejsami**. DUŻY, przemyśleć cały landing. *(Michał 07-07 #3 + Tomek 07-10 #1-3)* **Pierwszy konkretny drugi rejs (Michał 07-12): Seszele, katamaran Lagoon 40, 4 kajuty×2 os. (prywatne łazienki, klima, agregat, odsalarka), maj 2027, 2 terminy: 8-18 i 18-29 maja (można 22 dni), 1150 EUR/os. + przelot + pokładówka. Plakat: `docs/assets/WhatsApp Image 2026-07-10 at 15.34.38.jpeg` — termin na plakacie BŁĘDNY.**
 - **FEAT-6 — Indywidualne ceny koi** (rabat per koja; boczna kajuta taniej „gdy chcemy"). Mechanizm: procent rabatu przy koi albo opis + reużycie działającego mechanizmu zwrotu. *(Michał 07-07 #2 + Tomek 07-07 #2)*
 - **FEAT-7 — Płeć żeglarza** w schemacie + opcjonalne pokazywanie K/M na sprzedanych miejscach. *(Michał 07-07 #4)*
 - **FEAT-8 — Badge „BRAK MIEJSC"** gdy odcinek/rejs wyprzedany (wyraźny napis że jest, ale sprzedany). *(Michał 07-07 #1)*
@@ -53,7 +53,7 @@
 
 ## 🎨 Landing — uwagi Michała 2026-06-19 (22 poz.)
 
-→ **Szczegóły: `handoff.md` sekcja „Backlog Michała — landing (2026-06-19)".** ~~13 pozycji copy~~ ✅ 2026-07-12 (commit `9a02312e`: etapy 01-04, cennik + gwarancja miejsca, jacht, FAQ q2, kapitan→skipper w całym src). **Zostają:** ramka logo w hero (bug), mapa — realna geografia + większe napisy/kropki mobile, link Instagram, galeria (Later — Michał odłożył), blok „nikt nie wie o co chodzi" (czeka na autora); PDF itinerary = FEAT-1. Otwarte z copy: czy „Wachty nawigacyjne" zostaje osobno obok „aktywnego udziału załogi" (pytanie do Michała).
+→ **Szczegóły: `handoff.md` sekcja „Backlog Michała — landing (2026-06-19)".** ~~13 pozycji copy~~ ✅ 2026-07-12 (commit `9a02312e`). ~~Ramka logo~~ ✅ 07-13 (`ff60d02c`). ~~Mapa: realna geografia + mobile~~ ✅ 07-13 (`875e731a`). ~~Link Instagram~~ ✅ 07-13 (`462e492c`, `instagram.com/sailing_architects`). **Zostają tylko:** galeria (Later — Michał odłożył), zakładka „O nas" (Later), blok „nikt nie wie o co chodzi" (czeka na autora); PDF itinerary = FEAT-1. Otwarte z copy: czy „Wachty nawigacyjne" zostaje osobno obok „aktywnego udziału załogi" (pytanie do Michała).
 
 ## ⚙️ Post-MVP admin (świadomie odłożone, ~33 poz.)
 
@@ -79,6 +79,11 @@
 > Diff: `ls docs/feedback/` vs ta lista. Każdy plik nieoznaczony ✅ → striażuj do backlogu i dopisz tu. Chroni przed zgubieniem nowego feedbacku.
 
 - ✅ `2026-06-19-uwagi-do-strony.docx` — striażowany 07-10 → „Landing Michała 06-19" (22 poz.)
+- ✅ `2026-07-05.md` — striażowany wcześniej → BUG-2/BUG-3/UI-1 (status dopisany 07-13)
+- ✅ `2026-07-07.md` — striażowany wcześniej → FEAT-5..8, LEGAL-1/2, UI-2/3 (status dopisany 07-13)
+- ✅ `2026-07-10.md` — striażowany wcześniej → BUG-6/avatar, FEAT-5 (status dopisany 07-13)
+- ✅ `2026-07-12.md` — striażowany 07-13 → FEAT-5 (rejs Seszele maj 2027, szczegóły + plakat w pozycji FEAT-5)
+- ℹ️ `2026_07_07_SA_regulamin_rejsu.doc` — nie feedback, dokument źródłowy (regulamin; progi §3.8 wykorzystane przy ADR-002)
 - ✅ `2026-07-05.md` — striażowany 07-10 → BUG-2, BUG-3, UI-1 (3 poz.)
 - ✅ `2026-07-07.md` — striażowany 07-10 → FEAT-5..9, LEGAL-1..2, UI-2..3 (10 poz.)
 - ✅ `2026_07_07_SA_regulamin_rejsu.doc` — źródło regulaminu, skonsumowany 07-07 → ADR-002 / refund policy §3.8 (progi 180/90/42/0)
