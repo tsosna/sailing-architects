@@ -14,7 +14,7 @@
 ## 🔴 Bugi otwarte
 
 - **BUG-1 — Panel żeglarza: „Cała trasa rejsu" zawsze podświetla Gibraltar→Madera.** `dashboard/+page.svelte:202-211` — `ports[]` ma hardcoded `active: true` na Gibraltar+Madera; `legActive()` podświetla odcinek gdy oba końce `active`. Fix: wyprowadź `active` z segmentu bookingu (`bookingData`; slug→odcinek s1..s4). *(dup: admin-post-mvp „…zawsze podświetla Gibraltar → Madera")*
-- **BUG-2 — Checkout krok 4 (`/book?segment=s1`): przycisk „Wróć" nie działa.** *(feedback 07-05; ta sama uwaga w docx Michała 06-19)*
+- ~~**BUG-2 — Checkout krok 4 (`/book?segment=s1`): przycisk „Wróć" nie działa.**~~ ✅ 2026-07-13 (commit `15261fa4`: ping-pong back()↔$effect; łańcuch wstecz zalogowanego 4→3→1). *(feedback 07-05; ta sama uwaga w docx Michała 06-19)*
 - **BUG-3 — Po kliknięciu „Rezerwuj" klik na „Panel" nie działa** („Poradnik" działa) — podejrzenie: stan/overlay blokuje część nawigacji. *(feedback 07-05)*
 - **BUG-4 — Alert „Held kończy się za X min" zamrożony.** `admin.ts:319-331` zwraca sformatowany string zamiast raw `holdExpiresAt`; klient nie odlicza. Fix: zwróć raw, formatuj z lokalnego `now` (jak reactive clock KPI). *(dup: admin-post-mvp „Reactive clock dla odliczania held")*
 - **BUG-5 — `/book` Step 5: fallback „Całość" maskuje brak planu w bazie.** Klasa UX (fallback ukrywa błąd konfiguracji). *(admin-post-mvp „`/book` Step 5 — fallback…")*
