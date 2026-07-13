@@ -38,6 +38,7 @@
 - **FEAT-7 — Płeć żeglarza** w schemacie + opcjonalne pokazywanie K/M na sprzedanych miejscach. *(Michał 07-07 #4)*
 - **FEAT-8 — Badge „BRAK MIEJSC"** gdy odcinek/rejs wyprzedany (wyraźny napis że jest, ale sprzedany). *(Michał 07-07 #1)*
 - **FEAT-9 — Miejsca specjalne: podpiąć edycję danych żeglarza** (`/admin/special`). *(Tomek 07-07 #1)*
+- **FEAT-10 — Checkout: przemyśleć miejsce kroku 3 (dane załogi).** Obserwacja przy BUG-2: krok 3 miesza dane żeglarza z procesem płatności; jest hybrydą etapu flow i formularza-detour z kroku 4 (stąd niejasny przycisk „Zapisz i wróć"). Dane są już opcjonalne i uzupełnialne po płatności w panelu → kandydat: wyjąć krok 3 z checkoutu (zostawić tylko ścieżkę panelową + detour z podsumowania) albo przesunąć za płatność. Decyzja produktowa — zdanie Michała. *(Tomek 07-13, przy naprawie BUG-2)*
 
 ## ⚖️ Legal / compliance
 

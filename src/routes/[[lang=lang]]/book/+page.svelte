@@ -640,12 +640,12 @@
 		}
 
 		if (step === 3 && isSignedIn) {
-			step = 4
+			step = 1
 			return
 		}
 
 		if (step === 4 && isSignedIn && !panelLoginMode) {
-			step = 2
+			step = 3
 			return
 		}
 
