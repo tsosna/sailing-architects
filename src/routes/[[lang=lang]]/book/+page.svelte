@@ -24,6 +24,7 @@
 	import { SignIn, SignUp, useClerkContext } from 'svelte-clerk'
 	import { api } from '$convex/api'
 	import { bookingSelection } from '$lib/state/booking-selection.svelte'
+	import { browser } from '$app/environment'
 
 	const STEPS = [
 		{ id: 1, label: 'Koje' },
@@ -100,6 +101,12 @@
 
 	let selectedSegment = $state(initialSegmentParam ?? voyageSegments[0].id)
 	let selectedBerths = $state(initialBerths)
+
+	if (browser) {
+		bookingSelection.selectedSegment =
+			initialSegmentParam ?? voyageSegments[0].id
+		bookingSelection.selectedBerths = [...initialBerths]
+	}
 
 	const segment = $derived(
 		voyageSegments.find((s) => s.id === selectedSegment) ?? voyageSegments[0]
@@ -206,6 +213,7 @@
 	function selectSegment(id: string) {
 		selectedSegment = id
 		selectedBerths = []
+		bookingSelection.selectSegment(id)
 	}
 
 	function toggleBerth(id: string) {
@@ -214,6 +222,7 @@
 		} else {
 			selectedBerths = [...selectedBerths, id]
 		}
+		bookingSelection.toggleBerth(id)
 	}
 
 	async function continueFromSelection() {

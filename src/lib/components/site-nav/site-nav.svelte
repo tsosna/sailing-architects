@@ -2,6 +2,7 @@
 	import { resolve } from '$app/paths'
 	import { LanguageSwitcher } from '$components/language-switcher'
 	import { bookingSelection } from '$lib/state/booking-selection.svelte'
+	import { useClerkContext } from 'svelte-clerk'
 
 	let scrolled = $state(false)
 	let menuOpen = $state(false)
@@ -34,6 +35,15 @@
 
 	const reserveHref = $derived(bookingSelection.bookingPath(resolve('/book')))
 
+	const ctx = useClerkContext()
+	const isSignedIn = $derived(!!ctx.auth.userId)
+
+	const reserveLabel = $derived(
+		bookingSelection.hasSelectedBerths && isSignedIn
+			? 'Kontynuuj rezerwację →'
+			: 'Rezerwuj'
+	)
+
 	function closeMenu() {
 		menuOpen = false
 	}
@@ -56,7 +66,7 @@
 			class="btn btn--ghost"
 			href={`${resolve('/book')}?auth=signin&next=dashboard`}>Panel</a
 		>
-		<a class="btn btn--primary" href={reserveHref}>Rezerwuj</a>
+		<a class="btn btn--primary" href={reserveHref}>{reserveLabel}</a>
 	</div>
 
 	<button
@@ -97,7 +107,7 @@
 			<a
 				class="btn btn--primary btn--full"
 				href={reserveHref}
-				onclick={closeMenu}>Rezerwuj</a
+				onclick={closeMenu}>{reserveLabel}</a
 			>
 		</div>
 

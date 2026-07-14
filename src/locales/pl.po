@@ -86,7 +86,6 @@ msgid "Panel"
 msgstr "Panel"
 
 #: src/lib/components/site-nav/site-nav.svelte
-#: src/lib/components/site-nav/site-nav.svelte
 msgid "Rezerwuj"
 msgstr "Rezerwuj"
 
@@ -1297,6 +1296,7 @@ msgstr "Wybierz koję na planie lub z listy, aby kontynuować."
 msgid "Najpierw wybierz etap i miejsce na planie jachtu. Logowanie pojawi się dopiero po kliknięciu „Kontynuuj rezerwację”."
 msgstr "Najpierw wybierz etap i miejsce na planie jachtu. Logowanie pojawi się dopiero po kliknięciu „Kontynuuj rezerwację”."
 
+#: src/lib/components/site-nav/site-nav.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Kontynuuj rezerwację →"
 msgstr "Kontynuuj rezerwację →"
