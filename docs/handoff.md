@@ -116,6 +116,45 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
+## Sesja 2026-07-14 — Feedback 07-17: nav „Kontynuuj rezerwację" + sync stanu wyboru koi (nauka, tryb ja-wskazuję-Tomek-pisze)
+
+### Zmiany
+
+Commit `d1aba342` na main, CI zielone. **NA PROD NIE PCHNIĘTE** — decyzja Tomka: push `main:production` zbiorczo po kolejnych featach.
+
+- **`site-nav.svelte`**: `useClerkContext()` + `isSignedIn` (lustro book page), `reserveLabel = $derived(hasSelectedBerths && isSignedIn ? 'Kontynuuj rezerwację →' : 'Rezerwuj')`, podmiana etykiety w obu miejscach (desktop + mobile menu). Feedback Michała/Tomka 07-17.
+- **`book/+page.svelte`**: sync lokalnego stanu wyboru do globalnego `bookingSelection` (Plan A): (1) init z URL w `if (browser)` — gołe przypisania z surowych `initialSegmentParam`/`initialBerths`; (2) `selectSegment` woła też `bookingSelection.selectSegment(id)`; (3) `toggleBerth` woła też `bookingSelection.toggleBerth(id)`. Reset po rezerwacji istniał wcześniej.
+- **`src/locales/{en,pl}.po`**: automat wuchale (przeniesione referencje `Rezerwuj`/`Kontynuuj rezerwację →`).
+- **`docs/backlog.md`**: REFACTOR-1 dodany, feedback `2026-07-17.md` striażowany ✅, reconcile 07-14.
+
+### Decyzje
+
+- **Plan A (sync dwóch stanów) zamiast B (jedno źródło prawdy)** — decyzja Tomka z uzasadnieniem: mniejsze ryzyko regresji dziś; B jako docelowy kierunek → **REFACTOR-1** w backlogu.
+- **Warunek etykiety wg feedbacku literalnie**: zalogowany **AND** koje wybrane. (Sam wybór bez loginu → nadal „Rezerwuj".)
+- **Bez ARIA na dynamicznej etykiecie** — widoczny tekst linku = accessible name; `aria-label` by się rozjechał z dynamiczną treścią, `aria-live` nie dla linku w nav (Tomek sam zapytał).
+- **6 warningów `no-navigation-without-resolve` w site-nav — pre-existing** (potwierdzone eslintem na HEAD przez `git stash`), zostają do zbiorczego INFRA-2.
+
+### Wnioski
+
+- **„Reaktywność działa, źródło złe."** Nav nie reagował nie przez brak `$derived`, tylko przez **dwa niezależne stany** tego samego faktu: lokalny `selectedBerths` w `/book` vs globalny `bookingSelection` (pisany tylko z landingu). Diagnoza empiryczna: test na landingu (gdzie pisze do globala) potwierdził mechanizm przed fixem. Kuzyn BUG-1/BUG-2 — duplikacja stanu.
+- **Pierwszy top-level zapis do module singletona = pierwszy zapis podczas SSR** → wyciek stanu między userami (jeden proces Node, wielu userów). Dotąd singleton był bezpieczny „przypadkiem" — pisały do niego wyłącznie handlery kliknięć (client-only). Guard `if (browser)` na init z URL. Teoria z 05-12 domknięta na realnym kodzie. → wiki (rozszerzenie [[svelte-context-vs-module-singleton-ssr]]).
+- **`state_referenced_locally` — ta sama klasa co BUG-3** (snapshot `$state` w init). Gdy snapshot jest zamierzony (jednorazowy przepis initu), czytaj **surowe wartości źródłowe** (`initialSegmentParam`, `initialBerths`) zamiast `$state` — zero warninga, ta sama semantyka.
+- **`authParam` ≠ stan zalogowania** — URL param wybiera formularz (signin/signup); prawda o sesji = `ctx.auth.userId` z Clerk. URL można wpisać ręcznie, sesji nie.
+- **`git add 'src/locales/*.po'`** — glob w single quotes rozwija **git** (match względem repo), nie zsh.
+- **Weryfikacja „czy warning mój": eslint na HEAD** (`git stash` → lint → `git stash pop`) — te same 6 warningów przed zmianą = nie moje.
+
+### Następne kroki
+
+#### Next
+
+- Kolejne featy, potem zbiorczy push `main:production` (na prodzie czeka już `d1aba342`).
+- Bugi: BUG-4 (reactive clock Held), BUG-6 (Wyloguj w adminie), BUG-5, BUG-7; FEAT-10 (decyzja z Michałem); FEAT-5.
+
+#### Blocked / Later / Open questions
+
+- REFACTOR-1 — `/book` na jedno źródło prawdy wyboru koi (Plan B) — later, osobna sesja.
+- Bez zmian: I18N-1, INFRA-2, DEP-1a/b, SEC-1/2/3 (FileVault po stronie Tomka — nadal OFF).
+
 ## Sesja 2026-07-12/13 — Landing 06-19 domknięty + BUG-1/2/3 (nauka, tryb ja-wskazuję-Tomek-pisze)
 
 ### Zmiany

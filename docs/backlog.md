@@ -1,6 +1,6 @@
 # Backlog — sailing-architects
 
-> **Jedyne źródło prawdy dla OTWARTYCH pozycji.** Ostatni reconcile: 2026-07-10.
+> **Jedyne źródło prawdy dla OTWARTYCH pozycji.** Ostatni reconcile: 2026-07-14.
 >
 > Zasady:
 > - Tu trafia **każda** otwarta pozycja (bug / feature / infra). Rozwiązane → skreśl `~~…~~` z datą albo usuń.
@@ -70,6 +70,7 @@
 - ~~**LEARN-1 — Lekcja ekstrakcji: logika refundów do `_lib/` + testy.**~~ ✅ 2026-07-11 (sesja II) — `matchRefundTier` → `_lib/refundTiers.ts` (5 testów) + `allocateCascade` → `_lib/refundCascade.ts` (8 testów, throw ×3), handlery cienkie, commit `451e0c6a`, CI zielone.
 - ~~**INFRA-1 — ESLint** (eslint + eslint-plugin-svelte). Trzeci brak z audytu 07-11 (po CI ✅ i testach ✅). Prettier ≠ linting: brak kontroli a11y, unused vars, wzorców Svelte.~~ ✅ 2026-07-12 — flat config (js+ts+svelte+prettier, ignores z `.gitignore`), triaga 54 znalezisk: 19 fixów (eqeqeq ×3, martwe inicjalizatory ×3, unused ×3, ctx `any`→`QueryCtx`/`DatabaseReader` ×6, prefer-const), 5 inline-disable z uzasadnieniem, wpięte w `pnpm lint` + CI.
 - **INFRA-2 — `svelte/no-navigation-without-resolve` (23 warningi).** Przejście linków/`goto()` na `resolve()` z `$app/paths` — typowane trasy. Reguła zdegradowana do `warn` w `eslint.config.js`; refactor 23 miejsc (site-nav ×6, book ×6, admin ×5, reszta pojedyncze) jako osobna sesja.
+- **REFACTOR-1 — `/book`: jedno źródło prawdy wyboru koi.** Dziś dwa stany o tym samym fakcie: lokalny `selectedSegment`/`selectedBerths` w `book/+page.svelte` + globalny `bookingSelection` (czyta nav), synchronizowane ręcznie w 3 punktach (Plan A, 07-14). Docelowo `/book` czyta/pisze wyłącznie `bookingSelection` (klasa dostaje init z URL), lokalne zmienne znikają. Uwaga na SSR: init do singletona tylko w `if (browser)`. *(decyzja Tomka 07-14 przy feedbacku 07-17)*
 
 ## 🌍 i18n
 
@@ -89,6 +90,7 @@
 - ✅ `2026-07-07.md` — striażowany wcześniej → FEAT-5..8, LEGAL-1/2, UI-2/3 (status dopisany 07-13)
 - ✅ `2026-07-10.md` — striażowany wcześniej → BUG-6/avatar, FEAT-5 (status dopisany 07-13)
 - ✅ `2026-07-12.md` — striażowany 07-13 → FEAT-5 (rejs Seszele maj 2027, szczegóły + plakat w pozycji FEAT-5)
+- ✅ `2026-07-17.md` — striażowany 07-14 → zrealizowany od ręki (1 poz.): nav „Kontynuuj rezerwację →" gdy zalogowany + koje wybrane (commit `d1aba342`)
 - ℹ️ `2026_07_07_SA_regulamin_rejsu.doc` — nie feedback, dokument źródłowy (regulamin; progi §3.8 wykorzystane przy ADR-002)
 - ✅ `2026-07-05.md` — striażowany 07-10 → BUG-2, BUG-3, UI-1 (3 poz.)
 - ✅ `2026-07-07.md` — striażowany 07-10 → FEAT-5..9, LEGAL-1..2, UI-2..3 (10 poz.)
@@ -97,6 +99,7 @@
 
 ## ✅ Rozwiązane niedawno (żeby nie wracały)
 
+- ~~Nav „Rezerwuj" statyczny mimo zalogowania + wyboru koi (feedback 07-17)~~ — 07-14 (`d1aba342`: `reserveLabel` w site-nav + sync `/book` → `bookingSelection`; na main, prod czeka na zbiorczy push).
 - ~~Panel żeglarza pokazywał zły/wygasły booking~~ — 07-05 (`bookingByUser` lista + filtr `confirmed`).
 - ~~Panel żeglarza: tylko jedna koja mimo wielu~~ — 07-05 (selektor rejsu).
 - ~~PDF potwierdzenia font poza bundlem~~ — 07-07 (`?url` + `read()`).
