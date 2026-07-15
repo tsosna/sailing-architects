@@ -156,7 +156,7 @@ Kod Tomek, bramki zielone przy obu commitach. **Push main + `main:production` zr
 
 #### Blocked / Later / Open questions
 
-- Decyzja Tomka do potwierdzenia: nota zamiast usunięcia w [[svelte-clerk-button-global-styling]] (patrz Decyzje).
+- ~~Decyzja Tomka do potwierdzenia: nota zamiast usunięcia w [[svelte-clerk-button-global-styling]]~~ ✅ potwierdzone 07-15: artykuł zostaje z notą.
 - Bez zmian: REFACTOR-1, I18N-1, INFRA-2, DEP-1a/b, SEC-1/2/3 (FileVault nadal OFF po stronie Tomka).
 
 ## Sesja 2026-07-14 — Feedback 07-17: nav „Kontynuuj rezerwację" + sync stanu wyboru koi (nauka, tryb ja-wskazuję-Tomek-pisze)
