@@ -29,6 +29,7 @@ type AlertItem = {
 	subtitle: string
 	bookingRef?: string
 	bookingId?: string
+	holdExpiresAt?: number
 	priority: number
 	suggestedActions: Array<'send_reminder' | 'copy_whatsapp' | 'open_booking'>
 }
@@ -406,7 +407,8 @@ export const overviewBySegment = query({
 						: `Held kończy się za ${minutesLeft} min`,
 				subtitle: `Koja ${b.berthId}`,
 				priority: isNear ? 60 : 10,
-				suggestedActions: []
+				suggestedActions: [],
+				holdExpiresAt: b.holdExpiresAt ?? 0
 			})
 		}
 

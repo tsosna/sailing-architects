@@ -3317,3 +3317,12 @@ msgstr ""
 
 #~ msgid "Instagram — sailing_architects"
 #~ msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Held kończy się teraz"
+msgstr ""
+
+#. 0: holdCountdown
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Held kończy się za {0}"
+msgstr ""

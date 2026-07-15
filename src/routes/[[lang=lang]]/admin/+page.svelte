@@ -243,10 +243,20 @@
 					<p class="empty-row">Brak aktywnych alertów. Czysto.</p>
 				{:else}
 					{#each data.alerts as alert (alert.id)}
+						{@const holdCountdown =
+							alert.holdExpiresAt != null
+								? formatHoldCountdown(alert.holdExpiresAt, now)
+								: null}
 						<article class="alert" data-level={alert.level}>
 							<div class="alert-top">
 								<div>
-									<h3>{alert.title}</h3>
+									<h3>
+										{holdCountdown === null
+											? alert.title
+											: holdCountdown === 'teraz'
+												? 'Held kończy się teraz'
+												: `Held kończy się za ${holdCountdown}`}
+									</h3>
 									<p>{alert.subtitle}</p>
 								</div>
 								<span class="badge badge--{alert.level}">
