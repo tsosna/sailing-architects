@@ -1,6 +1,6 @@
 # Backlog — sailing-architects
 
-> **Jedyne źródło prawdy dla OTWARTYCH pozycji.** Ostatni reconcile: 2026-07-14.
+> **Jedyne źródło prawdy dla OTWARTYCH pozycji.** Ostatni reconcile: 2026-07-15.
 >
 > Zasady:
 > - Tu trafia **każda** otwarta pozycja (bug / feature / infra). Rozwiązane → skreśl `~~…~~` z datą albo usuń.
@@ -16,9 +16,9 @@
 - ~~**BUG-1 — Panel żeglarza: „Cała trasa rejsu" zawsze podświetla Gibraltar→Madera.**~~ ✅ 2026-07-13 (hardcoded `active` usunięte z `ports[]`; `activeLeg` derived ze `slug` segmentu bookingu, mapa s1..s4→0..3; reaguje na selektor multi-booking). *(dup: admin-post-mvp „…zawsze podświetla Gibraltar → Madera" — skreślić i tam)*
 - ~~**BUG-2 — Checkout krok 4 (`/book?segment=s1`): przycisk „Wróć" nie działa.**~~ ✅ 2026-07-13 (commit `15261fa4`: ping-pong back()↔$effect; łańcuch wstecz zalogowanego 4→3→1). *(feedback 07-05; ta sama uwaga w docx Michała 06-19)*
 - ~~**BUG-3 — Po kliknięciu „Rezerwuj" klik na „Panel" nie działa** („Poradnik" działa)~~ ✅ 2026-07-13 (nie overlay: same-route nav `/book`→`/book?auth=` nie remountuje komponentu, `initialAuthParam` czytany raz w init; fix: `$effect` na reaktywnym `authParam` — zalogowany → `panelTarget()`, wylogowany → step 2). *(feedback 07-05)*
-- **BUG-4 — Alert „Held kończy się za X min" zamrożony.** `admin.ts:319-331` zwraca sformatowany string zamiast raw `holdExpiresAt`; klient nie odlicza. Fix: zwróć raw, formatuj z lokalnego `now` (jak reactive clock KPI). *(dup: admin-post-mvp „Reactive clock dla odliczania held")*
+- ~~**BUG-4 — Alert „Held kończy się za X min" zamrożony.**~~ ✅ 2026-07-15 (commit `650887e9`: query zwraca surowe `holdExpiresAt?` w alercie, klient formatuje z reactive clock `{@const}` + ternary; na prod). *(dup: admin-post-mvp „Reactive clock dla odliczania held" — skreślić i tam)*
 - **BUG-5 — `/book` Step 5: fallback „Całość" maskuje brak planu w bazie.** Klasa UX (fallback ukrywa błąd konfiguracji). *(admin-post-mvp „`/book` Step 5 — fallback…")*
-- **BUG-6 — Admin: brak akcji „Wyloguj" w `/admin` w ogóle** + brak avatar/user-menu (standard „zalogowany"). Dashboard żeglarza ma surowy `<SignOutButton>` (`dashboard/+page.svelte:247`) do zawinięcia. Idiom: svelte-clerk `<UserButton />`. *(dup: admin-post-mvp „Brak akcji Wyloguj w layoucie /admin"; Tomek 07-10)*
+- ~~**BUG-6 — Admin: brak akcji „Wyloguj" w `/admin` w ogóle** + brak avatar/user-menu.~~ ✅ 2026-07-15 (commit `1274523d`: `<UserButton />` w admin sidebar dół + mobilebar + dashboard header; dark theme popovera naprawiony — nowe nazwy zmiennych Clerk + `elements.userButtonPopoverActionButton`; na prod). Style `.btn--signout` zostają — reużyte przez selektor rejsu. *(dup: admin-post-mvp „Brak akcji Wyloguj w layoucie /admin" — skreślić i tam)*
 - **BUG-7 — Walidacja formy edycji uczestnika w drawerze.** `adminUpdateParticipantData` przyjmuje surowe stringi bez format/enum check (email, data, enumy). Fix: współdziel zod z booking flow. *(admin-post-mvp „Walidacja pól formy…")*
 
 ## 🚀 Deploy
@@ -56,6 +56,7 @@
 - **UI-1 — Mobile: odwrócić kolejność CTA** po „Rezerwuj" — najpierw „Zaloguj się do panelu", potem „Rezerwacja jako manifest pokładowy". *(feedback 07-05 #3)*
 - **UI-2 — Wolne/zajęte miejsca wyraźniej** w layout strony. *(Michał 07-07 #5)*
 - **UI-3 — Podciągnąć wyrazistość/percepcję strony i panelu** (Michał: obrazy `assets/WhatsApp Image 2026-07-07 at 15.08.44/15.09.09.jpeg`). *(Michał 07-07 #8)*
+- **UI-4 — Admin: mobile-tabs rozjeżdżają się przy szerokości ~1180px.** Breakpoint chowa sidebar, a taby sekcji renderują się jako ogromne kafle na szerokości tabletu — layout „do kitu" między desktopem a telefonem. Przejrzeć media query w `admin/+layout@.svelte` (breakpoint + wysokość/proporcje `.mobile-tabs`). *(Tomek 07-15, zauważone przy BUG-6)*
 
 ## 🎨 Landing — uwagi Michała 2026-06-19 (22 poz.)
 
@@ -70,6 +71,7 @@
 - ~~**LEARN-1 — Lekcja ekstrakcji: logika refundów do `_lib/` + testy.**~~ ✅ 2026-07-11 (sesja II) — `matchRefundTier` → `_lib/refundTiers.ts` (5 testów) + `allocateCascade` → `_lib/refundCascade.ts` (8 testów, throw ×3), handlery cienkie, commit `451e0c6a`, CI zielone.
 - ~~**INFRA-1 — ESLint** (eslint + eslint-plugin-svelte). Trzeci brak z audytu 07-11 (po CI ✅ i testach ✅). Prettier ≠ linting: brak kontroli a11y, unused vars, wzorców Svelte.~~ ✅ 2026-07-12 — flat config (js+ts+svelte+prettier, ignores z `.gitignore`), triaga 54 znalezisk: 19 fixów (eqeqeq ×3, martwe inicjalizatory ×3, unused ×3, ctx `any`→`QueryCtx`/`DatabaseReader` ×6, prefer-const), 5 inline-disable z uzasadnieniem, wpięte w `pnpm lint` + CI.
 - **INFRA-2 — `svelte/no-navigation-without-resolve` (23 warningi).** Przejście linków/`goto()` na `resolve()` z `$app/paths` — typowane trasy. Reguła zdegradowana do `warn` w `eslint.config.js`; refactor 23 miejsc (site-nav ×6, book ×6, admin ×5, reszta pojedyncze) jako osobna sesja.
+- **INFRA-3 — Przegląd zależności w `package.json`.** Do sprawdzenia nowe/odstające pakiety *(Tomek 07-15)*. Konkretny sygnał z sesji 07-15: dryf svelte-clerk — typy `clerk-js` 6.7.7 w node_modules vs runtime 6.25.3 z CDN (źródło problemów z appearance i propsami; wiki `clerk-cdn-runtime-version-drift`). Rozważyć aktualizację svelte-clerk/@clerk i przegląd reszty (`pnpm outdated`).
 - **REFACTOR-1 — `/book`: jedno źródło prawdy wyboru koi.** Dziś dwa stany o tym samym fakcie: lokalny `selectedSegment`/`selectedBerths` w `book/+page.svelte` + globalny `bookingSelection` (czyta nav), synchronizowane ręcznie w 3 punktach (Plan A, 07-14). Docelowo `/book` czyta/pisze wyłącznie `bookingSelection` (klasa dostaje init z URL), lokalne zmienne znikają. Uwaga na SSR: init do singletona tylko w `if (browser)`. *(decyzja Tomka 07-14 przy feedbacku 07-17)*
 
 ## 🌍 i18n

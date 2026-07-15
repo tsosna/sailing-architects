@@ -163,7 +163,7 @@ otwartą sprzed wygaśnięcia.
 !== 'confirmed'`). Storage flag na uczestniku zostaje jako optymalizacja /
 cache, ale nie jest jedynym źródłem.
 
-## Brak akcji „Wyloguj" w layoucie `/admin`
+## ~~Brak akcji „Wyloguj" w layoucie `/admin`~~ ✅ 2026-07-15 (BUG-6, commit `1274523d`: `<UserButton />` sidebar+mobilebar+dashboard)
 
 **Stan:** Admin layout (`src/routes/[[lang=lang]]/admin/+layout.svelte` + nagłówek) nie eksponuje `<SignOutButton />` ani linku do wylogowania. Żeby zakończyć sesję operator musi nawigować ręcznie do `/dashboard` (gdzie SignOut żyje) i kliknąć tam.
 
@@ -279,7 +279,7 @@ Pierwotna hipoteza („krzyżowanie wierszy między bookingami przez błędny fi
 
 **Kierunek:** Najsensowniej (preferowane) — **cross-booking overview uczestników**: tabela wszystkich uczestników wszystkich bookingów ze statusem (`missing` / `drafted_by_admin` / `confirmed` / `expired`), filtry per status + per segment, klik → otwiera booking-drawer scrollowany do tej koi (synergia z deep-link backlogiem Alert Queue). Realny ops-tool: kapitan ma jedną stronę „kto jeszcze nie potwierdził danych" cross-cały rejs. Fallback (jeśli overview nie ma priorytetu) — usunąć route + link w sidebarze, dead navigation precz.
 
-## Reactive clock dla odliczania held (alert + KPI)
+## ~~Reactive clock dla odliczania held (alert + KPI)~~ ✅ KPI 2026-06-16 (PR #13), alert 2026-07-15 (BUG-4, commit `650887e9`)
 
 **Stan:** `src/convex/admin.ts:319-322` liczy `minutesLeft = (holdExpiresAt - now) / 60000` z `now = Date.now()` **wewnątrz query**. Convex subscription reactive na zmiany **DB**, nie na upływ czasu — Convex nie wie że minuta minęła. Identyczny problem: `src/routes/[[lang=lang]]/admin/+page.svelte:53-56` (`formatHoldCountdown` używa `Date.now()` w funkcji, `$derived` przelicza tylko gdy źródło DB się zmieni). Skutek: alert „Held kończy się za 15 min" zamrożony, KPI „N do wygaśnięcia" zamrożone — odliczanie nie tyka aż coś z DB nie pchnie nowego stanu.
 

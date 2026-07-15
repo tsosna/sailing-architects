@@ -1,6 +1,6 @@
 # AI Handoff — sailing-architects
 
-> Ostatnia aktualizacja: 2026-07-12
+> Ostatnia aktualizacja: 2026-07-15
 
 ---
 
@@ -115,6 +115,49 @@ npx wuchale                 # ekstrakcja stringów i18n
 ---
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
+
+## Sesja 2026-07-15 — BUG-4 (alert Held odlicza) + BUG-6 (UserButton w adminie i dashboardzie) (nauka, tryb ja-wskazuję-Tomek-pisze)
+
+### Zmiany
+
+Kod Tomek, bramki zielone przy obu commitach. **Push main + `main:production` zrobiony (Tomek) — CI i Vercel zielone**; na prod wyszły też zaległe `d1aba342` (nav reserve label z 07-14).
+
+- **`650887e9` — BUG-4:** alert „Held kończy się za X min" odlicza na kliencie. `admin.ts`: `AlertItem` dostał `holdExpiresAt?: number` (opcjonalne jak `bookingId?`), pętla holdów zasila `b.holdExpiresAt ?? 0`; stary `title` zostaje jako fallback. `admin/+page.svelte`: `{@const holdCountdown}` w `{#each}` (reużyty `formatHoldCountdown` + zegar `now` z PR #13), `<h3>` ternary wybiera całe zdanie (`teraz` vs `za X`). Test: patch koi w Dashboardzie (`held` + `holdExpiresAt` +20 min) → licznik tyka co 60 s.
+- **`1274523d` — BUG-6:** `<UserButton />` (svelte-clerk) w trzech miejscach: admin sidebar dół (`.sidebar-user` z `margin-top: auto`, przejęte od `sidebar-note`), admin mobilebar (flex `space-between` już był), dashboard header (zamiast surowego `<SignOutButton>`; style `.btn--signout` **zostają** — reużyte przez selektor rejsu). Dark theme popovera naprawiony w `+layout.svelte` (root): nowe nazwy zmiennych Clerka obok starych (`colorForeground`, `colorMutedForeground`, `colorInput`, `colorInputForeground`) + `elements.userButtonPopoverActionButton` z `'&:hover'`. „Wyloguj" przetestowany (admin + dashboard).
+- **`docs/backlog.md`**: BUG-4/BUG-6 ✅, **UI-4** (admin mobile-tabs ~1180px, obserwacja Tomka) i **INFRA-3** (przegląd `package.json`, uwaga Tomka) dodane, reconcile 07-15. Dupy skreślone też w `admin-post-mvp-decisions.md`.
+- **Wiki:** nowe [[clerk-cdn-runtime-version-drift]] (stack) + [[silent-unknown-config-keys]] (universal); rozszerzone [[svelte5-effect-cleanup-ambient-clock]] (BUG-4 jako potwierdzony przypadek); nota w [[svelte-clerk-button-global-styling]] (SignOutButton→UserButton, artykuł zostaje — lekcja `:global()` aktualna).
+
+### Decyzje
+
+- **Serwerowy `title` alertu zostaje jako fallback** — stary klient/inne miejsca czytające `title` nie łamią się; klient nadpisuje tylko gdy `holdExpiresAt` obecne.
+- **`?? 0` przy zasilaniu `holdExpiresAt`** — TS nie śledzi gwarancji filtra `heldBerths` (`number | undefined` w pętli); idiom już obecny w pliku.
+- **Clerk appearance: stare + nowe nazwy zmiennych obok siebie** — odporność na wahnięcia wersji CDN w obie strony; per-element `elements` jako warstwa-gwarancja tam, gdzie token wewnętrzny nienamierzalny.
+- **Artykuł `svelte-clerk-button-global-styling` NIE skasowany** mimo prośby Tomka o usunięcie wzmianki — lekcja `:global()` uniwersalna dla komponentów bibliotecznych; dopisana nota o dezaktualizacji przykładu. Do potwierdzenia przez Tomka.
+- **`HOLD_NEAR_EXPIRY_MS` = 15 min = pełna długość holdu** → `isNear` zawsze true (priorytet nie różnicuje). Zauważone, nie ruszone (scope) — bez pozycji w backlogu, kosmetyka priorytetów.
+
+### Wnioski
+
+- **„Serwer wysyła fakt, nie zdanie."** Query liczyła minuty i wtapiała w string — klient nie miał z czego odliczać (Convex reactive na DB, nie na czas). Fakt = surowy timestamp; zdanie = starzeje się od chwili wypowiedzenia. Trzecia odsłona ambient-clock (po KPI PR #13 i lekcji Scenariusza 9).
+- **Runtime z CDN ≠ typy w node_modules.** `Clerk.version` 6.25.3 vs `clerk-js` 6.7.7 na dysku — appearance mówił do API, którego już nie ma (`colorText`→`colorForeground`), a `afterSignOutUrl` do API, którego jeszcze nie było w typach (przeniesiony na provider). Dryf działa w obie strony; kompilator raz ratuje, raz milczy.
+- **Config przyjmujący nieznane klucze połyka literówki bez sygnału** — `colorNatural` zamiast `colorNeutral`: typecheck zielony, „opcja nie działa", fałszywy trop w diagnozie (testowana inna hipoteza niż wpisany kod). Najpierw przeczytaj klucz znak po znaku.
+- **Mierz skutek, nie config:** `getComputedStyle` + `console.table` w konsoli pokazały per-element co realnie dostało jaki kolor (tło z configu, tekst z defaultów) — bez tego zgadywanka o zmiennych trwałaby dalej. Gotchas: SVG `className` = `SVGAnimatedString` (`.toString()`), znikający popover = `setTimeout` na złapanie, Brave „allow pasting" (self-XSS protection — zasada słuszna: rozumiej co wklejasz).
+- **Biznes holdu:** 15-min blokada koi na czas płacenia (guard w `createBooking` przeciw podwójnej sprzedaży), wygasa przez upływ czasu bez crona (kod traktuje przeterminowany held jak wolny — storage-vs-derive). Zamrożony licznik = kłamstwo biznesowe dla skippera („klient płaci" gdy koja dawno wolna).
+- **Flex kolumna: `margin-top: auto` = przyklej do dołu** — zjada wolną przestrzeń nad elementem; przy dwóch elementach dolnej grupy tylko pierwszy może go mieć.
+
+### Następne kroki
+
+#### Next
+
+- **BUG-5** (fallback „Całość" w `/book` Step 5 maskuje brak planu) albo **BUG-7** (walidacja formy uczestnika, zod).
+- **INFRA-3** — przegląd `package.json` (uwaga Tomka 07-15); konkret: dryf svelte-clerk/@clerk (typy 6.7.7 vs CDN 6.25.3).
+- **Sprawdzić svelte MCP** (uwaga Tomka 07-15: „jak wygląda teraz MCP do Svelte — wydaje mi się że to było w Skills") — w sesji 07-15 podłączony był oficjalny serwer MCP `svelte` (narzędzia: get-documentation, list-sections, autofixer, playground-link); obejrzeć co daje w praktyce nauki/pracy.
+- **UI-4** — admin mobile-tabs przy ~1180px.
+- FEAT-10 (decyzja z Michałem), FEAT-5.
+
+#### Blocked / Later / Open questions
+
+- Decyzja Tomka do potwierdzenia: nota zamiast usunięcia w [[svelte-clerk-button-global-styling]] (patrz Decyzje).
+- Bez zmian: REFACTOR-1, I18N-1, INFRA-2, DEP-1a/b, SEC-1/2/3 (FileVault nadal OFF po stronie Tomka).
 
 ## Sesja 2026-07-14 — Feedback 07-17: nav „Kontynuuj rezerwację" + sync stanu wyboru koi (nauka, tryb ja-wskazuję-Tomek-pisze)
 
