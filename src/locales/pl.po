@@ -1087,9 +1087,8 @@ msgstr "Dokumenty do pobrania"
 #~ msgid "Wybierz opcję"
 #~ msgstr "Wybierz opcję"
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Wyloguj"
-msgstr "Wyloguj"
+#~ msgid "Wyloguj"
+#~ msgstr "Wyloguj"
 
 #: src/lib/components/boat-plan/boat-plan.svelte
 msgid "Dostępna"

@@ -2,7 +2,7 @@
 	import { resolve } from '$app/paths'
 	import { onMount } from 'svelte'
 	import { useConvexClient, useQuery } from 'convex-svelte'
-	import { useClerkContext, SignOutButton } from 'svelte-clerk'
+	import { useClerkContext, UserButton } from 'svelte-clerk'
 	import { api } from '$convex/api'
 	import type { Id } from '$convex/dataModel'
 
@@ -249,7 +249,7 @@
 						<p class="dash__ref-value">{bookingData.bookingRef}</p>
 					</div>
 				{/if}
-				<SignOutButton class="btn btn--signout">Wyloguj</SignOutButton>
+				<UserButton />
 			</div>
 		</header>
 		{#if bookings.length > 1}

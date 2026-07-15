@@ -19,6 +19,12 @@
 			colorInputBackground: '#162840',
 			colorInputText: '#f5f0e8',
 			colorInputBorder: 'rgba(212, 170, 90, 0.46)',
+			colorNatural: '#f5f0e8',
+			// nowe nazwy (clerk-js ≥ ~6.12)
+			colorForeground: '#f5f0e8',
+			colorMutedForeground: 'rgba(245, 240, 232, 0.74)',
+			colorInput: '#162840',
+			colorInputForeground: '#f5f0e8',
 			fontFamily: 'DM Sans, system-ui, sans-serif',
 			borderRadius: '2px'
 		},
@@ -33,6 +39,13 @@
 				fontSize: '12px',
 				fontWeight: '600',
 				letterSpacing: '0.04em'
+			},
+			userButtonPopoverActionButton: {
+				color: 'rgba(245, 240, 232, 0.78)',
+				'&:hover': {
+					color: '#f5f0e8',
+					backgroundColor: 'rgba(245, 240, 232, 0.08)'
+				}
 			},
 			formFieldInput: {
 				backgroundColor: '#162840',

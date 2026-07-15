@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state'
+	import { UserButton } from 'svelte-clerk'
 
 	let { children } = $props()
 
@@ -42,6 +43,9 @@
 				</a>
 			{/each}
 		</nav>
+		<div class="sidebar-user">
+			<UserButton />
+		</div>
 		<div class="sidebar-note">
 			<p>
 				Clerk role: admin. Produkcja: skipper / operator. Dev: dodatkowy
@@ -52,6 +56,7 @@
 
 	<div class="mobilebar">
 		<strong>Sailing Architects · Admin</strong>
+		<UserButton />
 	</div>
 	<nav class="mobile-tabs" aria-label="Sekcje admina (mobile)">
 		{#each navItems as item (item.href)}
@@ -181,7 +186,6 @@
 	}
 
 	.sidebar-note {
-		margin-top: auto;
 		padding: 14px;
 		border: 1px solid var(--admin-line);
 		background: rgba(245, 240, 232, 0.035);
@@ -192,6 +196,10 @@
 		color: var(--admin-muted);
 		font-size: 12px;
 		line-height: 1.55;
+	}
+	.sidebar-user {
+		margin-top: auto;
+		padding: 6px 0 6px;
 	}
 
 	.main {
