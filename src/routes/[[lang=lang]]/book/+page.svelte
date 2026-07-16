@@ -386,15 +386,7 @@
 		const totalGrosze = segment.price * berths.length * 100
 		const plan = planQuery.data
 		if (!plan || !plan.items || plan.items.length === 0) {
-			return [
-				{
-					id: 'full',
-					label: 'Całość',
-					amount: totalGrosze,
-					amountFormatted: formatGrosze(totalGrosze),
-					sortOrders: [1]
-				}
-			]
+			return []
 		}
 
 		const items = [...plan.items].sort((a, b) => a.sortOrder - b.sortOrder)
@@ -1131,25 +1123,38 @@
 						</div>
 
 						{#if !clientSecret}
-							<fieldset class="pay-options">
-								<legend class="pay-options__legend">Co płacisz teraz?</legend>
-								{#each paymentOptions as option (option.id)}
-									<label class="pay-options__row">
-										<input
-											type="radio"
-											name="payment-option"
-											value={option.id}
-											checked={selectedPaymentOption?.id === option.id}
-											onchange={() => (selectedPaymentOptionId = option.id)}
-											disabled={intentLoading}
-										/>
-										<span class="pay-options__label">{option.label}</span>
-										<span class="pay-options__amount"
-											>{option.amountFormatted} zł</span
-										>
-									</label>
-								{/each}
-							</fieldset>
+							{#if planQuery.isLoading}
+								<p>Ładowanie opcji płatności...</p>
+							{:else if planQuery.error}
+								<p class="error-msg">
+									Nie udało się pobrać opcji płatności. Odśwież stronę.
+								</p>
+							{:else if paymentOptions.length === 0}
+								<p class="error-msg">
+									Brak planu płatności. Prosimy o kontakt telefoniczny lub
+									mailowy
+								</p>
+							{:else}
+								<fieldset class="pay-options">
+									<legend class="pay-options__legend">Co płacisz teraz?</legend>
+									{#each paymentOptions as option (option.id)}
+										<label class="pay-options__row">
+											<input
+												type="radio"
+												name="payment-option"
+												value={option.id}
+												checked={selectedPaymentOption?.id === option.id}
+												onchange={() => (selectedPaymentOptionId = option.id)}
+												disabled={intentLoading}
+											/>
+											<span class="pay-options__label">{option.label}</span>
+											<span class="pay-options__amount"
+												>{option.amountFormatted} zł</span
+											>
+										</label>
+									{/each}
+								</fieldset>
+							{/if}
 						{/if}
 
 						{#if holdRemainingMs !== null}

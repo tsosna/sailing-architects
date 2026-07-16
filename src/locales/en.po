@@ -1560,9 +1560,8 @@ msgstr ""
 msgid "Uzupełnij teraz"
 msgstr ""
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Całość"
-msgstr ""
+#~ msgid "Całość"
+#~ msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Dopłata końcowa"
@@ -3324,4 +3323,22 @@ msgstr ""
 #. 0: holdCountdown
 #: src/routes/[[lang=lang]]/admin/+page.svelte
 msgid "Held kończy się za {0}"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Ładowanie opcji płatności..."
+msgstr ""
+
+#~ msgid "Brak planu płaności. Prosimy o kontakt telefoniczny lub mailowy"
+#~ msgstr ""
+
+#~ msgid "Błąd! Nie udało się pobrać opcji płatności. Odśwież stronę.\""
+#~ msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Brak planu płatności. Prosimy o kontakt telefoniczny lub mailowy"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Nie udało się pobrać opcji płatności. Odśwież stronę."
 msgstr ""

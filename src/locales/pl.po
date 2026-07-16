@@ -1560,9 +1560,8 @@ msgstr "Dla każdej wybranej koi utworzymy osobną kartę uczestnika w panelu."
 msgid "Uzupełnij teraz"
 msgstr "Uzupełnij teraz"
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Całość"
-msgstr "Całość"
+#~ msgid "Całość"
+#~ msgstr "Całość"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Dopłata końcowa"
@@ -3325,3 +3324,21 @@ msgstr "Held kończy się teraz"
 #: src/routes/[[lang=lang]]/admin/+page.svelte
 msgid "Held kończy się za {0}"
 msgstr "Held kończy się za {0}"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Ładowanie opcji płatności..."
+msgstr "Ładowanie opcji płatności..."
+
+#~ msgid "Brak planu płaności. Prosimy o kontakt telefoniczny lub mailowy"
+#~ msgstr "Brak planu płaności. Prosimy o kontakt telefoniczny lub mailowy"
+
+#~ msgid "Błąd! Nie udało się pobrać opcji płatności. Odśwież stronę.\""
+#~ msgstr "Błąd! Nie udało się pobrać opcji płatności. Odśwież stronę.\""
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Brak planu płatności. Prosimy o kontakt telefoniczny lub mailowy"
+msgstr "Brak planu płatności. Prosimy o kontakt telefoniczny lub mailowy"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Nie udało się pobrać opcji płatności. Odśwież stronę."
+msgstr "Nie udało się pobrać opcji płatności. Odśwież stronę."
