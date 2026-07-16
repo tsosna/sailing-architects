@@ -116,6 +116,48 @@ npx wuchale                 # ekstrakcja stringów i18n
 
 <!-- Wpisy sesji poniżej (od najnowszych) -->
 
+## Sesja 2026-07-16 — BUG-5 (fallback „Całość" w Step 5) + BUG-7 (walidacja edycji uczestnika, zod) (nauka, tryb ja-wskazuję-Tomek-pisze)
+
+### Zmiany
+
+Kod Tomek. BUG-5 scommitowany; **BUG-7 kod gotowy, NIEcommitowany** (celowo — smoke test warstwy serwerowej zaległy, przepis w backlogu przy BUG-7).
+
+- **`cc28966` — BUG-5:** `/book` Step 5 nie fabrykuje już opcji „Całość", gdy segment nie ma aktywnego planu. `paymentOptions` → `[]` przy braku planu; template z gałęziami: `planQuery.isLoading` → placeholder, `planQuery.error` → komunikat techniczny (bez `.message` — strona publiczna), `paymentOptions.length === 0` → „Brak planu płatności…" (`error-msg`), else → radia. Przycisk „Zapłać" był już bezpieczny (`!selectedPaymentOption` → disabled). Wpis „Całość" w `.po` → `#~` obsolete. Smoke test: `isActive: false` na planie w Dashboardzie → komunikat; przywrócenie → radia wracają bez refresha.
+- **BUG-7 (working tree):** (1) `adminParticipantSchema` w `src/lib/schemas/crew-profile.ts` — format-only (wszystkie pola `.optional()`, bez `min(1)` — niekompletność to legalny stan z `dataStatus`), nazwy pól mutation (`dateOfBirth`, `emergencyContactPhone`…), `invitedEmail` dodany, guard `docNumber !== undefined` w `superRefine`. (2) Drawer: `payload` + `safeParse` + toast błędów + `return` przed mutation; mutation dostaje `...parsed.data` (transform `toUpperCase` na `docNumber`); `novalidate` na formie (natywny dymek przeglądarki uprzedzał zod); pole daty `type="date"` → tekstowe `placeholder="dd/mm/yyyy"` (picker emitował ISO — rozjazd formatów w jednej kolumnie). (3) Mutation `adminUpdateParticipantData`: import schematu względny (`../lib/schemas/crew-profile` — alias `$lib` nie istnieje w bundlerze Convexa), `safeParse(profilePatch)` + `throw` z komunikatami, `merged` i `ctx.db.patch` na `parsed.data`.
+- **`docs/backlog.md`:** BUG-5 ✅, BUG-7 status „w toku, zostaje smoke test serwera + commit", **UI-5** nowe (patch nie czyści pól — `undefined` = „nie ruszaj"), reconcile 07-16, dedup listy feedbacku. Dup BUG-5 skreślony w `admin-post-mvp-decisions.md`. FEAT-9 (edycja danych z `/admin/special`) potwierdzony jako istniejący — po BUG-7 dostanie walidację za darmo (brama w mutation).
+- **Wiki (5 nowych, universal):** [[loading-empty-error-three-states]], [[presence-vs-format-validation]], [[zod4-safeparse-data-never-narrowing]], [[patch-undefined-omit-vs-clear]], [[native-form-validation-preempts-js]] + profil ucznia.
+
+### Decyzje
+
+- **Gałąź `planQuery.error` dodana mimo braku w backlogu** — po pytaniu Tomka: bez niej nowy komunikat „brak planu, kontakt z biurem" kłamałby przy awarii query (fix zmieniał treść kłamstwa, więc to nasz problem). Jedyne inne miejsce z obsługą `.error` w projekcie: `/admin/audit`.
+- **Drawer przechodzi na tekstowe pole daty** (jak reszta app), zamiast konwersji ISO↔dd/mm/yyyy na brzegach albo migracji na ISO w bazie — najmniejszy spójny fix; kanonizacja formatu w bazie = osobny refactor, nie na sesję nauki. Stare wiersze ISO wyjdą przy edycji (walidacja zatrzyma do przepisania) — zaleta.
+- **Czyszczenie pól uczestnika NIE naprawione** (UI-5) — wymaga zmiany kontraktu mutation (brak-argumentu vs ustaw-pusto); najpierw decyzja, czy realny use-case. Obejście: nadpisać wartość zamiast czyścić.
+- **BUG-7 bez commita** — warstwa serwerowa nieprzetestowana (test wymaga tymczasowego zakomentowania walidacji klienta; Tomkowi skończyła się energia). Świadomy wyjątek od „commit po weryfikacji" na rzecz „nie commituj niezweryfikowanego".
+
+### Wnioski
+
+- **Trzy stany asynchronicznego odczytu:** loading („jeszcze nie wiem") ≠ pusty wynik („wiem: nie ma") ≠ error („nie udało się zapytać"). `!data` skleja wszystkie; fallback „coś pokażę" maskuje błędny stan i przenosi prawdę na serwer z najgorszym komunikatem. Kolejność gałęzi: loading przed empty, inaczej błysk błędu przy każdym wejściu.
+- **Walidacja ma dwie osie — obecność i format.** Schemat pełnej formy (checkout) skleja obie; flow częściowej edycji potrzebuje samego formatu (`email().optional()`, zero `min(1)`). Nie reużywaj schematu — reużyj klocków (regexy, refinements, transformy).
+- **Zod 4 nie pilnuje `return` po `safeParse`:** gałąź błędu ma `data?: never` (ergonomia destructuringu) → `parsed.data` legalne na niezawężonej unii, spread `...undefined` legalny → typecheck zielony przy brakującym `return`; runtime = error toast + success toast z no-op zapisu. W zod 3 typy to łapały. „Kompilator łapie tylko to, co typy kodują."
+- **`<input type="email">` + submit = natywna walidacja uprzedza `onsubmit`** — zod w ogóle nie odpala; dymek systemowy po angielsku. `novalidate` na formie, `type="email"` zostaje (klawiatura mobile).
+- **Patch API: `undefined` = „nie ruszaj", nie „wyczyść"** — helper `optional('')` → `undefined` → Convex pomija argument → `ctx.db.patch` nie dotyka pola; user czyści, widzi „zapisano", wartość wraca. Rozróżnienie wymaga zmiany kontraktu, nie da się dokleić na kliencie.
+- **`<input type="date">` zawsze emituje ISO `yyyy-mm-dd`** — niezależnie od locale i wyglądu; druga forma pisząca do tej samej kolumny w `dd/mm/yyyy` = dwa formaty w bazie. Brak walidacji nie znaczy „brak reguł", znaczy „rozjazd po cichu".
+- **Alias `$lib` nie istnieje w bundlerze Convexa** — import z `src/convex/*` do `src/lib/*` musi być względny (`../lib/...`); bundler podąża za importami względnymi poza katalog convex, zod działa w runtime.
+
+### Następne kroki
+
+#### Next
+
+- **BUG-7 dokończenie:** smoke test warstwy serwerowej (zakomentuj walidację w drawerze → zły email → toast z komunikatem serwera, separator `;` → przywróć → `git diff`) + `pnpm format` + commit + push (main + production).
+- **INFRA-3** — przegląd `package.json` (dryf svelte-clerk 6.7.7 vs CDN 6.25.3).
+- **Svelte MCP** — obejrzeć w praktyce (serwer był podłączony też w tej sesji, nieużyty).
+- UI-4 (mobile-tabs ~1180px), UI-5 (decyzja: czyszczenie pól potrzebne?), FEAT-10/FEAT-5 (decyzje z Michałem).
+
+#### Blocked / Later / Open questions
+
+- `novalidate` w pozostałych formach (book flow, panel uczestnika) — ten sam problem dymka natywnego możliwy; nie ruszone (scope), bez pozycji w backlogu.
+- Bez zmian: REFACTOR-1, I18N-1, INFRA-2, DEP-1a/b, SEC-1/2/3.
+
 ## Sesja 2026-07-15 — BUG-4 (alert Held odlicza) + BUG-6 (UserButton w adminie i dashboardzie) (nauka, tryb ja-wskazuję-Tomek-pisze)
 
 ### Zmiany

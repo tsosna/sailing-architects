@@ -321,7 +321,7 @@ Pierwotna hipoteza („krzyżowanie wierszy między bookingami przez błędny fi
 
 **Kierunek:** (1) Wizualnie odróżnić draft od zapisanego — banner „Niezapisany draft z szablonu" + zmiana koloru sekcji + przycisk „Zapisz plan" wyróżniony. (2) Alternatywa: nie generować draftu automatycznie, pokazać pusty stan z przyciskiem „Wygeneruj z szablonu". (3) Po zmianie segmentu wykryć niezapisane zmiany i ostrzec (`beforeunload` / dialog „Masz niezapisane zmiany, kontynuować?"). (4) Zmienić default `template` z `'deposit_2'` na `'full'` w `automation/+page.svelte:28,64` — admin widzi 1 pozycję „Całość" zgodną z tym co widzi buyer w Step 5 (gdy brak planu w bazie, buyer dziś dostaje fallback „Całość" — patrz pozycja niżej). Eliminuje niespójność „admin widzi 3 raty, buyer widzi całość".
 
-## `/book` Step 5 — fallback „Całość" maskuje brak planu w bazie
+## ~~`/book` Step 5 — fallback „Całość" maskuje brak planu w bazie~~ ✅ 2026-07-16 (BUG-5, commit `cc28966`: fallback → `[]`, gałęzie loading/error/brak-planu)
 
 **Stan:** `paymentOptions` w `src/routes/[[lang=lang]]/book/+page.svelte:367–376` ma fallback: gdy `plan` jest null albo `plan.items.length === 0`, UI i tak pokazuje pojedynczy radio „Całość" (`sortOrders: [1]`). User wybiera, klika „Zapłać", API `validateSelection` (`src/routes/api/stripe/create-intent/+server.ts:99–101`) odtwarza schedule po swojej stronie, sortOrder UI nie matchuje serwerowego → toast „Nieprawidłowy wybór płatności". Bug ujawniony przy A4b ale klasa inna — UX user-facing, fallback maskuje stan błędny zamiast go pokazać.
 

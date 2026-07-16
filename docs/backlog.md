@@ -1,6 +1,6 @@
 # Backlog — sailing-architects
 
-> **Jedyne źródło prawdy dla OTWARTYCH pozycji.** Ostatni reconcile: 2026-07-15.
+> **Jedyne źródło prawdy dla OTWARTYCH pozycji.** Ostatni reconcile: 2026-07-16.
 >
 > Zasady:
 > - Tu trafia **każda** otwarta pozycja (bug / feature / infra). Rozwiązane → skreśl `~~…~~` z datą albo usuń.
@@ -17,9 +17,9 @@
 - ~~**BUG-2 — Checkout krok 4 (`/book?segment=s1`): przycisk „Wróć" nie działa.**~~ ✅ 2026-07-13 (commit `15261fa4`: ping-pong back()↔$effect; łańcuch wstecz zalogowanego 4→3→1). *(feedback 07-05; ta sama uwaga w docx Michała 06-19)*
 - ~~**BUG-3 — Po kliknięciu „Rezerwuj" klik na „Panel" nie działa** („Poradnik" działa)~~ ✅ 2026-07-13 (nie overlay: same-route nav `/book`→`/book?auth=` nie remountuje komponentu, `initialAuthParam` czytany raz w init; fix: `$effect` na reaktywnym `authParam` — zalogowany → `panelTarget()`, wylogowany → step 2). *(feedback 07-05)*
 - ~~**BUG-4 — Alert „Held kończy się za X min" zamrożony.**~~ ✅ 2026-07-15 (commit `650887e9`: query zwraca surowe `holdExpiresAt?` w alercie, klient formatuje z reactive clock `{@const}` + ternary; na prod). *(dup: admin-post-mvp „Reactive clock dla odliczania held" — skreślić i tam)*
-- **BUG-5 — `/book` Step 5: fallback „Całość" maskuje brak planu w bazie.** Klasa UX (fallback ukrywa błąd konfiguracji). *(admin-post-mvp „`/book` Step 5 — fallback…")*
+- ~~**BUG-5 — `/book` Step 5: fallback „Całość" maskuje brak planu w bazie.**~~ ✅ 2026-07-16 (commit `cc28966`: fallback → `[]`, template z gałęziami loading / query-error / brak-planu / radia; smoke test przez `isActive: false` w Dashboardzie OK). *(dup: admin-post-mvp „`/book` Step 5 — fallback…" — skreślić i tam)*
 - ~~**BUG-6 — Admin: brak akcji „Wyloguj" w `/admin` w ogóle** + brak avatar/user-menu.~~ ✅ 2026-07-15 (commit `1274523d`: `<UserButton />` w admin sidebar dół + mobilebar + dashboard header; dark theme popovera naprawiony — nowe nazwy zmiennych Clerk + `elements.userButtonPopoverActionButton`; na prod). Style `.btn--signout` zostają — reużyte przez selektor rejsu. *(dup: admin-post-mvp „Brak akcji Wyloguj w layoucie /admin" — skreślić i tam)*
-- **BUG-7 — Walidacja formy edycji uczestnika w drawerze.** `adminUpdateParticipantData` przyjmuje surowe stringi bez format/enum check (email, data, enumy). Fix: współdziel zod z booking flow. *(admin-post-mvp „Walidacja pól formy…")*
+- **BUG-7 — Walidacja formy edycji uczestnika w drawerze.** `adminUpdateParticipantData` przyjmuje surowe stringi bez format/enum check (email, data, enumy). Fix: współdziel zod z booking flow. *(admin-post-mvp „Walidacja pól formy…")* **W toku 07-16 (kod gotowy, niecommitowany):** `adminParticipantSchema` (format-only, pola opcjonalne) w `crew-profile.ts`; walidacja klient (drawer, `novalidate`) + serwer (mutation, throw). Przy okazji: drawer miał `type="date"` (ISO) vs reszta app `dd/mm/yyyy` — ujednolicone na tekstowe. **Zostaje: smoke test warstwy serwerowej** (zakomentuj walidację w drawerze → zły email → toast z komunikatem serwera z `;` → przywróć) + commit.
 
 ## 🚀 Deploy
 
@@ -57,6 +57,7 @@
 - **UI-2 — Wolne/zajęte miejsca wyraźniej** w layout strony. *(Michał 07-07 #5)*
 - **UI-3 — Podciągnąć wyrazistość/percepcję strony i panelu** (Michał: obrazy `assets/WhatsApp Image 2026-07-07 at 15.08.44/15.09.09.jpeg`). *(Michał 07-07 #8)*
 - **UI-4 — Admin: mobile-tabs rozjeżdżają się przy szerokości ~1180px.** Breakpoint chowa sidebar, a taby sekcji renderują się jako ogromne kafle na szerokości tabletu — layout „do kitu" między desktopem a telefonem. Przejrzeć media query w `admin/+layout@.svelte` (breakpoint + wysokość/proporcje `.mobile-tabs`). *(Tomek 07-15, zauważone przy BUG-6)*
+- **UI-5 — Admin: nie da się wyczyścić pola uczestnika w drawerze.** Puste pole → `optional()` → `undefined` → Convex traktuje jako „argument nieobecny" → `ctx.db.patch` nie dotyka pola, stara wartość zostaje. Puste = „nie ruszaj", nie „wyczyść". Fix wymagałby zmiany kontraktu mutation (rozróżnienie brak-argumentu vs ustaw-pusto); najpierw decyzja, czy czyszczenie pól to realny use-case admina. *(wykryte 07-16 przy BUG-7)*
 
 ## 🎨 Landing — uwagi Michała 2026-06-19 (22 poz.)
 
@@ -94,10 +95,6 @@
 - ✅ `2026-07-12.md` — striażowany 07-13 → FEAT-5 (rejs Seszele maj 2027, szczegóły + plakat w pozycji FEAT-5)
 - ✅ `2026-07-17.md` — striażowany 07-14 → zrealizowany od ręki (1 poz.): nav „Kontynuuj rezerwację →" gdy zalogowany + koje wybrane (commit `d1aba342`)
 - ℹ️ `2026_07_07_SA_regulamin_rejsu.doc` — nie feedback, dokument źródłowy (regulamin; progi §3.8 wykorzystane przy ADR-002)
-- ✅ `2026-07-05.md` — striażowany 07-10 → BUG-2, BUG-3, UI-1 (3 poz.)
-- ✅ `2026-07-07.md` — striażowany 07-10 → FEAT-5..9, LEGAL-1..2, UI-2..3 (10 poz.)
-- ✅ `2026_07_07_SA_regulamin_rejsu.doc` — źródło regulaminu, skonsumowany 07-07 → ADR-002 / refund policy §3.8 (progi 180/90/42/0)
-- ✅ `2026-07-10.md` — striażowany 07-10 → wzbogacił FEAT-5 (belka zapowiedzi + menu między rejsami + współistnienie wyprzedany/nowy)
 
 ## ✅ Rozwiązane niedawno (żeby nie wracały)
 
