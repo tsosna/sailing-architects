@@ -10,7 +10,7 @@
 	const stats = [
 		['4', 'etapy'],
 		['10', 'miejsc'],
-		['~3500km', 'trasa'],
+		['~2200nm', 'trasa'],
 		['41 dni', 'łącznie']
 	] as const
 </script>

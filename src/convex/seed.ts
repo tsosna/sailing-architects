@@ -43,7 +43,7 @@ export const initializeVoyage = mutation({
 				dates: '4–11.10.2026',
 				startDate: new Date('2026-10-04').getTime(),
 				endDate: new Date('2026-10-11').getTime(),
-				pricePerBerth: 1800,
+				pricePerBerth: 2400,
 				days: 7
 			},
 			{
@@ -52,7 +52,7 @@ export const initializeVoyage = mutation({
 				dates: '12–21.10.2026',
 				startDate: new Date('2026-10-12').getTime(),
 				endDate: new Date('2026-10-21').getTime(),
-				pricePerBerth: 2300,
+				pricePerBerth: 2900,
 				days: 9
 			},
 			{
@@ -61,7 +61,7 @@ export const initializeVoyage = mutation({
 				dates: '22–31.10.2026',
 				startDate: new Date('2026-10-22').getTime(),
 				endDate: new Date('2026-10-31').getTime(),
-				pricePerBerth: 2300,
+				pricePerBerth: 2999,
 				days: 9
 			},
 			{
@@ -70,7 +70,7 @@ export const initializeVoyage = mutation({
 				dates: '1–14.11.2026',
 				startDate: new Date('2026-11-01').getTime(),
 				endDate: new Date('2026-11-14').getTime(),
-				pricePerBerth: 3200,
+				pricePerBerth: 4200,
 				days: 13
 			}
 		]

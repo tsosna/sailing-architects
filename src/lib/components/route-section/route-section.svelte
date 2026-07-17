@@ -21,7 +21,7 @@
 			to: 'Gibraltar',
 			dates: '4–11.10.2026',
 			days: 7,
-			price: 1800,
+			price: 2400,
 			segmentId: voyageSegments[0].id,
 			desc: 'Start wyprawy. Żegluga wzdłuż wschodniego wybrzeża Hiszpanii, do Gibraltaru, jednej z najważniejszych morskich bram świata.'
 		},
@@ -31,7 +31,7 @@
 			to: 'Madera',
 			dates: '12–21.10.2026',
 			days: 9,
-			price: 2300,
+			price: 2900,
 			segmentId: voyageSegments[1].id,
 			desc: 'Kurs na południowy-zachód. Pierwszy etap oceaniczny. Madera — zielona perła Atlantyku, to wulkaniczne klify, tarasowe winnice, oraz historyczne Funchal.'
 		},
@@ -41,7 +41,7 @@
 			to: 'Teneryfa',
 			dates: '22–31.10.2026',
 			days: 9,
-			price: 2300,
+			price: 2999,
 			segmentId: voyageSegments[2].id,
 			desc: 'Wyspy Kanaryjskie, oferują piękne wulkany, w tym majestatyczny Teide na Teneryfie. Turkusowe plaże i doskonałą kuchnię — idealny odpoczynek po rejsie przez ocean.'
 		},
@@ -51,7 +51,7 @@
 			to: 'Cabo Verde',
 			dates: '1–14.11.2026',
 			days: 13,
-			price: 3200,
+			price: 4200,
 			segmentId: voyageSegments[3].id,
 			desc: 'Finalny odcinek — tydzień na oceanie. Pasaty, wieloryby, delfiny i oceaniczna przestrzeń. Cabo Verde to esencja egzotyki: afrykańskie rytmy, wulkaniczne krajobrazy, cudowna przyroda i piękne plaże.'
 		}
