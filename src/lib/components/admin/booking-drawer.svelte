@@ -5,6 +5,10 @@
 	import type { Id } from '$convex/dataModel'
 	import { toastState } from '$lib/state/toast.svelte'
 	import RefundDialog from './refund-dialog.svelte'
+	import {
+		adminParticipantSchema,
+		getCrewProfileErrors
+	} from '$lib/schemas/crew-profile'
 
 	type Props = {
 		bookingId: Id<'bookings'> | null
@@ -188,26 +192,42 @@
 				editForm.docType === 'passport' || editForm.docType === 'id'
 					? editForm.docType
 					: undefined
+
+			const payload = {
+				invitedEmail: optional(editForm.invitedEmail),
+				firstName: optional(editForm.firstName),
+				lastName: optional(editForm.lastName),
+				email: optional(editForm.email),
+				dateOfBirth: optional(editForm.dateOfBirth),
+				birthPlace: optional(editForm.birthPlace),
+				nationality: optional(editForm.nationality),
+				phone: optional(editForm.phone),
+				docType: docTypeValue,
+				docNumber: optional(editForm.docNumber),
+				emergencyContactName: optional(editForm.emergencyContactName),
+				emergencyContactPhone: optional(editForm.emergencyContactPhone),
+				swimmingAbility: optional(editForm.swimmingAbility),
+				sailingExperience: optional(editForm.sailingExperience),
+				dietaryRequirements: optional(editForm.dietaryRequirements),
+				medicalNotes: optional(editForm.medicalNotes)
+			}
+
+			const parsed = adminParticipantSchema.safeParse(payload)
+			if (!parsed.success) {
+				const errors = getCrewProfileErrors(parsed.error)
+				toastState.addToast({
+					message: Object.values(errors).join('; '),
+					status: 'error',
+					duration: 0
+				})
+				return
+			}
+
 			const result = await convex.mutation(
 				api.mutations.adminUpdateParticipantData,
 				{
 					participantId: editingParticipantId as Id<'bookingParticipants'>,
-					invitedEmail: optional(editForm.invitedEmail),
-					firstName: optional(editForm.firstName),
-					lastName: optional(editForm.lastName),
-					email: optional(editForm.email),
-					dateOfBirth: optional(editForm.dateOfBirth),
-					birthPlace: optional(editForm.birthPlace),
-					nationality: optional(editForm.nationality),
-					phone: optional(editForm.phone),
-					docType: docTypeValue,
-					docNumber: optional(editForm.docNumber),
-					emergencyContactName: optional(editForm.emergencyContactName),
-					emergencyContactPhone: optional(editForm.emergencyContactPhone),
-					swimmingAbility: optional(editForm.swimmingAbility),
-					sailingExperience: optional(editForm.sailingExperience),
-					dietaryRequirements: optional(editForm.dietaryRequirements),
-					medicalNotes: optional(editForm.medicalNotes)
+					...parsed.data
 				}
 			)
 			toastState.addToast({
@@ -825,6 +845,7 @@
 										{#if isEditing && editForm}
 											<form
 												class="edit-form"
+												novalidate
 												onsubmit={(e) => {
 													e.preventDefault()
 													saveParticipant()
@@ -855,7 +876,7 @@
 													>
 													<label
 														><span>Data urodzenia</span><input
-															type="date"
+															placeholder="dd/mm/yyyy"
 															bind:value={editForm.dateOfBirth}
 														/></label
 													>

@@ -4,6 +4,7 @@ import type { Doc, Id } from './_generated/dataModel'
 import { v } from 'convex/values'
 import { requireConvexAdmin } from './_lib/requireAdmin'
 import { calculatePaymentStatusAfterRefund } from './_lib/refundStatus'
+import { adminParticipantSchema } from '../lib/schemas/crew-profile'
 
 const HOLD_DURATION_MS = 15 * 60 * 1000
 const DEFAULT_CURRENCY = 'pln'
@@ -862,7 +863,14 @@ export const adminUpdateParticipantData = mutation({
 
 		const { participantId: _participantId, ...profilePatch } = args
 
-		const merged = { ...participant, ...profilePatch }
+		const parsed = adminParticipantSchema.safeParse(profilePatch)
+		if (!parsed.success) {
+			throw new Error(
+				parsed.error.issues.map((issue) => issue.message).join('; ')
+			)
+		}
+
+		const merged = { ...participant, ...parsed.data }
 		const dataStatus = participantDataStatus({
 			invitedEmail: merged.invitedEmail,
 			firstName: merged.firstName,
@@ -895,7 +903,7 @@ export const adminUpdateParticipantData = mutation({
 		}
 
 		await ctx.db.patch(participant._id, {
-			...profilePatch,
+			...parsed.data,
 			dataStatus,
 			confirmationStatus,
 			adminEditedAt: Date.now(),

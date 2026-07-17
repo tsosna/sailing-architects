@@ -84,6 +84,64 @@ export const crewProfileSchema = z
 			})
 		}
 	})
+export const adminParticipantSchema = z
+	.object({
+		firstName: z.string().trim().optional(),
+		lastName: z.string().trim().optional(),
+		email: z.string().trim().email('Podaj poprawny adres e-mail').optional(),
+		invitedEmail: z
+			.string()
+			.trim()
+			.email('Podaj poprawny adres e-mail')
+			.optional(),
+		dateOfBirth: z
+			.string()
+			.trim()
+			.refine(isPastDate, 'Podaj datę w formacie dd/mm/yyyy')
+			.optional(),
+		birthPlace: z.string().trim().optional(),
+		nationality: z.string().optional(),
+		phone: z
+			.string()
+			.trim()
+			.regex(phonePattern, 'Podaj poprawny numer telefonu')
+			.refine(hasValidPhoneLength, 'Podaj poprawny numer telefonu')
+			.optional(),
+		docType: z.enum(['passport', 'id']).optional(),
+		docNumber: z
+			.string()
+			.trim()
+			.transform((value) => value.toUpperCase())
+			.refine((value) => documentPattern.test(value), {
+				message: 'Użyj 5-15 liter i cyfr, bez spacji'
+			})
+			.optional(),
+		emergencyContactName: z.string().trim().optional(),
+		emergencyContactPhone: z
+			.string()
+			.trim()
+			.regex(phonePattern, 'Podaj poprawny numer telefonu')
+			.refine(hasValidPhoneLength, 'Podaj poprawny numer telefonu')
+			.optional(),
+		swimmingAbility: z.string().optional(),
+		sailingExperience: z.string().optional(),
+		dietaryRequirements: z.string().trim().optional(),
+		medicalNotes: z.string().trim().optional()
+	})
+	.superRefine((value, ctx) => {
+		if (
+			value.nationality === 'PL' &&
+			value.docType === 'id' &&
+			value.docNumber !== undefined &&
+			!polishIdPattern.test(value.docNumber)
+		) {
+			ctx.addIssue({
+				code: 'custom',
+				path: ['docNumber'],
+				message: 'Polski dowód ma format ABC123456'
+			})
+		}
+	})
 
 export type CrewProfileForm = z.input<typeof crewProfileSchema>
 export type CrewProfileData = z.output<typeof crewProfileSchema>
