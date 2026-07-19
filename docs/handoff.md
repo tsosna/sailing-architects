@@ -2986,3 +2986,36 @@ W projekcie zainstalowany plugin Claude Code: `caveman@caveman` (globalnie, scop
 - Scenariusze 8 (Miejsca specjalne), 9 (Hold expiring) — po Scenariuszu 7.
 
 ~
+## Sesja 2026-07-19 — Feedback Michała 07-19: cena s3, „Niedostępna", bug encji `&nbsp;` w wuchale
+
+### Zmiany
+
+- Cena s3 Madera→Teneryfa 2999→3800 w 3 statycznych źródłach: `src/convex/seed.ts`, `src/lib/data/voyage-segments.ts`, `route-section.svelte` (commit `6f75105`). **Prod Convex `voyageSegments.pricePerBerth` s3 patchowany ręcznie przez Tomka w Dashboardzie** (jak przy f4765d3).
+- Legenda boat-plan i aria-label dla koi `complimentary`: „Bezpłatna" → „Niedostępna" (`boat-plan.svelte`). Znacznik graficzny (przekreślenie) zostaje; teksty „bezpłatna" w adminie bez zmian (widzi tylko Michał).
+- Znaczek „&" między kwotą a „zł" — dwie rundy: (1) `card__price-unit` przełączony na DM Sans (hipoteza fontu — błędna), (2) właściwy fix `7554b1c`: usunięta encja `&nbsp;` z templatek pricing/route section, odstęp przez `margin-left` w CSS. Zweryfikowane w DOM na prod: `2400zł/2900zł/3800zł/4200zł`, charCode 38 zniknął. Michał potwierdził.
+- `docs/backlog.md`: feedback `2026-07-19.md` striażowany ✅; FEAT-11 wzmocniony (Michał ponowił „pole cena aktywne"); nowa pozycja **INFRA-4** (przenośność sekretów między maszynami).
+- `.claude/launch.json` (untracked) — konfiguracja preview dev servera dla Claude Code.
+
+### Decyzje
+
+- **Deploy bez testu lokalnego** (decyzja Tomka) — na MacAir brak `.env` (świeży klon, brak dostępu do pliku z Mac mini); zmiany niskiego ryzyka, weryfikacja bezpośrednio na prod przez DOM inspection.
+- **Kolejność przy zmianie ceny: najpierw patch DB, potem deploy** — DB jest źródłem naliczania Stripe; rozjazd strona-vs-DB = złe kwoty w oknie deployu.
+- **INFRA-4 kierunek: `vercel env pull`** — sekrety dev w Vercel env (Development scope), na nowej maszynie `vercel login && vercel link && vercel env pull .env`; zmienne Convex uzupełnia `npx convex dev`. Alternatywa: sejf 1Password/iCloud.
+
+### Wnioski
+
+- **Wuchale mieli encje HTML na literalny `&`** — `<span>&nbsp;zł</span>` → w DOM tekst `&zł` (charCode 38). Katalogi `.po` czyste — mangling na etapie kompilacji templatki. Nie używać encji w templatkach; odstępy CSS-em albo `{' '}`. Promowane: `wiki/concepts/wuchale-html-entities-in-templates.md` (scope: stack).
+- **Weryfikuj hipotezę w DOM, nie na screenshocie** — pierwsza runda fixu poszła za hipotezą „font renderuje ozdobne z"; `textContent` + charCodes na prod rozstrzygnęły w sekundę, że to literalny znak w danych.
+- Na MacAir `pnpm check` sypie ~16 błędów `$env` — to brak `.env`, nie regresja (notatka w memory: `macair-clone-no-env`).
+
+### Następne kroki
+
+#### Next
+
+- **Wgrać sekrety do Vercel (Development scope) i przetestować `vercel env pull`** (INFRA-4) — odblokowuje lokalny dev na MacAir; potrzebne klucze z paneli Clerk/Stripe/Brevo.
+- Sprawdzić kwoty rat planu płatności s3 w `/admin/automation` po zmianie ceny na 3800.
+
+#### Blocked / Later / Open questions
+
+- Lokalny dev na MacAir zablokowany do czasu INFRA-4 (brak `.env`).
+- FEAT-11 (samodzielna edycja cen przez Michała) — rośnie priorytet, Michał ponowił drugi raz w tygodniu.
