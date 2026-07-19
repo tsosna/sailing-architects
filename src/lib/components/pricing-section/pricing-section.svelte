@@ -170,6 +170,7 @@
 	}
 
 	.card__price-unit {
+		font-family: var(--font-sans);
 		font-size: 16px;
 	}
 

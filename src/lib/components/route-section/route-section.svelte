@@ -41,7 +41,7 @@
 			to: 'Teneryfa',
 			dates: '22–31.10.2026',
 			days: 9,
-			price: 2999,
+			price: 3800,
 			segmentId: voyageSegments[2].id,
 			desc: 'Wyspy Kanaryjskie, oferują piękne wulkany, w tym majestatyczny Teide na Teneryfie. Turkusowe plaże i doskonałą kuchnię — idealny odpoczynek po rejsie przez ocean.'
 		},
@@ -201,7 +201,9 @@
 						</div>
 						<div>
 							<p class="card__label">Cena</p>
-							<p class="card__price">{priceFormatted} zł</p>
+							<p class="card__price">
+								{priceFormatted}<span class="card__price-unit">&nbsp;zł</span>
+							</p>
 						</div>
 					</div>
 				</article>
@@ -389,6 +391,11 @@
 		font-size: 22px;
 		color: var(--color-brass-text);
 		margin: 0;
+	}
+
+	.card__price-unit {
+		font-family: var(--font-sans);
+		font-size: 14px;
 	}
 
 	@media (max-width: 820px) {

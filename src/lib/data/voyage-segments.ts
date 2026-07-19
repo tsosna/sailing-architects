@@ -26,7 +26,7 @@ export const voyageSegments: readonly VoyageSegment[] = [
 		name: 'Madera → Teneryfa',
 		dates: '22–31.10.2026',
 		days: 9,
-		price: 2999
+		price: 3800
 	},
 	{
 		id: 's4',
