@@ -42,7 +42,7 @@
 					<p class="card__dates">{seg.dates} · {seg.days} dni</p>
 					<p class="card__price">
 						{seg.price.toLocaleString('pl-PL')}<span class="card__price-unit"
-							>&nbsp;zł</span
+							>zł</span
 						>
 					</p>
 					<p class="card__per">za osobę · 1 koja</p>
@@ -172,6 +172,7 @@
 	.card__price-unit {
 		font-family: var(--font-sans);
 		font-size: 16px;
+		margin-left: 6px;
 	}
 
 	.card__per {

@@ -202,7 +202,7 @@
 						<div>
 							<p class="card__label">Cena</p>
 							<p class="card__price">
-								{priceFormatted}<span class="card__price-unit">&nbsp;zł</span>
+								{priceFormatted}<span class="card__price-unit">zł</span>
 							</p>
 						</div>
 					</div>
@@ -396,6 +396,7 @@
 	.card__price-unit {
 		font-family: var(--font-sans);
 		font-size: 14px;
+		margin-left: 5px;
 	}
 
 	@media (max-width: 820px) {
