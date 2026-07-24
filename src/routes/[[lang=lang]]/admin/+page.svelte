@@ -11,6 +11,7 @@
 		| 'data_missing'
 		| 'awaiting_confirmation'
 		| 'paid'
+		| 'refunded'
 
 	let now = $state(Date.now())
 	$effect(() => {
@@ -40,13 +41,19 @@
 			case 'overdue':
 				return rows.filter((r) => r.flags.overdue)
 			case 'due_soon':
-				return rows.filter((r) => r.flags.dueSoon && !r.flags.overdue)
+				return rows.filter(
+					(r) => r.flags.dueSoon && !r.flags.overdue && !r.isClosed
+				)
 			case 'data_missing':
-				return rows.filter((r) => r.flags.dataMissing)
+				return rows.filter((r) => r.flags.dataMissing && !r.isClosed)
 			case 'awaiting_confirmation':
-				return rows.filter((r) => !r.flags.paid && !r.flags.overdue)
+				return rows.filter(
+					(r) => !r.flags.paid && !r.flags.overdue && !r.isClosed
+				)
 			case 'paid':
-				return rows.filter((r) => r.flags.paid)
+				return rows.filter((r) => r.flags.paid && !r.isClosed)
+			case 'refunded':
+				return rows.filter((r) => r.isClosed)
 			default:
 				return rows
 		}
@@ -166,7 +173,7 @@
 				</div>
 			</div>
 			<div class="filters">
-				{#each [['all', 'Wszystkie'], ['overdue', 'Zaległe'], ['due_soon', 'Do przypomnienia'], ['data_missing', 'Brak danych'], ['awaiting_confirmation', 'Oczekuje wpłaty'], ['paid', 'Opłacone']] as const as [key, label] (key)}
+				{#each [['all', 'Wszystkie'], ['overdue', 'Zaległe'], ['due_soon', 'Do przypomnienia'], ['data_missing', 'Brak danych'], ['awaiting_confirmation', 'Oczekuje wpłaty'], ['paid', 'Opłacone'], ['refunded', 'Zwrócone']] as const as [key, label] (key)}
 					<button
 						type="button"
 						class="filter"

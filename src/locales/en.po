@@ -107,7 +107,6 @@ msgid "Wybierz etap rejsu"
 msgstr ""
 
 #. 0: seg.price.toLocaleString('pl-PL')
-#. 0: priceFormatted
 #. 0: seg.price.toLocaleString('pl-PL')
 #. 0: totalPriceFormatted
 #. 0: option.amountFormatted
@@ -117,7 +116,6 @@ msgstr ""
 #. 0: formatGrosze(payment.amount)
 #. 0: formatGrosze(payment.amount)
 #: src/lib/components/cabins-section/cabins-section.svelte
-#: src/lib/components/route-section/route-section.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
@@ -204,7 +202,7 @@ msgstr ""
 msgid "C"
 msgstr ""
 
-#. 0: berth.id; 1: state === 'captain' ? 'skipper' \\: state === 'complimentary' ? 'bezpłatna' \\: state === 'held' ? 'czasowo zablokowana' \\: state === 'taken' ? 'zajęta' \\: state === 'selected' ? 'wybrana' \\: 'dostępna'
+#. 0: berth.id; 1: state === 'captain' ? 'skipper' \\: state === 'complimentary' ? 'niedostępna' \\: state === 'held' ? 'czasowo zablokowana' \\: state === 'taken' ? 'zajęta' \\: state === 'selected' ? 'wybrana' \\: 'dostępna'
 #: src/lib/components/boat-plan/boat-plan.svelte
 msgid "Koja {0} — {1}"
 msgstr ""
@@ -347,6 +345,7 @@ msgid "{0} · {1} dni"
 msgstr ""
 
 #: src/lib/components/pricing-section/pricing-section.svelte
+#: src/lib/components/route-section/route-section.svelte
 msgid "zł"
 msgstr ""
 
@@ -1101,9 +1100,8 @@ msgstr ""
 #~ msgid "Kapitan ⚓"
 #~ msgstr ""
 
-#: src/lib/components/boat-plan/boat-plan.svelte
-msgid "Bezpłatna"
-msgstr ""
+#~ msgid "Bezpłatna"
+#~ msgstr ""
 
 #: src/lib/components/boat-plan/boat-plan.svelte
 msgid "SKP"
@@ -3341,4 +3339,12 @@ msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Nie udało się pobrać opcji płatności. Odśwież stronę."
+msgstr ""
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "Niedostępna"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Zwrócone"
 msgstr ""

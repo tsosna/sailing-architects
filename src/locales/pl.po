@@ -107,7 +107,6 @@ msgid "Wybierz etap rejsu"
 msgstr "Wybierz etap rejsu"
 
 #. 0: seg.price.toLocaleString('pl-PL')
-#. 0: priceFormatted
 #. 0: seg.price.toLocaleString('pl-PL')
 #. 0: totalPriceFormatted
 #. 0: option.amountFormatted
@@ -117,7 +116,6 @@ msgstr "Wybierz etap rejsu"
 #. 0: formatGrosze(payment.amount)
 #. 0: formatGrosze(payment.amount)
 #: src/lib/components/cabins-section/cabins-section.svelte
-#: src/lib/components/route-section/route-section.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
@@ -204,7 +202,7 @@ msgstr "B"
 msgid "C"
 msgstr "C"
 
-#. 0: berth.id; 1: state === 'captain' ? 'skipper' \\: state === 'complimentary' ? 'bezpłatna' \\: state === 'held' ? 'czasowo zablokowana' \\: state === 'taken' ? 'zajęta' \\: state === 'selected' ? 'wybrana' \\: 'dostępna'
+#. 0: berth.id; 1: state === 'captain' ? 'skipper' \\: state === 'complimentary' ? 'niedostępna' \\: state === 'held' ? 'czasowo zablokowana' \\: state === 'taken' ? 'zajęta' \\: state === 'selected' ? 'wybrana' \\: 'dostępna'
 #: src/lib/components/boat-plan/boat-plan.svelte
 msgid "Koja {0} — {1}"
 msgstr "Koja {0} — {1}"
@@ -347,6 +345,7 @@ msgid "{0} · {1} dni"
 msgstr "{0} · {1} dni"
 
 #: src/lib/components/pricing-section/pricing-section.svelte
+#: src/lib/components/route-section/route-section.svelte
 msgid "zł"
 msgstr "zł"
 
@@ -1101,9 +1100,8 @@ msgstr "Zajęta"
 #~ msgid "Kapitan ⚓"
 #~ msgstr "Kapitan ⚓"
 
-#: src/lib/components/boat-plan/boat-plan.svelte
-msgid "Bezpłatna"
-msgstr "Bezpłatna"
+#~ msgid "Bezpłatna"
+#~ msgstr "Bezpłatna"
 
 #: src/lib/components/boat-plan/boat-plan.svelte
 msgid "SKP"
@@ -3342,3 +3340,11 @@ msgstr "Brak planu płatności. Prosimy o kontakt telefoniczny lub mailowy"
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Nie udało się pobrać opcji płatności. Odśwież stronę."
 msgstr "Nie udało się pobrać opcji płatności. Odśwież stronę."
+
+#: src/lib/components/boat-plan/boat-plan.svelte
+msgid "Niedostępna"
+msgstr "Niedostępna"
+
+#: src/routes/[[lang=lang]]/admin/+page.svelte
+msgid "Zwrócone"
+msgstr "Zwrócone"
