@@ -8,6 +8,7 @@ import { internal } from './_generated/api'
 import type { Id } from './_generated/dataModel'
 import { v } from 'convex/values'
 import { sendCrewDataReminderEmail, sendPaymentReminderEmail } from './_emails'
+import { isBookingClosed } from './_lib/bookingClosed'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 const CREW_REMINDER_FIRST_DELAY_MS = 14 * DAY_MS
@@ -105,8 +106,15 @@ export const _listCrewReminderCandidates = internalQuery({
 
 			const booking = await ctx.db.get(p.bookingId)
 			if (!booking || booking.status !== 'confirmed') continue
+
 			if (!booking.paidAt) continue
 			if (now - booking.paidAt < CREW_REMINDER_FIRST_DELAY_MS) continue
+
+			const berthDocs = await Promise.all(
+				booking.berthIds.map((id) => ctx.db.get(id))
+			)
+			const isClosed = isBookingClosed(booking, berthDocs)
+			if (isClosed) continue
 
 			let recipient: string | null = null
 			let recipientName: string | null = null
