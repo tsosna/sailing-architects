@@ -3058,3 +3058,37 @@ W projekcie zainstalowany plugin Claude Code: `caveman@caveman` (globalnie, scop
 - FEAT-15 (Program rejsu) — czeka na opis + zdjęcia od Michała.
 - FEAT-14 (blog po rejsach) — deadline październik 2026.
 - LEGAL-3: potwierdzenie nazwy + decyzja o historii (Michał).
+
+## Sesja 2026-07-24 (II) — FEAT-13 lightbox galerii jachtu
+
+### Zmiany
+
+- `src/lib/components/vessel-section/vessel-section.svelte` — lightbox na galerii jachtu: natywny `<dialog>` + `showModal()`, klik hero/miniatura otwiera (`openLightbox(index)`), prev/next z wrap-around (`% length`), zamykanie Esc/×/backdrop, strzałki klawiatury (`onkeydown` ArrowLeft/Right), aria-label na kontrolkach. Stan `openIndex: number | null` + `bind:this` do elementu dialogu. Commit `2b25789d` (`--amend` dołączył `src/locales/{en,pl}.po` — wuchale wyekstrahował aria-labele).
+- `docs/backlog.md` — FEAT-13 oznaczony zrobione + notka o low-res źródłach; dopisany do „Rozwiązane niedawno".
+- Sufit rozmiaru w lightboxie `min(92vw, 1000px)` — kompromis, bo źródła `static/images/sailing/` mają max 698×548px (zmierzone `sips`).
+
+### Decyzje
+
+- **Natywny `<dialog>` zamiast biblioteki lightbox** — platforma daje top layer, `::backdrop`, Esc, focus trap za darmo; zero zależności (Simplicity First). Wyniesienie do osobnego komponentu odłożone do momentu, gdy FEAT-15 stanie się drugim konsumentem — nie wcześniej.
+- **Nie upscalować agresywnie** — źródła low-res; sufit 1000px (~1.4×) zamiast wymuszania szerokości (rozmycie). Prawdziwy fix = pełne zdjęcia od Michała, wchodzą z FEAT-5e (Cloudinary) / FEAT-15 (galeria „Program rejsu").
+
+### Wnioski
+
+- **Nadpisanie `display` na elemencie, który przeglądarka sama chowa** — `.lightbox { display: flex }` nadpisał regułę `dialog:not([open]){display:none}` → zamknięty dialog (`fixed; inset:0; transparent`) został niewidzialną warstwą łapiącą kliki całej strony. Fix: przypiąć `display:flex` pod `[open]`, nie goły selektor. Promowane: `wiki/concepts/native-dialog-display-override.md` (scope universal). Dotyczy też `<details>`, `[hidden]`.
+- **`%` vs `/` w wrap-around** — modulo zawija indeks (koniec→początek), dzielenie daje ułamek → `arr[0.2]` = undefined. `(i-1+length) % length` chroni przed ujemnym (`-1 % 5 = -1` w JS).
+- **CSS nie naprawi rozdzielczości** — `max-width:100%` pozwala urosnąć, nie wymusza; `<img>` staje na natural size. Rozpoznanie granicy „to dane, nie CSS" = osobna decyzja (sufit + backlog).
+- **WebSocket `127.0.0.1` z perspektywy przeglądarki** — `PUBLIC_CONVEX_URL=127.0.0.1` znaczy „host, na którym działa przeglądarka". App otwarta po LAN IP (`192.168.33.29:5173`, Vite Network URL) → WS leci do localhostu tej maszyny, nie do Mac mini z Convex. Fix codzienny: otwierać `localhost:5173`. Dostęp z drugiej maszyny = Convex na `0.0.0.0` + IP w env (osobny temat, kandydat INFRA).
+
+### Następne kroki
+
+#### Next
+
+- Push zbiorczy na prod (main + production) — commit lightbox `2b25789d` czeka lokalnie razem z wcześniejszymi.
+- FEAT-13 część druga (galeria „Program rejsu") wejdzie z FEAT-15, gdy Michał dostarczy content + pełne zdjęcia.
+- INFRA-4 (`vercel env pull`) — nadal otwarte.
+
+#### Blocked / Later / Open questions
+
+- Źródła zdjęć jachtu low-res (max 698×548) — lightbox ograniczony do sufitu 1000px; pełne pliki od Michała (łączy się z FEAT-5e Cloudinary).
+- FEAT-15 (Program rejsu) — czeka na opis + zdjęcia od Michała.
+- LEGAL-3: potwierdzenie „Wpłata początkowa" + decyzja o historycznych snapshotach (telefon z Michałem).

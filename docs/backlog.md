@@ -109,6 +109,7 @@
 
 ## ✅ Rozwiązane niedawno (żeby nie wracały)
 
+- ~~FEAT-13 lightbox galerii jachtu~~ — 07-24 (`2b25789d`: natywny `<dialog>` w `vessel-section.svelte`, prev/next wrap-around, Esc/×/strzałki/backdrop). Znane ograniczenie: źródła low-res (max 698×548) → sufit `min(92vw,1000px)`; pełne zdjęcia z FEAT-5e/FEAT-15.
 - ~~Nav „Rezerwuj" statyczny mimo zalogowania + wyboru koi (feedback 07-17)~~ — 07-14 (`d1aba342`: `reserveLabel` w site-nav + sync `/book` → `bookingSelection`; na main, prod czeka na zbiorczy push).
 - ~~Panel żeglarza pokazywał zły/wygasły booking~~ — 07-05 (`bookingByUser` lista + filtr `confirmed`).
 - ~~Panel żeglarza: tylko jedna koja mimo wielu~~ — 07-05 (selektor rejsu).
