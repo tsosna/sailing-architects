@@ -35,6 +35,23 @@
 			alt: 'Katedra w Palmie na Majorce'
 		}
 	] as const
+
+	let openIndex = $state<number | null>(null)
+	let dialogEl = $state<HTMLDialogElement | null>(null)
+
+	function openLightbox(index: number) {
+		openIndex = index
+		dialogEl?.showModal()
+	}
+
+	function showNext() {
+		if (openIndex === null) return
+		openIndex = (openIndex + 1) % galleryImages.length
+	}
+	function showPrev() {
+		if (openIndex === null) return
+		openIndex = (openIndex - 1 + galleryImages.length) % galleryImages.length
+	}
 </script>
 
 <section id="vessel" class="vessel">
@@ -45,12 +62,26 @@
 		<div class="vessel__grid">
 			<div class="gallery">
 				<figure class="gallery__hero">
-					<img src={galleryImages[0].src} alt={galleryImages[0].alt} />
+					<button
+						type="button"
+						onclick={() => {
+							openLightbox(0)
+						}}
+					>
+						<img src={galleryImages[0].src} alt={galleryImages[0].alt} />
+					</button>
 				</figure>
 				<div class="gallery__thumbs">
-					{#each galleryImages.slice(1) as image (image.src)}
+					{#each galleryImages.slice(1) as image, i (image.src)}
 						<figure class="gallery__thumb">
-							<img src={image.src} alt={image.alt} />
+							<button
+								type="button"
+								onclick={() => {
+									openLightbox(i + 1)
+								}}
+							>
+								<img src={image.src} alt={image.alt} />
+							</button>
 						</figure>
 					{/each}
 				</div>
@@ -73,6 +104,35 @@
 			</div>
 		</div>
 	</div>
+	<dialog
+		bind:this={dialogEl}
+		class="lightbox"
+		onclose={() => {
+			openIndex = null
+		}}
+		onkeydown={(e) => {
+			if (e.key === 'ArrowRight') showNext()
+			if (e.key === 'ArrowLeft') showPrev()
+		}}
+	>
+		{#if openIndex !== null}
+			<button
+				type="button"
+				aria-label="Zamknij"
+				onclick={() => dialogEl?.close()}>×</button
+			>
+			<button type="button" aria-label="Poprzednie zdjęcia" onclick={showPrev}
+				>‹</button
+			>
+			<img
+				src={galleryImages[openIndex].src}
+				alt={galleryImages[openIndex].alt}
+			/>
+			<button type="button" aria-label="Następne zdjęcie" onclick={showNext}
+				>›</button
+			>
+		{/if}
+	</dialog>
 </section>
 
 <style>
@@ -209,5 +269,71 @@
 			grid-template-columns: 1fr;
 			gap: 32px;
 		}
+	}
+	.lightbox {
+		border: none;
+		padding: 0;
+		background: transparent;
+		max-width: none;
+		max-height: none;
+		width: 100vw;
+		height: 100dvh;
+		position: fixed;
+		inset: 0;
+	}
+
+	.lightbox[open] {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.lightbox::backdrop {
+		background: rgba(10, 16, 26, 0.85);
+	}
+
+	.lightbox img {
+		width: auto;
+		height: auto;
+		max-width: min(92vw, 1000px);
+		max-height: 88vh;
+		object-fit: contain;
+	}
+
+	.gallery__hero button,
+	.gallery__thumb button {
+		all: unset;
+		display: block;
+		cursor: pointer;
+		width: 100%;
+		height: 100%;
+	}
+
+	.lightbox button {
+		position: fixed;
+		background: rgba(10, 16, 26, 0.5);
+		color: var(--color-warm-white);
+		border: 1px solid rgba(196, 146, 58, 0.3);
+		cursor: pointer;
+		font-size: 28px;
+		line-height: 1;
+		width: 48px;
+		height: 48px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.lightbox button[aria-label='Zamknij'] {
+		top: 20px;
+		right: 20px;
+	}
+	.lightbox button[aria-label='Poprzednie zdjęcia'] {
+		left: 20px;
+		top: 50%;
+	}
+	.lightbox button[aria-label='Następne zdjęcie'] {
+		right: 20px;
+		top: 50%;
 	}
 </style>

@@ -1992,6 +1992,7 @@ msgstr "Escape"
 #: src/lib/components/admin/refund-dialog.svelte
 #: src/lib/components/admin/refund-dialog.svelte
 #: src/lib/components/toast/toast.svelte
+#: src/lib/components/vessel-section/vessel-section.svelte
 msgid "Zamknij"
 msgstr "Zamknij"
 
@@ -3354,3 +3355,22 @@ msgstr "Wpłata początkowa + 2 raty"
 #: src/routes/[[lang=lang]]/admin/automation/+page.svelte
 msgid "Wpłata początkowa + 3 raty"
 msgstr "Wpłata początkowa + 3 raty"
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Poprzednie zdjęcia"
+msgstr "Poprzednie zdjęcia"
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "Następne zdjęcie"
+msgstr "Następne zdjęcie"
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "ArrowRight"
+msgstr "ArrowRight"
+
+#: src/lib/components/vessel-section/vessel-section.svelte
+msgid "ArrowLeft"
+msgstr "ArrowLeft"
+
+#~ msgid "Poprzednie zdjęcie"
+#~ msgstr "Poprzednie zdjęcie"
