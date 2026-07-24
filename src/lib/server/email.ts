@@ -333,7 +333,7 @@ function formatDate(timestamp?: number): string {
 function paymentEmailSubject(type: PaymentEmailType, bookingRef: string) {
 	switch (type) {
 		case 'deposit':
-			return `Zaliczka rezerwacji ${bookingRef} opłacona · Sailing Architects`
+			return `Wpłata początkowa za rezerwację ${bookingRef} zaksięgowana · Sailing Architects`
 		case 'fully-paid':
 			return `Rezerwacja ${bookingRef} opłacona w całości · Sailing Architects`
 		default:
@@ -344,7 +344,7 @@ function paymentEmailSubject(type: PaymentEmailType, bookingRef: string) {
 function paymentEmailHeading(type: PaymentEmailType): string {
 	switch (type) {
 		case 'deposit':
-			return 'Zaliczka opłacona — rezerwacja aktywna'
+			return 'Wpłata początkowa zaksięgowana — rezerwacja aktywna'
 		case 'fully-paid':
 			return 'Rezerwacja opłacona w całości'
 		default:

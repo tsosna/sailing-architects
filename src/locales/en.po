@@ -2524,13 +2524,11 @@ msgstr ""
 msgid "Szablon"
 msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
-msgid "Zaliczka + 2 raty"
-msgstr ""
+#~ msgid "Zaliczka + 2 raty"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
-msgid "Zaliczka + 3 raty"
-msgstr ""
+#~ msgid "Zaliczka + 3 raty"
+#~ msgstr ""
 
 #: src/routes/[[lang=lang]]/admin/automation/+page.svelte
 msgid "Całość teraz"
@@ -3347,4 +3345,12 @@ msgstr ""
 
 #: src/routes/[[lang=lang]]/admin/+page.svelte
 msgid "Zwrócone"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Wpłata początkowa + 2 raty"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/admin/automation/+page.svelte
+msgid "Wpłata początkowa + 3 raty"
 msgstr ""

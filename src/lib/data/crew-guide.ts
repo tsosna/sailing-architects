@@ -77,7 +77,7 @@ export const crewGuideChecklists: ReadonlyArray<CrewGuideChecklist> = [
 		title: 'Płatności i formalności',
 		phase: 'Po rezerwacji',
 		items: [
-			'Wpłata zaliczki w terminie wskazanym przez organizatora',
+			'Wpłata początkowa w terminie wskazanym przez organizatora',
 			'Wypełnienie formularza danych załogi (dane do rejestru jachtu)',
 			'Podpisanie regulaminu rejsu',
 			'Ustalenie preferencji kajutowych (damska / męska / mieszana)',

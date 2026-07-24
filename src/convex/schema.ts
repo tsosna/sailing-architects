@@ -27,7 +27,7 @@ export default defineSchema({
 	paymentPlanItems: defineTable({
 		planId: v.id('paymentPlans'),
 		segmentId: v.id('voyageSegments'),
-		label: v.string(), // "Zaliczka", "Rata 1", "Rata 2"
+		label: v.string(), // "Wpłata początkowa", "Rata 1", "Rata 2"
 		kind: v.union(
 			v.literal('deposit'),
 			v.literal('installment'),

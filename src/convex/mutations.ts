@@ -1066,7 +1066,7 @@ export const seedTestPaymentPlan = mutation({
 
 		const planId = await ctx.db.insert('paymentPlans', {
 			segmentId: segment._id,
-			name: 'Plan testowy: zaliczka 30% + 2 raty',
+			name: 'Plan testowy: wpłata początkowa 30% + 2 raty',
 			currency: DEFAULT_CURRENCY,
 			isActive: true,
 			allowFullPayment: true,
@@ -1077,7 +1077,7 @@ export const seedTestPaymentPlan = mutation({
 		await ctx.db.insert('paymentPlanItems', {
 			planId,
 			segmentId: segment._id,
-			label: 'Zaliczka',
+			label: 'Wpłata początkowa',
 			kind: 'deposit',
 			amountPerBerth: depositPerBerth,
 			sortOrder: 1

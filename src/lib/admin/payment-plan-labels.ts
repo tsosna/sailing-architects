@@ -9,7 +9,7 @@ export function defaultPlanName(segmentName: string) {
 export const PAYMENT_PLAN_ITEM_LABELS = {
 	full: 'Całość',
 	customFirst: 'Pozycja 1',
-	deposit: 'Zaliczka',
+	deposit: 'Wpłata początkowa',
 	installment: (index: number) => `Rata ${index}`,
 	item: (index: number) => `Pozycja ${index}`
 } as const

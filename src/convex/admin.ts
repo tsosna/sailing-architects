@@ -215,7 +215,7 @@ export const overviewBySegment = query({
 			} else if (paid > 0) {
 				paymentLabel =
 					booking.paymentStatus === 'deposit_paid'
-						? 'Zaliczka'
+						? 'Wpłata początkowa'
 						: 'Częściowo opłacone'
 				paymentLevel = 'ok'
 			} else {

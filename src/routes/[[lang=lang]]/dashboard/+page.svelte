@@ -88,7 +88,7 @@
 
 	const paymentStatusLabels: Record<string, string> = {
 		unpaid: 'Nieopłacona',
-		deposit_paid: 'Zaliczka opłacona',
+		deposit_paid: 'Wpłata początkowa zaksięgowana',
 		partially_paid: 'Częściowo opłacona',
 		paid: 'Opłacona',
 		overdue: 'Po terminie',

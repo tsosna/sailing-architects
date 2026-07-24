@@ -85,7 +85,7 @@ function paymentStatusLabel(status?: string): string {
 		case 'paid':
 			return 'Opłacona w całości'
 		case 'deposit_paid':
-			return 'Zaliczka opłacona'
+			return 'Wpłata początkowa zaksięgowana'
 		case 'partially_paid':
 			return 'Częściowo opłacona'
 		case 'overdue':

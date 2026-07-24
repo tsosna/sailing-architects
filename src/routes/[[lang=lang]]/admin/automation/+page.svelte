@@ -388,8 +388,8 @@
 				bind:value={template}
 				onchange={() => generateItems(template, pricePerBerthPLN)}
 			>
-				<option value="deposit_2">Zaliczka + 2 raty</option>
-				<option value="deposit_3">Zaliczka + 3 raty</option>
+				<option value="deposit_2">Wpłata początkowa + 2 raty</option>
+				<option value="deposit_3">Wpłata początkowa + 3 raty</option>
 				<option value="full">Całość teraz</option>
 				<option value="custom">Własny plan</option>
 			</select>
