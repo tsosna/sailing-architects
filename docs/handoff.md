@@ -3019,3 +3019,42 @@ W projekcie zainstalowany plugin Claude Code: `caveman@caveman` (globalnie, scop
 
 - Lokalny dev na MacAir zablokowany do czasu INFRA-4 (brak `.env`).
 - FEAT-11 (samodzielna edycja cen przez Michała) — rośnie priorytet, Michał ponowił drugi raz w tygodniu.
+
+## Sesja 2026-07-24 — feedback 07-20 (cron do zamkniętych bookingów) + filtr „Zwrócone" + LEGAL-3 „zaliczka"
+
+### Zmiany
+
+- `src/convex/reminders.ts` — `_listCrewReminderCandidates` pomija zamknięte bookingi: fetch koi + `isBookingClosed` + `continue`, wstawione ZA tanimi filtrami (status/paidAt/karencja), przed drogim resztą. Commit `5957312`. Root cause feedbacku 07-20: SA-2026-8022 (zwrócona) dostała email „uzupełnij dane" — zwrot zostawia `status: 'confirmed'`, zamknięcie to fakt wyliczany, cron go nie liczył.
+- `src/routes/[[lang=lang]]/admin/+page.svelte` — filtr „Zwrócone" (`refunded` w `FilterKey` + przycisk + `case` na `r.isClosed`) + wykluczenie `isClosed` z „Oczekuje wpłaty" i „Opłacone". Commit `906f758`. Oba fixy zweryfikowane na prod.
+- LEGAL-3: „Zaliczka" → „Wpłata początkowa" w 9 miejscach copy (labels, admin fallback, email subject+heading, PDF, crew-guide, automation options, dashboard, seed testowy) + `.po` przez `npx wuchale` (CLI, dev server zatrzymany). Commit `aabe018`. Label aktywnego planu na prod zmieniony ręcznie w `/admin/automation`. Enum `kind: 'deposit'` i snapshoty historyczne celowo nietknięte.
+- Raty planu s3 na prod zweryfikowane po zmianie ceny na 3800 (wisiało z 07-19) — zgadzają się.
+- `docs/backlog.md` — FEAT-5 rozszerzony (multi-rejs homepage, admin zakładanie rejsów, Cloudinary), FEAT-8 rozszerzony (baner „Wyprzedane" + licznik wolnych miejsc), nowe FEAT-12 (książka + kod −3% + śpiewnik), FEAT-13 (lightbox), FEAT-14 (blog po rejsach, deadline październik 2026), FEAT-15 (sekcja „Program rejsu", blocked na content); LEGAL-3 status; feedback 07-20 + email 07-23 striażowane ✅.
+
+### Decyzje
+
+- **„Wpłata początkowa" zamiast „1 rata"** (do potwierdzenia z Michałem wieczorem) — „1 rata" wymusza przenumerowanie istniejących „Rata 1/2" we wszystkich planach; „Wpłata początkowa" nie rusza numeracji.
+- **„zaksięgowana" zamiast „opłacona"** przy nowym podmiocie — „wpłata opłacona" to masło maślane; ujednolicone w mail/PDF/dashboard.
+- **Snapshoty historyczne z „Zaliczka" zostają** — historia mówi prawdę o momencie zakupu; czyszczenie = osobna decyzja prawna (pytanie do Michała).
+- **Kolejność filtrów w query crona: tanie przed drogimi** — fetch koi (odczyty DB) dopiero po odrzuceniu kandydatów przez porównania w pamięci.
+
+### Wnioski
+
+- **Fakt wyliczany (closed) nie broni się sam** — każdy konsument (cron, filtry, KPI) musi go policzyć; filtr po `status` nie wystarcza, bo zwrot nie zmienia statusu. Trzeci raz ta lekcja (KPI 07-04, panel żeglarza 07-07, cron 07-24) — wzorzec: grep po użyciach `bookings` przy każdym nowym konsumencie.
+- **`git diff` pokazuje tylko niezastagowane** — po `git add` diff „znika"; stagowane ogląda się `git diff --cached`. Kolumny `git status --short`: lewa = staged, prawa = unstaged.
+- **Dwa `-m` = subject + body** (git sam wstawia pustą linię); jedno `-m` = wszystko w jednej linii. `--amend` naprawia niewypchnięty commit.
+- **`npx wuchale`** — ekstrakcja katalogów z CLI bez klikania po stronach; dev server zatrzymać (stale-catalog gotcha z 07-12). Literały w `.ts` (email, PDF, crew-guide) nadal poza `.po` = I18N-1.
+- **Przepis na commit message wypracowany** (typ → test zdaniem „jeśli zastosujesz ten commit, on ___" → sklej) — promowany do wiki: `procedures/commit-message-recipe.md`.
+
+### Następne kroki
+
+#### Next
+
+- Telefon z Michałem (21:00): potwierdzić „Wpłata początkowa"; decyzja o historycznych snapshotach; QR (odpowiedź: statyczny QR trwały); omówić FEAT-12/13/15 i priorytety.
+- FEAT-13 (lightbox) — dobry kandydat na następną sesję nauki (czysty frontend, zamknięty zakres).
+- INFRA-4 (`vercel env pull`) — nadal otwarte.
+
+#### Blocked / Later / Open questions
+
+- FEAT-15 (Program rejsu) — czeka na opis + zdjęcia od Michała.
+- FEAT-14 (blog po rejsach) — deadline październik 2026.
+- LEGAL-3: potwierdzenie nazwy + decyzja o historii (Michał).

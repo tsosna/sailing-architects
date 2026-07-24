@@ -1,0 +1,348 @@
+Delivered-To: tomek.sosinski@gmail.com
+Received: by 2002:a05:6a10:7134:b0:73a:dc2a:6c0f with SMTP id ay20csp3647813pxc;
+        Thu, 23 Jul 2026 14:30:56 -0700 (PDT)
+X-Received: by 2002:a17:907:1784:b0:c16:8adf:f183 with SMTP id a640c23a62f3a-c1c509794aamr240104866b.14.1784842255780;
+        Thu, 23 Jul 2026 14:30:55 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1784842255; cv=none;
+        d=google.com; s=arc-20260327;
+        b=CXlrA1hfJjQJXaKRAya5H6Cx4+HYvTi+BKraWlWOw0Vlr3fnQv4ybTJVxKxArM+B3d
+         GigI0JnRNEX1TLAWu6qrPuHnAUdTFfJWrsjmiD0T4E/ZnZXZBPy58pkexle46JtdqA2Q
+         iXb9yupD+bYu9I9e8xTnH39Yx9pBTUM+qR6HVefAaJ12yaDXSjNhvJaRmDNRik4gjdXx
+         FGGsBwN8Jopt8C4NoswhNkqXYhm7VApNPqNXX6rRF0Ys6AosCOd6amCQhjJoiB6XbnCA
+         zNiaf6v+hFvhQQy41svqrQLBwuG+/ciIgVV1MZZ1q/TNZ9PQ0dFh2jY3TGJGrBHpdUcf
+         9Mow==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=subject:from:to:content-language:user-agent:mime-version:date
+         :message-id:dkim-signature;
+        bh=47dL7CEizJ3E0SuWgLw0KQxeASATi5UqFyzoktlE5WU=;
+        fh=xDRxjIjwstSXH0jcq2O5hyW4DkQr3SOw5ea51UPnzPc=;
+        b=B3BvFEpxTDcYBj3o7nZq65Pt7z7+vX/4qCM1HUm/K62Yt2MssRzvYCtf1+irw0n++B
+         C+Hfiv5kM6W5NPJSU1oWkg3ucgaweu4lrueHA3xxW9n7tTBWxrT9yJqwExWQyM/xUAD+
+         BjvnBP6xhfAe4Dk2UgXDGJOKnaqJws6CdcnK0rw/pF9lG64/X5AaP+mSroAuHcPP+9Fa
+         i2/UvxDuu7URfmm02WPyoWJqgPae2K4dPiMkayjNUOzeGslRnz6I2DeCG9YRrK3IkP+D
+         f/+TQGj4fcvj3i/0qBBgEkgfZoSaNNCQoBnaI33iF1nSuGmOBLv9j1BUaa8VQpCTEa85
+         1WlQ==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@jmsstudio.com header.s=1676395270.internal header.b=x3GhqJ5i;
+       spf=pass (google.com: domain of msmolarski@jmsstudio.com designates 85.128.190.42 as permitted sender) smtp.mailfrom=msmolarski@jmsstudio.com;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=jmsstudio.com
+Return-Path: <msmolarski@jmsstudio.com>
+Received: from shared-amg42.rev.nazwa.pl (shared-amg42.rev.nazwa.pl. [85.128.190.42])
+        by mx.google.com with ESMTPS id a640c23a62f3a-c1c57245640si192162766b.173.2026.07.23.14.30.55
+        for <tomek.sosinski@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 23 Jul 2026 14:30:55 -0700 (PDT)
+Received-SPF: pass (google.com: domain of msmolarski@jmsstudio.com designates 85.128.190.42 as permitted sender) client-ip=85.128.190.42;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@jmsstudio.com header.s=1676395270.internal header.b=x3GhqJ5i;
+       spf=pass (google.com: domain of msmolarski@jmsstudio.com designates 85.128.190.42 as permitted sender) smtp.mailfrom=msmolarski@jmsstudio.com;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=jmsstudio.com
+X-Virus-Scanned: by amavisd-new using ClamAV (2)
+X-Spam-Flag: NO
+X-Spam-Score: -0.626
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.626 tagged_above=-10 tests=[ALL_TRUSTED=-1,
+	HTML_MESSAGE=0.001, PDS_RDNS_DYNAMIC_FP=0.01, RDNS_DYNAMIC=0.363]
+	autolearn=disabled
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=jmsstudio.com;
+	s=1676395270.internal; t=1784842254;
+	bh=47dL7CEizJ3E0SuWgLw0KQxeASATi5UqFyzoktlE5WU=;
+	h=Date:To:From:Subject;
+	b=x3GhqJ5iX3bkSrTgcqRoookdldP4ilpuT+EvCKcleSF++0C+AxTZ1hTez/x/0eukD
+	 0ja9Ta1Ne95Q/0wWxCPjASAN3H3mK0VjPYnmSaaMdglemzwHZB+fTMM3vF5VF0Gi1K
+	 sk1+pnDn50I2v0dmovTymFcDyk/lKwGy5JgqnHoD2BU67RTiWG/+Iv937GXy6+wUIY
+	 3z3UMWYirRL+aF9N/Dd4Ry/wxY0opCgJ8U94NjLhvcBa/0Vvk+EEmYuZcN0sr8AFoJ
+	 O4XclsnQLhHGy+91ofMiUWHEoCbEi0SSJiv62qsta4CjhMCshi6CKfVp8prVRUbKP2
+	 cV+/dnTF/LZTw==
+Received: from [192.168.1.12] (80.49.175.121.ipv4.supernova.orange.pl [80.49.175.121])
+	by jmsstudio.nazwa.pl (Postfix) with ESMTP id BBA2C1C7658;
+	Thu, 23 Jul 2026 23:30:54 +0200 (CEST)
+Content-Type: multipart/alternative;
+ boundary="------------nWE3pPPDleqIU9PHQ5Ohb2RW"
+Message-ID: <e1cd2861-b7bb-4a0c-ab10-5c828a8b0518@jmsstudio.com>
+Date: Thu, 23 Jul 2026 23:30:53 +0200
+MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Content-Language: pl, en-GB
+To: =?UTF-8?Q?Tomek_Sosi=C5=84ski?= <tomek.sosinski@gmail.com>
+From: =?UTF-8?Q?Micha=C5=82_Smolarski_-_jmsSTUDIO_ARCHITEKCI?=
+ <msmolarski@jmsstudio.com>
+Subject: Strona jachty
+
+This is a multi-part message in MIME format.
+--------------nWE3pPPDleqIU9PHQ5Ohb2RW
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+
+Cześć,
+
+Tomku do strony o jachtach kilka pilnych kwestii żeby ją zamknąć na gotowo:
+
+1  nad sekcja jacht ,  musi być sekcja "program rejsu"  , ja doślę 
+niebawem  opis tego rejsu , oraz kilka zdjęć do galerii w tej sekcji .
+
+Ważne zdjęcia powinny się powiększać do jakiejś formy galerii jak jak 
+się na nie kliknie.
+
+2 - zdjęcia w sekcji jacht też powinny się powiększać.
+
+3- musimy mieć opcję że na stronie głównej jest do wyboru kilka rejsów. 
+W sensie ta strona co jest teraz jest fajna jako strona rejsu 
+pojedynczego rejsu , ale potrzebna jest główna gdzie można wygrać na 
+początku z kilku rejsów  (zaraz musimy dodać Seszele maj , Francję wina 
+kwiecień , Grecje czerwiec  )
+
+4- potrzebuję żeby gdzieś była opcja "kup poradnik - dostań rabat" - 
+kończę pisać książkę dla nowicjuszy ,  chcę by można ją było kupić 
+online , a jak ktoś kupuje to za każdą sztukę ma kod do wykorzystania  
+przy rezerwacji na rabat 3 % . , w mojej ocenie ksiąska powinna być 
+dostępna do zakupu gdzieś w sekcji "poradnik" na jej początku . Tam damy 
+też do pobrania darmowy  śpiewnik żeglarski w trzech formatach (pdf, 
+mobi , epub)
+
+5 - czy znasz jakąś stronę  gdzie można zrobić bezpłatny trwały kod QR 
+kierujący na naszą stronę ?
+
+Jak będziesz zmiał chwilę to możemy się jutro zdzwonić wieczorem to 
+omówić po 21:00 .
+
+chyba że Ty jeszcze jesteś na wyjeździe , to jak wrócisz.
+
+Pozdrawiam ,
+
+-- 
+
+*mgr inż. arch. Michał Smolarski*
+*jmsSTUDIO **- ARCHITEKCI*
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+-- --
+mobile. *+48 601 671 182 *
+tel./fax. +48 12 427 17 54
+e-mail: *msmolarski@jmsstudio.com* <mailto:msmolarski@jmsstudio.com>
+*-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+-- --*
+*Visit:*
+[PL] www.jmsstudio.com
+[PL] www.architekt-krakow.pl
+[PL] www.projektowanie-wnetrz-krakow.pl
+*-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+-- --*
+*Treść niniejszej wiadomości wraz z załącznikami jest poufna*,prawnie 
+chroniona i przeznaczona wyłącznie do użytku osoby, do której jest 
+adresowana.
+Jeżeli nie jesteś zamierzonym adresatem, niniejszym informujemy, że 
+ujawnienie treści, powielanie, dystrybucja, lub podejmowanie działań w 
+oparciu o informacje
+zawarte w niniejszej wiadomości są surowo zabronione i mogą stanowić 
+naruszenie chronionych praw spółki jmsSTUDIO s.c. i Technologie Modułowe 
+sp z o.o. lub innych podmiotów i osób trzecich.
+Jeśli odbiorca otrzymał ten e-mail przez pomyłkę, prosimy niezwłocznie 
+powiadomić nadawcę oraz skasować wiadomość.
+*This email and any files transmitted with it are confidential*,legally 
+privileged and intended solely for the use of the individual or entity 
+to whom
+they are addressed. If you are not the intended recipient you are 
+notified that disclosing, copying, distributing or taking any action in 
+reliance on the contents of this
+information is strictly prohibited, and may constitute a violation of 
+legally protected rights of jmsSTUDIO s.c. and Technologie Modułowe sp z 
+o.o. or other entities and third parties. If you have received
+this email in error please promptly notify the sender and delete this 
+email. *Dziękujemy / Thank you - jmsSTUDIO - ARCHITEKCI*
+_*Myśląc o przyszłości,*_ dbajmy o naszą planetę i środowisko naturalne, 
+jeżeli nie ma takiej konieczności nie drukuj tej wiadomości email.
+_*Thinking about the future,*_*let's take care of our planet and the 
+natural environment, *if it is not necessary, do not print this email.
+*-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+-- --*
+*Szanowna Pani / Szanowny Panie, z dniem 25 maja 2018 weszły w życie 
+nowe zasady dotyczące ochrony danych osobowych (GDPR, RODO). W związku z 
+czym informujemy, że przetwarzamy Pani/Pana dane osobowe:*
+1- Administratorem Pani/Pana danych osobowych jest spółka: jmsSTUDIO 
+s.c. ; Żegocina 446; 32-731 Żegocina oraz spółka Technologie Modułowe 
+sp. z o.o. ul. Morawskiego 5; 30-102 Kraków
+2- Przetwarzamy Pani/Pana dane w celu: przygotowania ofert dla 
+Pani/Pana, świadczenia usług i innych czynności które zostały nam przez 
+Pana/Panią zlecone.
+3- Zasób danych osobowych zgromadzonych przez jmsSTUDIO s.c. i 
+Technologie Modułowe sp. z o.o. zawiera dane zgromadzone z: zapytań o 
+nasze usługi kierowanych bezpośrednio (werbalnie), telefonicznie, drogą 
+e-mail czy listownie, i innymi metodami (od 2004 roku); przesyłanych do 
+jmsSTUDIO s.c. i Technologie Modułowe sp. z o.o. z formularzy 
+kontaktowych i drogą e-mail
+na stronach internetowych zarządzanych przez spółki (od 2004 roku); 
+dokumentów, informacji, opinii i innych dokumentów uzyskanych z urzędów 
+i instytucji na podstawie pełnomocnictw i upoważnień przekazanych 
+jmsSTUDIO s.c. i Technologie Modułowe sp. z o.o. ; innych źródeł.
+4-Posiadane dane przetwarzane będą dla potrzeb marketingu bezpośredniego 
+produktów i usług jmsSTUDIO s.c. i Technologie Modułowe sp. z o.o. oraz 
+do realizacji zleconych nam przez Pana/Panią usług i innych czynności, 
+możemy przetwarzać je do czasu, aż zgłosi Pan/Pani sprzeciw względem ich 
+przetwarzania w tym celu.
+5- W przypadku jeżeli zlecone zostało nam przez Pana/Panią wykonanie 
+usług lub innych czynności Pana/Pani dane osobowe mogą w zwiażku z 
+realizacją zleconych czynności czy usług zostać przekazywane zewnętrznym 
+podmiotom i firmą przetwarzającym.
+6- W każdej chwili przysługuje Pani/Panu prawo do wniesienia sprzeciwu 
+wobec przetwarzania Pani/Pana danych, oraz prawo do żądania usunięcia 
+Pani/Pana danych z naszych zasobów. Może Pani/Pan tego dokonać poprzez 
+wysłanie informacji do nas drogą mailową na adres: info@jmsstudio.pl 
+bądź poprzez formularz kontaktowy na naszej stronie internetowej. 
+Wszelkie pytania związane z przetwarzaniem przez nas Pani/Pana danych 
+proszę kierować pod adres: *info@jmsstudio.pl*
+
+--------------nWE3pPPDleqIU9PHQ5Ohb2RW
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+<!DOCTYPE html>
+<html>
+  <head>
+
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  </head>
+  <body text="#000000" bgcolor="#FFFFFF">
+    <p>Cześć, </p>
+    <p>Tomku do strony o jachtach kilka pilnych kwestii żeby ją zamknąć
+      na gotowo:</p>
+    <p>1  nad sekcja jacht ,  musi być sekcja "program rejsu"  , ja
+      doślę niebawem  opis tego rejsu , oraz kilka zdjęć do galerii w
+      tej sekcji . </p>
+    <p>Ważne zdjęcia powinny się powiększać do jakiejś formy galerii jak
+      jak się na nie kliknie. </p>
+    <p>2 - zdjęcia w sekcji jacht też powinny się powiększać. </p>
+    <p>3- musimy mieć opcję że na stronie głównej jest do wyboru kilka
+      rejsów. W sensie ta strona co jest teraz jest fajna jako strona
+      rejsu pojedynczego rejsu , ale potrzebna jest główna gdzie można
+      wygrać na początku z kilku rejsów  (zaraz musimy dodać Seszele maj
+      , Francję wina kwiecień , Grecje czerwiec  )</p>
+    <p>4- potrzebuję żeby gdzieś była opcja "kup poradnik - dostań
+      rabat" - kończę pisać książkę dla nowicjuszy ,  chcę by można ją
+      było kupić online , a jak ktoś kupuje to za każdą sztukę ma kod do
+      wykorzystania  przy rezerwacji na rabat 3 % . , w mojej ocenie
+      ksiąska powinna być dostępna do zakupu gdzieś w sekcji "poradnik"
+      na jej początku . Tam damy też do pobrania darmowy  śpiewnik
+      żeglarski w trzech formatach (pdf, mobi , epub) </p>
+    <p>5 - czy znasz jakąś stronę  gdzie można zrobić bezpłatny trwały
+      kod QR kierujący na naszą stronę ?  </p>
+    <p>Jak będziesz zmiał chwilę to możemy się jutro zdzwonić wieczorem
+      to omówić po 21:00 . </p>
+    <p>chyba że Ty jeszcze jesteś na wyjeździe , to jak wrócisz. </p>
+    <p>Pozdrawiam ,</p>
+    <div class="moz-signature">-- <br>
+      <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+      <title></title>
+      <meta name="GENERATOR" content="OpenOffice 4.1.15  (Win32)">
+      <meta name="CREATED" content="20090416;11320264">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGED" content="20250310;21425287">
+      <meta name="Info 1" content="">
+      <meta name="Info 2" content="">
+      <meta name="Info 3" content="">
+      <meta name="Info 4" content="">
+      <meta name="jmsSTUDIO - ARCHITEKCI" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michal Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <style type="text/css">
+	<!--
+		@page { size: 21cm 29.7cm; margin-left: 0.69cm; margin-right: 0.79cm; margin-top: 0.32cm; margin-bottom: 2cm }
+		P { margin-bottom: 0.21cm; so-language: zxx }
+		PRE.western { font-family: "Courier New", monospace; font-size: 10pt; so-language: zxx }
+		PRE.cjk { font-family: "MS PGothic", monospace; font-size: 10pt; so-language: zxx }
+		PRE.ctl { font-family: "Courier New", monospace; font-size: 10pt; so-language: zxx }
+		A:link { color: #000080; so-language: zxx; text-decoration: underline }
+		A:visited { color: #800000; so-language: zxx; text-decoration: underline }
+	-->
+	</style>
+      <pre lang="zxx" class="western"><font color="#000000"><font
+      face="Arial, sans-serif"><font size="2" style="font-size: 9pt"><b>mgr inż. arch. Michał Smolarski</b></font></font></font>
+<font color="#808080"><font face="Arial, sans-serif"><font size="2"
+      style="font-size: 9pt"><span lang="zxx"><font color="#ff6600"><b>jmsSTUDIO  </b></font><b>-  ARCHITEKCI</b></span></font></font></font>
+<font color="#000000"><font face="Arial, sans-serif"><font size="1"
+      style="font-size: 6pt"><span lang="zxx">-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --</span></font></font></font>
+<font face="Arial, sans-serif"><font size="2" style="font-size: 9pt"><span
+      lang="zxx"><span style="font-weight: normal">mobile. </span><b>+48 601 671 182      </b></span></font></font>
+<font face="Arial, sans-serif"><font size="2" style="font-size: 9pt"><span
+      lang="zxx"><span style="font-weight: normal">tel./fax. +48 12 427 17 54</span></span></font></font>
+<span lang="zxx"><font face="Arial, sans-serif"><font size="2"
+      style="font-size: 9pt"><span lang="zxx"><span
+      style="font-weight: normal">e-mail:  </span></span></font></font><a
+      href="mailto:msmolarski@jmsstudio.com"><font
+      face="Arial, sans-serif"><font size="2" style="font-size: 9pt"><span
+      lang="zxx"><b>msmolarski@jmsstudio.com</b></span></font></font></a></span>
+<font color="#000000"><font face="Arial, sans-serif"><font size="1"
+      style="font-size: 6pt"><span lang="zxx"><b>-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --</b></span></font></font></font>
+<font face="Arial, sans-serif"><font size="2" style="font-size: 9pt"><span
+      lang="zxx"><b>Visit:</b></span></font></font>
+<font size="2" style="font-size: 9pt"><span lang="zxx"><font
+      face="Arial, sans-serif"><span style="font-weight: normal">[PL] <a class="moz-txt-link-abbreviated" href="http://www.jmsstudio.com">www.jmsstudio.com</a></span></font></span></font>
+<font size="2" style="font-size: 9pt"><span lang="zxx"><font
+      face="Arial, sans-serif"><span style="font-weight: normal">[PL] <a class="moz-txt-link-abbreviated" href="http://www.architekt-krakow.pl">www.architekt-krakow.pl</a></span></font></span></font>
+<font size="2" style="font-size: 9pt"><span lang="zxx"><font
+      face="Arial, sans-serif"><span style="font-weight: normal">[PL] <a class="moz-txt-link-abbreviated" href="http://www.projektowanie-wnetrz-krakow.pl">www.projektowanie-wnetrz-krakow.pl</a></span></font></span></font>
+<font color="#000000"><font face="Arial, sans-serif"><font size="1"
+      style="font-size: 6pt"><span lang="zxx"><b>-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --</b></span></font></font></font>
+<font face="Arial, sans-serif"><font size="1" style="font-size: 8pt"><span
+      lang="zxx"><font color="#666666"><span
+      style="text-decoration: none"><b>Treść niniejszej wiadomości wraz z załącznikami jest poufna</b></span></font><font
+      color="#666666"><span style="text-decoration: none">,</span></font><font
+      color="#666666"> </font><font color="#666666"><font size="1">prawnie chroniona i przeznaczona wyłącznie do użytku osoby, do której jest adresowana. </font></font></span></font></font>
+<font color="#666666"><font face="Arial, sans-serif"><font size="1"><span
+      lang="zxx">Jeżeli nie jesteś zamierzonym adresatem, niniejszym informujemy, że ujawnienie treści, powielanie, dystrybucja, lub podejmowanie działań w oparciu o informacje </span></font></font></font>
+<font color="#666666"><font face="Arial, sans-serif"><font size="1"><span
+      lang="zxx">zawarte w niniejszej wiadomości są surowo zabronione i mogą stanowić naruszenie chronionych praw spółki jmsSTUDIO s.c. i Technologie Modułowe sp z o.o. lub innych podmiotów i osób trzecich. </span></font></font></font>
+<font color="#666666"><font face="Arial, sans-serif"><font size="1"><span
+      lang="zxx">Jeśli odbiorca otrzymał ten e-mail  przez pomyłkę, prosimy niezwłocznie powiadomić nadawcę oraz skasować wiadomość.</span></font></font></font>
+<font face="Arial, sans-serif"><font size="1" style="font-size: 8pt"><span
+      lang="zxx"><font color="#666666"><span
+      style="text-decoration: none"><b>This email and any files transmitted with it are confidential</b></span></font><font
+      color="#666666"><span style="text-decoration: none">,</span></font><font
+      color="#666666"> </font><font color="#666666"><font size="1">legally privileged and intended solely for the use of the individual or entity to whom </font></font></span></font></font>
+<font color="#666666"><font face="Arial, sans-serif"><font size="1"><span
+      lang="zxx">they are addressed. If you are not the intended recipient you are notified that disclosing, copying, distributing or taking any action in reliance on the contents of this </span></font></font></font>
+<font color="#666666"><font face="Arial, sans-serif"><font size="1"><span
+      lang="zxx">information is strictly prohibited, and may constitute a violation of legally protected rights of jmsSTUDIO s.c. and Technologie Modułowe sp z o.o. or other entities and third parties. If you have received </span></font></font></font>
+<font face="Arial, sans-serif"><font size="1" style="font-size: 8pt"><span
+      lang="zxx"><font color="#666666"><font size="1">this email in error please promptly notify the sender and delete this email.   </font></font><font
+      color="#666666"><span style="text-decoration: none"><b>Dziękujemy / Thank you - jmsSTUDIO  -  ARCHITEKCI</b></span></font></span></font></font>
+<font color="#007826"><font face="Arial, sans-serif"><font size="1"
+      style="font-size: 8pt"><span lang="zxx"><u><b>Myśląc o przyszłości,</b></u> dbajmy o naszą planetę i środowisko naturalne, jeżeli nie ma takiej konieczności nie drukuj tej wiadomości email. </span></font></font></font>
+<font color="#007826"><font face="Arial, sans-serif"><font size="1"
+      style="font-size: 8pt"><span lang="zxx"><u><b>Thinking about the future,</b></u><span
+      style="text-decoration: none"> </span><span
+      style="text-decoration: none"><b>let's take care of our planet and the natural environment, </b></span><span
+      style="text-decoration: none"><span style="font-weight: normal">if it is not necessary, do not print this email.</span></span></span></font></font></font>
+<font color="#000000"><font face="Arial, sans-serif"><font size="1"
+      style="font-size: 6pt"><span lang="zxx"><b>-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --</b></span></font></font></font>
+<font color="#000000"><font face="Arial, sans-serif"><font size="1"
+      style="font-size: 6pt"><span lang="zxx"><b>Szanowna Pani / Szanowny Panie, z dniem 25 maja 2018 weszły w życie nowe zasady dotyczące ochrony danych osobowych (GDPR, RODO). W związku z czym informujemy, że przetwarzamy Pani/Pana dane osobowe:</b> </span></font></font></font>
+<font color="#000000"><font face="Arial, sans-serif"><font size="1"
+      style="font-size: 6pt"><span lang="zxx">1- Administratorem Pani/Pana danych osobowych jest spółka: jmsSTUDIO s.c. ; Żegocina 446; 32-731 Żegocina oraz spółka Technologie Modułowe sp. z o.o. ul. Morawskiego 5; 30-102 Kraków</span></font></font></font>
+<font color="#000000"><font face="Arial, sans-serif"><font size="1"
+      style="font-size: 6pt"><span lang="zxx">2- Przetwarzamy Pani/Pana dane w celu: przygotowania ofert dla Pani/Pana,  świadczenia usług i innych czynności które zostały nam przez Pana/Panią zlecone.</span></font></font></font>
+<font color="#000000"><font face="Arial, sans-serif"><font size="1"
+      style="font-size: 6pt"><span lang="zxx">3- Zasób danych osobowych zgromadzonych przez jmsSTUDIO s.c. i Technologie Modułowe sp. z o.o. zawiera dane zgromadzone z: zapytań o nasze usługi kierowanych bezpośrednio (werbalnie), telefonicznie, drogą e-mail czy listownie, i innymi metodami (od 2004 roku); przesyłanych do jmsSTUDIO s.c.  i Technologie Modułowe sp. z o.o. z formularzy kontaktowych i drogą e-mail</span></font></font></font>
+<font color="#000000"><font face="Arial, sans-serif"><font size="1"
+      style="font-size: 6pt"><span lang="zxx">na stronach internetowych zarządzanych przez spółki (od 2004 roku); dokumentów, informacji, opinii i innych dokumentów uzyskanych z urzędów i instytucji na podstawie pełnomocnictw i upoważnień przekazanych jmsSTUDIO s.c.  i Technologie Modułowe sp. z o.o. ; innych źródeł. </span></font></font></font>
+<font color="#000000"><font face="Arial, sans-serif"><font size="1"
+      style="font-size: 6pt"><span lang="zxx">4-Posiadane dane przetwarzane będą dla potrzeb marketingu bezpośredniego produktów i usług jmsSTUDIO s.c. i Technologie Modułowe sp. z o.o. oraz do realizacji zleconych nam przez Pana/Panią usług i innych czynności, możemy przetwarzać je do czasu, aż zgłosi Pan/Pani sprzeciw względem ich przetwarzania w tym celu.</span></font></font></font>
+<font color="#000000"><font face="Arial, sans-serif"><font size="1"
+      style="font-size: 6pt"><span lang="zxx">5- W przypadku jeżeli zlecone zostało nam przez Pana/Panią wykonanie usług lub innych czynności Pana/Pani dane osobowe mogą w zwiażku z realizacją zleconych czynności  czy usług zostać przekazywane zewnętrznym podmiotom i firmą przetwarzającym.</span></font></font></font>
+<font color="#000000"><font face="Arial, sans-serif"><font size="1"
+      style="font-size: 6pt"><span lang="zxx">6- W każdej chwili przysługuje Pani/Panu prawo do wniesienia sprzeciwu wobec przetwarzania Pani/Pana danych, oraz prawo do żądania usunięcia Pani/Pana danych z naszych zasobów. Może Pani/Pan tego dokonać poprzez wysłanie informacji do nas drogą mailową na adres: <a class="moz-txt-link-abbreviated" href="mailto:info@jmsstudio.pl">info@jmsstudio.pl</a> bądź poprzez formularz kontaktowy na naszej stronie internetowej. Wszelkie pytania związane z przetwarzaniem przez nas Pani/Pana danych proszę kierować pod adres: <b><a class="moz-txt-link-abbreviated" href="mailto:info@jmsstudio.pl">info@jmsstudio.pl</a></b></span></font></font></font></pre>
+    </div>
+  </body>
+</html>
+
+--------------nWE3pPPDleqIU9PHQ5Ohb2RW--
