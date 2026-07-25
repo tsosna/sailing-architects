@@ -326,9 +326,8 @@ msgstr ""
 msgid "Wybierz swój etap"
 msgstr ""
 
-#: src/lib/components/pricing-section/pricing-section.svelte
-msgid "Ostatnie miejsca"
-msgstr ""
+#~ msgid "Ostatnie miejsca"
+#~ msgstr ""
 
 #. 0: String(i + 1).padStart(2, '0')
 #. 0: port.label
@@ -1594,9 +1593,8 @@ msgstr ""
 msgid "Nieopłacona"
 msgstr ""
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Zaliczka opłacona"
-msgstr ""
+#~ msgid "Zaliczka opłacona"
+#~ msgstr ""
 
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Częściowo opłacona"
@@ -3374,3 +3372,16 @@ msgstr ""
 
 #~ msgid "Poprzednie zdjęcie"
 #~ msgstr ""
+
+#~ msgid "Wyprzedane"
+#~ msgstr ""
+
+#~ msgid "Wolne {0} miejsca"
+#~ msgstr ""
+
+#~ msgid "Wolne {0} {1}"
+#~ msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Wpłata początkowa zaksięgowana"
+msgstr ""

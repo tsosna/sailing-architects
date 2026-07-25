@@ -1,6 +1,7 @@
 import { query } from './_generated/server'
 import { v } from 'convex/values'
 import { isBookingClosed } from './_lib/bookingClosed'
+import { isBerthFree } from './_lib/berthFree'
 
 /** All voyage segments — for landing segment picker and booking page. */
 export const listSegments = query({
@@ -30,11 +31,7 @@ export const berthStatusesBySlug = query({
 
 		const now = Date.now()
 		return berths
-			.filter((b) => {
-				if (b.status === 'available') return false
-				if (b.status !== 'held') return true
-				return typeof b.holdExpiresAt === 'number' && b.holdExpiresAt > now
-			})
+			.filter((b) => !isBerthFree(b, now))
 			.map((b) => ({ berthId: b.berthId, status: b.status }))
 	}
 })
@@ -55,6 +52,30 @@ export const allBerthsBySlug = query({
 			.query('berths')
 			.withIndex('by_segment', (q) => q.eq('segmentId', segment._id))
 			.collect()
+	}
+})
+
+export const listBerthAvailability = query({
+	args: {},
+	handler: async (ctx) => {
+		const now = Date.now()
+
+		const segments = await ctx.db.query('voyageSegments').collect()
+
+		const result = []
+
+		for (const segment of segments) {
+			const berths = await ctx.db
+				.query('berths')
+				.withIndex('by_segment', (q) => q.eq('segmentId', segment._id))
+				.collect()
+
+			const free = berths.filter((b) => isBerthFree(b, now)).length
+
+			result.push({ slug: segment.slug, free })
+		}
+
+		return result
 	}
 })
 

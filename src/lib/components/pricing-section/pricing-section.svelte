@@ -2,6 +2,9 @@
 	import { resolve } from '$app/paths'
 	import { voyageSegments } from '$lib/data/voyage-segments'
 	import { bookingSelection } from '$lib/state/booking-selection.svelte'
+	import { useQuery } from 'convex-svelte'
+	import { api } from '$convex/api'
+	import { berthBadge } from '$lib/berth-badge'
 
 	const includes = [
 		'Koja na jachcie',
@@ -24,6 +27,17 @@
 	function bookingHref(segmentId: string) {
 		return bookingSelection.bookingPath(resolve('/book'), segmentId)
 	}
+	// Free berth count per segment — empty map while loading
+	const availabilityQuery = useQuery(
+		api.queries.listBerthAvailability,
+		() => ({})
+	)
+
+	const freeBySlug = $derived(
+		new Map(
+			(availabilityQuery.data ?? []).map(({ slug, free }) => [slug, free])
+		)
+	)
 </script>
 
 <section id="pricing" class="pricing">
@@ -33,9 +47,13 @@
 
 		<div class="cards">
 			{#each voyageSegments as seg, i (seg.id)}
+				{@const badge = berthBadge(freeBySlug.get(seg.id))}
+
 				<article class="card">
-					{#if i === 3}
-						<span class="card__badge">Ostatnie miejsca</span>
+					{#if badge}
+						<span class="card__badge card__badge--{badge.tone}"
+							>{badge.text}</span
+						>
 					{/if}
 					<p class="card__eyebrow">Etap {String(i + 1).padStart(2, '0')}</p>
 					<h3 class="card__title">{seg.name}</h3>
@@ -129,13 +147,22 @@
 		top: 16px;
 		right: 16px;
 		padding: 4px 10px;
-		background: var(--color-brass);
-		color: var(--color-navy);
 		font-family: var(--font-sans);
 		font-size: 9px;
 		font-weight: 700;
 		letter-spacing: 1.5px;
 		text-transform: uppercase;
+	}
+
+	.card__badge--low-stock {
+		background: var(--color-brass);
+		color: var(--color-navy);
+	}
+
+	.card__badge--sold-out {
+		background: rgba(245, 240, 232, 0.12);
+		border: 1px solid var(--color-muted);
+		color: var(--color-warm-white);
 	}
 
 	.card__eyebrow {

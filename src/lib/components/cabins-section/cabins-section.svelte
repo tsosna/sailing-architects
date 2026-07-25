@@ -6,6 +6,7 @@
 	import { voyageSegments } from '$lib/data/voyage-segments'
 	import { bookingSelection } from '$lib/state/booking-selection.svelte'
 	import { api } from '$convex/api'
+	import { berthBadge } from '$lib/berth-badge'
 
 	const segmentParam = $derived(page.url.searchParams.get('segment'))
 	let appliedSegmentParam = $state<string | null>(null)
@@ -20,6 +21,7 @@
 	const selectedBerthsLabel = $derived(
 		bookingSelection.selectedBerths.length === 1 ? 'koję' : 'koje'
 	)
+
 	const totalPriceFormatted = $derived(totalPrice.toLocaleString('pl-PL'))
 	const selectionEyebrow = $derived(
 		[
@@ -43,6 +45,18 @@
 				berthId,
 				status as BerthStatus
 			])
+		)
+	)
+
+	// Free berth count per segment — empty map while loading
+	const availabilityQuery = useQuery(
+		api.queries.listBerthAvailability,
+		() => ({})
+	)
+
+	const freeBySlug = $derived(
+		new Map(
+			(availabilityQuery.data ?? []).map(({ slug, free }) => [slug, free])
 		)
 	)
 
@@ -73,6 +87,7 @@
 
 		<div class="segments" role="tablist" aria-label="Wybierz etap rejsu">
 			{#each voyageSegments as seg (seg.id)}
+				{@const badge = berthBadge(freeBySlug.get(seg.id))}
 				<button
 					type="button"
 					role="tab"
@@ -87,6 +102,11 @@
 					<span class="segments__price"
 						>{seg.price.toLocaleString('pl-PL')} zł</span
 					>
+					{#if badge}
+						<span class="segments__badge segments__badge--{badge.tone}"
+							>{badge.text}</span
+						>
+					{/if}
 				</button>
 			{/each}
 		</div>
@@ -210,6 +230,27 @@
 
 	.segments__btn--active .segments__price {
 		color: var(--color-brass-text);
+	}
+
+	.segments__badge {
+		align-self: flex-start;
+		padding: 4px 10px;
+		font-family: var(--font-sans);
+		font-size: 9px;
+		font-weight: 700;
+		letter-spacing: 1.5px;
+		text-transform: uppercase;
+	}
+
+	.segments__badge--low-stock {
+		background: var(--color-brass);
+		color: var(--color-navy);
+	}
+
+	.segments__badge--sold-out {
+		background: rgba(245, 240, 232, 0.12);
+		border: 1px solid var(--color-muted);
+		color: var(--color-warm-white);
 	}
 
 	.banner {
