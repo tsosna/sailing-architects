@@ -3092,3 +3092,50 @@ W projekcie zainstalowany plugin Claude Code: `caveman@caveman` (globalnie, scop
 - Źródła zdjęć jachtu low-res (max 698×548) — lightbox ograniczony do sufitu 1000px; pełne pliki od Michała (łączy się z FEAT-5e Cloudinary).
 - FEAT-15 (Program rejsu) — czeka na opis + zdjęcia od Michała.
 - LEGAL-3: potwierdzenie „Wpłata początkowa" + decyzja o historycznych snapshotach (telefon z Michałem).
+
+## Sesja 2026-07-25 — FEAT-8: badge dostępności koi z realnych danych
+
+### Zmiany
+
+- `src/convex/queries.ts` — nowa query `listBerthAvailability` (bez argumentów, zwraca `{ slug, free }[]` dla wszystkich etapów w jednej subskrypcji). Pętla po `voyageSegments` + `berths` po indeksie `by_segment`, zliczanie przez `.filter().length`.
+- `src/convex/_lib/berthFree.ts` (nowy) — `isBerthFree(berth, now)`; predykat „czy koja jest wolna" wyjęty z `berthStatusesBySlug`. Stara query używa go teraz jako `!isBerthFree(...)`, cały trzyliniowy filtr zniknął. Wejście `Pick<Doc<'berths'>, 'status' | 'holdExpiresAt'>`.
+- `src/lib/berth-badge.ts` (nowy) — `berthBadge(free)` zwraca `{ text, tone } | null`; `LOW_STOCK = 3`, trzy stany (brak danych / wyprzedane / mało miejsc). Czysta funkcja.
+- `src/lib/components/cabins-section/cabins-section.svelte` — subskrypcja + `Map` slug→free, badge w zakładkach etapów (`align-self: flex-start`, w flow pod ceną).
+- `src/lib/components/pricing-section/pricing-section.svelte` — to samo w kartach cennika; **usunięty zaszyty `{#if i === 3}` z tekstem „Ostatnie miejsca"**. Warianty `--low-stock` (mosiądz) i `--sold-out` (neutralny, `rgba(245,240,232,0.12)` + border).
+- `docs/backlog.md` — FEAT-8 skreślony; nowe pozycje INFRA-6, REFACTOR-2, REFACTOR-3, UI-6; korekta wpisu BUG-7 (kod jest w `f37903b0`, nie „niecommitowany”).
+- Commity `d8f9b246` (feat) + `ce704845` (docs), `main` + `production`. Zweryfikowane na prodzie: badge zgadzają się z realną liczbą wolnych koi.
+
+### Decyzje
+
+- **Nowa query zamiast reużycia `allBerthsBySlug`** — ta zwraca całe dokumenty z `guestName` i identyfikatorami Stripe; na publicznym landingu byłby wyciek. `berthStatusesBySlug` nie pasowała kształtem (jeden `slug` w argumencie, a badge potrzebuje wszystkich czterech etapów naraz).
+- **`total` nie wchodzi do kontraktu query** — potrzebny tylko wewnątrz handlera do odjęcia. Badge nigdy nie pokazuje „3 z 10”, więc pole nie jedzie przez sieć.
+- **Wyprzedany etap zostaje klikalny** — badge informuje, nie blokuje. Michał prosił, żeby było widać, że etap istnieje, ale jest sprzedany.
+- **Sold-out w barwie neutralnej, nie w kolorze akcji.** Złoto = CTA/cena/aktywna zakładka; ubranie w nie „Wyprzedane” kazałoby ślepemu zaułkowi wołać tak samo głośno jak ofertom do kupienia. Zmierzony kontrast: 6,2:1 (low-stock) i 10,5:1 (sold-out).
+- **Teksty badge’a zostają w `.ts` mimo utraty widoczności dla wuchale** — EN dziś nie istnieje (`en.po` prawie pusty), a I18N-1 i tak wymaga rozwiązania systemowego dla wszystkich plików `.ts`. Budowanie struktury pod język, którego nie ma, to spekulacja.
+- **UI-6 (`font-size: 9px`) nie ruszany punktowo** — to samo 9px siedzi w eyebrow’ach całego landingu; wchodzi razem z FEAT-5 (decyzja Tomka).
+
+### Wnioski
+
+- **Query napisana dla admina nie jest automatycznie bezpieczna publicznie.** `.map()` na końcu `berthStatusesBySlug` to nie sprzątanie dla wygody, tylko projekcja jako granica zaufania — z dokumentu wychodzą dwa pola i ani jedno więcej. Reużycie „bo już jest” to typowa droga wycieku.
+- **Refaktor przenosi kod bez zmiany zachowania.** Przy ekstrakcji `isBerthFree` do helpera trafiła własna wersja reguły zamiast dokładnej negacji oryginału — plan jachtu zaczął inaczej traktować `held` bez `holdExpiresAt` i milisekundę wygaśnięcia, choć nikt go nie dotykał. Dwie zmiany sklejone w jedną nie dają się osobno przetestować ani cofnąć, a diff wygląda niewinnie. Dowód bezzmianowości: stara query zwraca po refaktorze tyle samo rekordów co przed.
+- **Jedna reguła biznesowa spisana N razy rozjeżdża się po cichu.** „Czy hold jeszcze obowiązuje” żyło w 4 kopiach (`queries.ts`, `admin.ts`, `mutations.ts`, nowa piąta w budowie), każda inaczej traktowała brak `holdExpiresAt`. Dwie zunifikowane, dwie zostały (REFACTOR-3).
+- **Literówka w nazwie klasy CSS jest niewidzialna dla wszystkich narzędzi.** `cart__badge--low-stock` zamiast `card__badge--` — `svelte-check` 0 błędów, ESLint cicho, badge bez tła. Nazwa klasy to string; nic nie sprawdza, czy ma odpowiednik w CSS. Jedyna obrona to obejrzeć wynik (ta sama rodzina co `colorNatural` w configu Clerka).
+- **Ten sam CSS w innym kontenerze zachowuje się inaczej.** `position: absolute` działało w karcie cennika (`position: relative` na `.card`), a w zakładce wyrzuciło badge w róg dokumentu — `.segments__btn` nie ma kontekstu pozycjonowania.
+- **Nazwy klas nie łączą stylów między komponentami Svelte** — style są scoped, kompilator dokleja hash pliku. Zmiana `card__badge` na `segments__badge` „żeby był wspólny” dała dwie niewidzące się klasy i jeden komponent bez stylu.
+- **Barwa niesie znaczenie, kontrast niesie ważność.** Wariant neutralny wypadł kontrastowo lepiej od złotego, nie zabierając koloru akcji.
+- **Cursor dokłada zmiany spoza zakresu.** Znana pułapka miała jeden objaw (silent revert po „accept”); doszedł drugi — zmiana szersza niż zamówiona, poprawna technicznie, więc żadne narzędzie nie protestuje. Wychodzi tylko przy czytaniu całego `git diff`, nie tylko fragmentu, o który się prosiło.
+
+### Następne kroki
+
+#### Next
+
+- BUG-7 — zaległy smoke test warstwy serwerowej (przepis w backlogu), ostatnia otwarta pozycja w sekcji bugów.
+- REFACTOR-3 — dwie pozostałe kopie reguły holdu (`admin.ts:109`, `mutations.ts:478`); podmiana w `mutations.ts` dotyka guardu sprzedaży, osobny commit.
+- DEP-1a / DEP-1b — walidacja snapshotu polityki i A7e na realnym stuck refund (wiszą od 07-10).
+
+#### Blocked / Later / Open questions
+
+- I18N-1 rośnie: teksty badge’a dołączyły do `crew-guide.ts` jako copy poza zasięgiem wuchale (`#~` w obu katalogach).
+- REFACTOR-2 — `voyageSegments[].id` vs `slug` w DB; zgodność utrzymywana ręcznie, wspólny mianownik z FEAT-11.
+- UI-6 — skala typograficzna landingu (9px), wchodzi z FEAT-5.
+- FEAT-15, LEGAL-3 (potwierdzenie nazwy + snapshoty historyczne) — bez zmian, czekają na Michała.

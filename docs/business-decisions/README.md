@@ -21,3 +21,4 @@ Indeks decyzji biznesowych i produktowych dla `sailing-architects`.
 | [ADR-015](ADR-015-pln-now-currency-field-for-future.md) | PLN jako jedyna waluta z jawnym polem currency | płatności | przyjęta |
 | [ADR-016](ADR-016-ksef-invoices-research-open.md) | Faktury i KSeF jako osobny moduł | faktury / KSeF / płatności | do potwierdzenia przez Michała |
 | [ADR-017](ADR-017-payment-item-kind-semantics.md) | Semantyka kind pozycji planu płatności (full/deposit niosą reguły) | płatności | przyjęta |
+| [ADR-018](ADR-018-availability-badge-derived-from-data.md) | Komunikaty o dostępności miejsc wynikają z danych, nie z decyzji marketingowej | landing / sprzedaż / compliance | przyjęta |
