@@ -2,6 +2,7 @@ import { internalMutation, mutation } from './_generated/server'
 import type { MutationCtx } from './_generated/server'
 import type { Doc, Id } from './_generated/dataModel'
 import { v } from 'convex/values'
+import { isBerthFree } from './_lib/berthFree'
 import { requireConvexAdmin } from './_lib/requireAdmin'
 import { calculatePaymentStatusAfterRefund } from './_lib/refundStatus'
 import { adminParticipantSchema } from '../lib/schemas/crew-profile'
@@ -474,11 +475,7 @@ export const createBooking = internalMutation({
 				)
 				.first()
 			if (!berth) throw new Error(`Berth not found: ${berthId}`)
-			const expiredHold =
-				berth.status === 'held' &&
-				typeof berth.holdExpiresAt === 'number' &&
-				berth.holdExpiresAt <= now
-			if (berth.status !== 'available' && !expiredHold)
+			if (!isBerthFree(berth, now))
 				throw new Error(`Koja ${berthId} jest już zajęta`)
 			resolved.push(berth)
 		}

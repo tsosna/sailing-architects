@@ -6,5 +6,6 @@ export function isBerthFree(
 ): boolean {
 	if (berth.status === 'available') return true
 	if (berth.status !== 'held') return false
-	return !(typeof berth.holdExpiresAt === 'number' && berth.holdExpiresAt > now)
+	if (typeof berth.holdExpiresAt !== 'number') return false
+	return berth.holdExpiresAt <= now
 }
