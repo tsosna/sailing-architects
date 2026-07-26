@@ -106,7 +106,9 @@ Backlog rzeczy, które są świadomie odłożone po Etapach 1-7. Nic z tej listy
 
 **Kierunek:** dodać przycisk „Poproś o nowy link" → Convex action `requestNewConfirmationLink({ oldToken })` która: (1) sprawdza czy stary token istniał (anti-spam), (2) generuje nowy, (3) wysyła do tego samego odbiorcy + kopia do admina. Bez auth — token sam jest dowodem że ktoś dostał oryginalny mail.
 
-### Walidacja pól formy edycji uczestnika w drawerze
+### ~~Walidacja pól formy edycji uczestnika w drawerze~~ ✅ 2026-07-26 (BUG-7)
+
+Zrobione: `adminParticipantSchema` w `src/lib/schemas/crew-profile.ts` (format-only, pola opcjonalne — obecność pilnuje `participantDataStatus`), walidacja po obu stronach (drawer + mutacja), enumy zawężone. Obie warstwy zweryfikowane smoke testem 07-26. Ogon: INFRA-7 (treść błędu z mutacji nie dociera do klienta na prodzie).
 
 **Stan:** `adminUpdateParticipantData` w `src/convex/mutations.ts` przyjmuje stringi bez walidacji — można wpisać dowolne wartości w `firstName`, `email`, `dateOfBirth`, `phone`, `docNumber`, `nationality`, `swimmingAbility`, `sailingExperience`. Brak ograniczeń długości, brak format check (email regex, data ISO, telefon), brak whitelist dla enumów typu `swimmingAbility`/`sailingExperience`/`docType`. Forma kupującego ma walidację (zod) — admin form ją pomija.
 
