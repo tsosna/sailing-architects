@@ -171,6 +171,12 @@ export const _listUpcomingPaymentCandidates = internalQuery({
 			const booking = await ctx.db.get(payment.bookingId)
 			if (!booking || booking.status !== 'confirmed') continue
 
+			const berthDocs = await Promise.all(
+				booking.berthIds.map((id) => ctx.db.get(id))
+			)
+			const isClosed = isBookingClosed(booking, berthDocs)
+			if (isClosed) continue
+
 			const recipient = await resolveBuyerRecipient(ctx, booking)
 			if (!recipient) continue
 
@@ -216,6 +222,12 @@ export const _listOverduePaymentCandidates = internalQuery({
 
 			const booking = await ctx.db.get(payment.bookingId)
 			if (!booking || booking.status !== 'confirmed') continue
+
+			const berthDocs = await Promise.all(
+				booking.berthIds.map((id) => ctx.db.get(id))
+			)
+			const isClosed = isBookingClosed(booking, berthDocs)
+			if (isClosed) continue
 
 			const recipient = await resolveBuyerRecipient(ctx, booking)
 			if (!recipient) continue
