@@ -40,7 +40,7 @@
 
 	const reserveLabel = $derived(
 		bookingSelection.hasSelectedBerths && isSignedIn
-			? 'Kontynuuj rezerwację →'
+			? 'Kontynuuj rezerwację\u00A0→'
 			: 'Rezerwuj'
 	)
 
@@ -69,19 +69,22 @@
 		<a class="btn btn--primary" href={reserveHref}>{reserveLabel}</a>
 	</div>
 
-	<button
-		type="button"
-		class="hamburger"
-		class:hamburger--open={menuOpen}
-		aria-expanded={menuOpen}
-		aria-controls="site-nav-mobile"
-		aria-label={menuOpen ? 'Zamknij menu' : 'Otwórz menu'}
-		onclick={() => (menuOpen = !menuOpen)}
-	>
-		<span class="hamburger__line"></span>
-		<span class="hamburger__line"></span>
-		<span class="hamburger__line"></span>
-	</button>
+	<div class="mobile-actions">
+		<a class="btn btn--primary" href={reserveHref}>{reserveLabel}</a>
+		<button
+			type="button"
+			class="hamburger"
+			class:hamburger--open={menuOpen}
+			aria-expanded={menuOpen}
+			aria-controls="site-nav-mobile"
+			aria-label={menuOpen ? 'Zamknij menu' : 'Otwórz menu'}
+			onclick={() => (menuOpen = !menuOpen)}
+		>
+			<span class="hamburger__line"></span>
+			<span class="hamburger__line"></span>
+			<span class="hamburger__line"></span>
+		</button>
+	</div>
 </nav>
 
 {#if menuOpen}
@@ -103,11 +106,6 @@
 				class="btn btn--ghost btn--full"
 				href={`${resolve('/book')}?auth=signin&next=dashboard`}
 				onclick={closeMenu}>Panel</a
-			>
-			<a
-				class="btn btn--primary btn--full"
-				href={reserveHref}
-				onclick={closeMenu}>{reserveLabel}</a
 			>
 		</div>
 
@@ -246,6 +244,10 @@
 		padding-bottom: 14px;
 	}
 
+	.mobile-actions {
+		display: none;
+	}
+
 	.hamburger {
 		display: none;
 		flex-direction: column;
@@ -350,6 +352,12 @@
 
 		.hamburger {
 			display: flex;
+		}
+
+		.mobile-actions {
+			display: flex;
+			align-items: center;
+			gap: 12px;
 		}
 	}
 

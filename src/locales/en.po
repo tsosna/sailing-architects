@@ -1292,7 +1292,6 @@ msgstr ""
 msgid "Najpierw wybierz etap i miejsce na planie jachtu. Logowanie pojawi się dopiero po kliknięciu „Kontynuuj rezerwację”."
 msgstr ""
 
-#: src/lib/components/site-nav/site-nav.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Kontynuuj rezerwację →"
 msgstr ""
@@ -3384,4 +3383,8 @@ msgstr ""
 
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Wpłata początkowa zaksięgowana"
+msgstr ""
+
+#: src/lib/components/site-nav/site-nav.svelte
+msgid "Kontynuuj rezerwację →"
 msgstr ""
