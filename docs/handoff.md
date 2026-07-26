@@ -3139,3 +3139,49 @@ W projekcie zainstalowany plugin Claude Code: `caveman@caveman` (globalnie, scop
 - REFACTOR-2 — `voyageSegments[].id` vs `slug` w DB; zgodność utrzymywana ręcznie, wspólny mianownik z FEAT-11.
 - UI-6 — skala typograficzna landingu (9px), wchodzi z FEAT-5.
 - FEAT-15, LEGAL-3 (potwierdzenie nazwy + snapshoty historyczne) — bez zmian, czekają na Michała.
+
+## Sesja 2026-07-26 13:30 — BUG-7 smoke test, REFACTOR-3 domknięty, BUG-8 (monity do zwróconych)
+
+### Zmiany
+
+- **BUG-7 zamknięty** — zaległy smoke test warstwy serwerowej `adminUpdateParticipantData`. Obejście walidacji klienckiej (guard zakomentowany + `...parsed.data` → `...payload`), email `abc`, `mutations.ts:868` rzucił „Podaj poprawny adres e-mail". Po przywróceniu diff pusty, toast błędu bez wywołania sieciowego. Kod bez zmian (był w `f37903b0`), commit `a39c3fa3` tylko dokumentacyjny. Sekcja „Bugi otwarte" w backlogu pusta pierwszy raz.
+- **REFACTOR-3 zamknięty** w dwóch commitach. `0d832bcf`: KPI `heldBerths` w `admin.ts` czyta `isBerthFree` zamiast własnej kopii (`status === 'held' && !isBerthFree(b, now)`). `aea3c53e`: guard sprzedaży w `createBooking` (`mutations.ts`) też — sześć linii z `expiredHold` zastąpione przez `if (!isBerthFree(berth, now)) throw`. Przy okazji **`isBerthFree` przyjął ostrzejszą regułę**: koja `held` bez liczbowego `holdExpiresAt` jest teraz zajęta, nie wolna.
+- `src/convex/_lib/berthFree.test.ts` (nowy) — 7 przypadków: `available`, `taken`, `captain`, `complimentary`, `held` bez `holdExpiresAt`, `held` z holdem wygasłym, `held` z holdem aktywnym. Drugi plik testów poza modułem refundów.
+- **BUG-8 (nowy, znaleziony w trakcie sesji, naprawiony)** — `93631829`: `_listUpcomingPaymentCandidates` i `_listOverduePaymentCandidates` w `reminders.ts` dostały blok `isBookingClosed` + `continue`. Trzy maile „Zaległa rata…" wyszły z produkcji o 09:10 UTC do zwróconych rezerwacji testowych (SA-2026-9562, SA-2026-1708, SA-2026-2443). Odbiorcą była własna skrzynka, żaden klient tego nie zobaczył.
+- `docs/backlog.md` — BUG-7, BUG-8, REFACTOR-3 skreślone; nowe: **INFRA-7** (`ConvexError` vs `Error` na prodzie), **REFACTOR-4** (discriminated union w `berths`), **REFACTOR-5** (`markOverduePayments` u źródła), **SEC-4** (serwerowy guard zamknięcia dla ręcznych wysyłek), **UI-7/8/9** (mobile, feedback Michała 07-25), **UI-10** + **LEGAL-4/5** (dopisek 07-20). Feedback `2026-07-25.md` i dopisek `2026-07-20.md` striażowane ✅.
+- `docs/admin-post-mvp-decisions.md` — duplikat BUG-7 skreślony.
+- Push `main` + `production` → prod na `93631829`. Wszystkie dzisiejsze zmiany żywe.
+
+### Decyzje
+
+- **Ostrożniejsza reguła wygrywa i staje się wspólna.** Przy ostatniej kopii reguły holdu okazało się, że guard sprzedaży i helper różnią się na jednym stanie: koja `held` bez `holdExpiresAt` była dla guarda zajęta, dla helpera wolna. Zamiast podciągnąć guard pod helper (co uczyniłoby taką koję sprzedawalną), podciągnięto helper pod guard. Uzasadnienie Tomka: „lepiej nie sprzedać niż sprzedać podwójnie — wchodzimy w jakieś odszkodowania". Efekt uboczny: podmiana w `mutations.ts` stała się **dokładną** równoważnością na wszystkich stanach, a nie tylko na osiągalnych.
+- **Stan `held` bez `holdExpiresAt` jest nieosiągalny przez aplikację** — ustalone dowodowo, nie założone: jedyny zapis `status: 'held'` w repo (`mutations.ts:527`) ustawia oba pola w jednym `patch`, a wszystkie miejsca kasujące `holdExpiresAt` równocześnie wychodzą ze statusu `held`. Dlatego zmiana reguły dotyczy wyłącznie danych wprowadzonych ręcznie.
+- **INFRA-7 nie jest naprawiane teraz.** Convex wycina treść `throw new Error` na produkcji, więc komunikat walidacyjny z mutacji nigdy nie dotrze do admina. Zostaje, bo warstwa serwerowa to defense-in-depth — w normalnym przepływie zatrzymuje wcześniej walidacja kliencka z czytelnym toastem.
+- **Commity zostają po angielsku.** Tomek nazwał angielski realną barierą, rozważył przejście na polski i świadomie odrzucił: „tą barierę też muszę przejść". Wsparcie zamiast zmiany języka: zamknięty słownik czasowników do subjectów + rzeczowniki przepisywane z kodu, body pisane wspólnie.
+- **Zamknięte rezerwacje: broniono się dziś w konsumencie, nie u źródła.** `markOverduePayments` dalej oznacza raty zaległymi bez patrzenia na rezerwację (REFACTOR-5) — fix u źródła wymaga odczytów `bookings` w cronie, co jest osobną decyzją wydajnościową.
+
+### Wnioski
+
+- **Zakomentowanie guarda nie wystarcza, żeby przetestować warstwę pod nim.** Przy `safeParse` bez `return` `parsed.data` jest `undefined`, a `...undefined` to legalny no-op — mutacja dostaje pusty patch. Podpis tego buga: **toast sukcesu i zero zmian w danych**. Żeby dosięgnąć serwera, trzeba wysłać surowy payload, nie „to, co przeszło przez zoda".
+- **Fakt wyliczany nie broni się sam — czwarty raz.** KPI (07-04), panel żeglarza (07-07), cron danych załogi (07-24), crony płatnicze (07-26). Zwrot nie zmienia `bookings.status`, więc filtr po statusie zawsze przepuści zamkniętą rezerwację. Wzorzec operacyjny: przy każdym nowym konsumencie `bookings` sprawdzić, czy liczy `isBookingClosed`. Wzorzec docelowy: przestać produkować kłamliwe wiersze u źródła (REFACTOR-5, REFACTOR-4).
+- **Pomiar „tyle samo przed i po" bywa pusty.** KPI Held = 1 przed i po zgadzałoby się także wtedy, gdyby nowy predykat w ogóle nie czytał czasu. Dowód wymagał kontrpróby: hold przestawiony na przeszłość → 0. Ta sama luka co pusty wynik crona 24 lipca.
+- **Testy jednostkowe biją klikanie w Dashboardzie, gdy reguła ma kilka gałęzi.** Pięć stanów koi razy obecność pola = tabela, której nie da się sensownie przejść ręcznie. Sprawdzenie odporności przez odwrócenie znaku (`<=` → `>=`) pokazało, że zestaw łapie jeden z dwóch symptomów — brakujący przypadek („hold aktywny nie jest wolny") był tym groźniejszym.
+- **Convex może wykluczyć niespójne stany na poziomie schematu** przez `defineTable(v.union(v.object(...), ...))` z dyskryminatorem. To zmienia klasę problemu: zamiast bronić się w kodzie przed kombinacją pól, czyni ją niezapisywalną. Koszt: jeden kształt na status + migracja + pytanie o indeks na polu nieobecnym w części wariantów (REFACTOR-4).
+- **Ręczna zmiana danych w bazie bez zapisania stanu przed** kosztuje więcej niż samo cofnięcie. Odzyskanie oryginału koi C2 udało się dzięki temu, że `bookingPaymentIntentId` jest ustawiane wyłącznie razem ze statusem `taken` — pole obce zadziałało jak świadek. Reguła: wybieraj do testów wiersze o najmniejszej liczbie pól i zapisz stan przed zmianą.
+- **Subject commita opisuje czynność na kodzie, prawdziwą i w zakresie diffu.** Trzy dzisiejsze pomyłki z tej samej rodziny: rzeczownik zamiast czasownika („the closure of BUG-7"), obietnica pracy, której w diffie nie ma („change to ConvexError"), skutek zamiast czynności („reminders will not appear"). Test zdaniem „jeśli zastosujesz ten commit, on ___" wyłapuje wszystkie trzy.
+
+### Następne kroki
+
+#### Next
+
+- **DEP-1a / DEP-1b** — walidacja snapshotu polityki i A7e na realnym stuck refund (wiszą od 07-10, najstarsza otwarta pozycja).
+- **UI-7/8/9** — trzy poprawki mobile z feedbacku Michała 07-25; dobry kandydat na sesję nauki (zamknięty zakres, czysty frontend, screenshoty jako spec).
+- **REFACTOR-5** — `markOverduePayments` u źródła; wymaga decyzji o kierunku skanu (po ratach vs po bookingach).
+
+#### Blocked / Later / Open questions
+
+- **LEGAL-4/5** — treść prawna (dane wrażliwe, transfery UE-USA, odnośniki do regulaminu w formularzach i mailach); blokowane przez brak samego regulaminu/polityki (LEGAL-1/2).
+- **REFACTOR-4** — discriminated union w `berths`; przed podjęciem sprawdzić, czy indeks `by_status_and_hold_expires_at` działa, gdy pole nie występuje w czterech z pięciu wariantów.
+- **INFRA-7** — przegląd `throw new Error` w `src/convex/` i podział na „dla użytkownika" (`ConvexError`) vs „sanity check".
+- **SEC-4** — serwerowy guard zamknięcia dla ręcznych wysyłek z drawera.
+- FEAT-15, LEGAL-3, UI-6 — bez zmian, czekają na Michała / FEAT-5.

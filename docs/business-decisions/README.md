@@ -22,3 +22,4 @@ Indeks decyzji biznesowych i produktowych dla `sailing-architects`.
 | [ADR-016](ADR-016-ksef-invoices-research-open.md) | Faktury i KSeF jako osobny moduł | faktury / KSeF / płatności | do potwierdzenia przez Michała |
 | [ADR-017](ADR-017-payment-item-kind-semantics.md) | Semantyka kind pozycji planu płatności (full/deposit niosą reguły) | płatności | przyjęta |
 | [ADR-018](ADR-018-availability-badge-derived-from-data.md) | Komunikaty o dostępności miejsc wynikają z danych, nie z decyzji marketingowej | landing / sprzedaż / compliance | przyjęta |
+| [ADR-019](ADR-019-held-berth-without-expiry-treated-as-occupied.md) | Koja z blokadą bez terminu wygaśnięcia jest traktowana jako zajęta (lepiej nie sprzedać niż sprzedać podwójnie) | sprzedaż / dostępność / ryzyko finansowe | przyjęta |
