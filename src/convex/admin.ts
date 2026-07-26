@@ -7,6 +7,7 @@ import {
 	sendPaymentReminderEmail
 } from './_emails'
 import { isBookingClosed } from './_lib/bookingClosed'
+import { isBerthFree } from './_lib/berthFree'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 const DUE_SOON_WINDOW_MS = 7 * DAY_MS
@@ -106,7 +107,7 @@ export const overviewBySegment = query({
 		let pendingConfirmationCount = 0
 
 		const heldBerths = berths.filter(
-			(b) => b.status === 'held' && (b.holdExpiresAt ?? 0) > now
+			(b) => b.status === 'held' && !isBerthFree(b, now)
 		)
 		const sellableBerths = berths.filter(
 			(b) => b.status !== 'captain' && b.status !== 'complimentary'
