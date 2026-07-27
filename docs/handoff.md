@@ -3185,3 +3185,50 @@ W projekcie zainstalowany plugin Claude Code: `caveman@caveman` (globalnie, scop
 - **INFRA-7** — przegląd `throw new Error` w `src/convex/` i podział na „dla użytkownika" (`ConvexError`) vs „sanity check".
 - **SEC-4** — serwerowy guard zamknięcia dla ręcznych wysyłek z drawera.
 - FEAT-15, LEGAL-3, UI-6 — bez zmian, czekają na Michała / FEAT-5.
+
+## Sesja 2026-07-27 — UI-7 (CTA rezerwacji na mobile) + UI-8 (pasek statystyk hero) (nauka, tryb ja-wskazuję-Tomek-pisze)
+
+### Zmiany
+
+Kod Tomek. Dwa commity, oba na `main` i `production`.
+
+- **`30aa674d` — UI-7:** CTA rezerwacji widoczne na stałe w pasku na mobile. Nowy kontener `.mobile-actions` obejmuje przycisk i hamburgera; `display: none` domyślnie, `display: flex` w media query ≤900. Duplikat CTA usunięty z rozwijanego menu (`.mobile-menu__actions` zostaje z samym „Panel"). Etykieta dostała spację nierozdzielającą przed strzałką (`'Kontynuuj rezerwację →'`). `.po` obu języków zaktualizowane automatem wuchale.
+- **`24716b59` — UI-8:** pasek statystyk w hero mieści się na wąskim ekranie. W media query ≤720: `.stats { width: 100% }`, `.stats__cell { flex: 1; min-width: 0; padding: 10px 6px }`, `.stats__value { font-size: min(22px, 5vw) }`, ukrycie kolumny „etapy" przez `:nth-child(1)` z komentarzem o kruchości selektora.
+- **`docs/backlog.md`** — UI-7 i UI-8 skreślone; **opis UI-8 poprawiony** (wskazywał zakładki etapów, chodziło o hero); nowe: **UI-11** (przegląd kontrastu całego projektu), **UI-12** (etykieta CTA bez warunku `isSignedIn`), **UI-13** (rozjazd spacji między nav a `/book`), **INFRA-8** (startowy zestaw zasad dla nowego projektu). Feedback `2026-07-26.md` striażowany ✅.
+- **Wiki (5 nowych, wszystkie `universal`):** [[flex-min-width-shrink-floor]], [[scrollwidth-vs-clientwidth-overflow-measure]], [[fluid-font-min-px-vw]], [[positional-selector-couples-css-to-data-order]], [[dev-vs-prod-compare-session-state-first]] + indeks vaulta.
+
+### Decyzje
+
+- **Osobny kontener mobilny zamiast wyjątku w `.cluster`.** Alternatywa `.cluster > :not(.btn--primary) { display: none }` byłaby krótsza, ale ma dziurę: `LanguageSwitcher` to osobny komponent, a style Svelte są scoped — jego korzeń nie dostaje klasy hashującej, więc reguła by go nie złapała. Kontener kosztuje duplikat markupu CTA i zero zależności od scopingu.
+- **Kontener mobilny ma własne `display: none` na desktopie.** Bez tego `.site-nav` (flex, `space-between`) miałby trzy widoczne dzieci zamiast dwóch i `.cluster` odkleiłby się od prawej krawędzi. Hamburger sam z siebie tego nie robił, bo `display: none` wyjmuje element z układu flex całkowicie.
+- **Dwuliniowy przycisk na mobile zamiast zwężania typografii.** Przy 320px „KONTYNUUJ REZERWACJĘ →" łamie się na dwie linie i mieści w 64px paska. Zbijanie fontu tylko po to, żeby zmieścić w jednej linii, kosztowałoby czytelność na najmniejszym ekranie.
+- **UI-8: cztery kolumny w rzędzie zamiast układu 2×2, kosztem jednej kolumny.** Wybór Tomka. Cztery komórki nie mieszczą się przy żadnej sensownej typografii (`~2200nm` potrzebuje ~100px treści, zostawało ~63px), więc wariant „zmieścić" wymagał cięcia. Kryterium wyboru ofiary: **tnij powtórzenie, nie unikat** — „4 etapy" powtarza lead „Cztery etapy przez Atlantyk" widoczny 100px wyżej; „10 miejsc" nie występuje nigdzie indziej i niesie sygnał sprzedażowy.
+- **Selektor pozycyjny (`:nth-child`) zamiast flagi w danych.** Tablica `stats` ma cztery pozycje i leży sześć linii od reguły w tym samym pliku; wariant odporny kosztowałby trzy zmiany (dane, template, CSS) po to, by zabezpieczyć zdarzenie, którego tu nie ma. Obrona: komentarz mówiący, w co selektor celuje i co go złamie.
+- **Płynny font `min(22px, 5vw)` zamiast drugiego breakpointu.** Płaskie 16px zmieściłoby się wszędzie, ale obowiązywałoby w całym zakresie ≤720 — na tablecie stat hero wyglądałby mizernie przy 220px wolnego miejsca.
+- **Etykieta CTA bez `isSignedIn` — decyzja podjęta, wykonanie odłożone (UI-12).** Tomek: tekst ma zmieniać się po samym wyborze koi. To odejście od literalnego brzmienia feedbacku Michała z 07-17, więc warte potwierdzenia z nim.
+
+### Wnioski
+
+- **`min-width` jest podłogą ściskania, nie sugestią.** Flex przestaje ściskać po jej osiągnięciu i **wypycha** zawartość poza kontener. Objaw wygląda jak brak responsywności, a jest twardym ograniczeniem wpisanym ręcznie. Rachunek: `liczba × min-width + gapy` vs dostępna szerokość. Przy `border-box` (globalne w Tailwind preflight) `min-width` zawiera padding — łatwo przeliczyć podłogę o 2×padding za dużo.
+- **`flex: 1` to `basis: 0`, i to basis robi robotę.** Sam `flex-grow: 1` zostawia różnice, bo każdy element startuje od szerokości swojej treści. Dopiero `basis: 0` sprawia, że komórka z `~2200nm` dostaje tyle samo miejsca co komórka z `10`.
+- **Ocena okiem na jednej szerokości nie jest weryfikacją.** `~2200nm` wystawało 3px przy 375 (niewidoczne, bo tekst wyśrodkowany rozkłada nadmiar po połowie), 8px przy 360 i 21px przy 320 (litera wchodziła pod sąsiada). Pomiar: `scrollWidth` (ile treść potrzebuje) minus `clientWidth` (ile ma), oba przez `$0` w konsoli. Mierz na najwęższym realnym ekranie — 360px to większość Androidów, nie egzotyka.
+- **Szerokość tekstu skaluje się liniowo z fontem.** Jeden pomiar wystarcza na wszystkie pozostałe: `nowa szerokość = zmierzona × (nowy font / stary font)`. Stąd też górna granica fontu przy danym miejscu. To zamienia dobieranie rozmiaru na rachunek zamiast prób.
+- **„Na dev działa, na prodzie nie" najczęściej znaczy inny stan sesji, nie inny kod.** Fałszywy alarm po wdrożeniu UI-7: etykieta nie przełączała się na produkcji, bo Tomek nie był tam zalogowany, a warunek wymaga obu członów. Kolejność sprawdzania: (1) czy warunek w ogóle spełniony, (2) czy stan przetrwał drogę (stan w pamięci ginie przy każdym pełnym przeładowaniu, a logowanie nim jest), (3) czy prod serwuje ten build, (4) dopiero kod. Dzienny diff nie dotykał logiki etykiety — to samo w sobie wykluczało go jako przyczynę.
+- **Backlog cytuje zgłaszającego, nie pomiar.** UI-8 był opisany jako „zawijanie w zakładkach etapów ucina daty"; reprodukcja i screenshot Michała pokazały pasek statystyk w hero. Michał opisał, co widział na swoim telefonie, ktoś to zapisał w swoich słowach. Przy każdej pozycji z feedbacku: odtwórz u siebie przed czytaniem kodu.
+- **Skrót `padding: A B` to `góra/dół` `lewo/prawo`.** Zamiana miejscami nie daje błędu — daje inny układ. Tu przeszła niezauważona (fix i tak działał, bo font był płynny) i wyszła dopiero przy pomiarze wysokości komórki.
+- **Subject commita: jeden typ, jeden dwukropek, jedna czynność.** Trzy dzisiejsze pomyłki: czasownik na pozycji typu (`show:` zamiast `fix: show`), drugi dwukropek w środku, dwie czynności złączone `and` (druga to sposób realizacji pierwszej, więc należy do body). Rzeczowniki przepisuj z kodu — `reserve button`, nie `book button`, bo `book` to nazwa trasy, nie przycisku.
+
+### Następne kroki
+
+#### Next
+
+- **UI-9** — po wyborze segmentu przenieść widok do planu jachtu na mobile, poza etapem wyprzedanym. Ostatnia z trójki feedbacku Michała 07-25.
+- **UI-12** — jednoliniowe usunięcie `isSignedIn` z warunku etykiety; przy okazji **UI-13** (ta sama spacja nierozdzielająca w `/book`).
+- **DEP-1a / DEP-1b** — walidacja snapshotu polityki i A7e na realnym stuck refund (wiszą od 07-10, najstarsza otwarta pozycja).
+
+#### Blocked / Later / Open questions
+
+- **UI-11** — przegląd kontrastu całego projektu; sensowny dopiero jako wstęp do FEAT-5 (przebudowa landingu), inaczej poprawki pójdą do layoutu, który i tak się zmieni.
+- **INFRA-8** — startowy zestaw zasad dla nowego projektu; otwarte, gdzie ma mieszkać (vault `procedures/` vs szablon repo) i jak nie dopuścić do rozjazdu z artykułami źródłowymi.
+- **UI-12 czeka na potwierdzenie Michała** — zmiana odchodzi od jego literalnego feedbacku z 07-17.
+- REFACTOR-4/5, SEC-4, INFRA-7, LEGAL-4/5 — bez zmian.
