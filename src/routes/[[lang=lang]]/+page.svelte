@@ -299,5 +299,25 @@
 		.hero__inner {
 			padding: 0 20px;
 		}
+
+		.stats {
+			width: 100%;
+		}
+
+		.stats__cell {
+			flex: 1;
+			min-width: 0;
+			padding: 10px 6px;
+		}
+
+		.stats__value {
+			font-size: min(22px, 5vw);
+		}
+
+		/* ukrywa kolumnę „etapy" — powtarza treść leadu wyżej; pozycyjne,
+		   więc przy zmianie kolejności tablicy `stats` zniknie inna kolumna */
+		.stats__cell:nth-child(1) {
+			display: none;
+		}
 	}
 </style>
