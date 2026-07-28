@@ -60,9 +60,16 @@
 		)
 	)
 
+	let planEl: HTMLElement | undefined
+
 	function selectSegment(id: string) {
 		bookingSelection.selectSegment(id)
 		appliedSegmentParam = segmentParam
+		const soldOut = freeBySlug.get(id) === 0
+		const rect = planEl?.getBoundingClientRect()
+		if (!soldOut && rect && rect.bottom > window.innerHeight) {
+			planEl?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+		}
 	}
 
 	$effect(() => {
@@ -111,11 +118,13 @@
 			{/each}
 		</div>
 
-		<BoatPlan
-			selectedBerths={bookingSelection.selectedBerths}
-			{berthStatuses}
-			onToggleBerth={bookingSelection.toggleBerth.bind(bookingSelection)}
-		/>
+		<div class="plan-anchor" bind:this={planEl}>
+			<BoatPlan
+				selectedBerths={bookingSelection.selectedBerths}
+				{berthStatuses}
+				onToggleBerth={bookingSelection.toggleBerth.bind(bookingSelection)}
+			/>
+		</div>
 
 		{#if bookingSelection.selectedBerths.length > 0}
 			<div class="banner" aria-live="polite">
@@ -306,5 +315,9 @@
 
 	.banner__cta:hover {
 		background: var(--color-brass-light);
+	}
+
+	.plan-anchor {
+		scroll-margin-top: 64px;
 	}
 </style>
