@@ -3232,3 +3232,51 @@ Kod Tomek. Dwa commity, oba na `main` i `production`.
 - **INFRA-8** — startowy zestaw zasad dla nowego projektu; otwarte, gdzie ma mieszkać (vault `procedures/` vs szablon repo) i jak nie dopuścić do rozjazdu z artykułami źródłowymi.
 - **UI-12 czeka na potwierdzenie Michała** — zmiana odchodzi od jego literalnego feedbacku z 07-17.
 - REFACTOR-4/5, SEC-4, INFRA-7, LEGAL-4/5 — bez zmian.
+
+## Sesja 2026-07-30 — UI-9 (przewinięcie do planu jachtu) + UI-12 + UI-13 (nauka, tryb ja-wskazuję-Tomek-pisze)
+
+### Zmiany
+
+Kod Tomek. Trzy commity, wszystkie na `main` i `production`.
+
+- **`037fcff0` — UI-9:** po zmianie etapu strona przewija do planu jachtu. `cabins-section.svelte`: wrapper `<div class="plan-anchor" bind:this={planEl}>` wokół `<BoatPlan>`, `scrollIntoView({ behavior: 'smooth', block: 'start' })` w `selectSegment`, `scroll-margin-top: 64px` w stylach. Warunek: `!soldOut && rect.bottom > window.innerHeight`.
+- **`8348d1f7` — UI-12:** `reserveLabel` w `site-nav.svelte` bez członu `isSignedIn`. Usunięty łańcuch osieroconego kodu: `isSignedIn` → `ctx` → import `useClerkContext`. 1 linia dodana, 5 usuniętych.
+- **`0cde590e` — UI-13:** `book/+page.svelte:758` dostał spację nierozdzielającą przed strzałką, jak nav. Po ekstrakcji wuchale jeden aktywny `msgid` z dwoma odnośnikami źródłowymi, stary w `#~` w obu katalogach.
+- **`docs/business-decisions/2026_07_07_SA_regulamin_rejsu.doc`** — regulamin przeniesiony z `docs/feedback/` (`git mv`). Jest źródłem prawnym progów zwrotów w ADR-002 §3.8, a katalog feedbacku jest z natury przemijający.
+- **`docs/backlog.md`** — UI-9, UI-12, UI-13 skreślone; **DEP-1a odłożone z jawną datą powrotu 2026-08-30 i gotowym projektem testu**; nowe: **LEGAL-6** (regulamin niedostępny + zaślepka w panelu).
+- **Wiki (5 nowych, wszystkie `universal`):** [[bind-this-component-vs-element]], [[scroll-margin-top-under-sticky-header]], [[measure-the-symptom-not-the-proxy]], [[identical-looking-strings-compare-bytes]], [[unchanged-result-needs-a-control]] + indeks vaulta + link zwrotny w [[red-test-proves-the-test]].
+
+### Decyzje
+
+- **Warunek na widoczności, nie na breakpoincie.** `matchMedia('(max-width: 900px)')` byłby krótszy, ale wprowadza piątą kopię breakpointu do projektu, w którym istniejące i tak są rozjechane (nav 900, plan łódki 920, hero 720). `rect.bottom > window.innerHeight` nie wnosi żadnej nowej liczby do utrzymania i łapie też niskie okno na desktopie. Zgłoszenie mówiło „na telefonie", ale problemem nie jest wąski ekran — problemem jest plan poza polem widzenia.
+- **„Wyprzedane" brane wprost z danych (`freeBySlug.get(id) === 0`), nie przez `berthBadge`.** Reużycie funkcji prezentacji uzależniłoby przewijanie od decyzji copywriterskich — ktoś kiedyś schowa badge i scroll przestanie działać z niepowiązanego powodu. REFACTOR-3 dotyczył reguły z gałęziami; tu jest definicja bez gałęzi, która nie ma jak się rozjechać.
+- **`scroll-margin-top` w CSS zamiast offsetu w JS.** Wysokość sticky navu zostaje w jednym miejscu. `planEl.offsetTop - 64` tworzyłby drugą kopię tej liczby w innym języku, a rozjazd po zmianie nawigacji nie dałby żadnego sygnału.
+- **DEP-1a odłożone, nie odfajkowane.** Bez realnych wpłat na produkcji nie ma czego zwracać. Zamiast tego do backlogu trafił **projekt testu wraz z próbą kontrolną**, żeby za miesiąc nie odtwarzać rozumowania.
+- **Regulamin przeniesiony do `business-decisions/`, nie zostawiony w feedbacku.** Plik będący źródłem prawnym żywej reguły biznesowej nie może leżeć w katalogu, którego zawartość po striażowaniu przestaje się czytać.
+
+### Wnioski
+
+- **`bind:this` zwraca dwie różne rzeczy.** Na elemencie HTML — węzeł DOM z pełnym API. Na komponencie Svelte — instancję komponentu, bez `scrollIntoView` i bez `getBoundingClientRect`, bo komponent nie ma jednego elementu, który by go reprezentował. Obejście: własny wrapper wokół komponentu. Referencja nie potrzebuje `$state`, jeśli czytasz ją tylko imperatywnie — zbędny rune każe szukać konsumenta reaktywnego, którego nie ma.
+- **„Gdzie element się zaczyna" to nie to samo co „czy się mieści".** Pierwsza wersja warunku (`rect.top > innerHeight / 2`) przechodziła na mobile i przewijała bez powodu na desktopie, gdy plan był krótki i leżał nisko. Właściwe pytanie brzmiało `rect.bottom > window.innerHeight`. Rozstrzygnął to przypadek, w którym oba warunki się rozjeżdżają — Tomek go znalazł, testując oba scenariusze zamiast jednego.
+- **`return` jako guard wychodzi z całej funkcji, nie z jej ogona.** Warunek „pomiń wyprzedane" postawiony na górze `selectSegment` unieruchomił zakładkę wyprzedanego etapu — przestała przełączać widok. Guard z `return` jest bezpieczny tylko wtedy, gdy wszystko poniżej ma zostać pominięte.
+- **Usunięcie warunku osierocą łańcuch kodu.** `isSignedIn` → `ctx` → import. ESLint złapie zmienne, ale to człowiek musi zauważyć, że skoro nikt nie pyta Clerka o stan, to i połączenie z nim jest zbędne.
+- **Dwa stringi wyglądające identycznie trzeba porównać bajtami.** ` ` i zwykła spacja renderują się tak samo w terminalu i w edytorze; `grep` ich nie odróżni. Rozstrzygnął `repr()` wąskiego wycinka przed strzałką. Pierwsza wersja detektora była bezużyteczna, bo pytała „czy w linii jest spacja" — a linia to zdanie, więc odpowiedź zawsze brzmiała „tak". Detektor musi celować w pozycję, nie w obecność znaku.
+- **Zmiana literału to zmiana klucza tłumaczenia.** Stary `msgid` idzie w `#~`, a jego `msgstr` **nie** wędruje do nowego. Tu nic nie zginęło, bo angielski był pusty — ale sprawdzenie tego było częścią weryfikacji, nie założeniem.
+- **Wynik „bez zmian" nie jest dowodem bez próby kontrolnej.** Przy projektowaniu DEP-1a Tomek uznał, że niezmieniona sugestia wystarczy. Nie wystarcza: identyczny wynik daje hipoteza „snapshot działa" i hipoteza „zmiana progu w ogóle nie doszła". Potrzebny drugi pomiar, który po tej samej ingerencji **ma** się zmienić — rezerwacja bez snapshotu. Trzecia odsłona tego kształtu po KPI Held (07-26) i pustym wyniku crona (07-24).
+- **Push na `main` nie rusza `production`.** Po deployu UI-12 i UI-13 zostały tylko na `main`, mimo przekonania, że poszły dalej. Odruch: `git fetch origin && git log origin/production..main --oneline` — pusto znaczy, że prod ma wszystko. Bez `fetch` oglądasz lokalną kopię refa, która może pamiętać stan sprzed godziny.
+- **Subject commita opisujący usunięty warunek.** `fix: show reserve label after selecting berth after sign-in` opisywał regułę, która właśnie zniknęła. Sygnał: dwa `after` w jednym zdaniu. Przy commicie usuwającym warunek sprawdzić, czy subject nie powtarza tego, co przestało obowiązywać. Trzeci commit dnia wyszedł poprawnie za pierwszym podejściem.
+
+### Następne kroki
+
+#### Next
+
+- **LEGAL-6 punkt 3** — zaślepka „Regulamin rejsu · PDF" w `dashboard/+page.svelte:221` obiecuje żeglarzowi dokument, którego nie ma. Najtańsza i najpilniejsza część pozycji.
+- **REFACTOR-5** — `markOverduePayments` u źródła; wymaga decyzji o kierunku skanu (po ratach vs po bookingach).
+- **UI-11** — przegląd kontrastu; sensowny jako wstęp do FEAT-5.
+
+#### Blocked / Later / Open questions
+
+- **DEP-1a — ⏸ do 2026-08-30** (brak realnych wpłat). Projekt testu z próbą kontrolną leży w backlogu, gotowy do wykonania.
+- **DEP-1b** — A7e na realnym stuck refundzie; ta sama blokada co DEP-1a.
+- **LEGAL-6 punkty 1-2 i 4** — publikacja regulaminu czeka na potwierdzenie Michała, czy `.doc` z 07-07 to wersja finalna.
+- REFACTOR-2/4, SEC-4, INFRA-7, INFRA-8, LEGAL-4/5, UI-6, UI-10, FEAT-15, LEGAL-3 — bez zmian.
