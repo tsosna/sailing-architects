@@ -1292,9 +1292,8 @@ msgstr "Wybierz koję na planie lub z listy, aby kontynuować."
 msgid "Najpierw wybierz etap i miejsce na planie jachtu. Logowanie pojawi się dopiero po kliknięciu „Kontynuuj rezerwację”."
 msgstr "Najpierw wybierz etap i miejsce na planie jachtu. Logowanie pojawi się dopiero po kliknięciu „Kontynuuj rezerwację”."
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Kontynuuj rezerwację →"
-msgstr "Kontynuuj rezerwację →"
+#~ msgid "Kontynuuj rezerwację →"
+#~ msgstr "Kontynuuj rezerwację →"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Krok 5"
@@ -3386,5 +3385,6 @@ msgid "Wpłata początkowa zaksięgowana"
 msgstr "Wpłata początkowa zaksięgowana"
 
 #: src/lib/components/site-nav/site-nav.svelte
+#: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Kontynuuj rezerwację →"
 msgstr "Kontynuuj rezerwację →"

@@ -755,7 +755,7 @@
 						onclick={continueFromSelection}
 					>
 						{selectedBerths.length > 0
-							? 'Kontynuuj rezerwację →'
+							? 'Kontynuuj rezerwację\u00A0→'
 							: 'Wybierz koję'}
 					</button>
 				</div>
