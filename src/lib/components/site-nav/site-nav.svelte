@@ -2,7 +2,6 @@
 	import { resolve } from '$app/paths'
 	import { LanguageSwitcher } from '$components/language-switcher'
 	import { bookingSelection } from '$lib/state/booking-selection.svelte'
-	import { useClerkContext } from 'svelte-clerk'
 
 	let scrolled = $state(false)
 	let menuOpen = $state(false)
@@ -35,11 +34,8 @@
 
 	const reserveHref = $derived(bookingSelection.bookingPath(resolve('/book')))
 
-	const ctx = useClerkContext()
-	const isSignedIn = $derived(!!ctx.auth.userId)
-
 	const reserveLabel = $derived(
-		bookingSelection.hasSelectedBerths && isSignedIn
+		bookingSelection.hasSelectedBerths
 			? 'Kontynuuj rezerwację\u00A0→'
 			: 'Rezerwuj'
 	)
