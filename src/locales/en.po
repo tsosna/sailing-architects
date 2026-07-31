@@ -3275,9 +3275,8 @@ msgstr ""
 #~ msgid "Oaglowanie"
 #~ msgstr ""
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Dane wymagane przez skippera — osobno dla każdej koi. Możesz je aktualizować do 30 dni przed rejsem."
-msgstr ""
+#~ msgid "Dane wymagane przez skippera — osobno dla każdej koi. Możesz je aktualizować do 30 dni przed rejsem."
+#~ msgstr ""
 
 #: src/routes/[[lang=lang]]/admin/special/+page.svelte
 msgid "Stała blokada koi skippera — nie podlega rezerwacji."
@@ -3388,4 +3387,8 @@ msgstr ""
 
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Brak dokumentów do pobrania"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Dane wymagane przez skippera — osobno dla każdej koi."
 msgstr ""

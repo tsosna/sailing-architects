@@ -484,8 +484,8 @@
 							>↓ Pobierz potwierdzenie</button
 						>
 					{/if}
-					<button type="button" class="btn btn--ghost" disabled
-						>Kontakt z organizatorem</button
+					<a class="btn btn--ghost" href="mailto:sailingarchitects@gmail.com"
+						>Kontakt z organizatorem</a
 					>
 				</div>
 			</div>
@@ -494,8 +494,7 @@
 		{#if tab === 'profile'}
 			<div id="panel-profile" role="tabpanel">
 				<p class="lead">
-					Dane wymagane przez skippera — osobno dla każdej koi. Możesz je
-					aktualizować do 30 dni przed rejsem.
+					Dane wymagane przez skippera — osobno dla każdej koi.
 				</p>
 				{#if participants.length === 0}
 					<p class="voyage__empty">

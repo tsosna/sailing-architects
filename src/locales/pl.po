@@ -3275,9 +3275,8 @@ msgstr "Pełne ubezpieczenie jachtu i kaucji"
 #~ msgid "Oaglowanie"
 #~ msgstr "Oaglowanie"
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Dane wymagane przez skippera — osobno dla każdej koi. Możesz je aktualizować do 30 dni przed rejsem."
-msgstr "Dane wymagane przez skippera — osobno dla każdej koi. Możesz je aktualizować do 30 dni przed rejsem."
+#~ msgid "Dane wymagane przez skippera — osobno dla każdej koi. Możesz je aktualizować do 30 dni przed rejsem."
+#~ msgstr "Dane wymagane przez skippera — osobno dla każdej koi. Możesz je aktualizować do 30 dni przed rejsem."
 
 #: src/routes/[[lang=lang]]/admin/special/+page.svelte
 msgid "Stała blokada koi skippera — nie podlega rezerwacji."
@@ -3389,3 +3388,7 @@ msgstr "Kontynuuj rezerwację →"
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Brak dokumentów do pobrania"
 msgstr "Brak dokumentów do pobrania"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Dane wymagane przez skippera — osobno dla każdej koi."
+msgstr "Dane wymagane przez skippera — osobno dla każdej koi."
