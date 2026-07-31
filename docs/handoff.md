@@ -3305,6 +3305,7 @@ Kod Tomek. Jeden commit, na `main` i `production`.
 
 #### Next
 
+- **INFRA-9 — audyt zaślepek i danych makietowych w całym projekcie** (decyzja Tomka na koniec sesji). Dzisiejsza zmiana pokazała, że makieta potrafi wisieć na produkcji miesiącami, bo wygląda jak gotowy widok. Sondaż wstępny dał dwa trafienia do potwierdzenia: przycisk „Kontakt z organizatorem" `disabled` bezwarunkowo (`dashboard:487`) i ręcznie wpisana tablica `ports` duplikująca `voyageSegments`. Pozycja pierwsza na następną sesję.
 - **LEGAL-6 punkty 1-2** — regulamin jako dokument publiczny + odnośnik w stopce; czeka na potwierdzenie Michała, czy `.doc` z 07-07 to wersja finalna.
 - **REFACTOR-5** — `markOverduePayments` u źródła; wymaga decyzji o kierunku skanu.
 - **UI-11 + UI-14** — przegląd kontrastu razem z nieaktywnymi zakładkami panelu; sensowne jako wstęp do FEAT-5.
