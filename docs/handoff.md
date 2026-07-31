@@ -3314,3 +3314,53 @@ Kod Tomek. Jeden commit, na `main` i `production`.
 
 - **DEP-1a / DEP-1b — ⏸ do 2026-08-30** (brak realnych wpłat). Projekt testu z próbą kontrolną w backlogu.
 - REFACTOR-2/4, SEC-4, INFRA-7, INFRA-8, LEGAL-3/4/5, UI-6, UI-10, FEAT-15 — bez zmian.
+
+## Sesja 2026-07-31 (II) — INFRA-9 (audyt zaślepek i danych makietowych)
+
+### Zmiany
+
+Kod Tomek. Sesja audytowa — dwie naprawy, reszta rozpisana na pozycje backlogu.
+
+- **`dashboard/+page.svelte:487`** — przycisk „Kontakt z organizatorem" był `disabled` bezwarunkowo, więc wyświetlał się zawsze i nigdy nie działał. Zamieniony na `<a href="mailto:sailingarchitects@gmail.com">` z zachowaniem klas; precedens tej samej pary (ghost button jako link `mailto:`) stał już w `crew-guide-page.svelte:200`.
+- **`dashboard/+page.svelte:496`** — usunięte zdanie „Możesz je aktualizować do 30 dni przed rejsem". Reguła nie istnieje: `upsertBookingParticipant` (`mutations.ts:800-810`) ma dwa guardy — sesja i własność uczestnika — i żadnego porównania z datą startu etapu.
+- **`docs/backlog.md`** — INFRA-9 skreślony z opisem metody i pełnym wynikiem; nowe: **REFACTOR-6** (cztery kopie danych etapów), **UI-15** (mylna etykieta „41 dni ŁĄCZNIE"), **LEGAL-7** (profil organizatora + jedno źródło kontaktu), **SEC-5** (brak śladu zmian danych osobowych), **INFRA-10** (treść landingu do przeglądu przez Michała); INFRA-8 dostał pierwszą ostrą podpozycję (konwencja `MOCK(ID)`); FEAT-5 dostał notatkę do ADR o podziale encji JACHT/REJS.
+- **Wiki (6 nowych, wszystkie `universal`):** [[empty-search-result-needs-a-control]], [[code-search-pattern-syntax-blind-spots]], [[absent-rule-cannot-be-grepped]], [[placeholder-marker-needs-a-backlog-id]], [[one-instance-hides-two-entities]], [[two-measures-one-label]] + rozszerzony [[disabled-placeholder-still-asserts]] (rozróżnienie stan vs stała, tabela trzech sygnatur) + indeks vaulta.
+
+### Decyzje
+
+- **Usunąć obietnicę zamiast wyegzekwować regułę 30 dni.** Alternatywa (guard w mutacji + blokada formularza) utrwaliłaby w kodzie liczbę, która wzięła się z akapitu, nie z ustalenia. Termin graniczny edycji danych to decyzja Michała — skipper może potrzebować danych wcześniej albo wcale. Odrzucony też wariant pozornie bezpieczny: „możesz aktualizować w każdej chwili" jest **nadal twierdzeniem o regule**, prawdziwym dziś i fałszywym w dniu, w którym ktoś doda guard i nie znajdzie tego akapitu.
+- **Piąta kopia adresu e-mail wstawiona świadomie, wyciągnięcie do stałej odłożone.** `tel:` i `mailto:` są wpisane ręcznie w czterech miejscach; naprawa przycisku dodała piąte. Refaktor pięciu plików w środku nieskończonego audytu rozmyłby obie rzeczy — zapisany jako LEGAL-7 (a), razem z formalną nazwą organizatora i numerem uprawnień, bo to jedna encja.
+- **Granica audytu postawiona na podziale „twierdzenie o aplikacji vs twierdzenie o świecie".** `pricing-section`, `vessel-section`, `faq-section` i `crew-guide.ts` (228 linii) to niemal wyłącznie fakty, których w kodzie nie ma i być nie może — ubezpieczenie, specyfikacja jachtu, opłaty portowe. Czytanie ich przez nas zamieniłoby się w zgadywanie o rzeczywistości. Poszły do Michała jako INFRA-10, bez naszej oceny merytorycznej.
+- **Nie podmieniać „41 dni" na „38 dni".** Obie liczby są prawdziwe i mierzą co innego (rozpiętość dat vs suma pól `days`); wybór jednej bez nazwania miary przenosi nieporozumienie w drugą stronę. Właściwa naprawa to doprecyzowanie etykiety — UI-15.
+- **Brak nowego ADR.** Dzisiejsze rozstrzygnięcia dotyczyły prawdziwości treści, nie reguł biznesowych. Reguła, która **byłaby** decyzją biznesową — termin graniczny edycji danych uczestnika — nie została podjęta; leży jako otwarte pytanie do Michała w SEC-5.
+
+### Wnioski
+
+- **Pusty wynik grepa nie jest dowodem nieobecności.** Wzorzec `const \w+ = \[` na plikach `.ts` zwrócił czysto i wyglądało to na komplet — a pominął `voyage-segments.ts` i `cabins.ts`, czyli dwa pliki, o których obaj wiedzieliśmy, że są tam literały danych. Przyczyna składniowa: oba mają `export const` i adnotację typu przed `=`. Czysty wynik ma dwie nierozróżnialne przyczyny („w kodzie nic nie ma" / „wzorzec nie łapie tego, co jest"), a narzędzie nigdy ich nie rozróżni. Kontrola kosztuje jedno uruchomienie: puść wzorzec na plik ze znanym trafieniem. **To czwarta odsłona rodziny „wynik bez próby kontrolnej nic nie znaczy"** — po KPI Held (07-26), pustym wyniku crona (07-24) i snapshocie polityki (07-30), pierwszy raz poza pomiarem stanu.
+- **Szum wchodzi stroną, której nie pilnujesz.** `disabled(?![=:])` odsiał `disabled=`, ale 23 z 26 trafień to CSS-owa pseudoklasa `:disabled` — dokleja się z lewej. Praktyczna reguła przed dopisaniem lookaheadu: wypisz wszystkie konteksty, w których słowo może wystąpić (atrybut, właściwość, selektor, tekst). I odsiewaj potokiem zamiast zawężać wzorzec — wtedy **widać, co się odrzuca**.
+- **Nieobecnej reguły nie da się wygrepować.** `rg '30'` na regułę „30 dni przed rejsem" zawodzi w obie strony: trafienie było homonimem (próg polityki zwrotów w seedzie), a brak trafienia i tak niczego by nie dowiódł, bo reguła mogłaby być zapisana jako `2_592_000_000` albo wyliczana z `startDate`. Twierdzenie o zachowaniu weryfikuje się przez guardy funkcji zapisu. Punkt wejścia szukaj po **nazwie operacji**, nie po wartości reguły.
+- **Gołe `disabled` samo w sobie niczego nie dowodzi.** W gałęzi `{:else}` to stan wybierany w runtime (`book:1288` — PDF jeszcze nie gotowy). Bez gałęzi to stała (`dashboard:487`). Wyszukiwanie zwraca kandydatów, nie werdykty — każde trafienie wymaga przeczytania otoczenia.
+- **Trzecia sygnatura zaślepki nie ma sygnatury.** `disabled` ma składnię, literał ma kształt, obietnica w akapicie nie ma nic — to zwykły tekst obok innych zwykłych tekstów. Przechodzi przez każdy przegląd oparty na wyszukiwaniu. Jedyne narzędzie: lektura widoku z pytaniem „które zdania twierdzą o zachowaniu systemu".
+- **Liczba prawdziwa pod myloną etykietą.** „41 dni ŁĄCZNIE" obok „4 ETAPY" każe czytać sumę etapów, a suma wynosi 38. Obie wartości poprawne: 38 to czas na wodzie (suma `days`), 41 to rozpiętość dat. Różnica trzech dni to **postoje w porcie na zmianę załogi** — realny fakt domenowy, nigdzie nie zapisany, ujawniony wyłącznie jako niezgodność dwóch liczb. Rozbieżność zwykle koduje fakt bez nazwy; to bywa najcenniejsze znalezisko przeglądu. Sygnał ostrzegawczy: czy czytelnik może wyliczyć tę samą wielkość z innego miejsca produktu.
+- **Jedna instancja ukrywa dwie encje.** Dopóki jacht jest jeden i pływa jedną trasą, `cabins.ts` (jacht) i `voyage-segments.ts` (wyprawa) wyglądają na jeden byt, a pasek hero miesza oba bez żadnej szkody. Seszele (Lagoon 40, 8 koi wobec 10) rozerwą ten szew, a objaw wypłynie jako błąd walidacji przy wyborze nieistniejącej koi — **daleko od miejsca decyzji**. Test rozdzielający: *co musiałoby się zmienić, żeby ta wartość się zmieniła?*
+- **Zaślepka bez numeru pozycji jest życzeniem.** `TODO` nie działa, bo nie ma właściciela ani daty. `MOCK(ID)` wymusza założenie pozycji w chwili, gdy zaślepka powstaje — tarcie wypada wtedy, kiedy ma sens, a nie pół roku później. Audyt schodzi do jednego polecenia, a rozjazd marker↔backlog staje się wykrywalny mechanicznie.
+- **Podział przy przekazywaniu reguł następnym sesjom:** vault trzyma uzasadnienie (jedno źródło, przenośne), repo `AGENTS.md` krótki zapis operacyjny z odsyłaczem (agent czyta na starcie), linter wymusza bez czytania czegokolwiek. Warunek: zapis w repo odsyłający, nie kopia artykułu — inaczej powstaje ta sama klasa rozjazdu, którą konwencja zwalcza.
+
+### Następne kroki
+
+#### Next
+
+- **REFACTOR-6 punkt (4)** — daty w `dashboard:212` wyliczyć z segmentów zamiast trzymać ręcznie. Najtańsza część pozycji, nie wymaga FEAT-11.
+- **UI-15** — doprecyzowanie etykiety „41 dni"; jednoliniowe, ale wymaga zgody Michała na brzmienie.
+- **LEGAL-7 (a)** — `src/lib/data/organizer.ts` jako jedno źródło kontaktu; część techniczna nie czeka na odpowiedź prawną.
+- **REFACTOR-5** — `markOverduePayments` u źródła; wymaga decyzji o kierunku skanu.
+
+#### Blocked / Later / Open questions
+
+- **SEC-5 — pytanie do Michała:** czego wymaga urząd przy zgłoszeniu załogi, komu się zgłasza i czy dopuszcza korektę po złożeniu. Bez tego nie wiadomo, czy zmiana danych po zgłoszeniu jest kłopotem operacyjnym czy formalnym.
+- **LEGAL-7 (b)(c)** — formalna nazwa podmiotu i numer uprawnień organizatora turystyki; dane i rozstrzygnięcie prawne po stronie Michała.
+- **INFRA-10** — przegląd treści landingu przez Michała (ubezpieczenie, specyfikacja jachtu, opłaty portowe, FAQ).
+- **LEGAL-6 punkty 1-2** — publikacja regulaminu; czeka na potwierdzenie, czy `.doc` z 07-07 to wersja finalna.
+- **DEP-1a / DEP-1b — ⏸ do 2026-08-30** (brak realnych wpłat).
+- **INFRA-8** — miejsce zamieszkania zestawu zasad rozstrzygnięte propozycją (vault/repo/linter); reszta pozycji otwarta.
+- REFACTOR-2/4, SEC-4, INFRA-7, LEGAL-3/4/5, UI-6, UI-10, UI-11, UI-14, FEAT-15 — bez zmian.
