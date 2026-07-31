@@ -3280,3 +3280,36 @@ Kod Tomek. Trzy commity, wszystkie na `main` i `production`.
 - **DEP-1b** — A7e na realnym stuck refundzie; ta sama blokada co DEP-1a.
 - **LEGAL-6 punkty 1-2 i 4** — publikacja regulaminu czeka na potwierdzenie Michała, czy `.doc` z 07-07 to wersja finalna.
 - REFACTOR-2/4, SEC-4, INFRA-7, INFRA-8, LEGAL-4/5, UI-6, UI-10, FEAT-15, LEGAL-3 — bez zmian.
+
+## Sesja 2026-07-31 — LEGAL-6 punkt 3 (zaślepki w zakładce „Dokumenty")
+
+### Zmiany
+
+Kod Tomek. Jeden commit, na `main` i `production`.
+
+- **`9ef0c8f4` — LEGAL-6 p.3:** zakładka „Dokumenty" w panelu żeglarza przestała wymieniać nieistniejące pliki. `docs` przepisane ze statycznej tablicy czterech zaślepek na `$derived` z `confirmationDocUrl` — jedna pozycja, gdy potwierdzenie da się pobrać, pusta tablica w przeciwnym razie, plus pusty stan w szablonie. Wiersze zmienione z `<button disabled>` na `<a href>`. Kolumna z datą usunięta (decyzja Tomka — dla jednego dokumentu nic nie niosła). Przy okazji warunek „potwierdzenie jest do pobrania" zunifikowany w jedną wartość `confirmationDocUrl` (URL albo `null`), używaną też przez przycisk w zakładce „Rezerwacja".
+- **`docs/backlog.md`** — LEGAL-6 punkt 3 skreślony z opisem tego, co wyszło przy realizacji; nowa pozycja **UI-14** (nieaktywne zakładki panelu wyglądają na wyłączone), zaczepiona o UI-11.
+
+### Decyzje
+
+- **Zostawić tylko dokument, który istnieje — nie pusty stan dla całej zakładki.** Alternatywa („usuń listę, pokaż komunikat") była tańsza, ale zakładka „Dokumenty" świecąca pustką wygląda jak awaria. Potwierdzenie rezerwacji jest realnym plikiem z endpointu, więc zakładka staje się prawdziwa i użyteczna, a regulamin dopisze się do tej samej listy, gdy powstanie (LEGAL-6 p.1). Duplikat pobierania w dwóch zakładkach uznany za dwa uzasadnione konteksty, nie za powielenie do usunięcia.
+- **Jedna wartość zamiast pary URL + boolean.** Pierwsza wersja miała `confirmationPdfUrl` (URL albo `null`) i `canDownloadConfirmation` (boolean). TypeScript nie zawęża typu na podstawie booleana wyliczonego z innej zmiennej, więc budowanie `href: string` wymagałoby asercji. Sygnał projektowy, nie uciążliwość narzędzia: „czy można pobrać" i „skąd pobrać" to jedna informacja.
+
+### Wnioski
+
+- **Zaślepka bez działającego przycisku to nadal nieprawda.** Wiersze były `disabled`, więc martwego linku nie było — ale każdy z nich nazywał dokument i podawał jego datę (`PDF · 01.01.2026`). Data była zmyślona. Sprawdzenie pokazało też, że problem jest szerszy niż zapisano w backlogu: zaślepkami były wszystkie cztery pozycje, nie tylko regulamin. Kolejny raz opis pozycji był węższy od stanu faktycznego (jak UI-8 07-27).
+- **Katalog `.po` jako dowód usunięcia.** Trzy zmyślone nazwy dokumentów przeszły w `#~` po ekstrakcji — potwierdzenie z narzędzia, że napisy zniknęły z kodu, a nie zostały tylko schowane w innej gałęzi szablonu.
+- **`>` w wydruku komendy to dekoracja, w powłoce składnia.** Skopiowanie całego bloku wyjścia `pnpm format` (z liniami `> sailing-architects@0.0.1 format`) utworzyło dwa puste pliki o nazwach z tych linii. Tu skończyło się na śmieciach; przy istniejącej nazwie `> plik` **opróżnia** plik bez pytania i bez komunikatu. Ta sama rodzina co backtick w `-m "…"` i `[[ ]]` w ścieżce.
+
+### Następne kroki
+
+#### Next
+
+- **LEGAL-6 punkty 1-2** — regulamin jako dokument publiczny + odnośnik w stopce; czeka na potwierdzenie Michała, czy `.doc` z 07-07 to wersja finalna.
+- **REFACTOR-5** — `markOverduePayments` u źródła; wymaga decyzji o kierunku skanu.
+- **UI-11 + UI-14** — przegląd kontrastu razem z nieaktywnymi zakładkami panelu; sensowne jako wstęp do FEAT-5.
+
+#### Blocked / Later / Open questions
+
+- **DEP-1a / DEP-1b — ⏸ do 2026-08-30** (brak realnych wpłat). Projekt testu z próbą kontrolną w backlogu.
+- REFACTOR-2/4, SEC-4, INFRA-7, INFRA-8, LEGAL-3/4/5, UI-6, UI-10, FEAT-15 — bez zmian.
