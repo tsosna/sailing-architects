@@ -44,6 +44,11 @@
 				)
 			: null
 	)
+
+	const confirmationDocUrl = $derived(
+		bookingData?.status === 'confirmed' ? confirmationPdfUrl : null
+	)
+
 	let now = $state(Date.now())
 	const holdRemainingMs = $derived(
 		bookingData?.status === 'pending' && bookingData.holdExpiresAt
@@ -216,12 +221,17 @@
 		return i === activeLeg
 	}
 
-	const docs = [
-		{ name: 'Potwierdzenie rezerwacji', date: '24.04.2026', type: 'PDF' },
-		{ name: 'Regulamin rejsu', date: '01.01.2026', type: 'PDF' },
-		{ name: 'Lista rzeczy do zabrania', date: '01.01.2026', type: 'PDF' },
-		{ name: 'Plan trasy szczegółowy', date: '01.03.2026', type: 'PDF' }
-	]
+	const docs = $derived(
+		confirmationDocUrl
+			? [
+					{
+						name: 'Potwierdzenie rezerwacji',
+						type: 'PDF',
+						href: confirmationDocUrl
+					}
+				]
+			: []
+	)
 
 	const tabs: ReadonlyArray<{ id: Tab; label: string }> = [
 		{ id: 'booking', label: 'Rezerwacja' },
@@ -465,8 +475,8 @@
 				</section>
 
 				<div class="actions">
-					{#if confirmationPdfUrl && bookingData?.status === 'confirmed'}
-						<a class="btn btn--primary" href={confirmationPdfUrl}
+					{#if confirmationDocUrl}
+						<a class="btn btn--primary" href={confirmationDocUrl}
 							>↓ Pobierz potwierdzenie</a
 						>
 					{:else}
@@ -587,19 +597,23 @@
 		{#if tab === 'docs'}
 			<div id="panel-docs" role="tabpanel">
 				<p class="lead">Dokumenty do pobrania</p>
-				<ul class="docs">
-					{#each docs as doc (doc.name)}
-						<li>
-							<button type="button" class="docs__item" disabled>
-								<div class="docs__text">
-									<p class="docs__name">{doc.name}</p>
-									<p class="docs__meta">{doc.type} · {doc.date}</p>
-								</div>
-								<span class="docs__icon" aria-hidden="true">↓</span>
-							</button>
-						</li>
-					{/each}
-				</ul>
+				{#if docs.length > 0}
+					<ul class="docs">
+						{#each docs as doc (doc.name)}
+							<li>
+								<a class="docs__item" href={doc.href}>
+									<div class="docs__text">
+										<p class="docs__name">{doc.name}</p>
+										<p class="docs__meta">{doc.type}</p>
+									</div>
+									<span class="docs__icon" aria-hidden="true">↓</span>
+								</a>
+							</li>
+						{/each}
+					</ul>
+				{:else}
+					<p class="lead">Brak dokumentów do pobrania</p>
+				{/if}
 			</div>
 		{/if}
 	</div>

@@ -994,17 +994,14 @@ msgstr "Oczekuje na płatność"
 #~ msgid "Doświadczenie"
 #~ msgstr "Doświadczenie"
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Regulamin rejsu"
-msgstr "Regulamin rejsu"
+#~ msgid "Regulamin rejsu"
+#~ msgstr "Regulamin rejsu"
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Lista rzeczy do zabrania"
-msgstr "Lista rzeczy do zabrania"
+#~ msgid "Lista rzeczy do zabrania"
+#~ msgstr "Lista rzeczy do zabrania"
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Plan trasy szczegółowy"
-msgstr "Plan trasy szczegółowy"
+#~ msgid "Plan trasy szczegółowy"
+#~ msgstr "Plan trasy szczegółowy"
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/admin/audit/+page.svelte
@@ -3388,3 +3385,7 @@ msgstr "Wpłata początkowa zaksięgowana"
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Kontynuuj rezerwację →"
 msgstr "Kontynuuj rezerwację →"
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Brak dokumentów do pobrania"
+msgstr "Brak dokumentów do pobrania"

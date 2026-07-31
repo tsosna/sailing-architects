@@ -994,17 +994,14 @@ msgstr ""
 #~ msgid "Doświadczenie"
 #~ msgstr ""
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Regulamin rejsu"
-msgstr ""
+#~ msgid "Regulamin rejsu"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Lista rzeczy do zabrania"
-msgstr ""
+#~ msgid "Lista rzeczy do zabrania"
+#~ msgstr ""
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Plan trasy szczegółowy"
-msgstr ""
+#~ msgid "Plan trasy szczegółowy"
+#~ msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/admin/audit/+page.svelte
@@ -3387,4 +3384,8 @@ msgstr ""
 #: src/lib/components/site-nav/site-nav.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Kontynuuj rezerwację →"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Brak dokumentów do pobrania"
 msgstr ""
