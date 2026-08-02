@@ -3398,9 +3398,9 @@ Kod Tomek. Jeden commit, na `main` i `production`, zweryfikowany na prodzie.
 
 #### Next
 
+- **UI-11 + UI-14 — wybór Tomka na następną sesję (08-02).** Przegląd kontrastu tło↔czcionka w całym projekcie (landing, panel żeglarza, admin) razem z nieaktywnymi zakładkami panelu, które wyglądają na wyłączone. Wstęp do FEAT-5 — nowy layout ma startować ze zdrowej palety, nie dziedziczyć problemu. Materiał: screenshot Michała `docs/assets/IMG_3269.jpeg`. Uwaga na warstwy z `alpha` — kontrast liczy się po zmieszaniu, nie z wartości deklarowanej.
 - **UI-15** — doprecyzowanie etykiety „41 dni"; jednoliniowe, ale brzmienie musi zatwierdzić Michał.
 - **REFACTOR-5** — `markOverduePayments` u źródła; wymaga decyzji o kierunku skanu (po ratach vs po bookingach). Świeża głowa, nie ogon sesji.
-- **UI-11 + UI-14** — przegląd kontrastu razem z nieaktywnymi zakładkami panelu; wstęp do FEAT-5.
 
 #### Blocked / Later / Open questions
 
