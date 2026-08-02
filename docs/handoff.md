@@ -3364,3 +3364,50 @@ Kod Tomek. Sesja audytowa — dwie naprawy, reszta rozpisana na pozycje backlogu
 - **DEP-1a / DEP-1b — ⏸ do 2026-08-30** (brak realnych wpłat).
 - **INFRA-8** — miejsce zamieszkania zestawu zasad rozstrzygnięte propozycją (vault/repo/linter); reszta pozycji otwarta.
 - REFACTOR-2/4, SEC-4, INFRA-7, LEGAL-3/4/5, UI-6, UI-10, UI-11, UI-14, FEAT-15 — bez zmian.
+
+## Sesja 2026-08-02 — REFACTOR-6 punkt (4) (oś trasy w panelu żeglarza z Convexa)
+
+### Zmiany
+
+Kod Tomek. Jeden commit, na `main` i `production`, zweryfikowany na prodzie.
+
+- **`38bf9bef` — REFACTOR-6 p.4:** tablica `ports` w `dashboard/+page.svelte:212` (pięć portów z datami wpisanymi ręcznie) zastąpiona `$derived.by` czytającym `startDate`/`endDate` z tabeli Convex `voyageSegments`. Nowa subskrypcja `segmentsQuery` na istniejącej query `listSegments`, funkcja `dayMonth(ts)` formatująca timestamp na `'4.10'` w UTC, sortowanie segmentów po `startDate`, guard na pustych danych. Nazwy portów zostały wpisane ręcznie — z komentarzem odsyłającym do REFACTOR-6.
+- **`docs/backlog.md`** — REFACTOR-6 p.4 skreślony z opisem tego, co wyszło przy realizacji; dopisane **p.5** (nazwy portów nie istnieją w bazie, PORT jako encja bez reprezentacji) i **p.6** (wzór `N + 1` zakłada trasę liniową, rejs okrężny go łamie — obserwacja Tomka). **LEGAL-7 (a) przepisany:** plik statyczny `organizer.ts` skreślony jako zły cel, pozycja scalona w jeden refaktor „skiper + podmiot sprzedający w bazie".
+- **Wiki (5 nowych, wszystkie `universal`):** [[display-string-is-not-a-data-source]], [[calendar-day-vs-instant-in-time]], [[unordered-query-result-is-an-assumption]], [[two-names-for-one-thing-means-a-missing-entity]], [[arrow-brace-is-a-block-not-an-object]] + rozszerzony [[one-instance-hides-two-entities]] o sekcję „Osoba też bywa dwiema encjami" + indeks vaulta.
+
+### Decyzje
+
+- **Daty wzięte z Convexa, nie z `voyage-segments.ts`.** Plik `.ts` ma pole `dates: '4–11.10.2026'` — kuszące jako źródło, bo daty tam widać. Odrzucone: to napis do wyświetlenia. Wycinanie z niego fragmentu związałoby panel z decyzją copywritera i z tłumaczeniem (angielski wariant może brzmieć `'Oct 4–11, 2026'`), a separator to półpauza U+2013. Właściwym źródłem okazały się `startDate`/`endDate` — istniały w schemacie od początku i są już używane przez `refunds.ts:21` do liczenia progów zwrotu.
+- **Formatowanie w UTC, nie lokalnie.** Seed zapisuje `new Date('2026-10-04').getTime()`, czyli północ UTC. `getDate()` zwróciłby poprawny dzień w Polsce i dzień wcześniejszy dla użytkownika na zachód od Greenwich. Reguła przyjęta: czytaj w tej ramce, w której zapisano.
+- **Sortowanie po `startDate` dopisane jawnie.** `listSegments` nie używa `withIndex`, więc kolejność wyniku brała się z kolejności wstawiania przez seed. Dziś poprawna, ale nigdzie niezapisana — a cała chronologia osi trasy na niej stoi. Jedna linia zamienia założenie w regułę.
+- **Nazwy portów zostają wpisane ręcznie — świadomie, z komentarzem.** Nie da się ich wyprowadzić: `name` segmentu przeczy osi trasy (`Majorka` vs `Palma de Mallorca`). Przeniesienie do bazy to schemat + migracja + panel edycji + pytanie o tłumaczenia, czyli osobna pozycja. Komentarz przy kodzie zamienia zaślepkę w dług z adresem.
+- **Pusty stan podczas ładowania zaakceptowany.** Przez chwilę sekcja „Cała trasa rejsu" pokazuje sam nagłówek. Alternatywa — stare daty jako fallback — przywraca dokładnie tę kopię, którą pozycja usuwa.
+- **Brak nowego ADR.** Rozstrzygnięcia dotyczyły źródła danych i modelu, nie reguł biznesowych. Podział skiper/podmiot sprzedający **będzie** decyzją biznesową z konsekwencjami prawnymi, ale nie został podjęty — leży jako kierunek w LEGAL-7.
+
+### Wnioski
+
+- **Napis do wyświetlenia nie jest źródłem danych.** Trzecia odsłona w tym projekcie po `berthBadge` (UI-9) i po `dates`/`name` dzisiaj. Pytanie rozstrzygające przed napisaniem `split`: czy kształt tego stringa może zmienić ktoś, kto nie czyta tego kodu — tłumacz, copywriter, Michał w panelu. Jeśli tak, kod nie ma prawa na nim polegać.
+- **Dzień kalendarza to nie moment w czasie.** `new Date('2026-10-04')` i `new Date(2026, 9, 4)` opisują ten sam dzień i różnią się o dobę w UTC — pierwsza forma jest czytana jako UTC, druga jako czas lokalny. Błąd jest niewidoczny w Polsce, bo przesunięcie jest dodatnie. Kontrola bez ruszania zegara maszyny: `toLocaleDateString(..., { timeZone: 'America/Sao_Paulo' })`.
+- **Indeks zdefiniowany nie znaczy indeks użyty.** `by_slug` istnieje na tabeli, ale `listSegments` nie ma `withIndex`, więc nie bierze w tym udziału. Ta sama rodzina co gołe `disabled` z 07-31 (II): obecność deklaracji w pliku nigdy nie jest werdyktem o zachowaniu konkretnego miejsca.
+- **Ta sama rzecz pod dwiema nazwami to brakująca encja.** `Palma de Mallorca` i `Majorka` to jedno miejsce, ale nic ich nie łączy, bo PORT nie istnieje w kodzie jako byt — jego atrybuty rozsypały się na trzy pliki. Relacja odgadywana wzorem (`N + 1`) zakodowała przy okazji założenie, że trasa jest ścieżką; rejs okrężny je łamie. **Znalazł to Tomek**, patrząc na Seszele.
+- **Rozpoznanie zrośnięcia encji unieważnia kroki pośrednie.** LEGAL-7 (a) był zaplanowany jako tani krok „wyciągnij kontakt do pliku". Po zobaczeniu, że Michał jest dwiema encjami naraz, krok przestał prowadzić do celu: nazwa pliku utrwalałaby zlepek, a konsumenci przepisaliby się drugi raz przy przejściu na bazę. Krok pośredni ma sens, gdy prowadzi w stronę modelu docelowego, nie gdy nadaje nazwę zlepkowi.
+- **Klamra po strzałce to blok, nie obiekt.** `(x) => { a: x }` parsuje się, uruchamia i zwraca `undefined` dla każdego elementu — bez błędu składni, bo `a:` czyta się jako etykieta. `({` jest jedynym sposobem zwrócenia literału obiektu.
+- **Subject commita przejął temat rozmowy zamiast opisać diff.** Pierwsza wersja brzmiała `replace port names` — a nazwy portów były jedyną rzeczą, której commit nie ruszał; zajmowały za to całą wcześniejszą dyskusję. Nowa odmiana starej rodziny („message pisany zaraz po prozie przejmuje tryb prozy"). Odruch: przed napisaniem subjectu wypisać, co z diffu **znika** i co **przychodzi**. Po dwóch iteracjach message dany gotowy — zgodnie z regułą z 07-27.
+
+### Następne kroki
+
+#### Next
+
+- **UI-15** — doprecyzowanie etykiety „41 dni"; jednoliniowe, ale brzmienie musi zatwierdzić Michał.
+- **REFACTOR-5** — `markOverduePayments` u źródła; wymaga decyzji o kierunku skanu (po ratach vs po bookingach). Świeża głowa, nie ogon sesji.
+- **UI-11 + UI-14** — przegląd kontrastu razem z nieaktywnymi zakładkami panelu; wstęp do FEAT-5.
+
+#### Blocked / Later / Open questions
+
+- **LEGAL-7** — cała pozycja czeka na dane formalne od Michała; część (a) przestała być niezależna po przepisaniu 08-02.
+- **REFACTOR-6 punkty 5-6** — port jako encja; wchodzą z FEAT-11 i REFACTOR-2, nie osobno.
+- **SEC-5** — pytanie do Michała o wymagania urzędu przy zgłoszeniu załogi.
+- **INFRA-10** — przegląd treści landingu przez Michała.
+- **LEGAL-6 punkty 1-2** — publikacja regulaminu; czeka na potwierdzenie wersji finalnej.
+- **DEP-1a / DEP-1b — ⏸ do 2026-08-30** (brak realnych wpłat).
+- REFACTOR-2/4, SEC-4, INFRA-7, INFRA-8, LEGAL-3/4/5, UI-6, UI-10, FEAT-15 — bez zmian.
