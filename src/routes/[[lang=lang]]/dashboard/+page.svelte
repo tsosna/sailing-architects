@@ -16,6 +16,7 @@
 
 	// ── Convex queries ────────────────────────────────────────────────────
 	const bookingQuery = useQuery(api.queries.bookingByUser, () => ({ userId }))
+	const segmentsQuery = useQuery(api.queries.listSegments, () => ({}))
 	const convex = useConvexClient()
 
 	const bookings = $derived((bookingQuery.data ?? []).filter((b) => !b.closed))
@@ -208,14 +209,36 @@
 		SLUG_TO_LEG[bookingData?.segment?.slug ?? ''] ?? -1
 	)
 
-	// Timeline ports — for Sail Adventure 2026
-	const ports = [
-		{ port: 'Palma de Mallorca', date: '4.10' },
-		{ port: 'Gibraltar', date: '11.10' },
-		{ port: 'Madera', date: '21.10' },
-		{ port: 'Teneryfa', date: '31.10' },
-		{ port: 'Cabo Verde', date: '14.11' }
+	function dayMonth(ts: number): string {
+		const d = new Date(ts)
+		const day = d.getUTCDate()
+		const month = d.getUTCMonth()
+		return `${day}.${month + 1}`
+	}
+
+	// Port names are not in the DB — segment `name` is a display label
+	// ("Majorka → Gibraltar") and disagrees with the timeline ("Palma de Mallorca").
+	// Hardcoded until ports become real fields — see REFACTOR-6.
+	const PORT_NAMES = [
+		'Palma de Mallorca',
+		'Gibraltar',
+		'Madera',
+		'Teneryfa',
+		'Cabo Verde'
 	]
+
+	// Timeline ports — for Sail Adventure 2026
+	const ports = $derived.by(() => {
+		const segs =
+			segmentsQuery.data?.toSorted((a, b) => a.startDate - b.startDate) ?? []
+		if (segs.length === 0) return []
+
+		return PORT_NAMES.map((port, i) => ({
+			port,
+			date:
+				i === 0 ? dayMonth(segs[0].startDate) : dayMonth(segs[i - 1].endDate)
+		}))
+	})
 
 	function legActive(i: number): boolean {
 		return i === activeLeg
