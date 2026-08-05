@@ -781,7 +781,7 @@
 		background: none;
 		border: none;
 		border-bottom: 2px solid transparent;
-		color: rgba(245, 240, 232, 0.4);
+		color: var(--color-on-surface-soft);
 		font-family: var(--font-sans);
 		font-size: 12px;
 		letter-spacing: 1px;
@@ -794,7 +794,7 @@
 	}
 
 	.tabs__btn:hover {
-		color: rgba(245, 240, 232, 0.7);
+		color: var(--color-on-surface);
 	}
 
 	.tabs__btn--active {
@@ -884,7 +884,7 @@
 	.voyage__empty {
 		font-family: var(--font-sans);
 		font-size: 13px;
-		color: rgba(245, 240, 232, 0.3);
+		color: var(--color-on-surface-muted);
 		padding: 24px;
 		margin: 0;
 	}
@@ -1098,7 +1098,7 @@
 	.timeline__name {
 		font-family: var(--font-sans);
 		font-size: 10px;
-		color: rgba(245, 240, 232, 0.35);
+		color: var(--color-on-surface-muted);
 		text-align: center;
 		line-height: 1.3;
 	}
@@ -1185,7 +1185,7 @@
 		font-family: var(--font-sans);
 		font-size: 13px;
 		line-height: 1.6;
-		color: rgba(245, 240, 232, 0.4);
+		color: var(--color-on-surface-muted);
 		margin: 0 0 32px;
 	}
 
@@ -1460,7 +1460,7 @@
 	.docs__meta {
 		font-family: var(--font-sans);
 		font-size: 10px;
-		color: rgba(245, 240, 232, 0.3);
+		color: var(--color-on-surface-muted);
 		margin: 0;
 	}
 
