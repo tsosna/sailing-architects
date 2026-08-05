@@ -174,7 +174,7 @@
 		font-size: 14px;
 		line-height: 1.7;
 		max-width: 480px;
-		color: rgba(245, 240, 232, 0.45);
+		color: var(--color-on-surface-muted);
 		margin: 0 0 48px;
 	}
 
@@ -203,6 +203,14 @@
 			border-color 150ms ease;
 	}
 
+	.segments__btn:not(.segments__btn--active):hover {
+		background: var(--color-navy-light);
+	}
+
+	.segments__btn:hover .segments__name {
+		color: var(--color-on-surface);
+	}
+
 	.segments__btn--active {
 		background: rgba(196, 146, 58, 0.12);
 		border-bottom-color: var(--color-brass);
@@ -224,7 +232,7 @@
 		font-family: var(--font-sans);
 		font-size: 13px;
 		font-weight: 500;
-		color: rgba(245, 240, 232, 0.4);
+		color: var(--color-on-surface-soft);
 	}
 
 	.segments__btn--active .segments__name {

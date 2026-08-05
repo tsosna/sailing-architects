@@ -487,7 +487,7 @@
 	}
 
 	.table th {
-		color: rgba(245, 240, 232, 0.44);
+		color: var(--color-on-surface-muted);
 		font-size: 10px;
 		font-weight: 600;
 		letter-spacing: 0.14em;

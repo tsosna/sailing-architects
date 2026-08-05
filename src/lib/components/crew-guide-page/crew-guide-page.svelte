@@ -381,7 +381,7 @@
 	.section__lead {
 		font-family: var(--font-sans);
 		font-size: 14px;
-		color: rgba(245, 240, 232, 0.45);
+		color: var(--color-on-surface-muted);
 		line-height: 1.75;
 		max-width: 540px;
 		margin: 0 0 32px;
@@ -418,7 +418,7 @@
 	.checklist__count {
 		font-family: var(--font-sans);
 		font-size: 11px;
-		color: rgba(245, 240, 232, 0.3);
+		color: var(--color-on-surface-muted);
 	}
 
 	.checklist__count--done {
@@ -494,7 +494,7 @@
 	}
 
 	.checklist__text--checked {
-		color: rgba(245, 240, 232, 0.35);
+		color: var(--color-on-surface-muted);
 		text-decoration: line-through;
 	}
 
@@ -585,7 +585,7 @@
 	.cta__lead {
 		font-family: var(--font-sans);
 		font-size: 14px;
-		color: rgba(245, 240, 232, 0.45);
+		color: var(--color-on-surface-muted);
 		line-height: 1.7;
 		max-width: 420px;
 		margin: 0 0 28px;

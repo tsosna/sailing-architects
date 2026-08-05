@@ -117,7 +117,7 @@
 		font-size: 13px;
 		line-height: 1.7;
 		max-width: 360px;
-		color: rgba(245, 240, 232, 0.35);
+		color: var(--color-on-surface-muted);
 		margin: 0 0 20px;
 	}
 
@@ -220,7 +220,7 @@
 	.footer__bottom p {
 		font-family: var(--font-sans);
 		font-size: 11px;
-		color: rgba(245, 240, 232, 0.2);
+		color: var(--color-on-surface-muted);
 		margin: 0;
 	}
 	.footer__insta {

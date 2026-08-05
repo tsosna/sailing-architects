@@ -804,7 +804,7 @@
 	.boat__cabin-pos {
 		font-family: var(--font-sans);
 		font-size: 10px;
-		color: rgba(245, 240, 232, 0.4);
+		color: var(--color-on-surface-muted);
 		margin-top: 1px;
 		display: block;
 	}

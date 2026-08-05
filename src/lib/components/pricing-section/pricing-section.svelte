@@ -185,7 +185,7 @@
 	.card__dates {
 		font-family: var(--font-sans);
 		font-size: 12px;
-		color: rgba(245, 240, 232, 0.35);
+		color: var(--color-on-surface-muted);
 		margin: 0 0 24px;
 	}
 
@@ -291,7 +291,7 @@
 	}
 
 	.lists__label--dim {
-		color: rgba(245, 240, 232, 0.35);
+		color: var(--color-on-surface-muted);
 	}
 
 	@media (max-width: 720px) {

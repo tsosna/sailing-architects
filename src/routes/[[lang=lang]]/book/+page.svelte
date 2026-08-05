@@ -1376,7 +1376,7 @@
 	.lead {
 		font-family: var(--font-sans);
 		font-size: 13px;
-		color: rgba(245, 240, 232, 0.4);
+		color: var(--color-on-surface-muted);
 		max-width: 480px;
 		line-height: 1.6;
 		margin: -24px 0 32px;
@@ -1433,7 +1433,7 @@
 		font-family: var(--font-sans);
 		font-size: 13px;
 		font-weight: 500;
-		color: rgba(245, 240, 232, 0.4);
+		color: var(--color-on-surface-muted);
 	}
 
 	.booking-segments__btn--active .booking-segments__name {
@@ -1566,7 +1566,7 @@
 		background: none;
 		border: none;
 		border-bottom: 2px solid transparent;
-		color: rgba(245, 240, 232, 0.4);
+		color: var(--color-on-surface-soft);
 		font-family: var(--font-sans);
 		font-size: 12px;
 		letter-spacing: 1px;
@@ -1579,7 +1579,7 @@
 	}
 
 	.auth-tab:hover {
-		color: rgba(245, 240, 232, 0.7);
+		color: var(--color-on-surface);
 	}
 
 	.auth-tab--active {
@@ -1694,7 +1694,7 @@
 		font-family: var(--font-sans);
 		font-size: 11px;
 		line-height: 1.55;
-		color: rgba(245, 240, 232, 0.48);
+		color: var(--color-on-surface-muted);
 		margin: 12px 0 0;
 		padding-left: 14px;
 		border-left: 1px solid rgba(196, 146, 58, 0.28);
@@ -1842,7 +1842,7 @@
 	}
 
 	.clerk-host :global(.cl-formFieldInput::placeholder) {
-		color: rgba(245, 240, 232, 0.42);
+		color: var(--color-on-surface-muted);
 	}
 
 	.clerk-host :global(.cl-formFieldInput:focus) {
@@ -1948,7 +1948,7 @@
 	.confirm__key {
 		font-family: var(--font-sans);
 		font-size: 11px;
-		color: rgba(245, 240, 232, 0.4);
+		color: var(--color-on-surface-muted);
 		letter-spacing: 1px;
 		text-transform: uppercase;
 		margin: 0;
@@ -2050,7 +2050,7 @@
 	.pay__loading {
 		font-family: var(--font-sans);
 		font-size: 13px;
-		color: rgba(245, 240, 232, 0.4);
+		color: var(--color-on-surface-muted);
 		padding: 24px 0;
 	}
 
@@ -2108,7 +2108,7 @@
 	.pay__summary-dates {
 		font-family: var(--font-sans);
 		font-size: 11px;
-		color: rgba(245, 240, 232, 0.4);
+		color: var(--color-on-surface-muted);
 		margin: 0 0 20px;
 	}
 
@@ -2123,7 +2123,7 @@
 		margin-bottom: 8px;
 		font-family: var(--font-sans);
 		font-size: 11px;
-		color: rgba(245, 240, 232, 0.4);
+		color: var(--color-on-surface-muted);
 	}
 
 	.pay__summary-row > span:last-child {

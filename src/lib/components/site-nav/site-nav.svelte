@@ -182,7 +182,7 @@
 		font-size: 12px;
 		letter-spacing: 1.5px;
 		text-transform: uppercase;
-		color: rgba(245, 240, 232, 0.6);
+		color: var(--color-on-surface);
 		text-decoration: none;
 		transition: color 200ms ease;
 	}
@@ -210,7 +210,7 @@
 		background: none;
 		border: 1px solid rgba(196, 146, 58, 0.3);
 		padding: 8px 16px;
-		color: rgba(245, 240, 232, 0.6);
+		color: var(--color-on-surface);
 		font-size: 11px;
 		letter-spacing: 1.5px;
 	}

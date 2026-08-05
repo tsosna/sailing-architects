@@ -143,7 +143,7 @@
 	.field__hint {
 		font-family: var(--font-sans);
 		font-size: 10px;
-		color: rgba(245, 240, 232, 0.3);
+		color: var(--color-on-surface-muted);
 	}
 
 	.field__input--error {

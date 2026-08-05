@@ -274,6 +274,7 @@
 	}
 
 	.map__port {
+		opacity: 0.85;
 		cursor: pointer;
 		outline: none;
 		transition: opacity 150ms ease;
@@ -281,7 +282,7 @@
 
 	.map__port:hover,
 	.map__port:focus-visible {
-		opacity: 0.85;
+		opacity: 1;
 	}
 
 	.map__port:focus-visible circle {
