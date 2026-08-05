@@ -3411,3 +3411,63 @@ Kod Tomek. Jeden commit, na `main` i `production`, zweryfikowany na prodzie.
 - **LEGAL-6 punkty 1-2** — publikacja regulaminu; czeka na potwierdzenie wersji finalnej.
 - **DEP-1a / DEP-1b — ⏸ do 2026-08-30** (brak realnych wpłat).
 - REFACTOR-2/4, SEC-4, INFRA-7, INFRA-8, LEGAL-3/4/5, UI-6, UI-10, FEAT-15 — bez zmian.
+
+## Sesja 2026-08-05 — UI-14 + UI-11 (przegląd kontrastu: landing i panel żeglarza)
+
+### Zmiany
+
+Kod Tomek. Cztery commity, na `main` i `production`, weryfikowane pomiarem w DevTools po każdej zmianie.
+
+- **`83cdb043` — UI-14 + skala tokenów.** `app.css` dostał trzypoziomową skalę tekstu w bloku „Semantic aliases": `--color-on-surface` (pełny), nowy `--color-on-surface-soft` (alfa 0.7), `--color-on-surface-muted` podniesiony z 0.45 na **0.5** — podłoga zmierzona (4.69 na `--color-navy`, próg AA 4.5), zapisana w komentarzu razem z tłem i progiem. Oba tokeny zapisane składnią relatywną `rgb(from var(--color-on-surface) r g b / …)`, więc baza bieli została w jednym miejscu. W `dashboard/+page.svelte` pięć miejsc pod progiem podniesionych, zakładki (3.46 → 7.97) i ich hover rozdzielony.
+- **`d564d1cd` — `docs/tools/contrast-audit.js`.** Audyt wklejany do konsoli: obchodzi DOM, składa kolor z alfą na tle policzonym z przodków, dobiera próg z `font-size`/`font-weight`, deduplikuje i wypisuje `console.table`. W nagłówku pliku lista czterech rzeczy, których **nie widzi**.
+- **`15f3ab9b` — landing, hero.** Gradienty `hero__bg::after` przestrojone: stopy poziome przesunięte (38%→28%, 72%→62%) zamiast podnoszenia krycia, pionowy podniesiony (0.36→0.6), plus **osobna warstwa dla `max-width: 720px`** (pionowa od góry, bo na mobile tekst jedzie na górę i przez całą szerokość). `.subtitle` zdjęta alfa, `.lead` na token. Tokeny również w `route-section` i `pricing-section`.
+- **`7de6b4bf` — reszta landingu i `/book`.** 26 podmian literałów na tokeny w dziesięciu plikach (20 × `-muted`, 2 × `-soft`, 4 × pełny). Trzy naprawy stanów: `.map__port` przygaszał się na hover zamiast rozjaśniać, `.segments__btn` w kabinach miał `transition` bez żadnej reguły `:hover`, `.auth-tab` w `/book` spoczywał pod progiem. Hover wyłączony dla wybranego etapu przez `:not(…)`, bo bił modyfikator specyficznością.
+- **`69b9faf3`** — `style:` po Prettierze (`0.90` → `0.9`).
+- **`docs/backlog.md`** — UI-14 skreślone; UI-11 dostało podpunkt „Postęp 08-05" z zakresem zrobionym i zostawionym; nowe: **UI-16** (hero i nav nad zdjęciem nie osiągają AA, potrzebna decyzja wizualna) i **REFACTOR-7** (trójstan zakładek w czterech kopiach).
+- **Wiki (6 nowych, wszystkie `universal`):** [[contrast-is-a-property-of-the-pair]], [[text-over-photo-has-a-ceiling]], [[interactive-states-are-differences]], [[specificity-outranks-source-order]], [[css-has-no-line-endings]], [[audit-script-and-eye-see-different-things]] + indeks vaulta.
+
+### Decyzje
+
+- **Skala trzech poziomów zamiast podniesienia sześciu wartości.** Grep pokazał w samym panelu żeglarza sześć różnych alf tej samej bieli (0.3 · 0.35 · 0.4 · 0.5 · 0.6 · 0.7), żadnej z nazwą. Podniesienie wszystkich do progu zostawiłoby `0.5 / 0.6 / 0.7` — trzy poziomy nierozróżnialne okiem i dalej bez reguły „kiedy który". Człowiek czyta z tekstu najwyżej trzy wagi.
+- **Nazwy z istniejącej rodziny, nie nowa.** `app.css` miał już wzorzec `on-<powierzchnia>` (Material) w blokach `--color-on-surface` / `--color-on-surface-muted`. Nowy poziom wszedł jako `-soft` między nie, zamiast zakładać własną konwencję obok. Odrzucone `--color-primary`/`--color-secondary` — pierwsza nazwa kolidowała z kolorem marki w tym samym bloku (cicha wygrana jednej deklaracji).
+- **Element interaktywny nie schodzi poniżej treści, którą obsługuje.** To rozstrzygnęło przydział tokenów bez pomiarów per element: zakładki, przyciski segmentów i linki nawigacji dostały `-soft`, teksty pomocnicze `-muted`.
+- **Zajęta koja (`berth-btn--taken`, 1.82) świadomie nietknięta.** WCAG zwalnia stany wyłączone; przygaszenie jest tam nośnikiem informacji „nie da się kliknąć". Druga strona lekcji z UI-14: tam wygląd wyłączonego dostał element czynny, tu wygląd pasuje do stanu.
+- **Gradient hero rozszerzony w poziomie zamiast przyciemniony.** Podnoszenie krycia gasiło zdjęcie już przy pierwszym kroku. Przesunięcie stopów (38%→28%, 72%→62%) daje tę samą ochronę tekstu przy zachowanej jasności fotografii — Tomek znalazł tę oś sam, po odrzuceniu wariantu „mocniej".
+- **Osobna warstwa dla mobile zamiast kompromisu na jednej.** Na desktopie tekst siedzi w lewej kolumnie (trafia w gradient poziomy), na mobile idzie górą przez całą szerokość (mija oba). Jedna wartość miała dwa zadania i jedno musiała przegrać; `@media` rozdziela je bez targowania się.
+- **Zatrzymanie poniżej progu zapisane jako decyzja, nie jako sukces.** Hero 4.49/4.25 i nav 3.93 przy progu 4.5. Jedyne, co zostało, to scrim pod kolumną tekstu albo przyciemniony pasek nawigacji — czyli zmiana wyglądu, nie techniki. Poszło do UI-16 z liczbami, żeby za kwartał dało się odróżnić świadomy kompromis od przeoczenia.
+- **Dokończenie UI-11 odłożone świadomie** (decyzja Tomka na koniec sesji): panel żeglarza i admin za logowaniem, stany hover w całym projekcie, treści po interakcji. Praca mechaniczna i męcząca, lepiej na świeżo w osobnej sesji.
+- **Zmiana metody nauki commit messages** (na prośbę Tomka, w trakcie sesji): zamiast pisania od zera i korekty — wybór spośród trzech wariantów, z których dwa mają realną wadę, plus audyt ciała wygenerowanego z diffu. Produkcja angielskiej prozy zjadała uwagę, a poprawki dotyczyły gramatyki, nie treści. Ćwiczona umiejętność ma być: „czy subject nie kłamie o diffie i czy zakres się zgadza".
+- **Brak nowego ADR.** Wszystkie dzisiejsze rozstrzygnięcia dotyczyły czytelności i palety; UI-16 **będzie** decyzją wizualną z udziałem Michała, ale nie została podjęta.
+
+### Wnioski
+
+- **Kontrast jest własnością pary, nie koloru.** Nie istnieje „kolor o kontraście 4.5" — ta sama alfa 0.4 daje 3.46 na granacie, a nad zdjęciem nie daje jednej liczby w ogóle. Stąd token bez zapisanego tła jest pomiarem nieodtwarzalnym; komentarz musi nieść **wynik, tło i próg**.
+- **Wartość z `alpha` to przepis, nie kolor.** Jeden token, tyle realnych kolorów, ile powierzchni pod spodem. `--color-navy-mid` jest o włos jaśniejszy od `--color-navy` i już przesuwa wynik — założenie „skoro podłoga wyszła 4.69, to wszędzie przejdzie" jest fałszywe z definicji.
+- **Kolor o średniej luminancji nie może być bezpieczny na zmiennym tle.** Mosiądz `#d4aa5a`: 8.0 na granacie, 2.18 na jasnym niebie. Sprawdzenie sufitu kosztuje jeden ruch — zdejmij alfę, zostaw najmocniejszą wersję koloru, zmierz. Jeśli dalej brakuje, tekstem się nie da i pytanie zmienia się z „jaki kolor" na „czym zagwarantować tło".
+- **Stany interaktywne to różnice, nie wartości.** Cztery złamania tej reguły w jednej sesji, każde inne: hover zrównany ze spoczynkiem po podniesieniu (animacja z wartości do niej samej), hover przygaszający zamiast rozjaśniać, `transition` zadeklarowany bez reguły stanu, spoczynek pod progiem. Podniesienie jednego stanu jest zawsze przeglądem całego zestawu.
+- **Specyficzność bije kolejność w pliku.** `.segments__btn:hover` (0-2-0) zjadał `.segments__btn--active` (0-1-0) mimo że modyfikator stał niżej. Naprawa przez `:not(…)` — rozłączne zbiory zamiast wygranej. Osobno: dopisanie nowej reguły obok starej nie zmienia nic, bo w CSS reguły się nawarstwiają, a nie zastępują.
+- **W CSS koniec linii nie znaczy nic.** Brak `;` unieważnił obie sąsiednie deklaracje, niezamknięty `/*` połknął wszystko do `/* Typography */`. Strona renderowała się normalnie, konsola milczała. Kontrola: czy deklaracja **jest** w panelu Styles — obecność w pliku to co innego niż obecność w arkuszu.
+- **Skrypt audytowy i oko łapią rozłączne zbiory.** Audytor znalazł dziewięć pozycji na stronie głównej i przeoczył dwie najgorsze: akapit hero (3.72) i linki nawigacji (2.83). Oba przypadki strukturalne — `<img>` pod tekstem nie jest w łańcuchu `background-color`, a `transparent` każe dziedziczyć kolor rodzica zamiast patrzeć na piksele. Narzędzie audytowe **bez zapisanych ograniczeń** z czasem zamienia się w dowód nieistnienia problemu.
+- **Tokeny psują pomiar w DevTools i trzeba to obejść.** Po podmianie literałów kwadracik przy `color:` znika ze Styles, a ten w Computed nie jest klikalny. Obejście: wpisać kolor wprost w `element.style { }` na górze panelu — DevTools traktuje własną deklarację jako edytowalną i daje pełny próbnik z kontrastem. Dla tekstu na zdjęciu: `Cmd+Shift+C` i wiersz `Contrast` na plakietce elementu.
+- **Powtórzony trójstan to brakujący komponent.** Ten sam układ zakładek stoi w czterech plikach, wpisany od nowa; trzy z czterech kopii miały zepsuty albo brakujący hover, każda inaczej. Czwarta poprawka tego samego wzorca jest sygnałem do wydzielenia, nie do naprawy.
+- **Tomek sam wychwycił fałszywe zdanie w ciele commita**, które napisałem: „instead of raising opacity" przy zmianie, która krycie jednak podnosiła (w drugim gradiencie). To pierwszy raz, gdy audyt zgodności message↔diff poszedł w drugą stronę — i argument za nową metodą: na cudzym tekście ta praca idzie szybciej niż na własnym.
+
+### Następne kroki
+
+#### Next
+
+- **UI-15** — doprecyzowanie etykiety „41 dni"; jednoliniowe, brzmienie do zatwierdzenia przez Michała.
+- **REFACTOR-5** — `markOverduePayments` u źródła; wymaga decyzji o kierunku skanu (po ratach vs po bookingach). Świeża głowa, nie ogon sesji.
+- **UI-11 dokończenie** — panel żeglarza i admin za logowaniem, stany `:hover`/`:focus`, treści po interakcji. Odłożone świadomie 08-05; wracamy w osobnej sesji, bo praca mechaniczna.
+
+#### Blocked / Later / Open questions
+
+- **UI-16** — hero i nav nad zdjęciem; wymaga decyzji wizualnej (scrim / przyciemniony pasek) z Michałem, najlepiej razem z FEAT-5.
+- **REFACTOR-7** — jeden komponent zakładek zamiast czterech kopii; wchodzi z FEAT-5.
+- **LEGAL-7** — czeka na dane formalne od Michała.
+- **REFACTOR-6 punkty 5-6** — port jako encja; wchodzą z FEAT-11 i REFACTOR-2.
+- **SEC-5** — pytanie do Michała o wymagania urzędu przy zgłoszeniu załogi.
+- **INFRA-10** — przegląd treści landingu przez Michała.
+- **LEGAL-6 punkty 1-2** — publikacja regulaminu.
+- **DEP-1a / DEP-1b — ⏸ do 2026-08-30** (brak realnych wpłat).
+- REFACTOR-2/4, SEC-4, INFRA-7, INFRA-8, LEGAL-3/4/5, UI-6, UI-10, FEAT-15 — bez zmian.
