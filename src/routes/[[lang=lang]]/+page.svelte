@@ -106,7 +106,7 @@
 		background:
 			linear-gradient(
 				90deg,
-				rgba(7, 17, 30, 0.90) 0%,
+				rgba(7, 17, 30, 0.9) 0%,
 				rgba(13, 27, 46, 0.66) 28%,
 				rgba(13, 27, 46, 0.22) 62%
 			),
