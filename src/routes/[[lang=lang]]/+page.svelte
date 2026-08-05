@@ -106,14 +106,14 @@
 		background:
 			linear-gradient(
 				90deg,
-				rgba(7, 17, 30, 0.9) 0%,
-				rgba(13, 27, 46, 0.66) 38%,
-				rgba(13, 27, 46, 0.22) 72%
+				rgba(7, 17, 30, 0.90) 0%,
+				rgba(13, 27, 46, 0.66) 28%,
+				rgba(13, 27, 46, 0.22) 62%
 			),
 			linear-gradient(
 				0deg,
 				rgba(7, 17, 30, 0.9) 0%,
-				rgba(7, 17, 30, 0.36) 42%,
+				rgba(7, 17, 30, 0.6) 42%,
 				rgba(7, 17, 30, 0.24) 100%
 			);
 	}
@@ -199,7 +199,7 @@
 		font-family: var(--font-serif);
 		font-size: clamp(16px, 2vw, 22px);
 		font-style: italic;
-		color: rgba(196, 146, 58, 0.8);
+		color: var(--color-brass-text);
 		margin: 0 0 24px;
 	}
 
@@ -208,7 +208,7 @@
 		font-size: 14px;
 		line-height: 1.7;
 		max-width: 420px;
-		color: rgba(245, 240, 232, 0.55);
+		color: var(--color-on-surface-soft);
 		margin: 0 0 40px;
 	}
 
@@ -290,6 +290,15 @@
 	}
 
 	@media (max-width: 720px) {
+		.hero__bg::after {
+			background: linear-gradient(
+				180deg,
+				rgba(7, 17, 30, 0.9) 0%,
+				rgba(7, 17, 30, 0.65) 65%,
+				rgba(7, 17, 30, 0.25) 100%
+			);
+		}
+
 		.hero {
 			min-height: auto;
 			justify-content: flex-start;

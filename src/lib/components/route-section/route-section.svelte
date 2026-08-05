@@ -301,7 +301,7 @@
 		background: var(--color-navy-mid);
 		border: none;
 		border-bottom: 2px solid transparent;
-		color: rgba(245, 240, 232, 0.3);
+		color: var(--color-on-surface-soft);
 		font-family: var(--font-sans);
 		font-size: 11px;
 		font-weight: 700;
@@ -314,7 +314,7 @@
 	}
 
 	.selector__btn:hover {
-		color: rgba(245, 240, 232, 0.6);
+		color: var(--color-on-surface);
 	}
 
 	.selector__btn--active {
