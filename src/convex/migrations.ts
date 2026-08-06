@@ -13,3 +13,14 @@ export const backfillRefundedAmount = migrations.define({
 		}
 	}
 })
+
+export const cancelPaymentsOfRefundedBookings = migrations.define({
+	table: 'bookingPayments',
+	migrateOne: async (ctx, payment) => {
+		if (payment.status === 'paid' || payment.status === 'cancelled') return
+		const booking = await ctx.db.get(payment.bookingId)
+		if (booking?.paymentStatus !== 'refunded') return
+
+		return { status: 'cancelled' as const, updatedAt: Date.now() }
+	}
+})

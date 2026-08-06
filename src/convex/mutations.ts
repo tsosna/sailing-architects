@@ -1423,6 +1423,17 @@ export const processStripeRefund = internalMutation({
 			})
 			await ctx.db.patch(refund.bookingId, { paymentStatus: newStatus })
 
+			if (newStatus === 'refunded') {
+				for (const payment of allPayments) {
+					if (payment.status !== 'paid') {
+						await ctx.db.patch(payment._id, {
+							status: 'cancelled',
+							updatedAt: Date.now()
+						})
+					}
+				}
+			}
+
 			//1c: berth release (gdy Michal zaznaczyl w UI)
 			if (refund.releaseBerth) {
 				for (const berthId of booking.berthIds) {
