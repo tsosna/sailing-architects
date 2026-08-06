@@ -3471,3 +3471,61 @@ Kod Tomek. Cztery commity, na `main` i `production`, weryfikowane pomiarem w Dev
 - **LEGAL-6 punkty 1-2** — publikacja regulaminu.
 - **DEP-1a / DEP-1b — ⏸ do 2026-08-30** (brak realnych wpłat).
 - REFACTOR-2/4, SEC-4, INFRA-7, INFRA-8, LEGAL-3/4/5, UI-6, UI-10, FEAT-15 — bez zmian.
+
+## Sesja 2026-08-06 — REFACTOR-5 (zamykanie rat po pełnym zwrocie)
+
+### Zmiany
+
+Kod Tomek. Jeden commit `184fdf01`, na `main` i `production`, plus migracja uruchomiona ręcznie na dev i na prodzie.
+
+- **`184fdf01` — REFACTOR-5.** `processStripeRefund` ([`mutations.ts:1426`](../src/convex/mutations.ts)) zamyka wszystkie raty inne niż `paid` (`status: 'cancelled'` + `updatedAt`), gdy przeliczony `paymentStatus` wychodzi `refunded`. Warunek rezerwacji stoi **przed** pętlą, w pętli został wyłącznie warunek wiersza. Wiersze pochodzą z `allPayments` zebranych już w linii 1404 na potrzeby przeliczenia statusu — zero dodatkowych odczytów bazy.
+- **`migrations.ts` — `cancelPaymentsOfRefundedBookings`.** Jednorazowa migracja dla wierszy zapisanych przed zmianą: pomija `paid` i `cancelled` (idempotencja), dociąga rezerwację przez `await ctx.db.get`, zmienia tylko przy `paymentStatus === 'refunded'`. Przebiegi: dev 1 wiersz, prod **8 wierszy w 3 rezerwacjach**, powtórna sucha próba 0.
+- **`docs/business-decisions/ADR-020`** — pełny zwrot zamyka niezapłacone raty, częściowy ich nie rusza; decyzja nie zależy od stanu koi; obniżenie ceny to nie zwrot.
+- **`docs/backlog.md`** — REFACTOR-5 skreślony wraz z opisem, gdzie naprawa faktycznie wylądowała i dlaczego pytanie z pozycji zniknęło zamiast zostać rozstrzygnięte. Nowa pozycja **FEAT-16** (RABAT jako brakująca encja, spina FEAT-5b / FEAT-6 / FEAT-12 + korektę ceny robioną dziś zwrotem).
+- **Wiki (7 nowych, wszystkie `universal`):** [[skipped-row-stays-in-the-scan]], [[source-fix-is-forward-only]], [[a-rule-needs-rows-to-stand-on]], [[commit-subject-pointable-in-the-diff]], [[text-search-cannot-resolve-ownership]], [[tool-panel-is-not-a-code-inventory]], [[compiler-message-has-a-signature]] + indeks vaulta.
+
+### Decyzje
+
+- **Naprawa poszła do `processStripeRefund`, nie do crona — wbrew opisowi pozycji.** Backlog kazał dołożyć odczyt rezerwacji w `markOverduePayments` i rozstrzygnąć, czy skanować po ratach, czy po bookingach. Ten kierunek jest ślepy: `continue` w pętli niczego nie zapisuje, więc pominięty wiersz **zostaje w zbiorze kandydatów na zawsze**, a przy indeksie `status + dueAt` gromadzi się na jego początku i zjada `PAYMENT_SCAN_LIMIT`. Po 200 takich wierszach cron przestałby dosięgać rat żywych, raportując `{ scanned: 200, updated: 0 }` — czyli dokładnie to samo, co w dniu bez pracy. Właściwym momentem naprawy jest ten, w którym powstaje `refunded`.
+- **`isBookingClosed` odrzucone jako kryterium — rozstrzygnięcie Tomka.** Predykat wymaga koniunkcji „pieniądze zwrócone **i** koje oddane", a zwolnienie koi zależy od kwadracika zaznaczanego przez Michała w drawerze. Pełny zwrot bez zaznaczenia przechodził przez dzisiejszą obronę i monity szły dalej. Cytat: *„wysyłania nie możemy uzależniać od tego, co zrobi Michał; jeżeli pieniądze zostały zwrócone, nie wysyłamy"*. To rozstrzygnięcie odsłoniło, że jeden predykat odpowiada na dwa różne pytania — „czy koja jest do sprzedania" (potrzebuje koi) i „czy upominać się o pieniądze" (potrzebuje wyłącznie pieniędzy).
+- **Częściowy zwrot nie zamyka rat.** Ustalone jako reguła domenowa: to korekta, nie wyjście z rejsu. Rezerwacja żyje, miejsce zostaje, monity chodzą. → ADR-020.
+- **Obniżenie ceny wyjęte z zakresu.** Propozycja „rata 200, zwrócone 100, monit na 100" nie ma nośnika w modelu: zwrot dotyczy rat opłaconych, monit rat niezapłaconych, zbiory rozłączne. Potrzeba prawdziwa, narzędzie złe → FEAT-16, nie doklejka do REFACTOR-5.
+- **Obrona u odbiorców zostaje, świadomie.** Po naprawie źródła i migracji `isBookingClosed` w dwóch cronach mailowych jest praktycznie nieosiągalny. Nie usunięty, bo koszty pomyłek są nierówne: trzymanie to dwa odczyty na kandydata raz na dobę, błędne usunięcie to wezwanie do zapłaty wysłane człowiekowi po zwrocie. Zapisane w backlogu jako decyzja, nie jako ogon.
+- **Migracja zamiast ręcznej edycji w Dashboardzie.** Osiem wierszy da się poprawić klikaniem, ale wtedy nie ma ani zapisu reguły, ani powtarzalności na drugim środowisku, ani dowodu. Funkcja idempotentna daje wszystkie trzy, a powtórny przebieg jest testem, którego wynik da się przewidzieć przed uruchomieniem.
+- **Reguła istnieje przez chwilę w dwóch kopiach** (mutacja + migracja) i to przyjęte świadomie: migracja jest jednorazowa i po przebiegu staje się wpisem historycznym, więc rozjazd nie ma jak zaszkodzić.
+
+### Wnioski
+
+- **Pominięcie w pętli nie usuwa wiersza ze skanu.** `continue` bez zapisu to nie filtr, tylko przeciek — wiersz wraca przy każdym przebiegu, a przy zapytaniu po indeksie ustawia się na początku kolejki, bo ma najstarszy termin. Limit porcji, który miał chronić transakcję, staje się limitem tego, co w ogóle da się zrobić. Objaw jest cichy i nieodróżnialny od zdrowia.
+- **Naprawa u źródła działa tylko w przód.** Kod naprawia zdarzenia, nie dane. Stąd wymuszona kolejność: kod → wdrożenie → migracja → weryfikacja → dopiero rozmowa o usunięciu obrony u odbiorców. Usunięcie obrony razem z naprawą wypuściłoby stare wiersze prosto do klienta.
+- **Reguła biznesowa musi mieć wiersze, na których stoi.** Trzy pytania przed przyjęciem: jaka tabela, jaki warunek wybiera wiersze, z jakiego stanu w jaki. Dziś kontrola wypadła negatywnie i to był najtańszy możliwy moment na wykrycie — reguła brzmiała sensownie i wyłożyłaby się dopiero na klawiaturze.
+- **Grep nie zna właściciela pola.** `patch(payment._id, { status: 'cancelled' })` nie zawiera nazwy tabeli; ta stoi 48 linii wyżej, w zapytaniu wypełniającym zmienną. Przy statusach nazywanych słownikiem naturalnym (`pending`, `cancelled`, `paid`) kolizja nazw między tabelami jest regułą. Właściwa sonda to `query('nazwaTabeli')` — trafień mniej i każde do przeczytania.
+- **Brak w panelu narzędzia nie jest twierdzeniem o kodzie.** Zakładka funkcji w Dashboardzie Convexa nie pokazuje mutacji wewnętrznych ani funkcji rejestrowanych przez komponenty — stąd „nie ma tej migracji" przy pliku, który ją zawiera. Lustrzane odbicie znanej pułapki z indeksem `by_slug`: obecność deklaracji nie dowodzi użycia, nieobecność na liście nie dowodzi nieistnienia.
+- **Komunikat kompilatora ma sygnaturę.** `Property 'x' does not exist on type 'Promise<…>'` znaczy zawsze brak `await`; `Type 'string' is not assignable to '…union…'` przy polu obiektu znaczy literał rozszerzony do `string` i naprawia się `as const`. Obie wypadły dziś w jednej funkcji. Gdyby pierwsza przeszła, skutek byłby cichszy niż błąd: `undefined !== 'refunded'` jest prawdą, więc migracja wychodziłaby wcześniej na każdym wierszu i zgłaszała sukces.
+- **Przewidywanie przed uruchomieniem zamieniło migrację produkcyjną w rzecz sprawdzalną.** Liczba policzona z Dashboardu (3 + 3 + 2 + 0 = 8) zgodziła się z suchą próbą co do sztuki, a czwarta rezerwacja — ta z ratami już `cancelled` — nie pojawiła się w logu ani razu, co samo w sobie było dowodem, że oba pominięcia działają. `processed: 24` domknęło pytanie o rozmiar porcji.
+- **Rozmiar szkody z BUG-8 wyszedł dopiero z danych.** `reminderCount: 5` przy jednym wierszu i `4` przy drugim — to nie były „trzy maile", tylko serie chodzące tygodniami, zatrzymane dopiero przez własny limit.
+- **Guard, który wyglądał na zbędny, okazał się konieczny.** `if (!payment.dueAt …) continue` w `reminders.ts:62` wygląda na powtórzenie warunku z indeksu. Nie jest: raty „Dopłata końcowa" nie mają `dueAt` w ogóle, a brak pola sortuje się w indeksie przed wszystkimi wartościami, więc `lte('dueAt', now)` je wciąga. Wyszło z logu suchej próby, nie z lektury.
+- **Metoda nauki commit messages wymagała poprawki po jednym użyciu.** Trzy warianty do wyboru nie zadziałały same z siebie — Tomek wprost powiedział, że wszystkie trzy wyglądają podobnie i nie ma kryteriów rozróżnienia. Kryteria musiały zostać podane wprost (typ jako twierdzenie o zachowaniu; każde słowo wskazywalne w diffie; skutek to nie zmiana) i dopiero wtedy wybór stał się zadaniem, a nie zgadywanką. Wniosek do profilu: przy przejściu z produkcji na rozpoznawanie kryteria oceny trzeba wyłożyć osobno, bo w wariancie „pisz od zera" były niejawnie zastępowane przez moją korektę.
+
+### Następne kroki
+
+#### Next
+
+- **UI-11 dokończenie** — panel żeglarza i admin za logowaniem, stany `:hover`/`:focus`, treści po interakcji. Odłożone świadomie 08-05, dalej otwarte.
+- **FEAT-16 (RABAT jako encja)** — wchodzi **przed** FEAT-5b / FEAT-6 / FEAT-12, inaczej pierwsza z nich ustawi kształt dla pozostałych. Wymaga rozstrzygnięcia: kupony Stripe czy własna tabela.
+- **Test jednostkowy dla reguły z ADR-020** — dziś reguła jest przypięta wyłącznie przeglądem kodu. Wzorzec gotowy: `src/convex/_lib/berthFree.test.ts` z REFACTOR-3. Kandydat na wydzielenie predykatu do `_lib/`, jeśli pojawi się drugi konsument.
+- **UI-15** — doprecyzowanie etykiety „41 dni"; brzmienie do zatwierdzenia przez Michała.
+
+#### Blocked / Later / Open questions
+
+- **REFACTOR-5 punkt (2)** — usunięcie obrony u odbiorców. Nie „do zrobienia", tylko świadomie odłożone; wracać wyłącznie z argumentem mocniejszym niż oszczędność dwóch odczytów.
+- **UI-16** — hero i nav nad zdjęciem; decyzja wizualna z Michałem, najlepiej razem z FEAT-5.
+- **REFACTOR-7** — jeden komponent zakładek zamiast czterech kopii; wchodzi z FEAT-5.
+- **FEAT-4** — zwroty robione bezpośrednio w panelu Stripe nie ustawiają `paymentStatus` w ogóle, więc dzisiejsza reguła ich nie obejmuje; trafiają do kolejki nieobsłużonych zdarzeń.
+- **LEGAL-7** — czeka na dane formalne od Michała.
+- **REFACTOR-6 punkty 5-6** — port jako encja; wchodzą z FEAT-11 i REFACTOR-2.
+- **SEC-5** — pytanie do Michała o wymagania urzędu przy zgłoszeniu załogi.
+- **INFRA-10** — przegląd treści landingu przez Michała.
+- **LEGAL-6 punkty 1-2** — publikacja regulaminu.
+- **DEP-1a / DEP-1b — ⏸ do 2026-08-30** (brak realnych wpłat).
+- REFACTOR-2/4, SEC-4, INFRA-7, INFRA-8, LEGAL-3/4/5, UI-6, UI-10, FEAT-15 — bez zmian.
