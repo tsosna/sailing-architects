@@ -3529,3 +3529,55 @@ Kod Tomek. Jeden commit `184fdf01`, na `main` i `production`, plus migracja uruc
 - **LEGAL-6 punkty 1-2** — publikacja regulaminu.
 - **DEP-1a / DEP-1b — ⏸ do 2026-08-30** (brak realnych wpłat).
 - REFACTOR-2/4, SEC-4, INFRA-7, INFRA-8, LEGAL-3/4/5, UI-6, UI-10, FEAT-15 — bez zmian.
+
+## Sesja 2026-08-08 14:30 — ADR-020: test predykatu anulowania rat + BUG-9 (późny webhook nadpisuje refunded)
+
+### Zmiany
+
+Kod Tomek, tryb ja-wskazuję-Tomek-pisze. Jeden commit `29926c93` (po `--amend`), na `main`, pushnięty.
+
+- **`src/convex/_lib/refundCancellation.ts`** — nowy predykat czysty `shouldCancelPaymentAfterFullRefund`, lista pozytywna trzech statusów (`pending`, `overdue`, `failed`).
+- **`src/convex/_lib/refundCancellation.test.ts`** — 6 testów AAA, jeden na status, nazwy jako twierdzenia o zachowaniu (wynik + powód).
+- **`mutations.ts:1426`** — `payment.status !== 'paid'` zastąpione wywołaniem predykatu; realna zmiana zachowania: raty `processing` i `cancelled` przestały być patchowane w pętli po pełnym zwrocie.
+- **`docs/business-decisions/ADR-020-full-refund-closes-installments.md`** — uzupełnienie punktu 1 (wyjątek dla `processing`) + nowy wpis w Konsekwencjach wskazujący BUG-9.
+- **`docs/backlog.md`** — nowa pozycja **BUG-9** (późny webhook płatności nadpisuje `paymentStatus: 'refunded'`), reconcile date, diff feedbacku 08-08 zgodny, dopisek do rozwiązanej REFACTOR-5.
+- **Wiki (1 nowy, 2 rozszerzone, wszystkie `universal`):** [[copied-pattern-carries-its-reason]] (nowy) + rozszerzenia [[compiler-message-has-a-signature]] (sygnatura 3) i [[zsh-escaping-git-paths-and-commits]] (czwarte wystąpienie) + indeks vaulta.
+
+### Decyzje
+
+- **Lista pozytywna, nie negatywna — wybór Tomka, uzasadniony poprawnie po jednym pytaniu naprowadzającym.** Kryterium: siódmy status dodany kiedyś do schematu domyślnie ma zostać nietknięty, nie anulowany. Błąd domyślny „nic nie zrobiłem" jest tańszy niż „skasowałem cudzą ratę".
+- **Rata `processing` wyłączona z anulowania — ta sama struktura pytania co przy `isBookingClosed` 08-06: „czyje działanie rozstrzyga".** Tomek zaproponował najpierw rozwiązanie produktowe (powiadomić Michała, wysłać webhook później) — trafna intuicja co do tego, kto/co rozstrzyga (nie Michał), błędny poziom (feature, nie reguła dzisiejszego zakresu). Właściwa reguła: nie dotykaj, niech rozstrzygnie Stripe przez normalny webhook. Zapisane w ADR-020 jako uzupełnienie z dzisiejszą datą, nie jako nowy ADR — ta sama decyzja domenowa, rozszerzona o jeden przypadek brzegowy.
+- **Nazwy testów jako twierdzenia o zachowaniu, nie opis wejścia — wymagało dwóch rund korekty.** Pierwsza wersja opisywała status („Koja pending do zapłaty" — i ze złej encji, skopiowanej z szablonu `berthFree.test.ts`). Druga wersja miała wynik, ale dla `paid`/`cancelled` brakowało powodu albo powód był merytorycznie nietrafiony (`cancelled` opisany jako „zwrócona", mimo że dotyczy raty nigdy nie opłaconej). Trzecia była kompletna.
+- **6 testów, nie 2 — rozstrzygnięte pytaniem „czy funkcja rozróżnia te przypadki", nie wyczuciem.** Trzy odmowy (`paid`, `cancelled`, `processing`) trafiają w kodzie do wspólnego `return false`, ale każda ma inny powód biznesowy i broni przed inną przyszłą zmianą — duplikat byłby, gdyby dwa przypadki były nierozróżnialne dla funkcji, nie dla czytelnika.
+- **Commit message: `B` (`fix`) wybrany poprawnie, ale nie od razu.** Tomek trafnie zdiagnozował wadę wariantu `A` („jednak zmieniliśmy warunek") i mimo to go wybrał — musiał zostać zawrócony do własnego, poprawnego rozumowania. Diagnoza `C` była błędna co do przyczyny (twierdził „nic nie dodaliśmy do algorytmu", prawdziwa wada to zaniżony zakres subjectu wobec zmiany produkcyjnej widocznej w diffie).
+- **BUG-9 zapisany od razu jako osobna pozycja, nie dopisek.** Znaleziony przy weryfikacji, nie przy naprawie — dzisiejsza poprawka (wyłączenie `processing` z kasowania) jest poprawna sama w sobie, ale odsłania kolejny problem w sąsiednim kodzie (`applyStripePayment`), którego dzisiejszy zakres nie obejmował.
+
+### Wnioski
+
+- **Skopiowany wzorzec niesie swój powód, nie tylko kształt.** `NonNullable` przepisany z `refundStatus.ts` do `refundCancellation.ts` bez sprawdzenia, że pole docelowe (`bookingPayments.status`) nie jest `optional` w schemacie. Kod działał (owinięcie typu bez `null`/`undefined` jest tożsamością), ale nie miało funkcji — sygnał: element, którego usunięcie nic nie zmienia. Promowane: [[copied-pattern-carries-its-reason]].
+- **Trzecia sygnatura komunikatu kompilatora: parametr „nie z tej bajki" = wywołana zła funkcja.** Autocomplete podsunął `calculatePaymentStatusAfterRefund` zamiast `shouldCancelPaymentAfterFullRefund` — dwie nazwy z tego samego pliku, ten sam prefiks znaczeniowy, różny kształt argumentu. Kompilator złapał to wyłącznie dzięki tej różnicy kształtu; gdyby oba brały `string`, błąd przeszedłby cicho. Odruch inny niż przy pierwszych dwóch sygnaturach: nie napraw argumentu, sprawdź nazwę funkcji.
+- **Backticki w commit message — czwarte wystąpienie, wariant cichszy niż poprzednie trzy.** Wygenerowane ciało z fragmentem kodu w backtickach, przekazane przez `git commit -m "..."` w double quotes → command substitution. Poprzednie trzy razy zsh krzyczał `command not found`; tym razem komenda w środku nic nie wypisała, więc fragment po prostu zniknął z ciała bez żadnego komunikatu — widoczne dopiero przy `git log`. Naprawa: `--amend`. Reguła ogólna: ryzyko rośnie przy treści **generowanej**, nie wpisywanej ręcznie — nikt nie czyta znak po znaku przed wysłaniem.
+- **Metoda wyboru commit message zaczyna działać, ale zaufanie do własnej diagnozy jeszcze nie nadążyło.** Tomek poprawnie zidentyfikował wadę wariantu, który mimo to wybrał — pierwszy taki przypadek w tej metodzie. Inny rodzaj błędu niż 08-06 (tam brakowało kryteriów w ogóle); dziś kryteria były i zadziałały na diagnozę, nie zadziałały jeszcze na decyzję.
+- **Reguła biznesowa raz zapisana w ADR nie jest zamknięta na dobre — rozszerza się, gdy pojawia się nowy przypadek brzegowy.** ADR-020 z 08-06 nie przewidywał stanu `processing`, bo pytanie o niego nie padło przy pierwszym przejściu. Dzisiejsze uzupełnienie poszło do tego samego dokumentu z dopiskiem daty, nie jako nowy ADR — bo to ta sama decyzja domenowa („co się dzieje z ratą przy pełnym zwrocie"), rozszerzona o jedną gałąź, nie nowa decyzja.
+- **Dociekanie „co się stanie z tym stanem" odsłoniło realny, osobny bug (BUG-9), który nie był celem sesji.** Sprawdzenie krzyżowe z `applyStripePayment` pokazało, że `refreshBookingPaymentTotals` liczy status bookingu funkcją nieznającą zwrotów i może nadpisać `refunded`. Nienaprawione dziś — świadomie, zakres sesji był inny — ale zapisane z file:line, żeby następna sesja nie odtwarzała śledztwa.
+
+### Następne kroki
+
+#### Next
+
+- **BUG-9** — późny webhook `payment_intent.succeeded` może nadpisać `paymentStatus: 'refunded'` przez `refreshBookingPaymentTotals`. Trzy kierunki naprawy zapisane w backlogu, żaden nie wybrany.
+- **UI-11 dokończenie** — panel żeglarza i admin za logowaniem, stany `:hover`/`:focus`. Otwarte od 08-05, wciąż odłożone.
+- **FEAT-16 (rabat jako encja)** — wymaga rozstrzygnięcia: kupony Stripe czy własna tabela.
+
+#### Blocked / Later / Open questions
+
+- **UI-16** — hero i nav nad zdjęciem; decyzja wizualna z Michałem, najlepiej razem z FEAT-5.
+- **REFACTOR-7** — jeden komponent zakładek zamiast czterech kopii; wchodzi z FEAT-5.
+- **REFACTOR-5 punkt (2)** — usunięcie obrony u odbiorców w cronach mailowych; świadomie odłożone, wraca tylko z mocniejszym argumentem niż oszczędność dwóch odczytów.
+- **LEGAL-7** — czeka na dane formalne od Michała.
+- **REFACTOR-6 punkty 5-6** — port jako encja; wchodzą z FEAT-11 i REFACTOR-2.
+- **SEC-5** — pytanie do Michała o wymagania urzędu przy zgłoszeniu załogi.
+- **INFRA-10** — przegląd treści landingu przez Michała.
+- **LEGAL-6 punkty 1-2** — publikacja regulaminu.
+- **DEP-1a / DEP-1b — ⏸ do 2026-08-30** (brak realnych wpłat).
+- REFACTOR-2/4, SEC-4, INFRA-7, INFRA-8, LEGAL-3/4/5, UI-6, UI-10, FEAT-15 — bez zmian.

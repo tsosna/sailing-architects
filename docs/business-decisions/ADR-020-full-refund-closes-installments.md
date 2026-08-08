@@ -18,6 +18,8 @@ Przy okazji naprawy pojawiło się pytanie, na które kod nie miał odpowiedzi: 
 
 1. **Pełny zwrot zamyka rezerwację finansowo.** W momencie, w którym status płatności rezerwacji staje się `refunded`, wszystkie jej raty inne niż opłacone dostają status `cancelled`. Rezerwacja przestaje generować należności.
 
+   **Uzupełnienie 2026-08-08 — rata w stanie `processing` jest wyjątkiem.** Rata, dla której Stripe jeszcze nie potwierdził wyniku płatności, nie dostaje `cancelled`. Powód: o wyniku takiej raty rozstrzygają pieniądze w drodze przez Stripe, nie stan bazy w Convex — etykieta w bazie nie zatrzymuje transferu, który już się dzieje. Zasada dobiera się do decyzji z punktu 3: to nie administrator ani reguła aplikacji rozstrzyga o tej racie, tylko zdarzenie zewnętrzne, którego jeszcze nie ma. Rata `processing` zostaje nietknięta i rozstrzyga się sama poprzez webhook `payment_intent.succeeded` (→ `paid`) na normalnej ścieżce. Implementacja: predykat `shouldCancelPaymentAfterFullRefund` w [`_lib/refundCancellation.ts`](../../src/convex/_lib/refundCancellation.ts), lista pozytywna trzech statusów (`pending`, `overdue`, `failed`) — wybrana świadomie zamiast listy negatywnej, żeby siódmy status dodany do schematu w przyszłości domyślnie **nie** był anulowany.
+
 2. **Zwrot częściowy jest korektą, nie wyjściem z rejsu.** Przy statusie `partially_refunded` raty pozostają nietknięte, rezerwacja żyje, żeglarz płynie, a monity o pozostałe raty chodzą normalnie.
 
 3. **Decyzja nie zależy od stanu koi.** To, czy administrator zwolnił miejsca, jest odpowiedzią na pytanie „czy koja jest znów do sprzedania" i nie ma wpływu na pytanie „czy mamy się upominać o pieniądze". Wezwanie do zapłaty wysłane osobie, której oddano pieniądze, nie może zależeć od tego, czy ktoś zaznaczył pole w panelu.
@@ -41,6 +43,7 @@ Przy okazji naprawy pojawiło się pytanie, na które kod nie miał odpowiedzi: 
 - Obrona u odbiorców (predykat „rezerwacja zamknięta" w cronach mailowych) **zostaje**, mimo że po tej zmianie jest praktycznie nieosiągalna. Powód: koszt jej utrzymania to dwa odczyty dokumentów w cronie chodzącym raz dziennie, a koszt błędnego usunięcia to wezwanie do zapłaty wysłane do klienta po zwrocie. Zapisane świadomie, żeby nie wyglądało na przeoczenie.
 - Zwrot częściowy, który w intencji Michała ma jednak oznaczać rezygnację z rejsu, wymaga osobnego działania administratora (anulowanie rezerwacji). System nie zgadnie intencji z samej kwoty.
 - Reguła nie obejmuje zwrotów wykonanych bezpośrednio w panelu Stripe z pominięciem aplikacji — takie zdarzenia nie ustawiają statusu płatności rezerwacji i trafiają do osobnej kolejki nieobsłużonych zdarzeń (FEAT-4).
+- **Ryzyko odkryte 2026-08-08, nienaprawione — BUG-9.** Zostawienie raty `processing` nietkniętą (punkt 1, uzupełnienie) zamyka jeden problem (przedwczesne kasowanie), ale nie zamyka drugiego: jeśli webhook `payment_intent.succeeded` dla tej raty dojdzie **po** tym, jak zwrot ustawił `paymentStatus: 'refunded'`, `applyStripePayment` bezwarunkowo wywołuje `refreshBookingPaymentTotals`, która liczy `paymentStatus` funkcją nieznającą pojęcia zwrotu (`bookingPaymentStatus`, zwraca wyłącznie `unpaid | deposit_paid | partially_paid | paid`) i **nadpisuje `refunded`**. Szczegóły w backlogu.
 
 ## Powiązane
 
