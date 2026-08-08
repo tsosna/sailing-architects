@@ -6,6 +6,7 @@ import { isBerthFree } from './_lib/berthFree'
 import { requireConvexAdmin } from './_lib/requireAdmin'
 import { calculatePaymentStatusAfterRefund } from './_lib/refundStatus'
 import { adminParticipantSchema } from '../lib/schemas/crew-profile'
+import { shouldCancelPaymentAfterFullRefund } from './_lib/refundCancellation'
 
 const HOLD_DURATION_MS = 15 * 60 * 1000
 const DEFAULT_CURRENCY = 'pln'
@@ -1425,7 +1426,11 @@ export const processStripeRefund = internalMutation({
 
 			if (newStatus === 'refunded') {
 				for (const payment of allPayments) {
-					if (payment.status !== 'paid') {
+					if (
+						shouldCancelPaymentAfterFullRefund({
+							currentStatus: payment.status
+						})
+					) {
 						await ctx.db.patch(payment._id, {
 							status: 'cancelled',
 							updatedAt: Date.now()

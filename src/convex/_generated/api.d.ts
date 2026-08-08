@@ -12,6 +12,7 @@ import type * as _brevo from "../_brevo.js";
 import type * as _emails from "../_emails.js";
 import type * as _lib_berthFree from "../_lib/berthFree.js";
 import type * as _lib_bookingClosed from "../_lib/bookingClosed.js";
+import type * as _lib_refundCancellation from "../_lib/refundCancellation.js";
 import type * as _lib_refundCascade from "../_lib/refundCascade.js";
 import type * as _lib_refundStatus from "../_lib/refundStatus.js";
 import type * as _lib_refundTiers from "../_lib/refundTiers.js";
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   _emails: typeof _emails;
   "_lib/berthFree": typeof _lib_berthFree;
   "_lib/bookingClosed": typeof _lib_bookingClosed;
+  "_lib/refundCancellation": typeof _lib_refundCancellation;
   "_lib/refundCascade": typeof _lib_refundCascade;
   "_lib/refundStatus": typeof _lib_refundStatus;
   "_lib/refundTiers": typeof _lib_refundTiers;
