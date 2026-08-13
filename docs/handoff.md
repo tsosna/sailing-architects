@@ -3581,3 +3581,58 @@ Kod Tomek, tryb ja-wskazuję-Tomek-pisze. Jeden commit `29926c93` (po `--amend`)
 - **LEGAL-6 punkty 1-2** — publikacja regulaminu.
 - **DEP-1a / DEP-1b — ⏸ do 2026-08-30** (brak realnych wpłat).
 - REFACTOR-2/4, SEC-4, INFRA-7, INFRA-8, LEGAL-3/4/5, UI-6, UI-10, FEAT-15 — bez zmian.
+
+## Sesja 2026-08-13 13:05 — Stripe account swap (live) + feedback triage + progi zwrotów (ADR-001)
+
+### Zmiany
+
+Bez kodu — operacje na koncie Stripe, dokumentach prawnych i dokumentacji projektu. Tomek działał w dashboardach Stripe/Vercel (klucze nigdy nie trafiły do czatu ani do plików edytowanych przez Claude), Claude pisał docs/vault i sprawdzał stan produkcyjny przez `npx convex run` (read-only).
+
+- **Stripe przełączony na nowe konto „Skipper Arr"** — sandbox (dev, `.env` lokalnie) i live (Vercel, `Production`) skonfigurowane od zera: nowe `sk_/pk_`, nowy webhook endpoint, nowy `whsec_`. Zweryfikowane end-to-end dwa razy: sandbox (płatność 5 zł → `paid`) i live (płatność 5 zł → `paid` → pełny zwrot → `refunded`, `bookings.paymentStatus` sprawdzone w Convex Dashboard).
+- **Napotkany i naprawiony na żywo: webhook 308.** Pierwszy live endpoint zarejestrowany jako `sailing-architect.com/api/stripe/webhook` (bez `www`) → Vercel robi 308 → Stripe nie podąża za redirectem na POST → event `payment_intent.succeeded` failed → booking utknął „w trakcie" mimo że pieniądze doszły (widoczne w danych eventu: `status: succeeded`). Naprawa: URL endpointu zmieniony na canonical `www.sailing-architect.com`, failed event ręcznie **Resend**. To już opisany w vault gotcha ([[webhook-url-canonical-no-redirect]]) — drugie realne wystąpienie, ten sam mechanizm, inna sesja.
+- **`docs/backlog.md`** — feedback `2026-08-10.md` i `2026-08-12.md` striażowane. Nowe pozycje: **LEGAL-8** (rozbieżność progów zwrotów, ✅ zamknięta w tej samej sesji), **LEGAL-9** (checkbox akceptacji regulaminu + umowy uczestnika przy checkout), **FEAT-17** (automatyzacja zgłoszenia załogi przez booking-manager.com — otwarte pytanie o API), **UI-17** (przepisanie języka strony na składkowy), **UI-18** (przycisk zapisu w `/admin/automation` na górze karty zamiast pod edytowanymi wierszami — złapane na żywo przy edycji progów), **BUG-10** (panel klienta: rata po terminie nie zmienia etykiety do najbliższego przebiegu crona, ta sama rodzina co „storage vs derive" z 05-08). Dopiski do **LEGAL-6** (regulamin v2 potwierdzony i przeniesiony) i **LEGAL-7** (odpowiedź Michała o formie prawnej, patrz ADR-021).
+- **`docs/business-decisions/ADR-001-refund-tiers.md`** — uzupełnienie 08-13: progi zmienione z `180/100, 90/90, 42/50, 0/0` na `180/100, 90/80, 60/50, 0/0` (w dniach, nie miesiącach/tygodniach). Wynik testu dominacji trzech rozjeżdżających się źródeł tej samej reguły (regulamin, wiadomość Michała, żywa baza) — patrz Decyzje.
+- **`docs/business-decisions/ADR-021-private-non-commercial-membership-cruise.md`** — nowy ADR: forma prawna rejsu „prywatny, niekomercyjny, składkowy" (decyzja Michała 08-10, spisana dziś). README ADR-index zaktualizowany (brakowało też wpisu dla ADR-020 — dopisany przy okazji).
+- **Regulamin v2 przeniesiony**: `docs/assets/2026_08_09_SA_regulamin_rejsu_v2.doc` → `docs/business-decisions/`, treść poprawiona przez Tomka do nowych progów w dniach, potwierdzona przez Michała jako finalna. Stary `.doc` z 07-07 zostaje jako historia.
+- **Vault**: nowa procedura `procedures/stripe-account-swap` (napisana przed wykonaniem, zweryfikowana i zaktualizowana o realny gotcha canonical URL); nowy koncept `universal` **`three-conflicting-sources-compute-dont-pick`** (metoda rozstrzygania trzech rozjeżdżających się źródeł tej samej reguły — test dominacji zamiast wyboru jednego źródła); drobne uzupełnienia `webhook-url-canonical-no-redirect` (drugie wystąpienie) i `stripe-live-deployment` (Sandboxes zastąpiły Test mode w nowszym UI Stripe).
+
+### Decyzje
+
+- **System (żywa konfiguracja progów zwrotu) zostaje, dokumenty się poprawia — nie odwrotnie.** Tomek, przy trzech rozjeżdżających się źródłach tej samej reguły (regulamin miał `90%`/`42 dni`, wiadomość Michała `80%`/`45 dni` bez wzmianki o dodatkowym progu, żywa baza `80%` z dwoma progami `60`/`45`): wygrywa wariant najkorzystniejszy dla Michała. Sprawdzone matematycznie przez Claude — żywa konfiguracja daje refund % ≤ obu pozostałych źródeł w każdym przedziale dni, więc jest złożeniem dominującym, nie przypadkowym wyborem. Michał potwierdził liczby przed publikacją; Tomek poprawił `.doc`.
+- **Progi w regulaminie zapisane w dniach, nie miesiącach/tygodniach** — usuwa dwuznaczność „3 miesiące = 90 czy 91 dni", która była źródłem części rozjazdu od samego ADR-001 (07-03).
+- **ADR-021 napisany dziś, nie odłożony dalej** — Tomek wcześniej w sesji odłożył go „do zamknięcia sesji"; przy `close session` uznane za część tej samej operacji, nie osobną prośbę do powtórzenia następnym razem.
+- **Klucze Stripe nigdy nie przechodzą przez Claude** — cała rotacja kluczy (sandbox + live) zrobiona ręcznie przez Tomka w dashboardach Stripe/Vercel; Claude tylko wskazywał lokalizacje (`.env`, Vercel env vars, dokładne nazwy zmiennych) i weryfikował efekt przez read-only zapytania (`npx convex run refunds:getActiveRefundPolicy --prod`).
+- **Nowy feedback (`2026-08-12.md`) znaleziony przez `git status`, nie zgłoszony ustnie w tej sesji.** Tomek potwierdził że sam go dodał wcześniej. Nic złego się nie stało, ale to argument za tym, żeby diff `docs/feedback/` robić nie tylko przy `close session`, tylko przy każdym większym punkcie kontrolnym w trakcie.
+
+### Wnioski
+
+- **Redirect 308 na webhooku to nie tylko teoria z vaulta — złapało nas na żywo, na prawdziwym koncie, przy prawdziwych pieniądzach.** Dokumentacja sprzed dwóch miesięcy ([[webhook-url-canonical-no-redirect]]) opisywała dokładnie ten scenariusz z tą samą domeną jako przykład — i mimo to nowy endpoint został zarejestrowany bez `www`. Wniosek nie brzmi „dokumentacja nie działa", tylko: **pre-flight `curl -I` przed wpisaniem URL do dashboardu trzeba zrobić za każdym razem, wiedza o gotchy nie zastępuje kroku kontrolnego.** Procedura `stripe-account-swap` dostała ten krok dopisany do instrukcji rejestracji webhooka, żeby następny swap tego nie powtórzył.
+- **Trzy źródła jednej reguły biznesowej to inny problem niż brak źródła.** [[a-rule-needs-rows-to-stand-on]] (sesja 08-06) uczy sprawdzać, czy reguła w ogóle da się zapisać w danych. Tu reguła była zapisana trzy razy, w trzech niesynchronizowanych kanałach (dokument prawny, rozmowa, baza danych) — i żaden z trzech nie był z automatu „tym prawdziwym". Test dominacji (policz, nie wybieraj) zadziałał tylko dlatego, że istniała jasna oś bezpieczeństwa („korzystniejsze dla wypłacającego"); bez takiej osi jedyną drogą byłoby pytanie do Michała z pełną listą rozbieżności na stole. Promowane: [[three-conflicting-sources-compute-dont-pick]].
+- **Stripe zmienia UI szybciej niż dokumentacja społeczności nadąża.** „Test mode" zamienione na „Sandboxes" dla nowszych kont — Tomek nie widział przełącznika, którego szukał, bo szukał złej nazwy. To ten sam wzorzec co „Stripe dashboardy zmieniają UI" odnotowany w `prod-deployment-from-scratch` (mnożnik czasu ×3-5) — nie nowa lekcja, kolejne potwierdzenie starej.
+- **Dwa podobne przyciski blisko siebie to gotowy przepis na pomyłkę — złapane na żywym błędzie, nie w teorii.** `Zapisz plan` / `Zapisz politykę`, ten sam styl, stackowane pionowo, oba na górze swojej karty. Tomek kliknął zły, zauważył od razu, zapytał czy przenieść na dół — trafna intuicja, potwierdzona: przycisk zapisu na końcu edytowanej listy pasuje do naturalnego przepływu edytuj→zapisz i fizycznie oddala go od sąsiada. Zapisane jako UI-18, nie naprawione dziś (kod = Tomek, poza zakresem tej sesji).
+- **Metoda `close session` z ADR-em odłożonym w trakcie działa, jeśli ktoś o nim pamięta na końcu.** Tomek sam przypomniał ADR swoim poleceniem `close session + ... + wiki + commit i push` — nie trzeba było pytać drugi raz.
+
+### Następne kroki
+
+#### Next
+
+- **LEGAL-6 punkty 1-2** — publikacja regulaminu v2 (trasa `/regulamin` albo PDF, link w stopce widoczny przed zakupem). Treść już gotowa i potwierdzona (ADR-001 uzupełniony, `.doc` w `docs/business-decisions/`), brakuje wyłącznie publikacji.
+- **UI-17** — przepisanie języka strony na składkowy (cena→składka, wyprzedane→brak miejsc, boutique→private, nowy slogan hero). Lista konkretnych zamian gotowa w backlogu.
+- **LEGAL-9** — checkbox akceptacji regulaminu + umowy uczestnika przy checkout. Blokowane przez LEGAL-6 (potrzebny publiczny URL regulaminu).
+- **BUG-9** — spóźniony webhook płatności może nadpisać `paymentStatus: 'refunded'`. Otwarte od 08-08, wciąż nienaprawione.
+- **UI-11 dokończenie** — panel żeglarza i admin za logowaniem, stany `:hover`/`:focus`. Otwarte od 08-05.
+
+#### Blocked / Later / Open questions
+
+- **FEAT-17** — automatyzacja zgłoszenia załogi (booking-manager.com). Nie da się wycenić bez odpowiedzi: czy booking-manager ma API, czy to automatyzacja przeglądarkowa na cudzej stronie.
+- **LEGAL-7 punkt (c)** — numer uprawnień organizatora turystyki; zależy od odpowiedzi prawnika Michała, czy forma „niekomercyjna" (ADR-021) zmienia reżim prawny.
+- **UI-18** — przycisk zapisu w `/admin/automation` na dół karty. Drobne, nie pilne.
+- **UI-16** — hero i nav nad zdjęciem; decyzja wizualna z Michałem, najlepiej razem z FEAT-5.
+- **REFACTOR-7** — jeden komponent zakładek zamiast czterech kopii; wchodzi z FEAT-5.
+- **REFACTOR-5 punkt (2)** — usunięcie obrony u odbiorców w cronach mailowych; świadomie odłożone.
+- **SEC-5** — pytanie do Michała o wymagania urzędu przy zgłoszeniu załogi.
+- **INFRA-10** — przegląd treści landingu przez Michała.
+- **DEP-1a / DEP-1b** — warunek „pierwsza realna wpłata" spełniony dziś (Stripe live). DEP-1a nadal wymaga właściwego przebiegu testowego (zmiana progu w trakcie), nie jest tym samym co dzisiejszy test end-to-end.
+- REFACTOR-2/4, SEC-4, INFRA-7, INFRA-8, LEGAL-3/4/5, UI-6, UI-10, FEAT-15 — bez zmian.
+
+Brak dodatkowych uwag od Tomka na zamknięcie tej sesji.
