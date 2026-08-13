@@ -26,3 +26,4 @@ Indeks decyzji biznesowych i produktowych dla `sailing-architects`.
 | [ADR-020](ADR-020-full-refund-closes-installments.md) | Pełny zwrot zamyka niezapłacone raty, częściowy ich nie rusza | płatności / zwroty / komunikacja z klientem | przyjęta |
 | [ADR-021](ADR-021-private-non-commercial-membership-cruise.md) | Forma prawna rejsu — prywatny, niekomercyjny, składkowy | prawo / marketing / treść strony | przyjęta |
 | [ADR-022](ADR-022-money-after-full-refund-needs-human-decision.md) | Pieniądze przychodzące po pełnym zwrocie wymagają decyzji człowieka | płatności / zwroty / obsługa operacyjna | przyjęta (punkt 3 niezaimplementowany — FEAT-18) |
+| [ADR-023](ADR-023-terms-published-as-versioned-file.md) | Regulamin jako wersjonowany plik; dowodem akceptacji identyfikator wersji | dokumenty prawne / zgody klienta | przyjęta (zapis zgody czeka na LEGAL-9; język wiążący — LEGAL-10) |

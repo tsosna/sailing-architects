@@ -3692,3 +3692,53 @@ Kod Tomek, tryb ja-wskazuję-Tomek-pisze. Jeden commit `d0f841cf`, na `main`, wy
 - REFACTOR-2/4/6, SEC-4/5, INFRA-7/8/10, LEGAL-3/4/5, UI-6/10/15/18, FEAT-15 — bez zmian.
 
 Brak dodatkowych uwag od Tomka na zamknięcie tej sesji.
+
+## Sesja 2026-08-13 (III) 21:17 — LEGAL-6 p.1-2: publikacja regulaminu rejsu
+
+### Zmiany
+
+Kod Tomek, tryb ja-wskazuję-Tomek-pisze. Jeden commit `c0d01f2f`, na `main`, wypchnięty na `main` i `production` (build zielony, zweryfikowane na produkcji).
+
+- **`static/regulamin-pl-2026-08-09.pdf`** (nowy, 57 KB) — regulamin v2 wyeksportowany z Worda. Nazwa niesie temat, język i datę wersji.
+- **`src/lib/components/site-footer/site-footer.svelte`** — odnośnik „Regulamin →" w kolumnie akcji, `target="_blank"` + `rel="noopener"`, klasa `footer__link` (zero nowego CSS).
+- **`src/locales/pl.po` / `en.po`** — nowy klucz `Regulamin →`, wyciągnięty automatycznie przez wuchale przy chodzącym dev serwerze.
+- **`docs/business-decisions/ADR-023`** (nowy) — regulamin publikowany jako wersjonowany plik, dowodem akceptacji identyfikator wersji; odrzucone warianty (trasa z treścią w kodzie, kopia całej treści, samo `true`) z uzasadnieniem. README ADR-index zaktualizowany.
+- **`docs/backlog.md`** — LEGAL-6 punkty (1)(2)(4) skreślone, nowy punkt (5) (błędny URL w treści); nowe pozycje **BUG-11**, **LEGAL-10**, **INFRA-11**, **UI-19**; LEGAL-9 rozszerzony o trzy ustalenia z tej sesji; I18N-1 o pomiar; sekcja feedbacku o dopisek Michała i o poprawkę metody diffowania.
+- **Wiki (4 nowe, 1 rozszerzony):** [[version-identifier-needs-an-immutable-target]], [[log-line-names-the-request-not-the-sender]], [[legal-text-in-another-language-is-a-second-document]] (`universal`) + [[optional-root-param-disables-typed-routes]] (`stack`); rozszerzenie [[tool-panel-is-not-a-code-inventory]] o wariant konfiguracyjny (deklaracja zdolności bez danych) + indeks vaulta.
+
+### Decyzje
+
+- **Regulamin jako wersjonowany plik, nie trasa `/regulamin` — wybór Tomka po postawieniu pytania o snapshot.** Kryterium wyprowadzone, nie podane: identyfikator wersji zapisywany przy akceptacji (LEGAL-9) musi rozwiązywać się do dokładnie tego tekstu. Trasa trzyma treść w kodzie — po edycji aplikacja nie ma uchwytu do starej wersji, a nic nie wymusza podbicia identyfikatora przy zmianie tekstu. Świadomy koszt: PDF czyta się na telefonie gorzej niż strona. → **ADR-023**.
+- **Snapshot akceptacji = identyfikator wersji**, nie cała treść (13,7 tys. znaków w każdym wierszu rezerwacji) i nie sam fakt `true` (nie pozwala pokazać klientowi tekstu, na który się zgodził). **Zasadę nazywania kolejnych wersji dołożył Tomek sam** — bez niej identyfikator jest napisem, którego nikt nie gwarantuje.
+- **Nowa karta dla PDF.** Kryterium: odnośnik prowadzi poza aplikację, nie w jej głąb. Mocniejszy argument jest przed nami — w LEGAL-9 ten sam odnośnik stanie obok checkboxa w kasie, a klik w regulamin nie może kosztować wybranych koi i wypełnionych danych załogi.
+- **Stopka świadomie niedokładana do `/book`.** Wymaganie p.2 („widoczny przed zakupem") jest spełnione landingiem. Dziura w kasie należy do LEGAL-9, nie do tej pozycji.
+- **Suma kontrolna odłożona do LEGAL-9** — pytanie Tomka, kierunek zapisany w backlogu zamiast budowany dziś.
+- **Regulamin tylko po polsku; pytania o język wiążący nie rozstrzygamy.** Wariantów jest trzy i wszystkie są decyzją Michała i jego prawnika → **LEGAL-10**.
+
+### Wnioski
+
+- **Nazwa pliku to obietnica człowieka, suma kontrolna to fakt policzony z bajtów — pytanie Tomka, nie moje.** Zapytał wprost, czy da się pilnować niezmienności mechanizmem zamiast konwencją nazewniczą. Odpowiedź: tak, to content addressing; z trzema zastrzeżeniami, których sam nie mógł znać. **Hash wykrywa podmianę, nie zapobiega jej** — jeśli plik nadpisano, hash mówi „to nie ten tekst", ale oryginału już nie ma, więc idzie **razem** z zasadą „nowa wersja = nowy plik", nie zamiast niej. Część niezmienności projekt ma już za darmo od gita. A poziom dowodu wymagany prawnie to pytanie do prawnika, nie do architektury.
+- **Typowane trasy SvelteKit w tym projekcie nie działają — i nikt tego nie zepsuł.** Zapowiedziałem, że `resolve()` na pliku statycznym wywali typecheck. Nie wywaliło. Przyczyna w `.svelte-kit/non-ambient.d.ts`: unia dozwolonych ścieżek kończy się członem `` `${string}` & {} ``, pasującym do każdego napisu, bo korzeń tras to opcjonalny `[[lang=lang]]`. **Funkcja bezpieczeństwa zneutralizowana przez decyzję podjętą gdzie indziej i w innym celu** — nie przez błąd, nie przez wyłączenie flagi. Zapisane jako INFRA-11, bo dotyczy każdego `resolve()` w projekcie.
+- **Wpis w logu mówi, jakie żądanie przyszło. Nie mówi, kto je wysłał.** 404 na `/egulamin-pl-2026-08-09.pdf` przy poprawnym kodzie — literówka siedziała w pasku adresu otwartej karty, poza repozytorium, poza zasięgiem `grep` i `pnpm check`, a klient Vite powtarzał żądanie sam po restarcie serwera. Odruch „szukaj literówki w kodzie" prowadził w złą stronę przez cały czas. Przy okazji: to była próba kontrolna, o którą prosiłem, tylko przyszła sama i za darmo.
+- **Deklaracja nie dowodzi istnienia — trzecia odsłona w trzy sesje.** `en.po`: 658 `msgid`, **658 pustych `msgstr`**. Konfiguracja deklaruje dwa języki, trasa `/en` działa, a angielska wersja strony to polska strona pod innym adresem. Ta sama rodzina co indeks `by_slug` zdefiniowany i nieużywany (08-02) i funkcja migracji nieobecna w panelu Convexa (08-06). **Zgłoszenie Tomka („powinny być w backlogu wpisy") było trafne** — pozycja I18N-1 istniała od 07-12; moje „odkrycie" było odkryciem cudzej notatki sprzed miesiąca.
+- **Dokument prawny w drugim języku to drugi dokument, nie tłumaczenie interfejsu.** Pytanie Tomka „co z wielojęzycznością" rozbiło się na dwa rozłączne problemy: etykieta odnośnika (zwykły string, rutyna wuchale) i sam regulamin (trzy warianty prawne, żaden nie nasz). Różnica jest mierzalna skutkiem: nietrafnie przetłumaczony przycisk kosztuje jedno błędne kliknięcie, nietrafnie przetłumaczony próg zwrotu tworzy roszczenie.
+- **Subject commita nazywa możliwości, nie pliki.** Przy odrzuceniu wariantu z zaniżonym zakresem Tomek wskazał brak stopki — trafnie. Doprecyzowanie poszło w drugą stronę niż zwykle: `pl.po`/`en.po` **nie są** osobnym przemilczeniem, bo są skutkiem dodania etykiety. Kryterium zakresu brzmi więc ostrzej niż „czy wszystko wymienione": czy przemilczano którąś z **możliwości**, jakie diff daje użytkownikowi.
+- **Porównanie katalogu z listą nie wykrywa dopisku do istniejącego pliku.** `ls docs/feedback/` = 12 pozycji, bez zmian — a Michał dopisał nowe zgłoszenie do `2026-08-12.md`. Złapane przez `git diff` przy stagowaniu commita. Rutyna dopisana wczoraj zadziałała dokładnie tam, gdzie miała; wada siedziała w **narzędziu kontrolnym**, nie w częstotliwości kontroli.
+
+### Następne kroki
+
+#### Next
+
+- **LEGAL-6 p.5 — błędny URL w opublikowanym regulaminie.** Tomek znalazł go po wypchnięciu na produkcję; opis czeka na doprecyzowanie. **Pierwsza decyzja przed poprawką:** nowa wersja pliku czy podmiana bajtów pod tą samą nazwą. Podmiana jest obroniona, dopóki nikt nie zaakceptował dokumentu (checkbox z LEGAL-9 nie istnieje), ale ma być **wyborem**, nie odruchem.
+- **LEGAL-9 — checkbox akceptacji.** Odblokowany. Trzy ustalenia z dziś już w backlogu (co zapisuje checkbox, kierunek z sumą kontrolną, nowa karta dla odnośnika w kasie).
+- **UI-17** (język składkowy) — ostatnia niezrealizowana pozycja z feedbacku 08-10.
+- **BUG-10 + BUG-11 razem** — obie dotyczą tego samego wiersza harmonogramu płatności w panelu klienta.
+
+#### Blocked / Later / Open questions
+
+- **LEGAL-10** — język wiążący dokumentów prawnych; pytanie do prawnika Michała, ta sama lista co LEGAL-7 (c). Pilność niska, dopóki `en.po` jest pusty.
+- **INFRA-11** — czy da się odzyskać typowane trasy bez rezygnacji z opcjonalnego parametru języka; jeśli nie, zapisać koszt w `AGENTS.md`.
+- **UI-19** — regulamin jako prawdziwa pozycja w zakładce „Dokumenty"; sensowne dopiero z LEGAL-9, bo klient ma widzieć **swoją** wersję, nie najnowszą.
+- **Smoke test BUG-9** — bez zmian, zablokowany do FEAT-18.
+- **FEAT-18, FEAT-17, FEAT-16, FEAT-4, UI-11, UI-16, REFACTOR-5 p.2, REFACTOR-7, DEP-1a/1b** — bez zmian.
+- REFACTOR-2/4/6, SEC-4/5, INFRA-7/8/10, LEGAL-3/4/5, UI-6/10/15/18, FEAT-15 — bez zmian.
