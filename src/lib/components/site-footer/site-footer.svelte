@@ -53,6 +53,12 @@
 				<a class="footer__cta" href={resolve('/book')}>Zarezerwuj koję →</a>
 				<a class="footer__link" href={resolve('/poradnik')}>Poradnik załogi →</a
 				>
+				<a
+					class="footer__link"
+					href={resolve('/regulamin-pl-2026-08-09.pdf')}
+					target="_blank"
+					rel="noopener">Regulamin →</a
+				>
 			</div>
 		</div>
 		<div class="footer__bottom">

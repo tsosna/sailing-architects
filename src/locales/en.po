@@ -3392,3 +3392,7 @@ msgstr ""
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Dane wymagane przez skippera — osobno dla każdej koi."
 msgstr ""
+
+#: src/lib/components/site-footer/site-footer.svelte
+msgid "Regulamin →"
+msgstr ""
