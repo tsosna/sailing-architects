@@ -55,7 +55,7 @@ export const POST: RequestHandler = async ({ request }) => {
 					paidAt: Date.now()
 				}
 			)
-
+			if (!result) break
 			if (result.paymentEmailSentAt) break
 
 			const confirmation = await convex.query(

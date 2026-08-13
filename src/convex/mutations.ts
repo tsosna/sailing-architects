@@ -587,6 +587,9 @@ export const applyStripePayment = internalMutation({
 
 		const booking = await ctx.db.get(payments[0].bookingId)
 		if (!booking) throw new Error('Booking not found')
+		if (booking.paymentStatus === 'refunded') {
+			return
+		}
 		for (const payment of payments) {
 			if (payment.bookingId !== booking._id) {
 				throw new Error('PaymentIntent spans multiple bookings')
