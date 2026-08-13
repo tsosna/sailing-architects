@@ -25,3 +25,4 @@ Indeks decyzji biznesowych i produktowych dla `sailing-architects`.
 | [ADR-019](ADR-019-held-berth-without-expiry-treated-as-occupied.md) | Koja z blokadą bez terminu wygaśnięcia jest traktowana jako zajęta (lepiej nie sprzedać niż sprzedać podwójnie) | sprzedaż / dostępność / ryzyko finansowe | przyjęta |
 | [ADR-020](ADR-020-full-refund-closes-installments.md) | Pełny zwrot zamyka niezapłacone raty, częściowy ich nie rusza | płatności / zwroty / komunikacja z klientem | przyjęta |
 | [ADR-021](ADR-021-private-non-commercial-membership-cruise.md) | Forma prawna rejsu — prywatny, niekomercyjny, składkowy | prawo / marketing / treść strony | przyjęta |
+| [ADR-022](ADR-022-money-after-full-refund-needs-human-decision.md) | Pieniądze przychodzące po pełnym zwrocie wymagają decyzji człowieka | płatności / zwroty / obsługa operacyjna | przyjęta (punkt 3 niezaimplementowany — FEAT-18) |

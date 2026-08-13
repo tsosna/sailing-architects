@@ -3636,3 +3636,59 @@ Bez kodu — operacje na koncie Stripe, dokumentach prawnych i dokumentacji proj
 - REFACTOR-2/4, SEC-4, INFRA-7, INFRA-8, LEGAL-3/4/5, UI-6, UI-10, FEAT-15 — bez zmian.
 
 Brak dodatkowych uwag od Tomka na zamknięcie tej sesji.
+
+## Sesja 2026-08-13 (II) 17:40 — BUG-9: guard chroniący `refunded` przed spóźnionym webhookiem płatności
+
+### Zmiany
+
+Kod Tomek, tryb ja-wskazuję-Tomek-pisze. Jeden commit `d0f841cf`, na `main`, wypchnięty na `main` i `production` (build zielony).
+
+- **`src/convex/mutations.ts:590`** — guard w `applyStripePayment`: wcześniejsze wyjście, gdy `booking.paymentStatus === 'refunded'`. Trzy linie, postawione po `ctx.db.get(booking)` a przed pętlą patchującą raty.
+- **`src/routes/api/stripe/webhook/+server.ts:58`** — `if (!result) break` przed pierwszym użyciem `result`. Jedna linia gasi 10 błędów typów naraz.
+- **`docs/business-decisions/ADR-022`** (nowy) — pieniądze przychodzące po pełnym zwrocie wymagają decyzji człowieka; automatyczny zwrot i normalne zaksięgowanie odrzucone z uzasadnieniem. README ADR-index zaktualizowany.
+- **`docs/backlog.md`** — BUG-9 skreślony z przepisem smoke testu; nowa pozycja **FEAT-18** (brakująca encja „rozbieżność finansowa wymagająca decyzji" + powiadomienie); diff feedbacku 08-13 (II) zgodny, z uwagą kierunkową Tomka na następną sesję; reconcile date.
+- **Wiki (4 nowe, 2 rozszerzone, wszystkie `universal`):** [[declined-is-not-unhandled]], [[refusal-is-not-an-error]], [[rule-standing-on-a-mutated-field]], [[commit-body-carries-what-the-diff-cannot-show]] + rozszerzenia [[null-vs-undefined-system-boundaries]] i [[two-names-for-one-thing-means-a-missing-entity]] (drugi sygnał brakującej encji) + indeks vaulta.
+
+### Decyzje
+
+- **Rozstrzyga człowiek, nie automat — wybór Tomka na pytanie postawione biznesowo.** Trzy warianty: zwrócić z automatu / pokazać Michałowi / zaksięgować normalnie. Wybrał drugi. Uzasadnienie domknięte wspólnie: system nie ma danych, żeby odróżnić „klient wraca" od „bank się spóźnił". To ta sama intuicja, którą zgłosił 08-08 (informować Michała) — wtedy na złym poziomie (feature w środku rozmowy o regule technicznej), dziś na właściwym. → ADR-022.
+- **Naprawa poszła w guard, nie w `refreshBookingPaymentTotals`.** Backlog dopuszczał oba kierunki. Drugi jest naprawą u źródła (funkcja licząca `paymentStatus` nie zna pojęcia zwrotu i strukturalnie nie może go wyprodukować), ale wymaga rozstrzygnięcia, czym w ogóle jest `paymentStatus` — suma wpłat czy stan sprawy. Guard zatrzymuje szkodę dziś; rozdzielenie pojęć zostaje na moment, gdy pojawi się drugi konsument.
+- **`partially_refunded` świadomie poza warunkiem.** Pierwsza wersja Tomka obejmowała obie wartości; poprawione po przypomnieniu ADR-020. Częściowy zwrot to korekta ceny — rezerwacja trwa, kolejne raty muszą się księgować normalnie. To, że schemat trzyma te dwa stany jako **osobne wartości**, rozstrzygnęło wątpliwość, którą sam wcześniej podniosłem błędnie (bałem się, że guard na poziomie rezerwacji zablokuje legalne wpłaty).
+- **Odmowa zwraca `200`, nie rzuca wyjątku.** Rozważone trzy warianty. `throw` kusił, bo realizuje powiadamianie za darmo (nieudane zdarzenie samo pojawia się w dashboardzie Stripe — Tomek zna to z 08-13 rano, webhook 308). Odrzucony: adresatem jest programista, nie Michał; dochodzą trzy dni ponawiania i utrata rozróżnialności między awarią a świadomą odmową.
+- **Zakres domknięty na ochronie stanu; powiadomienie wyjęte do FEAT-18.** Powód nie jest wygodą: żadna istniejąca tabela nie jest właściwym miejscem zapisu, a projektowanie nowej encji to osobne zadanie. Dziura nazwana wprost w ciele commita i w ADR-022.
+- **Smoke test odłożony do FEAT-18 — decyzja Tomka.** Jeden przebieg testowy dla całości zamiast dwóch. Skutek zapisany wprost: poprawka jest na produkcji zweryfikowana wyłącznie typecheckiem i buildem.
+
+### Wnioski
+
+- **Świadoma odmowa to obsługa, nie jej brak — rozpoznanie Tomka, wbrew mojej propozycji.** Popchnąłem go w stronę tabeli `unhandledStripeEvents`, bo nazwa pasowała. Odrzucił: zdarzenie zostało dopasowane do rezerwacji i celowo nieprzetworzone, a „nieobsłużone" znaczy „nie wiemy, co z tym zrobić". Semantyka tabeli siedziała w polach `resolution` (`release_berth` / `keep_berth` / `orphan` = ustalanie przynależności), nie w nazwie. Promowane: [[declined-is-not-unhandled]].
+- **Dwie tabele odrzucone z dwóch rozłącznych powodów to brakująca encja.** `adminAuditLog` odpadł przez brak aktora, `unhandledStripeEvents` przez złą semantykę. Gdyby odpadła jedna — zwykły brak dopasowania. Test odróżniający od lenistwa: jeśli każdy kandydat wymaga **innego** kompromisu, brakuje encji; jeśli tego samego — brakuje pola. Dopisane do [[two-names-for-one-thing-means-a-missing-entity]] jako drugi sygnał.
+- **Nieobecność warunku nie ma reprezentacji w diffie — złapane przez Tomka przy audycie ciała commita.** Zdanie o świadomym pominięciu `partially_refunded` to „tylko nasza wiedza". I dlatego właśnie zostaje: ciało commita zarabia na siebie tam, gdzie diff nie sięga — świadome pominięcia, odrzucone warianty, znane dziury. Symetria z [[absent-rule-cannot-be-grepped]]: `grep` i `diff` widzą napisy, nie rozważania. Promowane: [[commit-body-carries-what-the-diff-cannot-show]].
+- **Guard stoi na polu, które ta sama funkcja nadpisuje.** Warunek czyta `paymentStatus`, a `refreshBookingPaymentTotals` 60 linii niżej to pole przelicza i zapisuje. Działa **wyłącznie dzięki kolejności**; przestawienie bloków wyłączyłoby regułę bez żadnego sygnału. Głębsza diagnoza: jedno pole odpowiada na dwa pytania — „ile wpłynęło" (suma) i „czy sprawa trwa" (stan). Dopóki pieniądze płyną w jedną stronę, obie odpowiedzi się zgadzają. **Zwrot to pierwsze zdarzenie, które je rozdziela.** Promowane: [[rule-standing-on-a-mutated-field]].
+- **`return` w mutacji Convex dociera do wywołującego jako `null`, nie `undefined`.** Konwersji nie robi żaden kod aplikacji — robi ją serializacja na granicy backend↔frontend. Komunikat `'result' is possibly 'null'` przy pliku, w którym słowo `null` nie pada ani razu. Praktycznie: po drugiej stronie granicy testuj falsy, nigdy `=== undefined`. Wariant [[null-vs-undefined-system-boundaries]] bez konwersji w kodzie.
+- **Dziesięć błędów typów, jedna naprawa.** Liczba komunikatów mierzy liczbę użyć wyniku, nie liczbę usterek. Kontrola wbudowana w zadanie: jeśli jedna linia gasi wszystkie, stoi we właściwym miejscu; jeśli część — stoi źle.
+- **Warunek odwrócony przy pierwszym podejściu — i to najgroźniejszy możliwy błąd w tym miejscu.** Pierwsza wersja wychodziła, gdy rezerwacja **nie** była zwrócona, czyli blokowała **wszystkie** normalne płatności. Typecheck by tego nie złapał (typy poprawne), test jednostkowy nie istnieje, a objawem byłaby cisza na produkcji. Stąd krok 1 przepisu smoke testu (zwykła płatność się księguje) jest **próbą kontrolną**, nie formalnością — [[unchanged-result-needs-a-control]] zastosowane do wdrożenia zamiast do pomiaru.
+- **Metoda wyboru commit message: pierwszy raz bezbłędnie i z własnym uzasadnieniem.** Wybrał A, odrzucił B jako zły typ, C jako zmianę wtórną. Odrzucenie C wymagało jednego doprecyzowania z mojej strony — C **nie kłamie**, przechodzi kryterium wskazywalności i ma poprawny typ; przegrywa wyłącznie na zakresie. To ten sam kształt pułapki, na którym potknął się 08-08. Kryteria podane z góry (od 08-06) zadziałały tym razem i na diagnozę, i na decyzję — czego zabrakło 08-08.
+- **Piąte wystąpienie backticków nie nastąpiło.** Ciało wygenerowane bez backticków (zgodnie z konwencją commitów w repo) + heredoc z ogranicznikiem w apostrofach, który wyłącza podstawianie w całości. `git log -1` po commicie jako kontrola. Obrona kosztowała zero, poprzednie cztery wpadki kosztowały `--amend`.
+
+### Następne kroki
+
+#### Next
+
+- **Feedback `2026-08-10.md` — realizacja, nie striaż.** Uwaga kierunkowa Tomka: pozycje są opisane w backlogu od 08-13, ale niezrobione. Kolejność do ustalenia na starcie sesji: **UI-17** (język składkowy), **LEGAL-6 p.1-2** (publikacja regulaminu v2 — treść gotowa i potwierdzona), **LEGAL-9** (checkbox akceptacji, blokowany przez LEGAL-6).
+- **FEAT-18** — brakująca encja „rozbieżność finansowa wymagająca decyzji" + powiadomienie Michała. Zadanie projektowe (wymyślić encję), nie doklejka. Odblokowuje smoke test BUG-9.
+- **BUG-10** — panel klienta, rata po terminie pokazuje „Oczekuje". Otwarte pytanie o brzmienie etykiety do potwierdzenia.
+- **UI-11 dokończenie** — panel żeglarza i admin za logowaniem. Otwarte od 08-05.
+
+#### Blocked / Later / Open questions
+
+- **Smoke test BUG-9** — zablokowany świadomie do FEAT-18. Przepis w backlogu, nie odtwarzać od zera.
+- **FEAT-17** — automatyzacja zgłoszenia załogi; nie da się wycenić bez odpowiedzi, czy booking-manager.com ma API.
+- **FEAT-16 (rabat jako encja)** — wchodzi przed FEAT-5b / FEAT-6 / FEAT-12; kupony Stripe czy własna tabela.
+- **FEAT-4** — zwroty robione bezpośrednio w panelu Stripe nie ustawiają `paymentStatus`, więc dzisiejszy guard ich nie obejmuje.
+- **LEGAL-7 punkt (c)** — numer uprawnień organizatora; zależy od odpowiedzi prawnika Michała (ADR-021).
+- **UI-16**, **REFACTOR-7** — wchodzą z FEAT-5.
+- **REFACTOR-5 punkt (2)** — usunięcie obrony u odbiorców w cronach mailowych; świadomie odłożone.
+- **DEP-1a / DEP-1b** — warunek „pierwsza realna wpłata" spełniony 08-13, DEP-1a nadal wymaga właściwego przebiegu (zmiana progu w trakcie).
+- REFACTOR-2/4/6, SEC-4/5, INFRA-7/8/10, LEGAL-3/4/5, UI-6/10/15/18, FEAT-15 — bez zmian.
+
+Brak dodatkowych uwag od Tomka na zamknięcie tej sesji.
