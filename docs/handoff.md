@@ -3786,7 +3786,7 @@ Trzy commity. Dwa na `main` i `production`, jeden tylko na `main`.
 
 #### Blocked / Later / Open questions
 
-- **Weryfikacja BUG-10 na produkcji** — o 16:00 UTC wypadał pierwszy przebieg godzinowy; potwierdzić w panelu Convexa **przełączonym na produkcję**, że `mark overdue payments` ma „Every hour" i świeży „Success".
+- ~~**Weryfikacja BUG-10 na produkcji**~~ **✅ zrobiona tego samego wieczoru.** Panel Convexa przełączony na produkcję: `mark overdue payments` → „Every hour", „Success 35 minutes ago", „Next run in 25 minutes" (35 + 25 = 60, zgodne z okresem). Kontrola rozstrzygała jedną rzecz: czy nowa definicja **wykonała się**, czy tylko zarejestrowała — świeży przebieg krótszy niż okres odpowiada twierdząco. **BUG-10 zweryfikowany behawioralnie na produkcji**, w odróżnieniu od BUG-9, który nadal stoi na samym typechecku.
 - **INFRA-12** — aplikacja nie zna własnej domeny (zero wystąpień w `src/`); kanoniczny host to `www.sailing-architect.com`.
 - **LEGAL-10** — język wiążący; bez zmian, pilność niska dopóki `en.po` pusty.
 - **INFRA-11, UI-19, Smoke test BUG-9** — bez zmian.
