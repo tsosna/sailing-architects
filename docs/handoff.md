@@ -3742,3 +3742,53 @@ Kod Tomek, tryb ja-wskazuję-Tomek-pisze. Jeden commit `c0d01f2f`, na `main`, wy
 - **Smoke test BUG-9** — bez zmian, zablokowany do FEAT-18.
 - **FEAT-18, FEAT-17, FEAT-16, FEAT-4, UI-11, UI-16, REFACTOR-5 p.2, REFACTOR-7, DEP-1a/1b** — bez zmian.
 - REFACTOR-2/4/6, SEC-4/5, INFRA-7/8/10, LEGAL-3/4/5, UI-6/10/15/18, FEAT-15 — bez zmian.
+
+## Sesja 2026-08-14 18:00 — LEGAL-6 p.5 domknięte, materiał do polityki prywatności, BUG-10
+
+### Zmiany
+
+Trzy commity. Dwa na `main` i `production`, jeden tylko na `main`.
+
+- **`d19c727f`** — `static/regulamin-pl-2026-08-09.pdf` + `docs/business-decisions/2026_08_09_SA_regulamin_rejsu_v2.doc`: poprawione **oba** błędne odnośniki w regulaminie. Podmiana bajtów pod tą samą nazwą pliku. Kod Tomek (edycja w Wordzie + eksport), tryb ja-wskazuję.
+- **`c50b09d5`** — `docs/business-decisions/privacy-policy-inputs.md` (nowy, ~200 linii): inwentarz danych osobowych z `schema.ts`, pięciu procesorów z lokalizacjami, trzy kwestie prawne, pięć pytań do Michała, pięć do prawnika, analiza co da się przenieść z polityki `domy-modulowe`. Napisane przeze mnie na polecenie Tomka, pytania przez niego zaakceptowane bez zmian.
+- **`13f66d60`** — `src/convex/crons.ts`: `crons.daily` → `crons.hourly` dla `mark overdue payments`. Trzy linie. Kod Tomek.
+- **`docs/backlog.md`** — BUG-10 i LEGAL-6 skreślone; LEGAL-1 przepisany (nieaktualny adres, scalenie kierunku z LEGAL-2); LEGAL-2 rozbudowany o materiał wejściowy i trzy ustalenia; LEGAL-9 o punkty (d) i (e); nowa pozycja **INFRA-12**.
+
+### Decyzje
+
+- **Podmiana bajtów zamiast nowej wersji pliku — wybór Tomka po pytaniu kontrolnym.** Zasada „nowa wersja = nowy plik" przyjęta wczoraj chroni dowód akceptacji; checkbox z LEGAL-9 nie istnieje, więc nie ma czego chronić. **Wyjątek wygasa w dniu wdrożenia LEGAL-9** i to zdanie jest w ciele commita, nie tylko tutaj.
+- **Poprawiamy oba odnośniki, treść punktu 4 zostaje nietknięta.** Tekst mówi o „dedykowanej podstronie www", a taka podstrona nie istnieje — opis rejsu to sekcje landingu. Przeformatowanie punktu to zmiana treści umownej i decyzja Michała z prawnikiem, nie nasza.
+- **Adres polityki: `/polityka-prywatnosci`, nie `/rodo`.** „RODO" to nazwa rozporządzenia, nie dokumentu. Regulamin wskazuje na stronę, której jeszcze nie ma — link celowo wyprzedza stronę, z terminem w LEGAL-9 (e).
+- **BUG-10 naprawiony w danych, nie w widoku.** Tomek najpierw wybrał „nic nie robimy" z argumentem, że mail i tak informuje żeglarza — argument sprawdzony w kodzie i **częściowo słuszny** (kolejność cronów 6:00 → 9:10 wyklucza sprzeczność panel-mail). Zmienił decyzję po postawieniu wariantu, którego wcześniej nie było na stole: cron co godzinę zawęża okno z 24 h do 60 minut **bez** tworzenia drugiego źródła prawdy.
+- **„Po terminie" zostaje mimo prośby Michała o „Zaległe".** Decyzja Tomka, świadoma, do zakomunikowania Michałowi — jego zgłoszenie było jednym zdaniem o dwóch rzeczach.
+- **ADR świadomie nie powstał.** Decyzja o naprawie w danych nie dotyka pieniędzy, prawa ani tego, co klient dostaje. Uzasadnienie razem z odrzuconym wariantem żyje w ciele commita; ADR-y w tym projekcie są dla decyzji, które musi zrozumieć ktoś nieczytający kodu.
+
+### Wnioski
+
+- **Wzorzec wyszukiwania niesie założenie tego, kto go pisze — i wtedy potwierdza samego siebie.** Kazałem Tomkowi szukać w regulaminie ciągu `architects`, żeby policzyć wystąpienia błędnej domeny. Ten ciąg **z definicji nie może** trafić w poprawną `sailing-architect.com`, więc odpowiedź „jest tylko w tym miejscu" była prawdziwa o wzorcu i fałszywa o dokumencie. Drugi zły odnośnik (`/rodo`) znalazł się dopiero przy wyciągnięciu **wszystkich** URL-i z pliku. Ta sama sesja dała trzecią odsłonę: grep po `rodo` w `src/` zwrócił dwa trafienia, oba w słowie „na**rodo**wość". Sonda znajduje litery, nie pojęcia.
+- **Bug okresowy obserwowany po fakcie wygląda na brak buga.** Tomek otworzył panel rano i zobaczył ratę oznaczoną „Po terminie" — po czym napisał, że chyba go zmyliło. Nie zmyliło: patrzył **po** przebiegu crona, a wczoraj **w oknie**. Defekt zamyka się sam, bez niczyjego udziału, więc każda obserwacja spoza okna pokazuje stan poprawny. Prawdopodobnie tak samo powstało zgłoszenie Michała.
+- **Zaleta, którą się traci, bywa niewidoczna, dopóki się jej nie zmierzy.** Argument „mail i tak dotrze" okazał się mocniejszy, niż zakładałem stawiając pytanie: `_listOverduePaymentCandidates` filtruje po `status === 'overdue'`, a monity idą 3 h po oznaczeniu, więc panel i mail **nie mogą** sobie przeczyć. Postawiłem Tomkowi pytanie o dwa źródła prawdy, nie sprawdziwszy wcześniej, że kolejność cronów tę sprzeczność już wyklucza. Po zmianie relacja się odwraca: panel wyprzedza mail, nigdy odwrotnie.
+- **Re-eksport dokumentu to nowy plik, nie zmieniony plik.** Poprawka ~40 znaków w Wordzie dała PDF o 11 KB większy (57 → 68 KB) — inne osadzenie fontów, inna kompresja. `git diff` nie powie o nim nic. Gdyby dokument był już zaakceptowany przez klienta, podmiana byłaby dla człowieka **niewykrywalna**: nie „trudna do wykrycia", tylko bez czego porównać. To argument za sumą kontrolną z LEGAL-9 (b), zobaczony pierwszy raz na własnym pliku zamiast w opisie.
+- **Plik może obiecywać treść i nie zawierać ani jednego jej zdania.** Wskazana jako wzór polityka z `domy-modulowe` to 414 linii układu i 80 kluczy Paraglide; tekst siedzi w `messages/pl.json`. Czwarta odsłona rodziny „deklaracja nie dowodzi istnienia" w dwóch sesjach.
+- **Skopiowany dokument prawny może stać się fałszywy przez samo przeniesienie.** Sekcja o transferze poza EOG w tamtej polityce jest w trybie przypuszczającym („**jeżeli** narzędzia poza EOG"). Tutaj Clerk, Stripe i Vercel hostują w USA — transfer jest pewny, więc to samo zdanie zmienia się z ostrożności w zatajenie. Różnica między „dostosować nazwy" a „napisać od nowa" leży dokładnie tu.
+- **Dane szczególnej kategorii siedziały w schemacie od początku i nikt ich tak nie nazwał.** `medicalNotes` i `dietaryRequirements` to art. 9 RODO, reżim ostrzejszy niż reszta. Skutek projektowy wychodzi poza politykę: **akceptacja regulaminu nie jest zgodą na ich przetwarzanie**, więc LEGAL-9 potrzebuje drugiego pola, i to nie w kasie, tylko tam, gdzie te dane są wpisywane.
+- **`www` bywa hostem kanonicznym i wtedy adres bez niego jest gorszy.** Podpowiedziałem `sailing-architect.com` bez `www`; Tomek zostawił `www` i miał rację — apex zwraca 308 na `www`. W dokumencie prawnym różnica nie jest kosmetyczna: to adres, pod którym dokument stoi, wobec adresu, który tam przekierowuje.
+- **Panel Convexa pokazuje deployment, nie kod.** „Every hour" widoczne po zapisaniu pliku dotyczyło środowiska deweloperskiego; produkcja miała stary harmonogram do czasu pusha na `production`. Historia przebiegów wiąże się z **nazwą zadania**, więc „Success 9 hours ago" pod nowym harmonogramem to ślad po starej definicji, nie sprzeczność.
+
+### Następne kroki
+
+#### Next
+
+- **Odpowiedź dla Michała, jedną wiadomością:** pytania z części 3 `privacy-policy-inputs.md` + informacja, że BUG-10 naprawiony co do mechanizmu, a etykieta „Po terminie" zostaje.
+- **LEGAL-2 — polityka prywatności.** Odblokowuje LEGAL-9 i gasi 404, na który wskazuje opublikowany regulamin. Blokada: odpowiedzi Michała.
+- **BUG-11** — ten sam wiersz harmonogramu, ten sam korzeń („stan zapisany dogania rzeczywistość"), ale decyzja biznesowa i kandydat na ADR; dotyka `createPaymentSchedule` i ADR-008.
+- **UI-17** (język składkowy) — ostatnia niezrealizowana pozycja z feedbacku 08-10.
+
+#### Blocked / Later / Open questions
+
+- **Weryfikacja BUG-10 na produkcji** — o 16:00 UTC wypadał pierwszy przebieg godzinowy; potwierdzić w panelu Convexa **przełączonym na produkcję**, że `mark overdue payments` ma „Every hour" i świeży „Success".
+- **INFRA-12** — aplikacja nie zna własnej domeny (zero wystąpień w `src/`); kanoniczny host to `www.sailing-architect.com`.
+- **LEGAL-10** — język wiążący; bez zmian, pilność niska dopóki `en.po` pusty.
+- **INFRA-11, UI-19, Smoke test BUG-9** — bez zmian.
+- **FEAT-18, FEAT-17, FEAT-16, FEAT-4, UI-11, UI-16, REFACTOR-5 p.2, REFACTOR-7, DEP-1a/1b** — bez zmian.
+- REFACTOR-2/4/6, SEC-4/5, INFRA-7/8/10, LEGAL-3/4/5, UI-6/10/15/18, FEAT-15 — bez zmian.
