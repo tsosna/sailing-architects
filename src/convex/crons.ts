@@ -10,9 +10,9 @@ crons.interval(
 	{}
 )
 
-crons.daily(
+crons.hourly(
 	'mark overdue payments',
-	{ hourUTC: 6, minuteUTC: 0 },
+	{ minuteUTC: 0 },
 	internal.reminders.markOverduePayments,
 	{}
 )
