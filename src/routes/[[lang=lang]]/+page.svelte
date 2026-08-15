@@ -45,11 +45,13 @@
 	<div class="hero__inner">
 		<div class="hero__row">
 			<div class="hero__copy">
-				<p class="eyebrow">Jesień 2026</p>
+				<p class="invite">
+					Zapraszamy do załogi na nasz prywatny rejs towarzysko-szkoleniowy
+				</p>
 				<h1 class="title">
 					Sail<br /><em>Adventure</em>
 				</h1>
-				<p class="subtitle">Palma de Mallorca → Cabo Verde</p>
+				<p class="subtitle">Palma de Mallorca → Cabo Verde · Jesień 2026</p>
 				<p class="lead">
 					Cztery etapy przez Atlantyk. Jacht Jeanneau Sun Odyssey 519.
 					Październik–Listopad 2026. Wybierz swoją koję i dołącz do załogi.
@@ -173,12 +175,12 @@
 		min-width: 300px;
 	}
 
-	.eyebrow {
+	.invite {
 		font-family: var(--font-sans);
-		font-size: 11px;
-		letter-spacing: 4px;
-		text-transform: uppercase;
+		font-size: 14px;
+		letter-spacing: 1px;
 		color: var(--color-brass-light);
+		max-width: 420px;
 		margin: 0 0 16px;
 	}
 

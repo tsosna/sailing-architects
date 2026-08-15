@@ -13,7 +13,8 @@
 					<span>Sailing Architects</span>
 				</div>
 				<p class="footer__desc">
-					Boutique sailing trips. Łączymy pasję żeglowania z odkrywaniem świata.
+					Private sailing adventures. Łączymy pasję żeglowania z odkrywaniem
+					świata.
 				</p>
 				<div class="footer__contact" aria-label="Kontakt do organizatora">
 					<p>Kontakt do organizatora</p>

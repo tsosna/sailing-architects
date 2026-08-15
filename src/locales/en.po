@@ -14,17 +14,15 @@ msgstr ""
 msgid "łącznie"
 msgstr ""
 
-#: src/routes/[[lang=lang]]/+page.svelte
-msgid "Jesień 2026"
-msgstr ""
+#~ msgid "Jesień 2026"
+#~ msgstr ""
 
 #: src/routes/[[lang=lang]]/+page.svelte
 msgid "Sail<0/><1>Adventure</1>"
 msgstr ""
 
-#: src/routes/[[lang=lang]]/+page.svelte
-msgid "Palma de Mallorca → Cabo Verde"
-msgstr ""
+#~ msgid "Palma de Mallorca → Cabo Verde"
+#~ msgstr ""
 
 #: src/routes/[[lang=lang]]/+page.svelte
 msgid "Cztery etapy przez Atlantyk. Jacht Jeanneau Sun Odyssey 519. Październik–Listopad 2026. Wybierz swoją koję i dołącz do załogi."
@@ -442,9 +440,8 @@ msgstr ""
 msgid "Cena"
 msgstr ""
 
-#: src/lib/components/site-footer/site-footer.svelte
-msgid "Boutique sailing trips. Łączymy pasję żeglowania z odkrywaniem świata."
-msgstr ""
+#~ msgid "Boutique sailing trips. Łączymy pasję żeglowania z odkrywaniem świata."
+#~ msgstr ""
 
 #: src/lib/components/crew-guide-page/crew-guide-page.svelte
 #: src/lib/components/site-footer/site-footer.svelte
@@ -3425,4 +3422,16 @@ msgstr ""
 #. 0: selectedPaymentOption?.amountFormatted ?? ''
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Opłać {0} zł →"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/+page.svelte
+msgid "Zapraszamy do załogi na nasz prywatny rejs towarzysko-szkoleniowy"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/+page.svelte
+msgid "Palma de Mallorca → Cabo Verde · Jesień 2026"
+msgstr ""
+
+#: src/lib/components/site-footer/site-footer.svelte
+msgid "Private sailing adventures. Łączymy pasję żeglowania z odkrywaniem świata."
 msgstr ""
