@@ -299,6 +299,31 @@
 				{/each}
 			</div>
 		{/if}
+
+		<section class="timeline">
+			<p class="timeline__title">Cała trasa rejsu</p>
+			<ol class="timeline__list" aria-label="Porty na trasie">
+				{#each ports as p, i (p.port)}
+					<li
+						class="timeline__port"
+						class:timeline__port--active={i === activeLeg ||
+							i === activeLeg + 1}
+					>
+						<span class="timeline__diamond" aria-hidden="true"></span>
+						<span class="timeline__name">{p.port}</span>
+						<span class="timeline__date">{p.date}</span>
+					</li>
+					{#if i < ports.length - 1}
+						<span
+							class="timeline__leg"
+							class:timeline__leg--active={legActive(i)}
+							aria-hidden="true"
+						></span>
+					{/if}
+				{/each}
+			</ol>
+		</section>
+
 		<div class="tabs" role="tablist" aria-label="Sekcje panelu">
 			{#each tabs as t (t.id)}
 				<button
@@ -472,30 +497,6 @@
 						</ul>
 					</section>
 				{/if}
-
-				<section class="timeline">
-					<p class="timeline__title">Cała trasa rejsu</p>
-					<ol class="timeline__list" aria-label="Porty na trasie">
-						{#each ports as p, i (p.port)}
-							<li
-								class="timeline__port"
-								class:timeline__port--active={i === activeLeg ||
-									i === activeLeg + 1}
-							>
-								<span class="timeline__diamond" aria-hidden="true"></span>
-								<span class="timeline__name">{p.port}</span>
-								<span class="timeline__date">{p.date}</span>
-							</li>
-							{#if i < ports.length - 1}
-								<span
-									class="timeline__leg"
-									class:timeline__leg--active={legActive(i)}
-									aria-hidden="true"
-								></span>
-							{/if}
-						{/each}
-					</ol>
-				</section>
 
 				<div class="actions">
 					{#if confirmationDocUrl}
