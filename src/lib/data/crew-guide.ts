@@ -246,16 +246,16 @@ export const crewGuideQuestions: ReadonlyArray<CrewGuideQuestion> = [
 		category: 'logistyka',
 		featured: true,
 		phase: 'Przed rezerwacją',
-		q: 'Co jest wliczone w cenę rejsu?',
-		a: 'Cena zawiera: koszt czarteru jachtu, prowadzenie przez skippera, przygotowanie rejsu, ubezpieczenie rejsu, pamiątkową koszulkę z rejsu.'
+		q: 'Co obejmuje składka rejsowa?',
+		a: 'Składka rejsowa obejmuje: koszt czarteru jachtu, prowadzenie przez skippera, przygotowanie rejsu, ubezpieczenie rejsu, pamiątkową koszulkę z rejsu.'
 	},
 	{
 		id: 'q23',
 		category: 'logistyka',
 		featured: true,
 		phase: 'Przed rezerwacją',
-		q: 'Co nie jest wliczone w cenę?',
-		a: 'Poza ceną: dojazd na miejsce startu i powrót, wyżywienie, paliwo do jachtu i opłaty portowe (składka pokładowa ok. 150–200 EUR/os na 7 dni), koszty pamiątek i wydatki osobiste, ubezpieczenie turystyczne.'
+		q: 'Czego nie obejmuje składka rejsowa?',
+		a: 'Poza składką rejsową: dojazd na miejsce startu i powrót, wyżywienie, paliwo do jachtu i opłaty portowe (składka pokładowa ok. 150–200 EUR/os na 7 dni), koszty pamiątek i wydatki osobiste, ubezpieczenie turystyczne.'
 	},
 	{
 		id: 'q24',

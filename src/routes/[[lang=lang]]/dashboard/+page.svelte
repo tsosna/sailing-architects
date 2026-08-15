@@ -151,7 +151,7 @@
 						? [['Blokada miejsc', holdRemainingLabel] as const]
 						: []),
 					[
-						'Cena',
+						'Składka',
 						`${((bookingData.segment?.pricePerBerth ?? 0) * bookingData.berths.length).toLocaleString('pl-PL')} zł`
 					]
 				]
@@ -464,7 +464,7 @@
 												`/dashboard/pay/${encodeURIComponent(payment._id)}`
 											)}
 										>
-											Zapłać
+											Opłać
 										</a>
 									{/if}
 								</li>

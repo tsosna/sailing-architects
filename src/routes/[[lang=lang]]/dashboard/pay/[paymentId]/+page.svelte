@@ -233,7 +233,7 @@
 							>
 								{intentLoading
 									? 'Inicjalizacja…'
-									: `Zapłać ${formatGrosze(payment.amount)} zł →`}
+									: `Opłać ${formatGrosze(payment.amount)} zł →`}
 							</button>
 						{:else}
 							<div

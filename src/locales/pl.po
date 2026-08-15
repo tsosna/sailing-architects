@@ -55,10 +55,8 @@ msgstr "Trasa"
 msgid "Kajuty"
 msgstr "Kajuty"
 
-#: src/lib/components/pricing-section/pricing-section.svelte
-#: src/lib/components/site-nav/site-nav.svelte
-msgid "Cennik"
-msgstr "Cennik"
+#~ msgid "Cennik"
+#~ msgstr "Cennik"
 
 #: src/lib/components/boat-plan/boat-plan.svelte
 #: src/lib/components/boat-plan/boat-plan.svelte
@@ -356,13 +354,11 @@ msgstr "za osobę · 1 koja"
 msgid "Zarezerwuj"
 msgstr "Zarezerwuj"
 
-#: src/lib/components/pricing-section/pricing-section.svelte
-msgid "Cena zawiera"
-msgstr "Cena zawiera"
+#~ msgid "Cena zawiera"
+#~ msgstr "Cena zawiera"
 
-#: src/lib/components/pricing-section/pricing-section.svelte
-msgid "Cena nie zawiera"
-msgstr "Cena nie zawiera"
+#~ msgid "Cena nie zawiera"
+#~ msgstr "Cena nie zawiera"
 
 #: src/lib/components/route-section/route-section.svelte
 #: src/lib/components/route-section/route-section.svelte
@@ -442,7 +438,6 @@ msgstr "Termin"
 msgid "Dni"
 msgstr "Dni"
 
-#: src/lib/components/route-section/route-section.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Cena"
 msgstr "Cena"
@@ -846,13 +841,11 @@ msgstr "Rejs"
 msgid "Sail Adventure 2026"
 msgstr "Sail Adventure 2026"
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Cena nie zawiera: kosztów dojazdu do mariny, opłat portowych i paliwa (ok. 150–200 EUR/os), ubezpieczenia turystycznego (ok. 250 zł/os)."
-msgstr "Cena nie zawiera: kosztów dojazdu do mariny, opłat portowych i paliwa (ok. 150–200 EUR/os), ubezpieczenia turystycznego (ok. 250 zł/os)."
+#~ msgid "Cena nie zawiera: kosztów dojazdu do mariny, opłat portowych i paliwa (ok. 150–200 EUR/os), ubezpieczenia turystycznego (ok. 250 zł/os)."
+#~ msgstr "Cena nie zawiera: kosztów dojazdu do mariny, opłat portowych i paliwa (ok. 150–200 EUR/os), ubezpieczenia turystycznego (ok. 250 zł/os)."
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Przejdź do płatności →"
-msgstr "Przejdź do płatności →"
+#~ msgid "Przejdź do płatności →"
+#~ msgstr "Przejdź do płatności →"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Krok 4"
@@ -882,9 +875,7 @@ msgstr "Podsumowanie"
 msgid "Razem"
 msgstr "Razem"
 
-#. 0: selectedPaymentOption?.amountFormatted ?? ''
 #. 0: formatGrosze(payment.amount)
-#: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
 msgid "Zapłać {0} zł →"
 msgstr "Zapłać {0} zł →"
@@ -1195,9 +1186,8 @@ msgstr "Kabina"
 msgid "Liczba miejsc"
 msgstr "Liczba miejsc"
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Cena za miejsce"
-msgstr "Cena za miejsce"
+#~ msgid "Cena za miejsce"
+#~ msgstr "Cena za miejsce"
 
 #. 0: berths.length === 1 ? 'Koja' \\: 'Koje'; 1: segment.dates; 2: berths.length === 1 ? 'jest Twoja' \\: 'są Twoje'
 #: src/routes/[[lang=lang]]/book/+page.svelte
@@ -3396,3 +3386,43 @@ msgstr "Dane wymagane przez skippera — osobno dla każdej koi."
 #: src/lib/components/site-footer/site-footer.svelte
 msgid "Regulamin →"
 msgstr "Regulamin →"
+
+#: src/lib/components/route-section/route-section.svelte
+msgid "Składka"
+msgstr "Składka"
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+#: src/lib/components/site-nav/site-nav.svelte
+msgid "Składki"
+msgstr "Składki"
+
+#~ msgid "Składka zawiera"
+#~ msgstr "Składka zawiera"
+
+#~ msgid "Składka nie zawiera"
+#~ msgstr "Składka nie zawiera"
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Składka rejsowa zawiera"
+msgstr "Składka rejsowa zawiera"
+
+#: src/lib/components/pricing-section/pricing-section.svelte
+msgid "Składka rejsowa nie zawiera"
+msgstr "Składka rejsowa nie zawiera"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Składka za osobę"
+msgstr "Składka za osobę"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Składka rejsowa nie zawiera: kosztów dojazdu do mariny, opłat portowych i paliwa (ok. 150–200 EUR/os), ubezpieczenia turystycznego (ok. 250 zł/os)."
+msgstr "Składka rejsowa nie zawiera: kosztów dojazdu do mariny, opłat portowych i paliwa (ok. 150–200 EUR/os), ubezpieczenia turystycznego (ok. 250 zł/os)."
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Opłać składkę →"
+msgstr "Opłać składkę →"
+
+#. 0: selectedPaymentOption?.amountFormatted ?? ''
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Opłać {0} zł →"
+msgstr "Opłać {0} zł →"

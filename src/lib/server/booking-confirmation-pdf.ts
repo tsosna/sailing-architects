@@ -200,7 +200,7 @@ export async function generateBookingConfirmationPdf(
 	writeRow(doc, 'Termin', segment.dates)
 	writeRow(doc, 'Liczba dni', String(segment.days))
 	writeRow(doc, berths.length === 1 ? 'Koja' : 'Koje', berthIds || '-')
-	writeRow(doc, 'Cena za miejsce', money(segment.pricePerBerth))
+	writeRow(doc, 'Składka rejsowa za miejsce', money(segment.pricePerBerth))
 	writeRow(doc, 'Razem', money(total))
 	if (typeof booking.paidAmount === 'number') {
 		writeRow(doc, 'Wpłacono', moneyGrosze(booking.paidAmount, currency))

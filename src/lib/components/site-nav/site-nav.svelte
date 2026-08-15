@@ -28,7 +28,7 @@
 		['Jacht', `${resolve('/')}#vessel`],
 		['Trasa', `${resolve('/')}#route`],
 		['Kajuty', `${resolve('/')}#cabins`],
-		['Cennik', `${resolve('/')}#pricing`],
+		['Składki', `${resolve('/')}#pricing`],
 		['Poradnik', resolve('/poradnik')]
 	] as const
 

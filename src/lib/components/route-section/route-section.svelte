@@ -200,7 +200,7 @@
 							<p class="card__value">{stage.days}</p>
 						</div>
 						<div>
-							<p class="card__label">Cena</p>
+							<p class="card__label">Składka</p>
 							<p class="card__price">
 								{priceFormatted}<span class="card__price-unit">zł</span>
 							</p>

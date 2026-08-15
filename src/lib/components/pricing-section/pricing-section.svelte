@@ -42,7 +42,7 @@
 
 <section id="pricing" class="pricing">
 	<div class="pricing__inner">
-		<p class="eyebrow">Cennik</p>
+		<p class="eyebrow">Składki</p>
 		<h2 class="title">Wybierz swój etap</h2>
 
 		<div class="cards">
@@ -74,7 +74,7 @@
 
 		<div class="lists">
 			<div>
-				<p class="lists__title">Cena zawiera</p>
+				<p class="lists__title">Składka rejsowa zawiera</p>
 				<ul class="lists__items">
 					{#each includes as item (item)}
 						<li class="lists__item">
@@ -85,7 +85,7 @@
 				</ul>
 			</div>
 			<div>
-				<p class="lists__title lists__title--dim">Cena nie zawiera</p>
+				<p class="lists__title lists__title--dim">Składka rejsowa nie zawiera</p>
 				<ul class="lists__items">
 					{#each excludes as item (item)}
 						<li class="lists__item">

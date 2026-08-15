@@ -687,7 +687,7 @@
 				.join(', ')
 		],
 		['Liczba miejsc', String(berths.length)],
-		['Cena za miejsce', `${pricePerBerthFormatted} zł`],
+		['Składka za osobę', `${pricePerBerthFormatted} zł`],
 		['Razem', `${totalPriceFormatted} zł`]
 	])
 </script>
@@ -808,7 +808,7 @@
 							>
 						</div>
 						<p class="auth-note">
-							Cena nie zawiera: kosztów dojazdu do mariny, opłat portowych i
+							Składka rejsowa nie zawiera: kosztów dojazdu do mariny, opłat portowych i
 							paliwa (ok. 150–200 EUR/os), ubezpieczenia turystycznego (ok. 250
 							zł/os).
 						</p>
@@ -1105,7 +1105,7 @@
 						>← Wróć</button
 					>
 					<button type="button" class="btn btn--primary" onclick={next}>
-						Przejdź do płatności →
+						Opłać składkę →
 					</button>
 				</div>
 			</section>
@@ -1239,7 +1239,7 @@
 						>
 							{intentLoading
 								? 'Inicjalizacja…'
-								: `Zapłać ${selectedPaymentOption?.amountFormatted ?? ''} zł →`}
+								: `Opłać ${selectedPaymentOption?.amountFormatted ?? ''} zł →`}
 						</button>
 					{:else}
 						<button
