@@ -439,7 +439,7 @@
 	const confirmationPdfUrl = $derived(
 		createdBookingRef && ctx.auth.userId
 			? resolve(
-					`/api/booking-confirmation/${encodeURIComponent(createdBookingRef)}?userId=${encodeURIComponent(ctx.auth.userId)}`
+					`/api/booking-confirmation/${encodeURIComponent(createdBookingRef)}`
 				)
 			: null
 	)

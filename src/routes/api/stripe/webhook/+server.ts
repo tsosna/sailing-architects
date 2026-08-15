@@ -59,7 +59,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			if (result.paymentEmailSentAt) break
 
 			const confirmation = await convex.query(
-				api.queries.bookingConfirmationByRef,
+				internal.queries.bookingConfirmationByRefInternal,
 				{
 					bookingRef: result.bookingRef,
 					userId: result.userId

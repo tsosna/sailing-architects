@@ -41,7 +41,7 @@
 	const confirmationPdfUrl = $derived(
 		bookingData && userId
 			? resolve(
-					`/api/booking-confirmation/${encodeURIComponent(bookingData.bookingRef)}?userId=${encodeURIComponent(userId)}`
+					`/api/booking-confirmation/${encodeURIComponent(bookingData.bookingRef)}`
 				)
 			: null
 	)

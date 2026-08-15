@@ -8,17 +8,18 @@ import {
 import { api } from '$convex/api'
 import type { RequestHandler } from './$types'
 
-const convex = new ConvexHttpClient(PUBLIC_CONVEX_URL)
+export const GET: RequestHandler = async ({ params, locals }) => {
+	const { getToken } = locals.auth()
+	const token = await getToken({ template: 'convex' })
+	if (!token) error(401, 'Unauthorized')
 
-export const GET: RequestHandler = async ({ params, url }) => {
-	const userId = url.searchParams.get('userId')
-	if (!userId) error(400, 'Missing userId')
+	const convex = new ConvexHttpClient(PUBLIC_CONVEX_URL)
+	convex.setAuth(token)
 
 	const confirmation = await convex.query(
 		api.queries.bookingConfirmationByRef,
 		{
-			bookingRef: params.bookingRef,
-			userId
+			bookingRef: params.bookingRef
 		}
 	)
 

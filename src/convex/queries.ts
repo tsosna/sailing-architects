@@ -1,4 +1,4 @@
-import { query } from './_generated/server'
+import { internalQuery, query, type QueryCtx } from './_generated/server'
 import { v } from 'convex/values'
 import { isBookingClosed } from './_lib/bookingClosed'
 import { isBerthFree } from './_lib/berthFree'
@@ -188,42 +188,59 @@ export const bookingParticipantsByBooking = query({
 	}
 })
 
-/** Booking confirmation payload for PDF generation. */
-export const bookingConfirmationByRef = query({
+async function loadBookingConfirmation(
+	ctx: QueryCtx,
+	bookingRef: string,
+	userId: string
+) {
+	const booking = await ctx.db
+		.query('bookings')
+		.withIndex('by_booking_ref', (q) => q.eq('bookingRef', bookingRef))
+		.first()
+	if (!booking || booking.userId !== userId) return null
+
+	const [segment, profile] = await Promise.all([
+		ctx.db.get(booking.segmentId),
+		ctx.db
+			.query('crewProfiles')
+			.withIndex('by_user', (q) => q.eq('userId', userId))
+			.first()
+	])
+	const berthDocs = await Promise.all(
+		booking.berthIds.map((id) => ctx.db.get(id))
+	)
+	const berths = berthDocs.filter((b): b is NonNullable<typeof b> => b !== null)
+
+	const payments = await ctx.db
+		.query('bookingPayments')
+		.withIndex('by_booking', (q) => q.eq('bookingId', booking._id))
+		.collect()
+
+	return {
+		booking,
+		segment,
+		profile,
+		berths,
+		payments: payments.sort((a, b) => a.sortOrder - b.sortOrder)
+	}
+}
+
+export const bookingConfirmationByRefInternal = internalQuery({
 	args: { bookingRef: v.string(), userId: v.string() },
 	handler: async (ctx, { bookingRef, userId }) => {
-		const booking = await ctx.db
-			.query('bookings')
-			.withIndex('by_booking_ref', (q) => q.eq('bookingRef', bookingRef))
-			.first()
-		if (!booking || booking.userId !== userId) return null
+		return await loadBookingConfirmation(ctx, bookingRef, userId)
+	}
+})
 
-		const [segment, profile] = await Promise.all([
-			ctx.db.get(booking.segmentId),
-			ctx.db
-				.query('crewProfiles')
-				.withIndex('by_user', (q) => q.eq('userId', userId))
-				.first()
-		])
-		const berthDocs = await Promise.all(
-			booking.berthIds.map((id) => ctx.db.get(id))
-		)
-		const berths = berthDocs.filter(
-			(b): b is NonNullable<typeof b> => b !== null
-		)
-
-		const payments = await ctx.db
-			.query('bookingPayments')
-			.withIndex('by_booking', (q) => q.eq('bookingId', booking._id))
-			.collect()
-
-		return {
-			booking,
-			segment,
-			profile,
-			berths,
-			payments: payments.sort((a, b) => a.sortOrder - b.sortOrder)
+/** Booking confirmation payload for PDF generation. */
+export const bookingConfirmationByRef = query({
+	args: { bookingRef: v.string() },
+	handler: async (ctx, { bookingRef }) => {
+		const identity = await ctx.auth.getUserIdentity()
+		if (!identity) {
+			throw new Error('Unauthorized: brak sesji')
 		}
+		return await loadBookingConfirmation(ctx, bookingRef, identity.subject)
 	}
 })
 
