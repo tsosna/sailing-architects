@@ -172,6 +172,19 @@ Ta sama lista co LEGAL-7 (c) i LEGAL-10 — do zadania jedną rozmową.
 3. Czy administrator będący osobą fizyczną musi podać adres pocztowy, czy wystarczy e-mail?
 4. Terminy retencji dla danych dokumentów tożsamości po zakończeniu rejsu.
 5. Język wiążący dokumentów prawnych przy dwujęzycznej stronie (LEGAL-10).
+6. **[LEGAL-12 b — jedyne pytanie z terminem, nie łączyć z resztą rozmowy]** Do 2026-08-15
+   plik PDF z potwierdzeniem rezerwacji — zawierający dane uczestników, w tym informacje
+   o stanie zdrowia i diecie — dało się pobrać **bez zalogowania**, jeśli znało się adres.
+   Podatność istniała ok. 107 dni i została naprawiona. **Ustalenie faktu jest niemożliwe:**
+   logi hostingu przechowywane są godzinę, a rozróżnienie „żądanie z sesją / bez sesji"
+   nie było w ogóle zapisywane, bo mechanizm go nie sprawdzał. Pytanie: czy niemożność
+   zweryfikowania, przy podatności realnej i dotyczącej danych z art. 9, sama w sobie
+   rodzi obowiązek zgłoszenia z art. 33? **Sformułowanie faktu nie może być łagodzone:**
+   nie „nie doszło do nieuprawnionego dostępu", tylko „nie istnieje zapis pozwalający to
+   stwierdzić ani wykluczyć". Termin 72 h biegnie od stwierdzenia naruszenia, nie od
+   uzyskania opinii — stąd osobny tryb. Pytanie poboczne do tej samej odpowiedzi: jaką
+   formę ma mieć dokumentacja z art. 33 ust. 5, skoro zdarzenie opisane jest dziś tylko
+   w repozytorium kodu (backlog + treść commita), a nie w dokumencie administratora.
 
 ---
 
@@ -208,6 +221,154 @@ fałszywe w dokumencie, którym organizator odpowiada przed UODO.
 
 ---
 
+## Część 6 — projekt sekcji polityki: odbiorcy, logi, retencja, bezpieczeństwo, art. 9
+
+Powstało 2026-08-15 (III) przy LEGAL-12. **To materiał wejściowy dla prawnika, nie gotowy
+dokument** — autor nie jest prawnikiem.
+
+**Zasada redakcyjna przyjęta dla całej części:** brzmienie ma być korzystne dla
+administratora, ale **korzystne znaczy precyzyjne, nie nieprawdziwe**. Fałszywe zdanie
+w polityce jest samodzielnym naruszeniem art. 5 ust. 1 lit. a i przy kontroli działa
+przeciw administratorowi mocniej niż brak dokumentu. Środki: formuły zamiast liczb,
+sufity zamiast deklaracji, czasowniki weryfikowalne zamiast przymiotników.
+
+Zdania oznaczone ⚠️ **są dziś nieprawdziwe** — wchodzą do dokumentu dopiero razem
+z odpowiadającym im mechanizmem w systemie. Decyzja Tomka 08-15 (III): dorabiamy je
+systematycznie, nie usuwamy z projektu.
+
+### 6.1 Fakty ustalone o dostawcach (stan 2026-08-15)
+
+| | ustalenie | źródło |
+|---|---|---|
+| Vercel — umowa powierzenia | DPA obejmuje **wyłącznie plany Enterprise i Pro**; projekt stoi na Hobby, więc umowy z art. 28 ust. 3 **nie ma**. Pro: $20/mies. | [vercel.com/legal/dpa](https://vercel.com/legal/dpa), LEGAL-13 |
+| Vercel — logi | retencja: Hobby 1 h · Pro 1 dzień · Enterprise 3 dni; Observability Plus 30 dni (Pro+, $1,20/1 mln zdarzeń); drainy do własnego magazynu tylko Pro+ | [docs Observability Plus](https://vercel.com/docs/observability/observability-plus) |
+| Vercel — region | **funkcje można przypiąć do regionu UE także na Hobby** (jeden region; Pro do pięciu). Domyślny to `iad1` (Waszyngton) i taki jest dziś — `vercel.json` nie ma klucza `regions`. Kandydat: `dub1` (Dublin), ten sam obszar co baza Convex | [docs regions](https://vercel.com/docs/functions/configuring-functions/region), INFRA-13 |
+| Vercel — granica tego ruchu | przypięcie regionu przenosi **obliczenia**, nie jurysdykcję: operatorem pozostaje Vercel Inc. (USA), CDN działa globalnie, adresy IP przechodzą przez infrastrukturę w USA (ochrona przed DDoS) | j.w. |
+| Stripe — region | **nie oferuje rezydencji danych w UE**; przetwarzanie jest globalne z założenia. Podstawa transferu: EU-US Data Privacy Framework, posiłkowo SCC. Podmiotem kontraktującym w Europie jest spółka irlandzka | [stripe.com/legal/dpa](https://stripe.com/legal/dpa) |
+| Convex | region produkcyjny **Irlandia** od startu (SEC-2); log streams i dzienne backupy dopiero od planu Pro ($25/dev/mies.) | SEC-2, [convex.dev/pricing](https://www.convex.dev/pricing) |
+| Convex — niewiadoma | czy DPA obowiązuje na planie Free/Starter — **nie ustalone**, strony prawne renderują treść skryptem. Jedno pytanie do supportu, nie zgadywać | LEGAL-13 |
+
+**Wniosek dla polityki:** „dane w Europie" jest prawdą wyłącznie o bazie danych. Konta,
+płatności i logi serwera są w USA i żadna konfiguracja tego nie zmienia — Stripe nie ma
+opcji europejskiej w ogóle, a europejski region Vercela zmienia miejsce obliczeń, nie
+podmiot nimi władający.
+
+### 6.2 Odbiorcy danych i przekazywanie poza EOG
+
+> Dane są przetwarzane z wykorzystaniem usług dostawców działających na zlecenie administratora:
+>
+> | Dostawca | Rola | Miejsce przetwarzania |
+> |---|---|---|
+> | Convex | baza danych aplikacji | Unia Europejska (Irlandia) |
+> | Vercel | hosting aplikacji i logi serwera | Stany Zjednoczone |
+> | Clerk | obsługa kont i logowania | Stany Zjednoczone |
+> | Stripe | obsługa płatności | Stany Zjednoczone |
+> | Brevo | wysyłka wiadomości e-mail | Unia Europejska |
+>
+> Przekazywanie danych do dostawców spoza Europejskiego Obszaru Gospodarczego odbywa się
+> na podstawie standardowych klauzul umownych zatwierdzonych przez Komisję Europejską.
+>
+> Lista według stanu na dzień wskazany na końcu dokumentu.
+
+**Uzasadnienie brzmienia.** Dane rejsu — te najwrażliwsze — leżą w Irlandii i warto to
+powiedzieć wprost, bo to prawda i brzmi dobrze. Zdanie „dane są przechowywane w Unii
+Europejskiej" **bez tabeli** byłoby nieprawdą. Tabela pozwala pokazać mocną stronę bez
+kłamstwa o reszcie. Klauzula o dacie chroni przed dezaktualizacją: zmiana dostawcy nie
+czyni dokumentu fałszywym wstecz.
+
+⚠️ Sformułowanie zakłada, że umowy powierzenia istnieją. Z Vercelem na Hobby jej nie ma
+(LEGAL-13) i **żadne brzmienie tego nie obejdzie** — to pierwsze pytanie, jakie zada prawnik.
+
+### 6.3 Logi techniczne
+
+> W związku z działaniem serwisu automatycznie zapisywane są dane techniczne: adres IP,
+> data i godzina zapytania, adres żądanej strony oraz informacje o przeglądarce. Służą one
+> wyłącznie zapewnieniu bezpieczeństwa i prawidłowego działania serwisu; podstawą jest
+> prawnie uzasadniony interes administratora (art. 6 ust. 1 lit. f RODO), polegający na
+> ochronie serwisu przed nadużyciami.
+>
+> Dane te są przechowywane przez okres wynikający z konfiguracji dostawcy hostingu, nie
+> dłużej niż 30 dni, a następnie usuwane automatycznie.
+
+**Uzasadnienie brzmienia.**
+
+- **„nie dłużej niż 30 dni"** — sufit, nie deklaracja. Dziś Vercel trzyma je godzinę.
+  Wpisanie „1 godzina" związałoby administratorowi ręce i wymagałoby zmiany polityki przy
+  każdej zmianie planu; sufit 30 dni pokrywa nawet wariant z Observability Plus.
+- **„usuwane automatycznie"** — mocne, a prawdziwe: wygasanie logów jest mechanizmem
+  dostawcy, nie obietnicą, że ktoś o tym pamięta.
+- **Interes uzasadniony, nie zgoda** — logi serwera to nie cookies; podpięcie ich pod zgodę
+  stworzyłoby obowiązek, którego nie ma.
+
+**Uwaga systemowa, ważniejsza niż samo brzmienie:** dłuższa retencja logów **nie jest**
+„bardziej zgodna z RODO". Art. 5 ust. 1 lit. e każe trzymać dane nie dłużej, niż to
+konieczne, a logi z adresami IP są zbiorem danych osobowych — wydłużenie tworzy nowy zbiór
+wymagający własnego celu i okresu. Każdy odbiorca strumienia logów (Axiom, Datadog) to
+kolejny podmiot przetwarzający, kolejny transfer do USA i kolejna pozycja w tej tabeli.
+
+### 6.4 Okresy przechowywania danych uczestników
+
+> Dane uczestników przechowujemy przez czas niezbędny do organizacji rejsu, a po jego
+> zakończeniu — przez okres przedawnienia roszczeń wynikających z uczestnictwa. Dane
+> niezbędne do rozliczeń podatkowych przechowujemy przez okres wymagany przepisami prawa.
+> ⚠️ Dane dotyczące stanu zdrowia i wymagań żywieniowych usuwamy po zakończeniu rejsu.
+
+**Uzasadnienie brzmienia.** Formuły zamiast liczb: „okres przedawnienia roszczeń" jest
+odesłaniem do ustawy — nie da się go przekroczyć przez pomyłkę i nie wymaga aktualizacji.
+
+⚠️ **Ostatnie zdanie jest dziś nieprawdziwe.** Nic w systemie nie kasuje `medicalNotes`
+ani `dietaryRequirements` po rejsie — to SEC-1, niezrobione. Obietnica usuwania bez
+mechanizmu usuwania to najkrótsza droga do naruszenia stwierdzonego z własnego dokumentu.
+Zdanie wchodzi razem z cronem kasującym, nie wcześniej. Pułapka do zapamiętania przy
+projektowaniu tego crona: **backupy mają własną retencję** — dane skasowane wracają
+z każdej wcześniejszej kopii, więc reguła kasowania musi obejmować cykl kopii zapasowych,
+inaczej słowo „usuwamy" pozostaje nieprawdziwe mimo działającego mechanizmu.
+
+### 6.5 Bezpieczeństwo
+
+> Dostęp do danych uczestników wymaga zalogowania się na konto, dla którego dane zostały
+> zapisane. Transmisja między przeglądarką a serwerem jest szyfrowana. Dostęp
+> administracyjny do danych ma wyłącznie organizator.
+
+**Uzasadnienie brzmienia.** Trzy zdania, każde weryfikowalne, żaden przymiotnik. Unikamy
+sformułowań typu „stosujemy najwyższe standardy bezpieczeństwa" czy „gwarantujemy
+poufność" — to obietnice bez treści, które przy incydencie cytuje się administratorowi
+jako dowód, że obiecał więcej, niż zrobił.
+
+Zdanie pierwsze jest prawdziwe **od commita `d1b72e94`** (SEC-6, 2026-08-15). Przed nim
+byłoby fałszywe — i to jest dobra ilustracja zasady: polityka opisuje system po naprawie,
+nie sprzed.
+
+**Czego tu świadomie nie ma:** zdania „dane są szyfrowane" bez kwalifikatora. Szyfrowany
+jest transport, pola w bazie nie (SEC-1). Rozszerzenie tej sekcji o szyfrowanie pól
+wrażliwych jest możliwe dopiero po SEC-1 — i to kolejne miejsce, w którym SEC-1 wraca jako
+warunek treści dokumentu, nie jako ulepszenie techniczne.
+
+### 6.6 Dane o zdrowiu i diecie
+
+> Informacje o stanie zdrowia i wymaganiach żywieniowych podajesz dobrowolnie, wyłącznie
+> w celu zapewnienia bezpieczeństwa na pokładzie i przygotowania wyżywienia. Przetwarzamy
+> je na podstawie Twojej wyraźnej zgody (art. 9 ust. 2 lit. a RODO). Zgodę możesz wycofać
+> w każdej chwili — nie wpływa to na zgodność z prawem przetwarzania sprzed wycofania.
+> ⚠️ Podanie tych informacji nie jest warunkiem uczestnictwa w rejsie.
+
+**Uzasadnienie brzmienia.** „Dobrowolnie" i „nie jest warunkiem uczestnictwa" chronią samą
+podstawę prawną: zgoda wymuszona — taka, bez której nie da się kupić koi — nie jest zgodą
+w rozumieniu RODO i cała podstawa się sypie. Kosztuje to tyle, że pole musi być opcjonalne.
+
+⚠️ Ostatnie zdanie wymaga sprawdzenia w formularzu i ewentualnej zmiany pola na opcjonalne.
+
+Wiąże się z LEGAL-9: zgoda musi być zbierana **osobno** od akceptacji regulaminu i **tam,
+gdzie te dane się wpisuje**, nie w kasie.
+
+### 6.7 Czego w tym projekcie świadomie nie ma
+
+- „Nie przekazujemy danych poza EOG" — nieprawda przy Clerk, Stripe i Vercelu.
+- „Dane są szyfrowane" bez kwalifikatora — patrz 6.5.
+- Konkretnych okresów w dniach — każdy taki wpis to zobowiązanie do pilnowania kalendarza.
+- Deklaracji o cookies — osobna sekcja, do napisania po ustaleniu, co realnie ustawiają
+  Clerk i Stripe.
+
 ## Kolejność prac
 
 1. Michał odpowiada na pytania z części 3 → treść polityki może powstać
@@ -225,3 +386,4 @@ inaczej klient akceptuje regulamin odsyłający do nieistniejącej polityki.
 - `docs/business-decisions/ADR-021-private-non-commercial-membership-cruise.md` — forma prawna rejsu
 - `docs/business-decisions/ADR-023-terms-published-as-versioned-file.md` — sposób publikacji dokumentów
 - `docs/backlog.md` — SEC-1 (szyfrowanie i retencja), SEC-2 (region i DPA), LEGAL-2, LEGAL-7, LEGAL-9, LEGAL-10
+- `docs/backlog.md` — LEGAL-12 (ocena naruszenia z art. 33), LEGAL-13 (DPA Vercela wymaga planu Pro), SEC-7 (log pobrań dokumentów), INFRA-13 (region funkcji w UE) — wszystkie z 2026-08-15, materiał do części 6
