@@ -436,9 +436,8 @@ msgstr "Termin"
 msgid "Dni"
 msgstr "Dni"
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Cena"
-msgstr "Cena"
+#~ msgid "Cena"
+#~ msgstr "Cena"
 
 #~ msgid "Boutique sailing trips. Łączymy pasję żeglowania z odkrywaniem świata."
 #~ msgstr "Boutique sailing trips. Łączymy pasję żeglowania z odkrywaniem świata."
@@ -1626,9 +1625,8 @@ msgstr "Harmonogram płatności"
 msgid "Termin {0}"
 msgstr "Termin {0}"
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Zapłać"
-msgstr "Zapłać"
+#~ msgid "Zapłać"
+#~ msgstr "Zapłać"
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
@@ -3385,6 +3383,7 @@ msgid "Regulamin →"
 msgstr "Regulamin →"
 
 #: src/lib/components/route-section/route-section.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Składka"
 msgstr "Składka"
 
@@ -3435,3 +3434,7 @@ msgstr "Palma de Mallorca → Cabo Verde · Jesień 2026"
 #: src/lib/components/site-footer/site-footer.svelte
 msgid "Private sailing adventures. Łączymy pasję żeglowania z odkrywaniem świata."
 msgstr "Private sailing adventures. Łączymy pasję żeglowania z odkrywaniem świata."
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Opłać"
+msgstr "Opłać"

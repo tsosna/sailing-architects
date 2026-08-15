@@ -436,9 +436,8 @@ msgstr ""
 msgid "Dni"
 msgstr ""
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Cena"
-msgstr ""
+#~ msgid "Cena"
+#~ msgstr ""
 
 #~ msgid "Boutique sailing trips. Łączymy pasję żeglowania z odkrywaniem świata."
 #~ msgstr ""
@@ -1626,9 +1625,8 @@ msgstr ""
 msgid "Termin {0}"
 msgstr ""
 
-#: src/routes/[[lang=lang]]/dashboard/+page.svelte
-msgid "Zapłać"
-msgstr ""
+#~ msgid "Zapłać"
+#~ msgstr ""
 
 #: src/lib/components/admin/booking-drawer.svelte
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
@@ -3385,6 +3383,7 @@ msgid "Regulamin →"
 msgstr ""
 
 #: src/lib/components/route-section/route-section.svelte
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Składka"
 msgstr ""
 
@@ -3434,4 +3433,8 @@ msgstr ""
 
 #: src/lib/components/site-footer/site-footer.svelte
 msgid "Private sailing adventures. Łączymy pasję żeglowania z odkrywaniem świata."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/dashboard/+page.svelte
+msgid "Opłać"
 msgstr ""
