@@ -23,7 +23,9 @@ Decyzja Michała, motywacja prawna — nie podana wprost w treści feedbacku 08-
 ## Konsekwencje
 
 - **Zrealizowane 08-13:** progi zwrotu ujednolicone i zapisane w regulaminie w dniach (ADR-001, uzupełnienie 08-13) — pośrednio wywołane tą samą falą porządkowania dokumentów.
-- **Niezrealizowane, w backlogu:** zmiana słownictwa na stronie (**UI-17**), checkbox akceptacji regulaminu + umowy uczestnika przy checkout (**LEGAL-9**), publikacja regulaminu (**LEGAL-6**, punkty 1-2).
+- **Zrealizowane 2026-08-15:** zmiana słownictwa (**UI-17**) — commity `9b0c106c` i `13f9ed61`. Objęła landing, kasę, panel uczestnika, poradnik i PDF potwierdzenia. Przy realizacji wyszła kolizja dwóch znaczeń słowa „składka" → **ADR-024**. Trzy elementy czekają na potwierdzenie Michała: pozycja sloganu w hero, łącznik w „towarzysko-szkoleniowy" i przeniesienie „Jesień 2026" z górnej linii do linii z trasą.
+- **Zrealizowane 2026-08-13:** publikacja regulaminu (**LEGAL-6**, punkty 1-2).
+- **Niezrealizowane, w backlogu:** checkbox akceptacji regulaminu + umowy uczestnika przy checkout (**LEGAL-9**).
 - **Otwarte, blokuje decyzję prawną:** czy forma „niekomercyjna" zwalnia z numeru uprawnień organizatora turystyki (**LEGAL-7**, punkt c) — pytanie do prawnika Michała, nie do zespołu technicznego. Ta ADR nie rozstrzyga tego pytania, tylko odnotowuje że od niej zależy odpowiedź.
 - **Ryzyko do świadomości, nie do natychmiastowego działania:** nazwanie czegoś „niekomercyjnym" w treści strony nie zmienia automatycznie stanu prawnego, jeśli realia (płatność za miejsce, świadczenie usługi za wynagrodzenie) wskazują na działalność komercyjną. Ostateczna ocena należy do prawnika Michała, nie do tego dokumentu.
 

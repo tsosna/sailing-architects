@@ -3792,3 +3792,55 @@ Trzy commity. Dwa na `main` i `production`, jeden tylko na `main`.
 - **INFRA-11, UI-19, Smoke test BUG-9** — bez zmian.
 - **FEAT-18, FEAT-17, FEAT-16, FEAT-4, UI-11, UI-16, REFACTOR-5 p.2, REFACTOR-7, DEP-1a/1b** — bez zmian.
 - REFACTOR-2/4/6, SEC-4/5, INFRA-7/8/10, LEGAL-3/4/5, UI-6/10/15/18, FEAT-15 — bez zmian.
+
+## Sesja 2026-08-15 13:00 — UI-17: język strony na składkowy (nauka, tryb ja-wskazuję-Tomek-pisze)
+
+### Zmiany
+
+Trzy commity, wszystkie na `main`; push na `production` osobno.
+
+- **`1ffb12f1`** — `src/convex/_generated/server.*`: przegenerowane typy Convexa (nowe `env`), świadomie **oddzielone** od zmian merytorycznych.
+- **`9b0c106c`** — jedenaście plików: `berth-badge.ts`, `crew-guide.ts`, `booking-confirmation-pdf.ts`, `pricing-section`, `route-section`, `site-nav`, `book`, `dashboard`, `dashboard/pay`, `pl.po`, `en.po`. Cena → składka w całej komunikacji z uczestnikiem.
+- **`13f9ed61`** — hero + stopka: slogan „Zapraszamy do załogi na nasz prywatny rejs towarzysko-szkoleniowy", `.eyebrow` → `.invite`, „Jesień 2026" zeszło do linii z trasą, „Boutique sailing trips" → „Private sailing adventures".
+- **`docs/business-decisions/ADR-024-membership-fee-naming.md`** (nowy) + wpis w README ADR; **ADR-021** — sekcja Konsekwencje zaktualizowana (UI-17 już nie jest „niezrealizowane").
+- **`docs/backlog.md`** — UI-17 skreślone; nowe: **UI-20** (pasek trasy w panelu), **I18N-2** (sprzątanie `#~`), **SEC-6** (PDF ufa `userId` z query), **LEGAL-11** (regulamin vs rozróżnienie składek); feedback `2026-08-15.md` odhaczony.
+
+### Decyzje
+
+- **Zakres szerszy niż prośba Michała — decyzja Tomka.** Michał pisał o „stronie"; Tomek rozszerzył na panel uczestnika, PDF i maile: „mail i PDF to też komunikacja z uczestnikiem". Panel admina świadomie poza — narzędzie wewnętrzne. **Maile sprawdzone i nietknięte**: nie mają słowa „cena", tylko „wpłata"/„rata". To wynik kontroli, nie pominięcie zakresu.
+- **„Opłać", nie „uiść" — mimo że „uiść" brzmi mniej handlowo.** Tomek postawił pytanie, ja odradziłem: komercyjny był czasownik „Zapłać" i zwrot „Przejdź do płatności", nie „Opłać". Cały efekt niesie rzeczownik „składka". „Uiść" dokłada rejestr urzędowy, nie niekomercyjność — a jest też dosłownym słowem Michała.
+- **Dwie składki dostają pełne nazwy → ADR-024.** Mechaniczna zamiana produkowała zdanie „Poza składką: … (składka pokładowa …)". Zasada: pełna nazwa tam, gdzie obie mogą się pomylić; krótka etykieta tam, gdzie kwota stoi obok i rozróżnia kontekst.
+- **Pliki generowane osobnym commitem.** `_generated` zmieniło się od `npx convex dev`, nie od naszej pracy. Wciągnięte do commita o słownictwie zaciemniłoby oba.
+- **`.eyebrow` przemianowany, nie zdublowany.** Styl 11px/wersaliki/4px odstępu jest zaprojektowany na dwa słowa; zdanie o 62 znakach dostałoby trzy linie krzyczącego tekstu. Zostawienie starej reguły dałoby martwy selektor.
+
+### Wnioski
+
+- **Wzorzec wyszukiwania buduje się z końcówek, nie z rdzenia.** Grep po `cen` łapie `center`, `centre`, `percent`, `suggestedPercent` — w tym projekcie kilkadziesiąt linii CSS. Wyliczenie polskich końcówek (`cen(a|y|ę|ie|nik|owy)\b`) zawęża sondę z liter do form wyrazu. Trzecia odsłona rodziny „sonda znajduje litery, nie pojęcia" w trzy sesje (`architects`, `rodo`/„narodowość", teraz `cen`/`center`).
+- **Martwy wpis `.po` powstaje także wtedy, gdy tekst nadal jest na stronie.** „Jesień 2026" trafiło do `#~`, choć data widnieje w hero — bo przeniosła się do środka dłuższego literału. Jednostką tłumaczenia jest cały literał, nie słowo. Skutek na przyszłość: tłumacz nie dostanie osobno „Autumn 2026", tylko całą linię z trasą.
+- **Formatowanie kodu nie tworzy nowych kluczy.** Prettier złamał zdanie stopki na dwie linie; `msgid` został jednolinijkowy — Wuchale normalizuje białe znaki. Gdyby tego nie robił, każde uruchomienie Prettiera osierocałoby połowę katalogu.
+- **Interpolacja ma własny zapis w `.po`.** `Zapłać ${kwota} zł` daje `msgid "Opłać {0} zł →"` plus komentarz `#. 0: selectedPaymentOption?.amountFormatted ?? ''`. Numer zamiast wartości, żeby tłumacz mógł przestawić dziurę w zdaniu; komentarz, żeby wiedział, co w nią wchodzi.
+- **138 martwych wpisów przy 659 aktywnych — i żaden nie kosztuje bajta w przeglądarce.** Skompilowany katalog bierze tylko aktywne. Koszt jest w czytaniu diffów, nie w wydajności. Ich funkcja (odzysk tłumaczenia) jest dziś warta zero, bo `en.po` ma wszystkie `msgstr` puste.
+- **Zwłoki zostawia też brzmienie, które żyło dziesięć minut.** W diffie `pl.po` widać `#~ "Składka zawiera"` — wersję poprawioną w trakcie sesji na „Składka rejsowa zawiera". Te 138 wpisów nie wzięło się z wielkich przebudów, tylko z dziesiątek drobnych poprawek słowa.
+- **Klasa CSS w Svelte jest lokalna dla komponentu.** Widziałem `.eyebrow` w kilku plikach i założyłem wspólny styl — nieprawda: każdy komponent dostaje własny sufiks przy kompilacji. `.eyebrow` w `pricing-section` i w `+page.svelte` to dwie niepowiązane reguły. Poprawiłem się w trakcie kroku, po sprawdzeniu, że w tym pliku klasa występuje dokładnie dwa razy.
+- **Katalog `.po` dogonił źródło już po commicie.** `9b0c106c` zawiera zmienione literały z `dashboard/+page.svelte` i **stary** katalog — `msgid "Cena"` nadal z referencją do tej trasy. Nowe wpisy pojawiły się dopiero, gdy trasa została faktycznie załadowana w dev serwerze; ekstrakcja idzie za tym, co Vite przetwarza, nie za zapisem na dysku. Praktycznie: przy zmianie copy na wielu trasach trzeba je wszystkie odwiedzić (albo puścić pełną ekstrakcję) **przed** `git add`, i sprawdzić `git status` drugi raz. Przy okazji dowód na regułę z tej samej sesji: `msgid "Składka"` ma teraz dwie linie `#:` — `route-section` i `dashboard` — czyli identyczny tekst z dwóch plików to jeden wpis.
+- **Strzałka na screenshocie nie mówi, w którą stronę ma pójść element.** Odczytałem strzałki prowadzące od paska trasy do dwóch zakładek jako „przenieś to tam" i zapisałem UI-20 odwrotnie do intencji; Tomek poprawił. Rysunek pokazuje **powiązanie**, kierunek dopowiada czytający — i dopowiada go zgodnie z własną hipotezą (moją było „na Rezerwacji i tak stoi już opis etapu, więc pasek jest zbędny"). Ta sama rodzina co „wzorzec wyszukiwania niesie założenie tego, kto go pisze" z 08-14, tylko sondą jest tu oko.
+- **Feedback może nie zawierać ani jednego zdania.** `docs/feedback/2026-08-15.md` to jedna linia ze ścieżką do PNG; całe zgłoszenie (UI-20) jest czerwonym flamastrem na screenshocie. Sonda po treści pliku nic by nie znalazła — trzeba było otworzyć obrazek. Kolejna odsłona „deklaracja nie dowodzi zawartości", tym razem w drugą stronę: plik istnieje i nie kłamie, tylko nie niesie treści sam z siebie.
+- **Zmiana metody nauki, wprowadzona przez Tomka.** Robotę mechaniczną (inwentarze, filtrowanie wyników, tabelki) robi Claude; Tomek chce **rozbioru użytego polecenia**, żeby rozumieć narzędzie, ale nie chce wykonywać kroków pośrednich. Uzasadnienie: przepisywanie wierszy nie uczy niczego, czego nie uczy przeczytanie gotowej listy. Zapisane w pamięci projektu.
+
+### Następne kroki
+
+#### Next
+
+- **Wiadomość do Michała, jedną porcją:** trzy punkty do potwierdzenia z UI-17 (pozycja sloganu, łącznik w „towarzysko-szkoleniowy", zejście „Jesień 2026" z pierwszej linii), nazwa „składka rejsowa" (ADR-024), „Po terminie" zamiast „Zaległe" (z 08-14) oraz pytania z `privacy-policy-inputs.md`.
+- **UI-20** — pasek „Cała trasa rejsu" ma być na **wszystkich** zakładkach panelu. Dziś renderuje się tylko przy `tab === 'booking'` (`dashboard/+page.svelte:477`, wewnątrz bloku od :318). Kierunek: wyjąć sekcję z bloku warunkowego, nie kopiować jej do trzech zakładek.
+- **BUG-11** — niezaczęty; korzeń wskazany: `createBookingPaymentSchedule` (`mutations.ts:149`), `dueAt` kopiowane z pozycji planu, czyli niezależne od daty zakupu. **Uwaga: backlog mówił `createPaymentSchedule` — taka funkcja nie istnieje.**
+- **LEGAL-2** — polityka prywatności; nadal blokowana odpowiedziami Michała.
+
+#### Blocked / Later / Open questions
+
+- **SEC-6** — nowa pozycja, warta decyzji szybciej niż reszta kolejki: PDF z danymi osobowymi pobierany bez logowania, jeśli ktoś zna adres.
+- **I18N-2** — sprzątanie `#~`; **przed** pierwszym tłumaczeniem EN, nie po.
+- **LEGAL-11** — czy regulamin i umowa uczestnika mówią o składce to samo, co teraz mówi strona.
+- **INFRA-12, LEGAL-10, INFRA-11, UI-19, Smoke test BUG-9** — bez zmian.
+- **FEAT-18, FEAT-17, FEAT-16, FEAT-4, UI-11, UI-16, REFACTOR-5 p.2, REFACTOR-7, DEP-1a/1b** — bez zmian.
+- REFACTOR-2/4/6, SEC-4/5, INFRA-7/8/10, LEGAL-3/4/5, UI-6/10/15/18, FEAT-15 — bez zmian.
