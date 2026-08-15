@@ -3891,3 +3891,60 @@ Kod pisał Tomek, cztery kroki + smoke.
 - **LEGAL-11, INFRA-12, LEGAL-10, INFRA-11, UI-19, Smoke test BUG-9** — bez zmian.
 - **FEAT-18, FEAT-17, FEAT-16, FEAT-4, UI-11, UI-16, REFACTOR-5 p.2, REFACTOR-7, DEP-1a/1b** — bez zmian.
 - REFACTOR-2/4/6, SEC-4/5, INFRA-7/8/10, LEGAL-3/4/5, UI-6/10/15/18, FEAT-15 — bez zmian.
+
+## Sesja 2026-08-15 (III) 20:30 — LEGAL-12 (a), UI-20, projekt sekcji polityki prywatności
+
+### Zmiany
+
+Cztery commity, wszystkie na `main`. **Nic nie poszło na produkcję** — świadomie.
+
+- **`7a6895cd`** — `dashboard/+page.svelte`: sekcja „Cała trasa rejsu" wyjęta z bloku `{#if tab === 'booking'}` i wstawiona **nad pasek zakładek**. Kod pisał Tomek; diff to czyste przeniesienie, jedyna różnica tekstowa to wcięcie. **UI-20 zamknięte.**
+- **`6533aa6d`** — `docs/backlog.md`: zamknięcie punktu (a) z LEGAL-12 wraz z zapisem, co dokładnie sprawdzono i dlaczego wynik brzmi „nie da się ustalić".
+- **`208dd2bf`** — dwie nowe pozycje: **LEGAL-13** (DPA Vercela nie obejmuje planu Hobby) i **SEC-7** (log dziedzinowy pobrań dokumentów).
+- **`dec22f52`** — `privacy-policy-inputs.md`: nowa **Część 6** (projekt pięciu sekcji polityki z uzasadnieniem każdego brzmienia + tabela faktów o dostawcach), pytanie (b) z LEGAL-12 dopisane do „Część 4 — pytania do prawnika", nowa pozycja **INFRA-13** w backlogu.
+
+Wiki: trzy nowe koncepty (`logs-answer-only-questions-the-code-asked`, `log-retention-vs-data-minimisation` — oba `universal`; `provider-dpa-tied-to-plan-tier` — `stack`) plus rozszerzenie `wuchale-msgid-lifecycle`.
+
+**ADR nie powstał.** W sesji nie zapadła decyzja biznesowa — jedyna kandydatka (upgrade Vercela na Pro) należy do Michała i jeszcze nie została podjęta. Zasada redakcyjna polityki prywatności została zapisana w `privacy-policy-inputs.md` jako materiał wejściowy, nie jako decyzja produktowa.
+
+### Decyzje
+
+- **Punkt (a) z LEGAL-12 domknięty wynikiem negatywnym, a nie porzucony.** Sprawdzone **oba** wejścia do danych: Vercel (Hobby, retencja 1 h wobec 107 dni ekspozycji) i Convex (najstarszy wpis sprzed ~12 h, w oknie 2 wywołania — zgodne ze smoke testami z poprzedniej sesji). **Sformułowanie wyniku nie podlega łagodzeniu:** nie „nie było nieuprawnionego dostępu", tylko „nie istnieje zapis pozwalający to stwierdzić ani wykluczyć". Zapisane w tej formie w backlogu i w pytaniu do prawnika.
+- **Pasek trasy nad zakładki, nie pod treść — wybór Tomka.** Uzasadnienie: jedna stała pozycja, pasek nie skacze przy zmianie zakładki (zakładki mają różną wysokość). Obie opcje wyjmowały sekcję z `role="tabpanel"`, co jest pożądane — przestaje być treścią jednej zakładki.
+- **Zdania nieprawdziwe zostają w projekcie polityki, oznaczone ⚠️ — decyzja Tomka.** Dotyczy dwóch: kasowania danych o zdrowiu po rejsie (wymaga SEC-1) i opcjonalności pól medycznych. Zamiast wykreślać, dorabiamy mechanizmy. Skutek uboczny jest korzystny: publikacja polityki wyznacza wtedy termin dla zadania technicznego.
+- **Zasada redakcyjna polityki: korzystne znaczy precyzyjne, nie nieprawdziwe.** Fałszywe zdanie w polityce jest samodzielnym naruszeniem art. 5 ust. 1 lit. a i przy kontroli działa przeciw administratorowi mocniej niż brak dokumentu. Narzędzia: formuły zamiast liczb („okres przedawnienia roszczeń"), sufity zamiast deklaracji („nie dłużej niż 30 dni"), czasowniki weryfikowalne zamiast przymiotników (żadnego „gwarantujemy bezpieczeństwo").
+- **Ćwiczenie „commit message — wybór z trzech" zawieszone na prośbę Tomka.** Jego uzasadnienie: to szczegół wobec luk w bezpieczeństwie i konwencjach, na niego przyjdzie czas. Od teraz piszę gotowy subject z uzasadnieniem do przeczytania. Sygnał powrotu ma wyjść od niego, nie z licznika przebiegów. Stan w chwili zawieszenia: poprawny wybór stabilny (pięć rund), rozwinięte uzasadnienie niestabilne (licznik 1 z 2).
+- **Git uruchamiam samodzielnie — decyzja Tomka.** `add` / `commit` wykonuję i zdaję relację. **Wyjątek: push na produkcję pytam każdorazowo** — to jedyny moment, w którym zmiana staje się publiczna.
+- **Push UI-20 na produkcję odłożony** — zmiana czysto wizualna, bez pilności właściwej wczorajszemu SEC-6.
+
+### Wnioski
+
+- **Log odpowiada tylko na pytania, które kod już zadawał.** Szukaliśmy żądań **bez sesji**, a naprawiony endpoint sesji nigdy nie sprawdzał — więc wywołanie uprawnione i wywołanie napastnika zapisały się identycznie. To ogranicza mocniej niż retencja: nawet roczne logi nie odpowiedziałyby na to pytanie. Praktyczny skutek: zdolność dochodzeniowa jest własnością **kodu**, nie planu hostingu, a moment dodawania guarda jest jedynym tanim momentem na dołożenie logu tego guarda. Promowane: [[concepts/logs-answer-only-questions-the-code-asked]].
+- **Bufor logów Convexa liczy się we wpisach, nie w czasie.** Najstarszy wpis pochodził sprzed ~12 h i był wywołaniem crona. Własne zadania okresowe (`expireCheckoutHolds`, `mark overdue payments`) **same wypychają starsze wpisy** i skracają okno dochodzeniowe. Nikt tego tak nie projektował — wyszło z gadatliwości cronów.
+- **Niemożność ustalenia faktu to nie ustalenie braku faktu.** Brzmi banalnie, dopóki nie trzeba tego napisać w dokumencie, który czyta prawnik. Cała wartość punktu (a) leży w tym jednym rozróżnieniu.
+- **Umowa powierzenia bywa przywiązana do planu taryfowego.** DPA Vercela obejmuje **wyłącznie Pro i Enterprise** — na Hobby dokumentu wymaganego przez art. 28 ust. 3 po prostu nie ma, i nie da się tego naprawić konfiguracją. Sprawa zero-jedynkowa, koszt $20/mies. Przy okazji: Stripe **nie oferuje rezydencji danych w UE w ogóle**, a przypięcie funkcji Vercela do regionu europejskiego (możliwe także na Hobby, jeden region) przenosi **obliczenia**, nie jurysdykcję — operatorem zostaje spółka amerykańska, IP i tak idą przez USA. Promowane: [[concepts/provider-dpa-tied-to-plan-tier]].
+- **Dłuższa retencja logów nie jest „bardziej zgodna z RODO".** Logi z adresami IP są zbiorem danych osobowych, więc wydłużenie to wymiana: zdolność badania incydentu za dłuższe przechowywanie danych o wszystkich. Każdy odbiorca strumienia logów (Axiom, Datadog) dokłada podmiot przetwarzający, transfer do USA i pozycję w polityce. W dokumencie podawać **sufit**, nie stan bieżący — „nie dłużej niż 30 dni" przeżyje zmianę planu, „1 godzina" nie. Promowane: [[concepts/log-retention-vs-data-minimisation]].
+- **SEC-1 wypłynęło dziś z trzech niezależnych stron** — retencja (nie można obiecać kasowania danych o zdrowiu, bo nic ich nie kasuje), bezpieczeństwo (nie można napisać „dane są szyfrowane", bo szyfrowany jest tylko transport) i ocena ryzyka przy LEGAL-12. To już nie jest zadanie techniczne „na kiedyś", tylko **warunek treści dokumentu prawnego**. Zauważył to Tomek.
+- **Pułapka przy projektowaniu kasowania: backupy mają własną retencję.** Dane usunięte cronem wracają z każdej wcześniejszej kopii. Reguła kasowania musi obejmować cykl kopii, inaczej słowo „usuwamy" pozostaje nieprawdziwe mimo działającego mechanizmu.
+- **Referencja `#:` w katalogu `.po` niesie ścieżkę pliku, bez numeru linii.** Przeniesienie sekcji markupu w obrębie komponentu nie ruszyło katalogu — kontrast wobec wczorajszego „katalog dogania źródło", gdzie zmieniała się **treść** literałów. Gdyby Wuchale zapisywał linie, każdy refaktor układu produkowałby szum w diffie tłumaczeń.
+- **Vercel `vercel.json` bez klucza `regions` znaczy Waszyngton.** Baza siedzi w Irlandii, więc każde zapytanie przechodzi dziś Atlantyk w obie strony. Wybór jednego regionu jest darmowy także na Hobby (INFRA-13).
+
+### Następne kroki
+
+#### Next
+
+- **LEGAL-12 (b) — pytanie do prawnika, osobną wiadomością.** Treść gotowa w `privacy-policy-inputs.md`, „Część 4", punkt 6. **Nie łączyć z resztą pytań** — 72 h z art. 33 biegnie od stwierdzenia naruszenia, nie od uzyskania opinii.
+- **LEGAL-13 — decyzja Michała:** Vercel Pro ($20/mies.) albo zmiana hostingu; bez tego brak umowy powierzenia z podmiotem, przez który idzie cały ruch. Plus jedno pytanie mailem do supportu Convexa: czy DPA obowiązuje na planie Free/Starter.
+- **Push UI-20 na produkcję** — gotowe na `main`, czeka na decyzję.
+- **BUG-11** — nowa sesja jutro (ustalone). Korzeń: `createBookingPaymentSchedule` (`mutations.ts:149`).
+- **INFRA-13** — jedna linia w `vercel.json` (`"regions": ["dub1"]`).
+- **Wiadomość do Michała** — lista rośnie od dwóch sesji: punkty z UI-17, „Po terminie", ADR-024, PDF pobieralny bez logowania (informacja), pytania z `privacy-policy-inputs.md`, a teraz koszt Vercel Pro.
+
+#### Blocked / Later / Open questions
+
+- **SEC-1** — awansuje w priorytecie: dwa zdania polityki prywatności czekają na kasowanie danych o zdrowiu i na szyfrowanie pól wrażliwych.
+- **SEC-7** — log dziedzinowy pobrań; tani, domyka to, czego dziś nie umieliśmy ustalić. Rozważyć wspólną tabelę z SEC-5 i FEAT-3.
+- **LEGAL-2** — polityka prywatności; nadal blokowana odpowiedziami Michała, ale Część 6 daje gotowy materiał na pięć sekcji.
+- **I18N-2, LEGAL-11, INFRA-12, LEGAL-10, INFRA-11, UI-19, Smoke test BUG-9** — bez zmian.
+- **FEAT-18, FEAT-17, FEAT-16, FEAT-4, UI-11, UI-16, REFACTOR-5 p.2, REFACTOR-7, DEP-1a/1b** — bez zmian.
+- REFACTOR-2/4/6, SEC-4/5, INFRA-7/8/10, LEGAL-3/4/5, UI-6/10/15/18, FEAT-15 — bez zmian.
