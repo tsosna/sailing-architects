@@ -3844,3 +3844,50 @@ Trzy commity, wszystkie na `main`; push na `production` osobno.
 - **INFRA-12, LEGAL-10, INFRA-11, UI-19, Smoke test BUG-9** — bez zmian.
 - **FEAT-18, FEAT-17, FEAT-16, FEAT-4, UI-11, UI-16, REFACTOR-5 p.2, REFACTOR-7, DEP-1a/1b** — bez zmian.
 - REFACTOR-2/4/6, SEC-4/5, INFRA-7/8/10, LEGAL-3/4/5, UI-6/10/15/18, FEAT-15 — bez zmian.
+
+## Sesja 2026-08-15 (II) 17:00 — SEC-6: PDF potwierdzenia wymaga sesji (nauka, tryb ja-wskazuję-Tomek-pisze)
+
+### Zmiany
+
+Jeden commit, `main` + `production`.
+
+- **`d1b72e94`** — pięć plików. `src/convex/queries.ts`: wspólne ciało wyjęte do `loadBookingConfirmation`, nowe `bookingConfirmationByRefInternal` (`internalQuery`, zachowuje argument `userId` dla webhooka Stripe'a), publiczne `bookingConfirmationByRef` bez argumentu `userId`, z `ctx.auth.getUserIdentity()`. `api/booking-confirmation/[bookingRef]/+server.ts`: token Clerka z `locals.auth()`, `ConvexHttpClient` tworzony **per żądanie** (klient modułowy usunięty). `api/stripe/webhook/+server.ts`: przełączony na `internal.*`. `dashboard/+page.svelte`, `book/+page.svelte`: `?userId=` usunięte z adresu pobierania.
+- **`docs/backlog.md`** — SEC-6 skreślony; nowa pozycja **LEGAL-12**.
+
+Kod pisał Tomek, cztery kroki + smoke.
+
+### Decyzje
+
+- **Guard w obu warstwach (wariant b), nie tylko w trasie SvelteKit — wybór Tomka.** Uzasadnienie: „zamyka obie drogi". Trasa była jedną z dwóch dróg do tych danych; drugą jest bezpośrednie wołanie publicznej funkcji Convexa, bo `PUBLIC_CONVEX_URL` jedzie do przeglądarki. Wariant (a) zostawiłby ją otwartą.
+- **Rozdzielenie funkcji zamiast dołożenia guarda do istniejącej.** Tę samą funkcję woła webhook Stripe'a, który **nie ma sesji użytkownika** — `getUserIdentity()` zwróciłoby tam `null` i mail z potwierdzeniem przestałby wychodzić, cicho (Stripe dostaje `200`, przeglądarka nie widzi nic, ślad tylko w logach). Ten sam ruch co A3 z 2026-05-24, tym razem na zapytaniu, nie na mutacji.
+- **Podmiana bajtów zamiast wersjonowania nie dotyczy tej zmiany** — dla porządku: PDF nie jest przechowywany, generuje się na żądanie.
+- **ADR nie powstał.** Poprawka nie zmienia niczego, co uczestnik dostaje ani za co płaci. Powód i odrzucony wariant żyją w ciele commita. Konsekwencja **prawna** zdarzenia jest osobna od decyzji technicznej i poszła do backlogu jako LEGAL-12.
+- **Push na produkcję tego samego dnia — decyzja Tomka**, po postawieniu obu stron: dziura opublikowana i dotyczy danych z art. 9 wobec zmiany ruszającej ścieżkę mailową sprawdzoną tylko na dev. Próba 3 (płatność testowa → mail z załącznikiem) przeszła przed pushem.
+
+### Wnioski
+
+- **Sprawdzenie może być poprawne i nie być tym, za co się je bierze.** `if (booking.userId !== userId) return null` wygląda jak kontrola właściciela i **jest** kontrolą — spójności pary. Że nie jest autoryzacją, widać dopiero po prześledzeniu, skąd bierze się argument: `url.searchParams.get('userId')` wobec `locals.auth()`. W miejscu guarda kod jest identyczny w obu wypadkach, więc review czytające samą linię odhaczy ją jako poprawną. To ta sama rodzina co „wzorzec wyszukiwania niesie założenie tego, kto go pisze" — tylko że tutaj założenie jest wbudowane w kod, nie w sondę.
+- **Ochrona parą to sekret współdzielony, a sekret w URL-u nie jest sekretem.** `bookingRef` to `SA-2026-` + `Math.random() * 9000`, czyli 9000 wartości — cały zakres przechodzi skrypt. `userId` z Clerka jest niezgadywalny, więc realnym wektorem nie było zgadywanie, tylko **wyciek adresu**: historia przeglądarki, logi Vercela, `Referer`, link przekazany dalej. Różnica wobec sesji jest też czasowa — sesja wygasa, adres działa zawsze.
+- **`const` na poziomie modułu to stan współdzielony między żądaniami.** Klient HTTP utworzony poza handlerem żyje przez cały proces; `setAuth` go mutuje. Dwa żądania w tej samej sekundzie i zapytanie jednego użytkownika idzie tokenem drugiego — poprawnie uwierzytelnione, bez błędu, bez śladu. Tego nie znajdzie test funkcjonalny, bo wymaga zbiegu w czasie. Promowane: [[concepts/module-scoped-client-with-mutable-auth]].
+- **Zmiana widoczności funkcji Convexa każe kompilatorowi wyliczyć wołających.** `_visibility: "public"` nie jest przypisywalne do `"internal"`, więc `pnpm check` wskazał dokładnie dwa miejsca, dokładnie te przewidziane w planie. Nie trzeba było ich szukać. Odwrotna strona tej samej monety: **adresy budowane ze stringów są poza typami** — `?userId=${...}` musiał zostać znaleziony grepem.
+- **Komunikat TS przy overloadzie to lista prób, nie jeden błąd.** Ściana na kilkanaście linii wypisuje każdą sygnaturę i powód odrzucenia; treść siedzi w dwóch ostatnich linijkach. Warto to nazwać uczącemu się, bo długość komunikatu sugeruje trudność, a rozstrzygnięcie jest krótkie.
+- **Odmowa i przepustka muszą być sprawdzone razem.** `401` bez sesji nic nie dowodzi, dopóki nie sprawdzi się, że zalogowany plik **dostaje**. Czwarta odsłona rodziny „wynik bez kontrpróby nic nie znaczy" (07-27, 07-30, 08-06).
+- **Najlepsza próba w tej sesji nie była w planie i wymyślił ją Tomek.** Moje trzy próby dowodziły, że guard stoi. Jego czwarta — zalogowany na innego żeglarza, cudzy `bookingRef` — dowodziła, że stoi **we właściwym miejscu**, czyli odtwarzała realny atak, a nie jego brak. Przy okazji wyszła własność, której nie planowaliśmy: `404` jest identyczne dla rezerwacji cudzej i nieistniejącej, więc endpoint nie działa jako wyrocznia istnienia numerów. Promowane: [[concepts/uniform-not-found-prevents-enumeration]].
+- **Podatność to nie to samo co naruszenie — ale nie wolno tego przesądzić samemu.** Dziura dotyczyła danych z art. 9 i była opublikowana. Czy uruchamia art. 33, zależy od **faktu** nieuprawnionego dostępu, a nie od jego możliwości; fakt da się (albo nie da) ustalić z logów Vercela i to jest pilne, bo 72 h liczy się od stwierdzenia. Zapisane jako LEGAL-12, żeby ocena nie zniknęła razem z zamkniętym commitem.
+
+### Następne kroki
+
+#### Next
+
+- **LEGAL-12 punkt (a)** — logi dostępu Vercela dla `/api/booking-confirmation/*`; ustalić, czy da się cokolwiek stwierdzić. Pilne przez termin z art. 33.
+- **Wiadomość do Michała** — do listy z poprzedniej sesji dochodzi jedna pozycja: PDF potwierdzenia był pobieralny bez logowania przez każdego, kto znał adres; naprawione i na produkcji. Informacja, nie pytanie.
+- **UI-20** — pasek „Cała trasa rejsu" na wszystkich zakładkach panelu; korzeń potwierdzony w kodzie: sekcja renderuje się w `dashboard/+page.svelte:477`, wewnątrz bloku `{#if tab === 'booking'}` z linii 318. Kierunek: wyjąć z bloku warunkowego, nie kopiować.
+- **BUG-11** — niezaczęty; korzeń: `createBookingPaymentSchedule` (`mutations.ts:149`).
+- **LEGAL-2** — polityka prywatności; nadal blokowana odpowiedziami Michała.
+
+#### Blocked / Later / Open questions
+
+- **I18N-2** — sprzątanie `#~`; przed pierwszym tłumaczeniem EN.
+- **LEGAL-11, INFRA-12, LEGAL-10, INFRA-11, UI-19, Smoke test BUG-9** — bez zmian.
+- **FEAT-18, FEAT-17, FEAT-16, FEAT-4, UI-11, UI-16, REFACTOR-5 p.2, REFACTOR-7, DEP-1a/1b** — bez zmian.
+- REFACTOR-2/4/6, SEC-4/5, INFRA-7/8/10, LEGAL-3/4/5, UI-6/10/15/18, FEAT-15 — bez zmian.
