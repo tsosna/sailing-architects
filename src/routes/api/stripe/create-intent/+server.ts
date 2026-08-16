@@ -24,7 +24,12 @@ function apiError(status: number, message: string) {
 	return json({ message }, { status })
 }
 
-type ScheduleRow = { sortOrder: number; kind: string; amount: number }
+type ScheduleRow = {
+	sortOrder: number
+	kind: string
+	amount: number
+	dueAt?: number
+}
 
 /**
  * Project the bookingPayments schedule for an upcoming booking, mirroring the
@@ -40,6 +45,7 @@ function projectSchedule(
 			kind: string
 			amountPerBerth: number
 			sortOrder: number
+			dueAt?: number
 		}>
 	} | null
 ): ScheduleRow[] {
@@ -52,7 +58,8 @@ function projectSchedule(
 	const rows: ScheduleRow[] = items.map((item) => ({
 		sortOrder: item.sortOrder,
 		kind: item.kind,
-		amount: item.amountPerBerth * berthCount
+		amount: item.amountPerBerth * berthCount,
+		dueAt: item.dueAt
 	}))
 
 	const scheduledAmount = items.reduce(
@@ -77,7 +84,8 @@ function projectSchedule(
  */
 function validateSelection(
 	schedule: ReadonlyArray<ScheduleRow>,
-	selectedSortOrders: number[]
+	selectedSortOrders: number[],
+	now: number
 ): { ok: true; amount: number } | { ok: false; message: string } {
 	if (selectedSortOrders.length === 0) {
 		return { ok: false, message: 'Nie wybrano żadnej płatności' }
@@ -105,6 +113,20 @@ function validateSelection(
 		return {
 			ok: false,
 			message: 'Wybór musi obejmować raty od pierwszej, bez pomijania'
+		}
+	}
+
+	const overdueRows = schedule.filter(
+		(r) => r.dueAt !== undefined && r.dueAt < now
+	)
+	if (overdueRows.length > 0) {
+		const minimumSortOrder = Math.max(...overdueRows.map((r) => r.sortOrder))
+		const lastSelected = unique[unique.length - 1]
+		if (lastSelected < minimumSortOrder) {
+			return {
+				ok: false,
+				message: `Niektóre raty są już po terminie, należy wybrać pierwsze ${minimumSortOrder} płatności`
+			}
 		}
 	}
 
@@ -163,7 +185,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		berthIds.length,
 		plan ?? null
 	)
-	const validation = validateSelection(schedule, selectedSortOrders)
+	const validation = validateSelection(schedule, selectedSortOrders, Date.now())
 	if (!validation.ok) return apiError(400, validation.message)
 
 	const bookingRef = `SA-2026-${String(Math.floor(Math.random() * 9000) + 1000)}`
