@@ -85,7 +85,9 @@
 				</ul>
 			</div>
 			<div>
-				<p class="lists__title lists__title--dim">Składka rejsowa nie zawiera</p>
+				<p class="lists__title lists__title--dim">
+					Składka rejsowa nie zawiera
+				</p>
 				<ul class="lists__items">
 					{#each excludes as item (item)}
 						<li class="lists__item">
