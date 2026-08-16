@@ -307,6 +307,23 @@ export const upsertSegmentPaymentPlan = mutation({
 			throw new Error('Suma rat na miejsce nie może przekraczać ceny miejsca')
 		}
 
+		if (
+			args.items.length > 1 &&
+			args.items.some((item) => item.kind === 'full')
+		) {
+			throw new Error(
+				`Typ "full" zarezerwowany jest tylko dla planu z jedną pełną płatnością`
+			)
+		}
+
+		if (
+			args.items.length === 1 &&
+			args.items.some((item) => item.kind === 'full') &&
+			scheduledAmountPerBerth !== segmentPricePerBerth
+		) {
+			throw new Error('Pełna płatność musi być równa cenie miejsca')
+		}
+
 		for (const item of args.items) {
 			if (item.amountPerBerth <= 0) {
 				throw new Error(

@@ -95,7 +95,11 @@ function validateSelection(
 		return { ok: false, message: 'Duplikaty w wyborze płatności' }
 	}
 	const fullRow = schedule.find(
-		(r) => r.kind === 'full' && unique.length === 1 && unique[0] === r.sortOrder
+		(r) =>
+			r.kind === 'full' &&
+			schedule.length === 1 &&
+			unique.length === 1 &&
+			unique[0] === r.sortOrder
 	)
 	if (fullRow) {
 		return { ok: true, amount: fullRow.amount }
