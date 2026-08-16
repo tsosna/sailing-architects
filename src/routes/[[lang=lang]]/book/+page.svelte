@@ -140,14 +140,15 @@
 		slug: selectedSegment
 	}))
 	type BerthStatus = 'held' | 'taken' | 'captain' | 'complimentary'
+
 	const berthStatuses = $derived(
 		new Map<string, BerthStatus>(
-			(statusQuery.data ?? []).map(
-				({ berthId, status }: { berthId: string; status: string }) => [
+			(statusQuery.data ?? [])
+				.filter(({ heldByMe }: { heldByMe: boolean }) => !heldByMe)
+				.map(({ berthId, status }: { berthId: string; status: string }) => [
 					berthId,
 					status as BerthStatus
-				]
-			)
+				])
 		)
 	)
 
@@ -808,9 +809,9 @@
 							>
 						</div>
 						<p class="auth-note">
-							Składka rejsowa nie zawiera: kosztów dojazdu do mariny, opłat portowych i
-							paliwa (ok. 150–200 EUR/os), ubezpieczenia turystycznego (ok. 250
-							zł/os).
+							Składka rejsowa nie zawiera: kosztów dojazdu do mariny, opłat
+							portowych i paliwa (ok. 150–200 EUR/os), ubezpieczenia
+							turystycznego (ok. 250 zł/os).
 						</p>
 					</aside>
 

@@ -29,10 +29,32 @@ export const berthStatusesBySlug = query({
 			.withIndex('by_segment', (q) => q.eq('segmentId', segment._id))
 			.collect()
 
+		const identity = await ctx.auth.getUserIdentity()
+		let myHoldIntents = new Set<string | undefined>()
+
+		if (identity) {
+			const bookings = await ctx.db
+				.query('bookings')
+				.withIndex('by_user', (q) => q.eq('userId', identity.subject))
+				.collect()
+
+			myHoldIntents = new Set(
+				bookings
+					.filter((b) => b.status === 'pending')
+					.map((b) => b.stripePaymentIntentId)
+			)
+		}
+
 		const now = Date.now()
 		return berths
 			.filter((b) => !isBerthFree(b, now))
-			.map((b) => ({ berthId: b.berthId, status: b.status }))
+			.map((b) => ({
+				berthId: b.berthId,
+				status: b.status,
+				heldByMe:
+					b.holdPaymentIntentId !== undefined &&
+					myHoldIntents.has(b.holdPaymentIntentId)
+			}))
 	}
 })
 
