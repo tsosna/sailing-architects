@@ -1,7 +1,7 @@
 import { internalMutation, mutation } from './_generated/server'
 import type { MutationCtx } from './_generated/server'
 import type { Doc, Id } from './_generated/dataModel'
-import { v } from 'convex/values'
+import { ConvexError, v } from 'convex/values'
 import { isBerthFree } from './_lib/berthFree'
 import { requireConvexAdmin } from './_lib/requireAdmin'
 import { calculatePaymentStatusAfterRefund } from './_lib/refundStatus'
@@ -289,7 +289,9 @@ export const upsertSegmentPaymentPlan = mutation({
 	handler: async (ctx, args) => {
 		await requireConvexAdmin(ctx)
 		if (!args.allowFullPayment && args.items.length === 0) {
-			throw new Error('Plan płatności musi mieć raty albo płatność całości')
+			throw new ConvexError(
+				'Plan płatności musi mieć raty albo płatność całości'
+			)
 		}
 
 		const segment = await ctx.db
@@ -304,14 +306,16 @@ export const upsertSegmentPaymentPlan = mutation({
 			0
 		)
 		if (scheduledAmountPerBerth > segmentPricePerBerth) {
-			throw new Error('Suma rat na miejsce nie może przekraczać ceny miejsca')
+			throw new ConvexError(
+				'Suma rat na miejsce nie może przekraczać ceny miejsca'
+			)
 		}
 
 		if (
 			args.items.length > 1 &&
 			args.items.some((item) => item.kind === 'full')
 		) {
-			throw new Error(
+			throw new ConvexError(
 				`Typ "full" zarezerwowany jest tylko dla planu z jedną pełną płatnością`
 			)
 		}
@@ -321,17 +325,19 @@ export const upsertSegmentPaymentPlan = mutation({
 			args.items.some((item) => item.kind === 'full') &&
 			scheduledAmountPerBerth !== segmentPricePerBerth
 		) {
-			throw new Error('Pełna płatność musi być równa cenie miejsca')
+			throw new ConvexError('Pełna płatność musi być równa cenie miejsca')
 		}
 
 		for (const item of args.items) {
 			if (item.amountPerBerth <= 0) {
-				throw new Error(
+				throw new ConvexError(
 					`Kwota pozycji "${item.label}" musi być większa od zera`
 				)
 			}
 			if (item.kind !== 'full' && !item.dueAt) {
-				throw new Error(`Pozycja "${item.label}" musi mieć datę płatności`)
+				throw new ConvexError(
+					`Pozycja "${item.label}" musi mieć datę płatności`
+				)
 			}
 		}
 

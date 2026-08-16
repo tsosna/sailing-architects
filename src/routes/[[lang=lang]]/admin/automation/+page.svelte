@@ -9,6 +9,7 @@
 		defaultPlanName
 	} from '$lib/admin/payment-plan-labels'
 	import { toastState } from '$lib/state/toast.svelte'
+	import { ConvexError } from 'convex/values'
 
 	type ItemKind = 'deposit' | 'installment' | 'balance' | 'full' | 'custom'
 
@@ -284,7 +285,9 @@
 		} catch (err) {
 			toastState.addToast({
 				message:
-					err instanceof Error ? err.message : PAYMENT_PLAN_TOAST.saveFailed,
+					err instanceof ConvexError
+						? String(err.data)
+						: PAYMENT_PLAN_TOAST.saveFailed,
 				status: 'error',
 				duration: 0
 			})
