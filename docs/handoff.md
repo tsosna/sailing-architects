@@ -3997,6 +3997,9 @@ Dokumenty: **ADR-025** (reguła BUG-11), `docs/backlog.md` — BUG-11 przepisany
 - **LEGAL-12 (b)** — pytanie do prawnika, osobną wiadomością.
 - **Wiadomość do Michała** — lista rośnie trzecią sesję; dochodzi **ADR-025** (kupujący po terminie płaci wymagalne raty od razu — to jego propozycja z 08-13, przyjęta co do zasady).
 
+- **BUG-13** — data urodzenia w danych załogi nie przyjmuje `01012005`; walidacja wymaga ukośników, pole nie ma maski ani normalizacji (`src/lib/schemas/crew-profile.ts:3`). Zgłoszone przez Tomka pod koniec sesji.
+- **UI-22** — „Dane załogi" mają zejść na koniec ścieżki zakupu; dziś stoją jako krok 3 z sześciu, przed płatnością.
+
 #### Blocked / Later / Open questions
 
 - **REFACTOR-8** — wspólny helper mapy statusów koi; robić razem z drugą kopią filtra.
