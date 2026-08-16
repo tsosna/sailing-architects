@@ -3948,3 +3948,60 @@ Wiki: trzy nowe koncepty (`logs-answer-only-questions-the-code-asked`, `log-rete
 - **I18N-2, LEGAL-11, INFRA-12, LEGAL-10, INFRA-11, UI-19, Smoke test BUG-9** — bez zmian.
 - **FEAT-18, FEAT-17, FEAT-16, FEAT-4, UI-11, UI-16, REFACTOR-5 p.2, REFACTOR-7, DEP-1a/1b** — bez zmian.
 - REFACTOR-2/4/6, SEC-4/5, INFRA-7/8/10, LEGAL-3/4/5, UI-6/10/15/18, FEAT-15 — bez zmian.
+
+## Sesja 2026-08-16 — BUG-11 (reguła + warstwa serwerowa), BUG-12 (2 z 3 warstw), błędy panelu jako zdania
+
+### Zmiany
+
+Pięć commitów, wszystkie na `main`. **Nic nie poszło na produkcję.**
+
+- **`6bbc120e`** — `create-intent/+server.ts`: `ScheduleRow` i `projectSchedule` przenoszą `dueAt`, `validateSelection` dostaje trzeci argument `now` i odrzuca wybór krótszy niż ostatnia rata po terminie. Kod pisał Tomek.
+- **`22664324`** — `upsertSegmentPaymentPlan`: dwie walidacje (`full` tylko jako jedyna pozycja; `full` tylko na pełną cenę koi) + warunek `schedule.length === 1` przy skrócie dla wiersza `full` w kasie. Kod pisał Tomek.
+- **`544b7d8d`** — pięć sprawdzeń przewidywalnych w `upsertSegmentPaymentPlan` rzuca `ConvexError`, toast panelu czyta `err.data`. `Segment not found` zostaje zwykłym `Error`. Pierwsze użycie `ConvexError` w repo.
+- **`4aeb60b7`** — `berthStatusesBySlug` zwraca `heldByMe` (rozpoznanie własnej blokady przez `ctx.auth`), `book/+page.svelte` wyrzuca własne blokady z mapy statusów. Kod pisał Tomek.
+- **`a5a207a2`** — `style:`, prettier na `pricing-section.svelte` (dług sprzed sesji; `pnpm lint` znów przechodzi formatowanie).
+
+Dokumenty: **ADR-025** (reguła BUG-11), `docs/backlog.md` — BUG-11 przepisany, nowe **BUG-12**, **UI-21**, **FEAT-19**, **REFACTOR-8**, dopisek do REFACTOR-2, wpis diffu feedbacku.
+
+### Decyzje
+
+- **BUG-11, wariant (a) — decyzja Tomka: plan Michała nietykalny, kupujący po terminie obejmuje wymagalne raty pierwszą wpłatą.** Uzasadnienie jego słowami: „promujemy tych, którzy zdecydują kupić wcześniej". Wariant (b) (przesuwanie terminów) odrzucony, bo terminy przestałyby być wspólne dla rejsu; (c) (odcięcie sprzedaży) to decyzja Michała o pieniądzach. → **ADR-025**.
+- **`full` jest niezmiennikiem, nie etykietą.** Pierwsza wersja reguły Tomka brzmiała „`full` tylko dla systemu, gdy nie ma planu" — doprecyzowana po znalezieniu szablonu „Całość teraz", który tworzy legalny jednopozycyjny plan `full`. Ostateczna postać: **`full` = jedyna pozycja planu i pełna cena koi**, pilnowane dwoma sprawdzeniami przy zapisie plus warunkiem w kasie.
+- **BUG-12: reguła „ostatni wybór wygrywa", w zakresie tego samego segmentu.** Odrzucony wariant tańszy (rozpoznanie własnego holdu w guardzie `createBooking`) — Convex nie rozmawia ze Stripe'em w mutacji, więc stary PaymentIntent zostałby płatny i ta sama koja dałaby się kupić dwa razy.
+- **Kolejność: anulowanie w Stripie przed zwolnieniem koi.** Nie kosmetyka — jeśli stary intent zdążył zostać opłacony, `cancel` rzuci błąd i to jedyny moment, w którym się o tym dowiemy.
+- **`ConvexError` tylko w jednej funkcji.** Wzorzec nowy w repo; rozszerzenie na resztę mutacji osobno, żeby nie mieszać konwencji przy okazji naprawy.
+- **Dane rejsu: idziemy docelowo w wariant (c) — wszystko do bazy — nie w półśrodek (b).** Decyzja Tomka po zmierzeniu kosztu obu.
+- **Tomek przerwał BUG-11 przed próbami, żeby zrobić BUG-12.** Moja rekomendacja była odwrotna. Skutek: pierwsza wersja reguły BUG-11 pojechała do commita niesprawdzona i **okazała się dziurawa** — obalił ją pierwszy przebieg przez interfejs (pozycja `kind: full`).
+
+### Wnioski
+
+- **Skrót w kodzie oparty na nazwie typu zakłada niezmiennik, którego nikt nie wymusza.** `kind === 'full'` czytane jako „to jest całość ceny" było prawdą wyłącznie przez konwencję. Wystarczyła jedna pozycja planu z tym typem i kwotą 690 zł z 2900 zł, żeby cała nowa reguła została ominięta wcześniejszym `return`. Moja ocena tego skrótu („nie luka, płatność całością pokrywa każde minimum") była odczytaniem intencji nazwy, nie sprawdzeniem danych.
+- **`pnpm check` przepuszcza zdania sprzeczne logicznie.** `args.items.length === 0 && args.items.some(...)` nie może być prawdziwe nigdy — pusta tablica nie ma elementów. Kompilator sprawdza kształt, nie sens; martwy warunek wygląda jak działający.
+- **Diff pokazuje różnicę, nie stan.** Przegląd zamiany „wszystkie `throw new Error` → `ConvexError`" zrobiony na `git diff` przeoczył jeden throw — ten, który powstał wcześniej tego samego dnia i pozostając bez zmiany nie pojawił się w diffie w ogóle. Właściwym narzędziem był `grep` po pliku. Kosztowało to dwie fałszywe hipotezy (wersja CLI, `instanceof` przez bundler).
+- **Ta sama derywacja w dwóch plikach kosztuje przy diagnozie, nie przy pisaniu.** Filtr własnych blokad dołożony w `book/+page.svelte` wyglądał na skończoną robotę; landing (`cabins-section.svelte`) miał własną kopię tej samej mapy statusów i zachowywał się po staremu. Objaw czytaliśmy z dwóch różnych stron naraz — logi z jednej, zrzut ekranu z drugiej. → **REFACTOR-8**.
+- **Zły typ danych nie tylko przepuścił płatność — schował ją.** Panel klienta filtruje `p.kind !== 'full'`, więc opłacona „Zaliczka" z typem `full` znikała z harmonogramu kupującego. Jedna zła wartość dała dwa niepowiązane objawy w różnych warstwach.
+- **`ConvexError` vs `Error` to nie kosmetyka.** Zwykły wyjątek jest dla Convexa awarią funkcji: do klienta jedzie otoczka z nazwą funkcji, Request ID i **ścieżką pliku z numerem linii**, a na deploymencie produkcyjnym treść jest wycinana do „Server Error". Michał zobaczyłby komunikat mówiący nic.
+- **Rozjazd danych dev potrafi udawać błąd kodu.** Panel liczył sumę planu wobec ceny z pliku statycznego (3800), serwer wobec ceny z bazy dev (2999) — badge „VALID" i odmowa zapisu w tej samej sekundzie, obie poprawne. Produkcja sprawdzona i zgodna. Zanim uzna się sprzeczność UI-vs-serwer za usterkę, trzeba sprawdzić, czy obie strony czytają ten sam wiersz.
+- **Blokada koi bez właściciela to nie to samo co blokada.** `berths` mają `holdExpiresAt` i `holdPaymentIntentId`, nie mają `userId` — więc guard sprzedaży nie odróżnia cudzej blokady od własnej sprzed minuty. Kupujący, który chciał dołożyć drugą koję, dostawał ścianę na 15 minut i **nie mógł nawet odznaczyć** swojej koi, bo status wygrywał z zaznaczeniem, a klik na cokolwiek ze statusem był połykany.
+- **Ceny dynamiczne — research bez implementacji.** Dziedzina (revenue management: Littlewood, EMSR, bid-price control) opiera się na estymacji rozkładu popytu z historii. Przy kilkunastu kojach na rejs próbka jest za mała, a bandyci wieloręcy uczą się przez świadome sprzedawanie po złej cenie. Rekomendacja: jawna drabinka progów. Dwie pułapki: cena zindywidualizowana uruchamia obowiązek informacyjny (Omnibus), a model „później = taniej" uczy klientów czekać. → **FEAT-19**.
+
+### Następne kroki
+
+#### Next
+
+- **BUG-12 warstwa 1** — zwolnienie własnej blokady w `/api/stripe/create-intent`: nowy `internalQuery` (rezerwacje `pending` tego użytkownika, ten segment, żywy hold) → `stripe.paymentIntents.cancel` → `internal.mutations.cancelBooking`. Bez tego powrót do wyboru nadal kończy się `409`.
+- **BUG-12, druga kopia** — ten sam filtr `heldByMe` w `cabins-section.svelte:41`; landing zachowuje się dziś po staremu.
+- **BUG-11, część otwarta** — UI wyboru płatności ma samo zaznaczać minimalny prefiks i nie pozwalać zejść niżej; komunikat odmowy do przepisania.
+- **Wyrównanie dev** — `voyageSegments` s3 `pricePerBerth` 2999 → 3800 (plik i prod mają 3800).
+- **Push UI-20 na produkcję** — czeka od 08-15, decyzja Tomka.
+- **LEGAL-12 (b)** — pytanie do prawnika, osobną wiadomością.
+- **Wiadomość do Michała** — lista rośnie trzecią sesję; dochodzi **ADR-025** (kupujący po terminie płaci wymagalne raty od razu — to jego propozycja z 08-13, przyjęta co do zasady).
+
+#### Blocked / Later / Open questions
+
+- **REFACTOR-8** — wspólny helper mapy statusów koi; robić razem z drugą kopią filtra.
+- **FEAT-19** (ceny dynamiczne), **UI-21** (klikalny pasek kroków) — nowe, bez pilności.
+- **REFACTOR-2** — kierunek ustalony (wszystko do bazy), zakres duży.
+- **SEC-1, SEC-7, LEGAL-2, LEGAL-13, I18N-2, INFRA-13** — bez zmian.
+- **FEAT-18, FEAT-17, FEAT-16, FEAT-4, UI-11, UI-16, REFACTOR-5 p.2, REFACTOR-7, DEP-1a/1b** — bez zmian.
+- REFACTOR-2/4/6, SEC-4/5, INFRA-7/8/10, LEGAL-3/4/5, UI-6/10/15/18, FEAT-15 — bez zmian.
