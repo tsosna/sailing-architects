@@ -20,7 +20,8 @@ fi
 
 if [ ! -f .vercel/project.json ]; then
 	echo "Katalog nie jest zlinkowany z projektem Vercel." >&2
-	echo "Najpierw: pnpm dlx vercel@latest link --yes" >&2
+	echo "Szukałem: $(pwd)/.vercel/project.json" >&2
+	echo "Najpierw, z tego samego katalogu: pnpm dlx vercel@latest link --yes" >&2
 	exit 1
 fi
 
