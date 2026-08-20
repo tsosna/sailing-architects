@@ -16,9 +16,12 @@ przeniesienia. Są trzy niezależne miejsca, z czego dwa są zdalne.
 
 Podział plików lokalnych:
 
-- **`.env`** — plik **generowany** przez `vercel env pull .env`. Nie edytuj go
-  ręcznie z myślą, że zmiana gdzieś dojedzie; edycja jest lokalna i zginie przy
-  następnym pullu. Żeby zmiana była trwała, wypchnij ją (patrz „Zmiana sekretu").
+- **`.env`** — wypełniany przez `vercel env pull .env --yes`. Uwaga: pull
+  **scala**, nie nadpisuje — zmienne obecne lokalnie, a nieobecne w środowisku
+  Development, zostają w pliku nietknięte. Ręczna edycja nie zniknie przy
+  następnym pullu, ale też nigdzie nie dojedzie: zostanie u Ciebie jako cicha
+  rozbieżność. Żeby zmiana obowiązywała wszędzie, wypchnij ją (patrz „Zmiana
+  sekretu"). Żeby dostać plik czysty, skasuj `.env` przed pullem.
 - **`.env.local`** — należy do narzędzi, nadpisywane automatem. Ma wyższy
   priorytet niż `.env` w Vite, więc adres Convexa stąd wygrywa.
 
@@ -45,7 +48,7 @@ na poziomie repozytorium i zapisuje `.vercel/repo.json` zamiast
 Sekrety — **zwróć uwagę na jawną nazwę pliku**, patrz „Pułapki":
 
 ```sh
-pnpm dlx vercel@latest env pull .env
+pnpm dlx vercel@latest env pull .env --yes
 ```
 
 Podpięcie się pod współdzielony deployment dev w Convex:
@@ -75,7 +78,7 @@ Na maszynie, na której go zmieniasz:
 Na pozostałych maszynach:
 
 ```sh
-pnpm dlx vercel@latest env pull .env
+pnpm dlx vercel@latest env pull .env --yes
 ```
 
 Skrypt jest idempotentny (kasuje starą wartość przed dodaniem nowej), więc można
@@ -108,8 +111,15 @@ lokalnego backendu na `0.0.0.0`.
 
 ## Pułapki
 
-- **`vercel env pull` bez argumentu pisze do `.env.local`** i nadpisze plik
+- **`vercel env pull` bez argumentu pisze do `.env.local`** i wejdzie w plik
   należący do Convexa. Zawsze podawaj `.env` jawnie.
+- **Pull scala, więc nieaktualne wartości lokalne przeżywają.** Po migracji albo
+  po dłuższej przerwie skasuj `.env` i zaciągnij od zera, zamiast pullować na
+  wierzch.
+- **Zmienna czytana przez `$env/static/private` musi istnieć w środowisku
+  Development**, inaczej build pada. Pusta wartość w lokalnym `.env` tego nie
+  załatwia: `secrets-push.sh` pomija puste, więc do Vercela nic nie trafia,
+  a pull nie ma czego przynieść. Tak wyszło z `CRON_SECRET`.
 - **`vercel link --yes` bez `--project` linkuje repo, nie projekt** — powstaje
   `.vercel/repo.json` (tryb alpha) zamiast `.vercel/project.json`, a wszystkie
   `vercel env` przestają działać. Jeśli tak wyjdzie: skasuj `repo.json` i zlinkuj
