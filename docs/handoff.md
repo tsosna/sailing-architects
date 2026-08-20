@@ -4008,3 +4008,50 @@ Dokumenty: **ADR-025** (reguła BUG-11), `docs/backlog.md` — BUG-11 przepisany
 - **SEC-1, SEC-7, LEGAL-2, LEGAL-13, I18N-2, INFRA-13** — bez zmian.
 - **FEAT-18, FEAT-17, FEAT-16, FEAT-4, UI-11, UI-16, REFACTOR-5 p.2, REFACTOR-7, DEP-1a/1b** — bez zmian.
 - REFACTOR-2/4/6, SEC-4/5, INFRA-7/8/10, LEGAL-3/4/5, UI-6/10/15/18, FEAT-15 — bez zmian.
+
+---
+
+## Sesja 2026-08-20 — INFRA-4: sekrety i Convex dev przenośne między maszynami
+
+### Zmiany
+
+- **Repo MacAir zsynchronizowane z remote** — było 60 commitów w tyle (ostatni lokalny z 07-25). Jedyna lokalna zmiana (`docs/feedback/2026-07-20.md`) okazała się bajt w bajt tym, co remote miał już zacommitowane w `48bed23`, więc odrzucona bez straty.
+- **Convex dev przeniesiony z anonimowego backendu lokalnego do chmury** — `dev:animated-lemming-109` (eu-west-1), wspólny dla MacAira i Mac mini. Dane ze starego backendu wyeksportowane na Mini (`convex export`) i zaimportowane do chmury (`convex import --replace`).
+- **`scripts/secrets-push.sh`** (nowy) — wypycha sekrety z lokalnego `.env` do Vercel → Development (12 zmiennych) i do zmiennych deploymentu Convexa (5). Idempotentny, wartości nigdzie nie drukuje, odmawia startu bez zlinkowanego Vercela i bez chmurowego deploymentu.
+- **`docs/dev-machine-setup.md`** (nowy) — procedura dla nowej maszyny, procedura odświeżania sekretu, sekcja pułapek.
+- **`.env.example`** — zmienne Convexa zakomentowane z adnotacją, że należą do `.env.local`; opis `CONVEX_ADMIN_KEY` poprawiony na deploy key z dashboardu.
+- **`src/convex/_generated/server.*`** przegenerowane przypiętym CLI (commit `55586d4`) — usunięty `export const env`, którego 1.36 nie emituje.
+- **Backlog** — INFRA-4 i INFRA-5 zamknięte, INFRA-14/15 otwarte, FEAT-20 i LEGAL-14/15 dopisane z feedbacku, **ADR-026** utworzony, README ADR-ów uzupełniony o brakujący wpis ADR-025.
+- **Pamięć projektu** — notatka `macair-clone-no-env` skasowana; jej treść przestała być prawdziwa, a sama zawierała warunek „gdy `.env` się pojawi, do usunięcia".
+
+### Decyzje
+
+- **Chmurowy deployment dev zamiast anonimowego lokalnego.** Convex daje jeden deployment dev na parę konto+projekt, więc obie maszyny trafiają na ten sam backend i te same dane. Alternatywa (zostać na lokalnym) oznaczała utrzymywanie dwóch rozjeżdżających się baz.
+- **Vercel → Development jako magazyn sekretów**, a nie 1Password ani sops/age. Vercel jest już w stacku; pozostałe warianty dokładały narzędzie i konto do konfiguracji nowej maszyny.
+- **Zasilanie jednorazowe idzie z maszyny kanonicznej, nie z tej, przy której się siedzi.** Tomek zmienił w międzyczasie klucze Stripe na Mini, więc zasilenie Vercela z sześciotygodniowego `.env` MacAira utrwaliłoby nieaktualne wartości. Skrypt trafił do repo właśnie dlatego, że musi dać się uruchomić z dowolnej maszyny.
+- **`CONVEX_ADMIN_KEY` z trzema uprawnieniami `runInternal*`**, bez `runTestQuery` — lustro klucza runtime z produkcji, żeby różnica uprawnień między środowiskami nie była kiedyś fałszywym tropem.
+- **Adres administratora z maila Michała nie jest przepisywany do repo** — backlog i ADR-026 wskazują na plik źródłowy. Jedna kopia danych osobowych zamiast trzech.
+
+### Wnioski
+
+- **„Przenieś plik konfiguracyjny" bywa złą diagnozą tego samego problemu.** INFRA-4 był zgłoszony jako brak `.env`, a `.env` na MacAirze istniał od 8 lipca, komplet 16 kluczy. Prawdziwym blokerem było `CONVEX_DEPLOYMENT=anonymous:…` i `PUBLIC_CONVEX_URL=127.0.0.1:3210`: baza dev leżała w `~/.convex` jednej maszyny. Żadna liczba kopii `.env` tego nie naprawia — trzeba było zmienić topologię, nie transport.
+- **Sekrety dev bywają rozproszone po magazynach, o których nie wie żaden plik w repo.** Tu były trzy: Vercel, zmienne środowiskowe deploymentu Convexa i lokalny `.env.local`. Ten środkowy ujawnił się dopiero wtedy, gdy push funkcji padł na `CLERK_JWT_ISSUER_DOMAIN` — świeży deployment startuje pusty.
+- **`vercel env pull` scala, nie nadpisuje.** Zmienne obecne lokalnie, a nieobecne w środowisku, przeżywają pull nietknięte. Nieaktualne `CONVEX_DEPLOYMENT=anonymous:…` przetrwało w ten sposób migrację. Po zmianie topologii trzeba skasować plik i zaciągnąć od zera, a do istniejącego pliku pull i tak wymaga `--yes`. Bez argumentu pisze do `.env.local` — czyli do pliku Convexa.
+- **Pusta wartość w `.env` maskuje brakującą zmienną.** `CRON_SECRET=` przechodził build, bo `$env/static/private` wymaga istnienia klucza, nie wartości. Skrypt pomija puste, więc do Vercela nic nie trafiło i pierwsza maszyna po pullu straciłaby build.
+- **`vercel link --yes` bez `--project` linkuje repozytorium, nie projekt** — zapisuje `.vercel/repo.json` (tryb alpha) zamiast `project.json`, po czym `vercel env` przestaje działać. Na dwóch maszynach ta sama komenda dała dwa różne wyniki.
+- **`npx <narzędzie>` w dokumentacji projektu to cichy dryf wersji.** `npx convex` bierze najnowsze CLI (1.44), a projekt ma przypięte 1.36. Tego samego dnia commit prostujący pliki generowane został cofnięty przez uruchomienie z drugiej maszyny. Ping-pong obserwowany, nie hipotetyczny — INFRA-15.
+- **Sonda „`ls docs/feedback/`" ma ślepą plamę przy dwóch maszynach.** Mail Michała o RODO leżał tylko na Mini i nie pojawiłby się w żadnym diffie robionym z MacAira.
+
+### Następne kroki
+
+#### Next
+
+- **Rozstrzygnąć churn z convex 1.44 na Mini** (~78 plików: `.agents/skills/`, `.claude/skills/`, `AGENTS.md`, `CLAUDE.md`, `skills-lock.json`, pliki generowane). Zacommitować odświeżenie czy odrzucić — patrz INFRA-15. Uwaga: 1.44 zjadło puste linie wokół bloku `convex-ai`, co łamie `pnpm lint`.
+- **Zacommitować `docs/feedback/RODO na jachcie.eml` z Mac mini** — na MacAirze tego pliku nie ma, a jest źródłem ADR-026 i LEGAL-14/15.
+- **LEGAL-2 odblokowany decyzją Michała** — polityka prywatności do napisania, sekcja o administratorze od zera.
+- **INFRA-14** — przypiąć wersję pnpm (MacAir 9.15.3, Mini 10.33.0).
+
+#### Blocked / Later / Open questions
+
+- Pozycje z sesji 2026-08-16 bez zmian: BUG-12 warstwy 1 i 3, BUG-11 (UI), BUG-13, UI-22, push UI-20, LEGAL-12 (b), wiadomość do Michała (dochodzą ADR-025 i ADR-026).
+- **FEAT-20** (token grupowy) — zderzyć z FEAT-19; gwarancja ceny kłóci się z drabinką czasową.
