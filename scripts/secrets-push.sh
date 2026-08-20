@@ -18,6 +18,12 @@ if [ ! -f .env ]; then
 	exit 1
 fi
 
+if [ ! -f .vercel/project.json ]; then
+	echo "Katalog nie jest zlinkowany z projektem Vercel." >&2
+	echo "Najpierw: pnpm dlx vercel@latest link --yes" >&2
+	exit 1
+fi
+
 if ! grep -q '^CONVEX_DEPLOYMENT=dev:' .env.local 2>/dev/null; then
 	echo "Ta maszyna nie jest jeszcze przełączona na chmurowy deployment dev." >&2
 	echo "Najpierw: pnpm exec convex dev --once --configure existing \\" >&2
