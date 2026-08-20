@@ -35,8 +35,12 @@ pnpm install
 ```sh
 pnpm exec convex login
 pnpm dlx vercel@latest login
-pnpm dlx vercel@latest link --yes
+pnpm dlx vercel@latest link --yes --project sailing-architects --team tsosnas-projects
 ```
+
+`--project` i `--team` nie są ozdobnikiem — bez nich `--yes` wpada w linkowanie
+na poziomie repozytorium i zapisuje `.vercel/repo.json` zamiast
+`.vercel/project.json`, czego `vercel env` nie obsłuży.
 
 Sekrety — **zwróć uwagę na jawną nazwę pliku**, patrz „Pułapki":
 
@@ -106,6 +110,10 @@ lokalnego backendu na `0.0.0.0`.
 
 - **`vercel env pull` bez argumentu pisze do `.env.local`** i nadpisze plik
   należący do Convexa. Zawsze podawaj `.env` jawnie.
+- **`vercel link --yes` bez `--project` linkuje repo, nie projekt** — powstaje
+  `.vercel/repo.json` (tryb alpha) zamiast `.vercel/project.json`, a wszystkie
+  `vercel env` przestają działać. Jeśli tak wyjdzie: skasuj `repo.json` i zlinkuj
+  ponownie z `--project` i `--team`.
 - **`vercel link` dopisuje `.env*` do `.gitignore`** — reguła szersza niż nasza,
   psuje negacje `!.env.example` / `!.env.test`. Cofnij ją, jeśli się pojawi.
 - **`npx convex` ściąga najnowsze CLI**, nie wersję z `package.json`. Efekt:
