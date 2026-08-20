@@ -1,6 +1,6 @@
 {
-	"guidelinesHash": "62d72acb9afcc18f658d88dd772f34b5b1da5fa60ef0402e57a784d97c458e57",
-	"agentsMdSectionHash": "2e7c4225c2fe4c71cd39b83389288e622de3269593294a9fc667cfd2853b237e",
-	"claudeMdHash": "2e7c4225c2fe4c71cd39b83389288e622de3269593294a9fc667cfd2853b237e",
-	"agentSkillsSha": "d0fa8085af313029add5740f67198aa42ca60c8d"
+  "guidelinesHash": "533ba2428f2dc572e825555e6e681d2e56e7e757c15a3fdd036a5d705413f020",
+  "agentsMdSectionHash": "9ad958b9c42a2a29bf78583b89fd58c6d28c2d2411bcf3996962e42394f2a4e7",
+  "claudeMdHash": "9ad958b9c42a2a29bf78583b89fd58c6d28c2d2411bcf3996962e42394f2a4e7",
+  "agentSkillsSha": "6843b65f3cbcee34bb2bc984d444f42ac7ca2a61"
 }

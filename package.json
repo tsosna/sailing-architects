@@ -55,7 +55,7 @@
 		"@clerk/localizations": "^4.5.5",
 		"@convex-dev/migrations": "^0.3.5",
 		"@stripe/stripe-js": "^9.3.0",
-		"convex": "^1.36.0",
+		"convex": "^1.44.0",
 		"convex-svelte": "^0.0.12",
 		"dejavu-fonts-ttf": "^2.37.3",
 		"pdfkit": "^0.18.0",

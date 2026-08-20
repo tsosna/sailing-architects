@@ -6,3 +6,7 @@ pnpm-lock.yaml
 skills-lock.json
 src/convex/_generated/
 docs/
+
+# Generowane przez `convex ai-files` — nie formatować
+.agents/skills/
+.claude/skills/
