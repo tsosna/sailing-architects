@@ -1,0 +1,12 @@
+# pnpm >= 11: skrypty build zależności wymagają jawnej zgody (`allowBuilds`),
+# a pominięcie niezadeklarowanego pakietu jest błędem, nie ostrzeżeniem.
+# `true` = skrypt ma się wykonać, `false` = świadomie go pomijamy.
+allowBuilds:
+  # potrzebny do budowania — jedyny, który był dozwolony też pod pnpm 9
+  esbuild: true
+  # natywne/opcjonalne, pomijane od zawsze; build przechodzi bez nich
+  '@clerk/shared': false
+  browser-tabs-lock: false
+  bufferutil: false
+  core-js: false
+  utf-8-validate: false

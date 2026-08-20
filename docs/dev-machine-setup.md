@@ -27,11 +27,41 @@ Podział plików lokalnych:
 
 Oba są w `.gitignore` i żaden nie trafia do repo.
 
+## Wersje narzędzi
+
+| Narzędzie | Wersja       | Przypięta w                     | Kto pilnuje                                     |
+| --------- | ------------ | ------------------------------- | ----------------------------------------------- |
+| Node      | **24.14.1**  | `.nvmrc`                        | nvm (`nvm use`), fnm czyta ten sam plik          |
+| pnpm      | **11.22.0**  | `packageManager` w package.json | pnpm sam, od wersji 10 wzwyż                     |
+
+pnpm od wersji 10 ma `manage-package-manager-versions` domyślnie włączone, więc
+czyta `packageManager` i **sam** pobiera właściwą wersję. Maszyna z pnpm ≥ 10
+nie wymaga żadnej komendy — wystarczy `git pull`. Corepack jest tu niepotrzebny.
+
+Maszyna z pnpm 9 lub starszym musi raz podbić wersję ręcznie (`brew upgrade pnpm`
+albo instalator ze strony pnpm), bo pnpm 9 tego pola nie honoruje.
+
+`engines.node` **celowo nie jest ustawione**: Vercel czyta to pole i wybiera po
+nim runtime produkcyjny, a to osobna decyzja niż wersja na maszynie
+deweloperskiej. `.nvmrc` działa wyłącznie lokalnie.
+
+### Skrypty build zależności
+
+pnpm 11 wymaga jawnej zgody na uruchomienie skryptów build zależności i traktuje
+brak deklaracji jako **błąd**, nie ostrzeżenie (`strictDepBuilds` domyślnie
+`true`). Lista mieszka w `pnpm-workspace.yaml` pod kluczem **`allowBuilds`**,
+jako mapa `pakiet: true|false`.
+
+Uwaga na starą nazwę: `onlyBuiltDependencies` (pnpm 10 i `package.json`) jest
+w 11 martwe. Najgorsze jest to, że `pnpm config get onlyBuiltDependencies` nadal
+je zwraca, więc wygląda na działające — a przy instalacji nie jest stosowane.
+
 ## Nowa maszyna, od zera
 
 ```sh
 git clone https://github.com/tsosna/sailing-architects.git
 cd sailing-architects
+nvm use          # bierze wersję z .nvmrc
 pnpm install
 ```
 

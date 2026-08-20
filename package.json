@@ -21,11 +21,7 @@
 		"email:handoff:yesterday": "node --env-file=.env scripts/send-yesterday-handoff-report.mjs",
 		"email:test": "node --env-file=.env scripts/send-test-email.mjs"
 	},
-	"pnpm": {
-		"onlyBuiltDependencies": [
-			"esbuild"
-		]
-	},
+	"packageManager": "pnpm@11.22.0",
 	"devDependencies": {
 		"@eslint/compat": "^2.1.0",
 		"@eslint/js": "^10.0.1",
