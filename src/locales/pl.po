@@ -3438,3 +3438,14 @@ msgstr "Private sailing adventures. Łączymy pasję żeglowania z odkrywaniem �
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Opłać"
 msgstr "Opłać"
+
+#~ msgid "Termin pozycji \"{0}\" minął {1}. Pierwsza płatność musi obejmować wszystkie raty po terminie"
+#~ msgstr "Termin pozycji \"{0}\" minął {1}. Pierwsza płatność musi obejmować wszystkie raty po terminie"
+
+#~ msgid "Termin pozycji „{0}\" minął {1}. Pierwsza płatność musi obejmować wszystkie raty po terminie."
+#~ msgstr "Termin pozycji „{0}\" minął {1}. Pierwsza płatność musi obejmować wszystkie raty po terminie."
+
+#. 0: lastOverdueItem.label; 1: formatDueDate( lastOverdueItem.dueAt )
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Termin pozycji „{0}” minął {1}. Pierwsza płatność musi obejmować wszystkie raty po terminie."
+msgstr "Termin pozycji „{0}” minął {1}. Pierwsza płatność musi obejmować wszystkie raty po terminie."

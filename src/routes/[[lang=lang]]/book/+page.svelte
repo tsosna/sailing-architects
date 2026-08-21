@@ -383,6 +383,15 @@
 		})
 	}
 
+	function formatDueDate(timestamp: number | undefined): string {
+		if (!timestamp) return ''
+		return new Date(timestamp).toLocaleDateString('pl-PL', {
+			day: '2-digit',
+			month: '2-digit',
+			year: 'numeric'
+		})
+	}
+
 	const paymentOptions: PaymentOption[] = $derived.by(() => {
 		const totalGrosze = segment.price * berths.length * 100
 		const plan = planQuery.data
@@ -424,11 +433,35 @@
 		return options
 	})
 
+	const lastOverdueItem = $derived.by(() => {
+		const items = planQuery.data?.items
+		if (!items) return null
+		const overdue = items.filter(
+			(i) => i.dueAt !== undefined && i.dueAt < Date.now()
+		)
+		if (overdue.length === 0) return null
+
+		return overdue.reduce((best, i) =>
+			i.sortOrder > best.sortOrder ? i : best
+		)
+	})
+
+	const minimumSortOrder = $derived(lastOverdueItem?.sortOrder ?? 0)
+
+	function isBelowMinimum(option: PaymentOption): boolean {
+		const lastSelected = option.sortOrders[option.sortOrders.length - 1]
+		return lastSelected < minimumSortOrder
+	}
+
 	let selectedPaymentOptionId = $state<string | null>(null)
+
+	const firstAllowedOption = $derived<PaymentOption | null>(
+		paymentOptions.find((o) => !isBelowMinimum(o)) ?? null
+	)
+
 	const selectedPaymentOption = $derived<PaymentOption | null>(
 		paymentOptions.find((o) => o.id === selectedPaymentOptionId) ??
-			paymentOptions[0] ??
-			null
+			firstAllowedOption
 	)
 
 	// ── Stripe state ─────────────────────────────────────────────────────
@@ -1139,6 +1172,14 @@
 								<fieldset class="pay-options">
 									<legend class="pay-options__legend">Co płacisz teraz?</legend>
 									{#each paymentOptions as option (option.id)}
+										{#if lastOverdueItem && option.id === firstAllowedOption?.id}
+											<p class="pay-options__notice">
+												Termin pozycji „{lastOverdueItem.label}” minął {formatDueDate(
+													lastOverdueItem.dueAt
+												)}. Pierwsza płatność musi obejmować wszystkie raty po
+												terminie.
+											</p>
+										{/if}
 										<label class="pay-options__row">
 											<input
 												type="radio"
@@ -1146,7 +1187,7 @@
 												value={option.id}
 												checked={selectedPaymentOption?.id === option.id}
 												onchange={() => (selectedPaymentOptionId = option.id)}
-												disabled={intentLoading}
+												disabled={intentLoading || isBelowMinimum(option)}
 											/>
 											<span class="pay-options__label">{option.label}</span>
 											<span class="pay-options__amount"
@@ -2188,6 +2229,12 @@
 		padding: 0 6px;
 	}
 
+	.pay-options__notice {
+		font-size: 11px;
+		color: var(--color-warm-white);
+		margin: 0 0 4px;
+	}
+
 	.pay-options__row {
 		display: grid;
 		grid-template-columns: 20px 1fr auto;
@@ -2200,6 +2247,12 @@
 
 	.pay-options__row:hover {
 		background: rgba(196, 146, 58, 0.06);
+	}
+
+	.pay-options__row:has(input:disabled) {
+		background: transparent;
+		cursor: not-allowed;
+		opacity: 0.45;
 	}
 
 	.pay-options__row input[type='radio'] {

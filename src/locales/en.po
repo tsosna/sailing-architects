@@ -3438,3 +3438,14 @@ msgstr ""
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 msgid "Opłać"
 msgstr ""
+
+#~ msgid "Termin pozycji \"{0}\" minął {1}. Pierwsza płatność musi obejmować wszystkie raty po terminie"
+#~ msgstr ""
+
+#~ msgid "Termin pozycji „{0}\" minął {1}. Pierwsza płatność musi obejmować wszystkie raty po terminie."
+#~ msgstr ""
+
+#. 0: lastOverdueItem.label; 1: formatDueDate( lastOverdueItem.dueAt )
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Termin pozycji „{0}” minął {1}. Pierwsza płatność musi obejmować wszystkie raty po terminie."
+msgstr ""
