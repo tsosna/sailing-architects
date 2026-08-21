@@ -1,0 +1,714 @@
+Delivered-To: tomek.sosinski@gmail.com
+Received: by 2002:a05:7412:bd88:b0:1ea:ac0:12af with SMTP id kn8csp470317rdb;
+        Wed, 19 Aug 2026 08:53:27 -0700 (PDT)
+X-Received: by 2002:a17:907:c80f:b0:c20:23f8:99a5 with SMTP id a640c23a62f3a-c242e20606amr454991866b.15.1787154807372;
+        Wed, 19 Aug 2026 08:53:27 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1787154807; cv=none;
+        d=google.com; s=arc-20260327;
+        b=nS6CnLBbVWUbTF2UmH/tMN14hg4GnjhozqL4AuZ6goYsS8xszaULZL48a/0jJLc+3G
+         HpYYmW1PVCkw6pxqLXjh3W8RUI64wKQwgT7IQq2zWSoOvlYmR5V5TDTVkHUvWs+uhRCD
+         o29NFIpYgqVaX79e6xpYXe+ElWaELkQ5eyJPi51pqXowUTg0Qnr9zt7mxS0q4uRGCh6J
+         TJOseYltKapaoAkvZLNq6jlOVPWj19pjQGGe/smxweDcOyr0foxeXS74epkFuRA29SjT
+         2YuRIGCKGYZuyIeMOQtsAyMoohMjAoyWY2/5fFrttilFWkzuYl4gdoXHeLU0kKMrN5wc
+         sTvA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=in-reply-to:from:content-language:references:to:subject:user-agent
+         :mime-version:date:message-id:dkim-signature;
+        bh=3RpjpUjfP9gz4vInGNSvGts/9QZCvoLeMYr2Ssoy+58=;
+        fh=xDRxjIjwstSXH0jcq2O5hyW4DkQr3SOw5ea51UPnzPc=;
+        b=nj+flJdkMu9RRD+F6KQ4VEMz+m6G1GL4XiHUx0693hLFXQmry4sCfKyFB9JZ/ibr3j
+         RMxdMqIODFlxFzvKzlmGo3fIX9BwgyIzvv8dnaxdyLy4zMUubyp5u6O2lmfJz+NkyX17
+         4rnPaLLAPjwyBwq/4TBJFbYX+CM9LBn6zAqlMOXSq86pfvIRputZW54Nknp1Hiog2CwM
+         Mqyx0oyzcubHZakU7L+FwRGKYPcBbq0XBtz7U1jMBwVj+1MuWJuqThxe16hLGIyV2tgk
+         20kWbmIeIu3aU39/BHrlszxrq9LC0a77H7yTwwAaBg2gy6OOn8zcu1mtNGC5lTnmQP9F
+         m1pA==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@jmsstudio.com header.s=1676395270.internal header.b="Emmq1L/q";
+       spf=pass (google.com: domain of msmolarski@jmsstudio.com designates 85.128.190.42 as permitted sender) smtp.mailfrom=msmolarski@jmsstudio.com;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=jmsstudio.com
+Return-Path: <msmolarski@jmsstudio.com>
+Received: from shared-amg42.rev.nazwa.pl (shared-amg42.rev.nazwa.pl. [85.128.190.42])
+        by mx.google.com with ESMTPS id a640c23a62f3a-c243c267cfesi159308666b.280.2026.08.19.08.53.27
+        for <tomek.sosinski@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 19 Aug 2026 08:53:27 -0700 (PDT)
+Received-SPF: pass (google.com: domain of msmolarski@jmsstudio.com designates 85.128.190.42 as permitted sender) client-ip=85.128.190.42;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@jmsstudio.com header.s=1676395270.internal header.b="Emmq1L/q";
+       spf=pass (google.com: domain of msmolarski@jmsstudio.com designates 85.128.190.42 as permitted sender) smtp.mailfrom=msmolarski@jmsstudio.com;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=jmsstudio.com
+X-Virus-Scanned: by amavisd-new using ClamAV (6)
+X-Spam-Flag: NO
+X-Spam-Score: -0.999
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.999 tagged_above=-10 tests=[ALL_TRUSTED=-1,
+	HTML_MESSAGE=0.001] autolearn=disabled
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=jmsstudio.com;
+	s=1676395270.internal; t=1787154806;
+	bh=3RpjpUjfP9gz4vInGNSvGts/9QZCvoLeMYr2Ssoy+58=;
+	h=Date:Subject:To:References:From:In-Reply-To;
+	b=Emmq1L/qLI44EqhAazyRHvRQju2asmxbUvA7+aCFKR7uykXycpMLwGSpHxVQWoTm7
+	 3BZtrIUKx4zlPDcOkqldSwvpS+zXGjvhSmY7N0shOXiOovEroBGlgGFaCaB2C3L4NB
+	 nYL56BadRw62YqhwlVFEFZUE0cd3ABl62hQyNs8ja5LMVuGJs5dDzwPmOWpw9/9HYQ
+	 ZnkHL7kj5YhQ0zLyHdH48neDrO4woEU5uZzh0DAsOU7/ERx2ub7iJuVBbI0ameBWF0
+	 2gRP04cKYw6jFS8AJfCCo8x8L9UcINN5VCeTzJ6P3suIo2Hfn5JOJfcqumwkHPoKs5
+	 IKdLv2JikYVwQ==
+Received: from [10.0.0.19] (hf64.internetdsl.tpnet.pl [80.53.83.64])
+	by jmsstudio.nazwa.pl (Postfix) with ESMTP id 6F72C1BCBDB;
+	Wed, 19 Aug 2026 17:53:25 +0200 (CEST)
+Content-Type: multipart/alternative;
+ boundary="------------mXdLWA5FSbKsH1oJyJN3STxN"
+Message-ID: <9eb41a15-6731-4433-8efb-f1ba2c819c47@jmsstudio.com>
+Date: Wed, 19 Aug 2026 17:53:24 +0200
+MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: RODO na jachcie
+To: =?UTF-8?Q?Tomek_Sosi=C5=84ski?= <tomek.sosinski@gmail.com>
+References: <CAHG22s++1oCnUZ0z3JrOw+P3tYCX1r+P8tRAx6v_EDGasw97aw@mail.gmail.com>
+Content-Language: pl, en-GB
+From: =?UTF-8?Q?Micha=C5=82_Smolarski_-_jmsSTUDIO_ARCHITEKCI?=
+ <msmolarski@jmsstudio.com>
+In-Reply-To: <CAHG22s++1oCnUZ0z3JrOw+P3tYCX1r+P8tRAx6v_EDGasw97aw@mail.gmail.com>
+
+This is a multi-part message in MIME format.
+--------------mXdLWA5FSbKsH1oJyJN3STxN
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+
+Cześć,
+
+Tomku, odpisuje w tekście poniżej*(na niebiesko)*
+
+*mgr inż. arch. Michał Smolarski*
+*jmsSTUDIO **- ARCHITEKCI*
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+-- --
+mobile. *+48 601 671 182 *
+tel./fax. +48 12 427 17 54
+e-mail: *msmolarski@jmsstudio.com* <mailto:msmolarski@jmsstudio.com>
+*-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+-- --*
+
+W dniu 14.08.2026 o 10:39, Tomek Sosiński pisze:
+>
+>
+>     1. „Prywatny, niekomercyjny" nie znaczy „poza RODO"
+>
+> To najważniejsze zdanie dla Michała.
+>
+> RODO ma wyłączenie dla działalności*czysto osobistej lub domowej*(art. 
+> 2 ust. 2 lit. c). Jeśli Michał czyta ADR-021 jako „rejs prywatny, więc 
+> RODO mnie nie dotyczy" — trzeba to sprawdzić, zanim oprze na tym decyzje.
+>
+Piszemy informacje rodo , nawet mimo ewentualnego  zwolnienia z tego 
+obowiązku.
+>
+> Fakty z systemu, które przemawiają przeciw wyłączeniu: koje 
+> sprzedawane przez internet*nieokreślonemu kręgowi odbiorców*, 
+> płatności kartą przez Stripe, harmonogram rat, automatyczne monity, 
+> panel administracyjny, landing z ofertą. To przetwarzanie 
+> systematyczne i zorganizowane, nie lista znajomych w notesie.
+>
+> *Rozstrzyga prawnik.*Nasza rola: dostarczyć powyższą listę, żeby ocena 
+> szła po faktach.
+>
+Piszemy i dajemy na stronę info rodo
+>
+>
+>     2. Administrator jako osoba fizyczna — da się pogodzić
+>
+> zostaje kontakt i osoba „Michał Smolarski".
+>
+ok.
+>
+> To*nie koliduje*z polityką prywatności. RODO wymaga tożsamości 
+> administratora i danych kontaktowych — nie wymaga NIP-u, REGON-u ani 
+> nazwy firmy. Osoba fizyczna jako administrator jest normalna.
+>
+> Otwarte zostaje jedno:*czy wystarczy e-mail, czy potrzebny adres*. Dla 
+> osoby prywatnej to adres domowy — realny koszt, nie formalność. 
+> Pytanie do prawnika.
+>
+ok. dajemy mój e-mail i adres domowy: Marii Konopnickiej 3/4a,  30-302 
+Kraków (mam oficjalna umowę najmu tego mieszkania to mogę się tym 
+adresem posługiwać , a swój mieć jako prywatny) .
+>
+> Kontrast z domy-modulowe, gdzie sekcja brzmi „Technologie Modułowe z 
+> siedzibą w Wieliczce, ul. Polna 2". Tu tego wiersza nie przepiszesz — 
+> musi powstać od nowa.
+>
+ok.  będzie nie "Z siedzibą" bo to osoba a nie byt prawny a 
+"Zamieszkały" bo osoba zamieszkuje.
+>
+>
+>     3. Dane o zdrowiu — kategoria, której tamta polityka w ogóle nie zna
+>
+> to*dane szczególnej kategorii*(art. 9 RODO). Notatki medyczne wprost. 
+> Dieta pośrednio — potrafi ujawnić religię (halal, koszer) albo chorobę 
+> (celiakia).
+>
+> Reżim jest ostrzejszy: przetwarzanie takich danych jest*zakazane*, 
+> chyba że zachodzi jeden z wyjątków z art. 9 ust. 2. W tej sytuacji 
+> realny jest jeden —*wyraźna zgoda*.
+>
+ok.  Dodajemy zapis że jeżeli   przed lub w trakcie rejsu zostaną  
+ujawnione dane jak: medyczne, religja, czy inne to jest to ujawnienie 
+dokonane za wyraźną zgodą uczestnika i dane te nie będą przetwarzane w 
+innym celu niż ten  w który zostały ujawnione.
+
+> Konsekwencja projektowa, którą trzeba znać
+>
+>     Akceptacja regulaminu nie jest zgodą na przetwarzanie danych o
+>     zdrowiu.
+>
+trzeba zrobić małe 2-3 punkty  oświadczenie o takiej zgodzie które 
+będzie przywołane w głównym regulaminie rodo a podpisywane przy wejściu 
+na pokład (chyba że wystarczy to "klikniecie" opisane poniżej przy 
+formularzu użytkownika i obejmie też dane podawane w trakcie rejsu - bo 
+może wtedy dopiero powie że je tylko halal..)   , razem z regulaminem 
+rejsu i potwierdzeniem szkolenia z bezpieczeństwa na jachcie i jego 
+podstawowej obsługi (ten dokument jeszcze ja przygotuję niebawem )
+>
+> To osobne pole, przy formularzu danych uczestnika, nie przy kasie. 
+> Kupujący w kasie nie podaje jeszcze notatek medycznych — podaje je 
+> uczestnik pod linkiem z tokenem. Zgoda musi być tam, gdzie dane.
+>
+ok. Można tu ją dać.
+>
+> Domy-modulowe nie ma tej sekcji, bo tam nikt nie zbiera danych o zdrowiu.
+>
+ok.
+
+
+> ------------------------------------------------------------------------
+>
+>
+>   Czwarty problem,
+>
+> *Kupujący wpisuje dane cudze.*
+>
+> Kupuje cztery koje, wpisuje dane trzech kolegów. Ci koledzy nie mieli 
+> kontaktu z serwisem — ich dane pozyskano*nie od nich*.
+>
+Nie pryz zakupie 4 koi , wpisuje tylko swoje dane , przy trzech  
+pozostałych kojach dostaje link który wysyła innym osobom którym kupił 
+rejs , oni po kliknięciu logują się i wypełniają dane .
+>
+> RODO ma na to osobny obowiązek informacyjny (art. 14): trzeba 
+> poinformować osobę, że jej dane są przetwarzane, przez kogo i po co.
+>
+Jak zrobimy tak jak wyżej to nie ma potrzeby , a generalny zapis ma być 
+taki że dane są przetwarzane  na potrzeby organizacji rejsu , oraz 
+zapewnienia bezpieczeństwa na rejsie.
+>
+> Dobra wiadomość:*miejsce już istnieje*. mail z linkiem do 
+> potwierdzenia danych to dokładnie ten moment kontaktu. Klauzula 
+> informacyjna wchodzi do treści tego maila. Nic nowego nie trzeba 
+> budować — trzeba dopisać tekst.
+>
+Trzeba zrobić by przy zakupie 3 koi kupujący podawał tylko swoje dane 
+dla jednej koi i dostawał dwa linki do rozesłania przez niego dla 
+załogantów. Te linki muszą działać do 3 dni przed rejsem .  Dodatkowo 
+optymalnie taki link powinien poza opcją zalogowania się i podania 
+danych i podpisu umowy ,
+> ------------------------------------------------------------------------
+>
+>
+>   Pytania  — czego nie da się wyprowadzić z kodu
+>
+>  1. *Komu przekazujesz manifest załogi?*Kapitanat, straż graniczna,
+>     ubezpieczyciel, czarterodawca jachtu? Numery dokumentów zbieramy w
+>     jakimś celu, a ten cel to lista odbiorców danych. W kodzie jej nie
+>     ma — tylko ty wiesz.
+>
+lista załogi zawiera : imię , nazwisko, pesel, data i miejsce  urodzenia 
+, nr. dokumentu podrży (paszport/dowód) , telefon , mail ,
+
+Ta lista jest wysyłana do firmy czarterowej przez ich stronę a oni dalej 
+wysyłają ja na jakiś serwer rządowy gdzie rejestruje się załogi .
+
+Listę załogi wpisuję (ograniczoną - tylko imię i nazwisko ) w dzienniku 
+jachtowym = cała załoga ma do niej dostęp.
+
+Wydrukowaną listę załogi zabieram w portach wejścia i wyjścia (porty 
+graniczne gdzie opuszcza się dany kraj lib do niego wjeżdża i robi 
+odprawę celno graniczną ) po wejściu do portów  lub przed wejściem z 
+niego , dostają ją do wglądu i kopiują służby graniczne i celne oraz 
+[policja portowa.
+
+Lista jest okazywana przy kontrolach jachtu, policyjnych , wojskowych ,i 
+przez inne  przez służby.
+
+>  1. *Jak długo dane mają zostać po rejsie?*Numer paszportu
+>     przechowywany bezterminowo to ryzyko bez korzyści. Potrzebny
+>     termin i powód (roszczenia, księgowość).
+>
+dla mnie mogą być trzymane to 30 dni od końca rejsu. Ale , jeden 
+egzemplarz listy załogi zostaje w dzienniku jachtowym , na zawsze. Ale 
+tam  dane są ograniczone do imienia i nazwiska załoganta
+
+>  1. *Zgoda marketingowa — zbierasz czy nie?*Dziś nie ma newslettera.
+>     Jeśli ma być, to osobna zgoda i osobna sekcja.
+>
+Tak zbierajmy bo na pewno będę wysyłał informacje o kolejnych rejsach.
+>
+>  1. *Czy jesteś ubezpieczony i czy ubezpieczyciel dostaje dane
+>     uczestników?*Kolejny odbiorca poza kodem.
+>
+Jestem ubezpieczony , ubezpieczyciel dostaje dane tylko w razie szkody 
+na którejś osobie lub jej mieniu spowodowanej przez moje działanie.
+>
+>  1. *Adres administratora w polityce — e-mail, czy pełny adres?*Do
+>     rozstrzygnięcia z prawnikiem; ma bezpośredni skutek dla twojej
+>     prywatności.
+>
+Podajemy adres  e-mail, ale w sumie zamiast adresu na Żegocinę, można by 
+podawać adres na Kraków gdzie wynajmuje mieszkanie:  Marii Konopnickiej 
+3/4a,  30-302 Kraków.
+
+> -- 
+>
+> Pozostaję z uszanowaniem
+>
+> Tomasz Sosiński
+>
+> 697 333 249
+>
+> ------------------------------------------------------------------------
+>
+> Niniejsza korespondencja zawiera informacje poufne objęte tajemnicą 
+> zawodową i prawnie chronione przeznaczone wyłącznie dla osób lub 
+> podmiotów, do których została zaadresowana. Jeżeli nie są Państwo 
+> adresatami niniejszego e-maila prosimy o zachowanie w poufności jego 
+> treści, nie rozpowszechnianie ani nie podejmowanie jakichkolwiek 
+> działań na podstawie informacji w nim zawartych. Jakiekolwiek 
+> wykorzystywanie bez uprawnienia informacji zawartych w przesyłanym 
+> dokumencie skutkować może odpowiedzialnością karną lub cywilną.
+>
+--------------mXdLWA5FSbKsH1oJyJN3STxN
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  </head>
+  <body text="#000000" bgcolor="#FFFFFF">
+    <p>Cześć, </p>
+    <p>Tomku, odpisuje w tekście poniżej<b>  <font color="#0000ff">(na
+          niebiesko)</font></b></p>
+    <div class="moz-signature">
+      <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+      <title></title>
+      <meta name="GENERATOR" content="OpenOffice 4.1.15  (Win32)">
+      <meta name="CREATED" content="20090416;11320264">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGED" content="20250310;21425287">
+      <meta name="Info 1" content="">
+      <meta name="Info 2" content="">
+      <meta name="Info 3" content="">
+      <meta name="Info 4" content="">
+      <meta name="jmsSTUDIO - ARCHITEKCI" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michal Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <meta name="CHANGEDBY" content="Michał Smolarski">
+      <style type="text/css">
+	<!--
+		@page { size: 21cm 29.7cm; margin-left: 0.69cm; margin-right: 0.79cm; margin-top: 0.32cm; margin-bottom: 2cm }
+		P { margin-bottom: 0.21cm; so-language: zxx }
+		PRE.western { font-family: "Courier New", monospace; font-size: 10pt; so-language: zxx }
+		PRE.cjk { font-family: "MS PGothic", monospace; font-size: 10pt; so-language: zxx }
+		PRE.ctl { font-family: "Courier New", monospace; font-size: 10pt; so-language: zxx }
+		A:link { color: #000080; so-language: zxx; text-decoration: underline }
+		A:visited { color: #800000; so-language: zxx; text-decoration: underline }
+	-->
+	</style>
+      <pre lang="zxx" class="western"><font color="#000000"><font
+      face="Arial, sans-serif"><font size="2" style="font-size: 9pt"><b>mgr inż. arch. Michał Smolarski</b></font></font></font>
+<font color="#808080"><font face="Arial, sans-serif"><font size="2"
+      style="font-size: 9pt"><span lang="zxx"><font color="#ff6600"><b>jmsSTUDIO  </b></font><b>-  ARCHITEKCI</b></span></font></font></font>
+<font color="#000000"><font face="Arial, sans-serif"><font size="1"
+      style="font-size: 6pt"><span lang="zxx">-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --</span></font></font></font>
+<font face="Arial, sans-serif"><font size="2" style="font-size: 9pt"><span
+      lang="zxx"><span style="font-weight: normal">mobile. </span><b>+48 601 671 182      </b></span></font></font>
+<font face="Arial, sans-serif"><font size="2" style="font-size: 9pt"><span
+      lang="zxx"><span style="font-weight: normal">tel./fax. +48 12 427 17 54</span></span></font></font>
+<span lang="zxx"><font face="Arial, sans-serif"><font size="2"
+      style="font-size: 9pt"><span lang="zxx"><span
+      style="font-weight: normal">e-mail:  </span></span></font></font><a
+      href="mailto:msmolarski@jmsstudio.com"><font
+      face="Arial, sans-serif"><font size="2" style="font-size: 9pt"><span
+      lang="zxx"><b>msmolarski@jmsstudio.com</b></span></font></font></a></span>
+<font color="#000000"><font face="Arial, sans-serif"><font size="1"
+      style="font-size: 6pt"><span lang="zxx"><b>-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --</b></span></font></font></font>
+
+</pre>
+    </div>
+    <div class="moz-cite-prefix">W dniu 14.08.2026 o 10:39, Tomek
+      Sosiński pisze:<br>
+    </div>
+    <blockquote type="cite"
+cite="mid:CAHG22s++1oCnUZ0z3JrOw+P3tYCX1r+P8tRAx6v_EDGasw97aw@mail.gmail.com">
+      <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+      <div dir="ltr">
+        <div>
+          <h2 dir="ltr" style="color:rgb(0,0,0)">1. „Prywatny,
+            niekomercyjny" nie znaczy „poza RODO"</h2>
+          <p dir="ltr" style="color:rgb(0,0,0)">To najważniejsze zdanie
+            dla Michała.</p>
+          <p dir="ltr" style="color:rgb(0,0,0)">RODO ma wyłączenie dla
+            działalności<span class="gmail-Apple-converted-space"> </span><strong>czysto
+              osobistej lub domowej</strong><span
+              class="gmail-Apple-converted-space"> </span>(art. 2 ust. 2
+            lit. c). Jeśli Michał czyta ADR-021 jako „rejs prywatny,
+            więc RODO mnie nie dotyczy" — trzeba to sprawdzić, zanim
+            oprze na tym decyzje.</p>
+        </div>
+      </div>
+    </blockquote>
+    <font color="#0000ff">Piszemy informacje rodo , nawet mimo
+      ewentualnego  zwolnienia z tego obowiązku. </font>
+    <blockquote type="cite"
+cite="mid:CAHG22s++1oCnUZ0z3JrOw+P3tYCX1r+P8tRAx6v_EDGasw97aw@mail.gmail.com">
+      <div dir="ltr">
+        <div>
+          <p dir="ltr" style="color:rgb(0,0,0)">Fakty z systemu, które
+            przemawiają przeciw wyłączeniu: koje sprzedawane przez
+            internet<span class="gmail-Apple-converted-space"> </span><strong>nieokreślonemu
+              kręgowi odbiorców</strong>, płatności kartą przez Stripe,
+            harmonogram rat, automatyczne monity, panel administracyjny,
+            landing z ofertą. To przetwarzanie systematyczne i
+            zorganizowane, nie lista znajomych w notesie.</p>
+          <p dir="ltr" style="color:rgb(0,0,0)"><strong>Rozstrzyga
+              prawnik.</strong><span class="gmail-Apple-converted-space"> </span>Nasza
+            rola: dostarczyć powyższą listę, żeby ocena szła po faktach.</p>
+        </div>
+      </div>
+    </blockquote>
+    <font color="#0000ff">Piszemy i dajemy na stronę info rodo </font>
+    <blockquote type="cite"
+cite="mid:CAHG22s++1oCnUZ0z3JrOw+P3tYCX1r+P8tRAx6v_EDGasw97aw@mail.gmail.com">
+      <div dir="ltr">
+        <div>
+          <h2 dir="ltr" style="color:rgb(0,0,0)">2. Administrator jako
+            osoba fizyczna — da się pogodzić </h2>
+          <p dir="ltr" style="color:rgb(0,0,0)">zostaje kontakt i osoba
+            „Michał Smolarski".</p>
+        </div>
+      </div>
+    </blockquote>
+    <font color="#0000ff">ok.</font>
+    <blockquote type="cite"
+cite="mid:CAHG22s++1oCnUZ0z3JrOw+P3tYCX1r+P8tRAx6v_EDGasw97aw@mail.gmail.com">
+      <div dir="ltr">
+        <div>
+          <p dir="ltr" style="color:rgb(0,0,0)">To<span
+              class="gmail-Apple-converted-space"> </span><strong>nie
+              koliduje</strong><span class="gmail-Apple-converted-space"> </span>z
+            polityką prywatności. RODO wymaga tożsamości administratora
+            i danych kontaktowych — nie wymaga NIP-u, REGON-u ani nazwy
+            firmy. Osoba fizyczna jako administrator jest normalna.</p>
+          <p dir="ltr" style="color:rgb(0,0,0)">Otwarte zostaje jedno:<span
+              class="gmail-Apple-converted-space"> </span><strong>czy
+              wystarczy e-mail, czy potrzebny adres</strong>. Dla osoby
+            prywatnej to adres domowy — realny koszt, nie formalność.
+            Pytanie do prawnika.</p>
+        </div>
+      </div>
+    </blockquote>
+    <font color="#0000ff">ok. dajemy mój e-mail i adres domowy:  </font><font
+      color="#0000ff"> Marii Konopnickiej 3/4a,  30-302 Kraków (mam
+      oficjalna umowę najmu tego mieszkania to mogę się tym adresem
+      posługiwać , a swój mieć jako prywatny) . </font>
+    <blockquote type="cite"
+cite="mid:CAHG22s++1oCnUZ0z3JrOw+P3tYCX1r+P8tRAx6v_EDGasw97aw@mail.gmail.com">
+      <div dir="ltr">
+        <div>
+          <p dir="ltr" style="color:rgb(0,0,0)">Kontrast z
+            domy-modulowe, gdzie sekcja brzmi „Technologie Modułowe z
+            siedzibą w Wieliczce, ul. Polna 2". Tu tego wiersza nie
+            przepiszesz — musi powstać od nowa.</p>
+        </div>
+      </div>
+    </blockquote>
+    <font color="#0000ff">ok.  będzie nie "Z siedzibą" bo to osoba a nie
+      byt prawny a "Zamieszkały" bo osoba zamieszkuje.</font>
+    <blockquote type="cite"
+cite="mid:CAHG22s++1oCnUZ0z3JrOw+P3tYCX1r+P8tRAx6v_EDGasw97aw@mail.gmail.com">
+      <div dir="ltr">
+        <div>
+          <h2 dir="ltr" style="color:rgb(0,0,0)">3. Dane o zdrowiu —
+            kategoria, której tamta polityka w ogóle nie zna</h2>
+          <p dir="ltr" style="color:rgb(0,0,0)"><span
+              class="gmail-Apple-converted-space"> </span>to<span
+              class="gmail-Apple-converted-space"> </span><strong>dane
+              szczególnej kategorii</strong><span
+              class="gmail-Apple-converted-space"> </span>(art. 9 RODO).
+            Notatki medyczne wprost. Dieta pośrednio — potrafi ujawnić
+            religię (halal, koszer) albo chorobę (celiakia).</p>
+          <p dir="ltr" style="color:rgb(0,0,0)">Reżim jest ostrzejszy:
+            przetwarzanie takich danych jest<span
+              class="gmail-Apple-converted-space"> </span><strong>zakazane</strong>,
+            chyba że zachodzi jeden z wyjątków z art. 9 ust. 2. W tej
+            sytuacji realny jest jeden —<span
+              class="gmail-Apple-converted-space"> </span><strong>wyraźna
+              zgoda</strong>.</p>
+        </div>
+      </div>
+    </blockquote>
+    <font color="#0000ff">ok.  Dodajemy zapis że jeżeli   przed lub w
+      trakcie rejsu zostaną  ujawnione dane jak: medyczne, religja, czy
+      inne to jest to ujawnienie dokonane za wyraźną zgodą uczestnika i
+      dane te nie będą przetwarzane w innym celu niż ten  w który
+      zostały ujawnione.  </font>
+    <pre lang="zxx" class="western">
+</pre>
+    <blockquote type="cite"
+cite="mid:CAHG22s++1oCnUZ0z3JrOw+P3tYCX1r+P8tRAx6v_EDGasw97aw@mail.gmail.com">
+      <div dir="ltr">
+        <div>
+          <p dir="ltr" style="color:rgb(0,0,0)">Konsekwencja projektowa,
+            którą trzeba znać<span class="gmail-Apple-converted-space"> </span></p>
+          <blockquote dir="ltr" style="color:rgb(0,0,0)">
+            <p dir="ltr">Akceptacja regulaminu nie jest zgodą na
+              przetwarzanie danych o zdrowiu.</p>
+          </blockquote>
+        </div>
+      </div>
+    </blockquote>
+    <font color="#0000ff">trzeba zrobić małe 2-3 punkty  oświadczenie o
+      takiej zgodzie które będzie przywołane w głównym regulaminie rodo
+      a podpisywane przy wejściu na pokład (chyba że wystarczy to
+      "klikniecie" opisane poniżej przy formularzu użytkownika i obejmie
+      też dane podawane w trakcie rejsu - bo może wtedy dopiero powie że
+      je tylko halal..)   , razem z regulaminem rejsu i potwierdzeniem
+      szkolenia z bezpieczeństwa na jachcie i jego podstawowej obsługi
+      (ten dokument jeszcze ja przygotuję niebawem ) </font>
+    <blockquote type="cite"
+cite="mid:CAHG22s++1oCnUZ0z3JrOw+P3tYCX1r+P8tRAx6v_EDGasw97aw@mail.gmail.com">
+      <div dir="ltr">
+        <div>
+          <p dir="ltr" style="color:rgb(0,0,0)">To osobne pole, przy
+            formularzu danych uczestnika, nie przy kasie. Kupujący w
+            kasie nie podaje jeszcze notatek medycznych — podaje je
+            uczestnik pod linkiem z tokenem. Zgoda musi być tam, gdzie
+            dane.</p>
+        </div>
+      </div>
+    </blockquote>
+    <font color="#0000ff">ok. Można tu ją dać.  </font>
+    <blockquote type="cite"
+cite="mid:CAHG22s++1oCnUZ0z3JrOw+P3tYCX1r+P8tRAx6v_EDGasw97aw@mail.gmail.com">
+      <div dir="ltr">
+        <div>
+          <p dir="ltr" style="color:rgb(0,0,0)">Domy-modulowe nie ma tej
+            sekcji, bo tam nikt nie zbiera danych o zdrowiu.</p>
+        </div>
+      </div>
+    </blockquote>
+    <p><font color="#0000ff">ok.</font></p>
+    <p><br>
+    </p>
+    <blockquote type="cite"
+cite="mid:CAHG22s++1oCnUZ0z3JrOw+P3tYCX1r+P8tRAx6v_EDGasw97aw@mail.gmail.com">
+      <div dir="ltr">
+        <div>
+          <hr>
+          <h1 dir="ltr" style="color:rgb(0,0,0)">Czwarty problem, </h1>
+          <p dir="ltr" style="color:rgb(0,0,0)"><strong>Kupujący wpisuje
+              dane cudze.</strong></p>
+          <p dir="ltr" style="color:rgb(0,0,0)">Kupuje cztery koje,
+            wpisuje dane trzech kolegów. Ci koledzy nie mieli kontaktu z
+            serwisem — ich dane pozyskano<span
+              class="gmail-Apple-converted-space"> </span><strong>nie od
+              nich</strong>.</p>
+        </div>
+      </div>
+    </blockquote>
+    <font color="#0000ff">Nie pryz zakupie 4 koi , wpisuje tylko swoje
+      dane , przy trzech  pozostałych kojach dostaje link który wysyła
+      innym osobom którym kupił rejs , oni po kliknięciu logują się i
+      wypełniają dane .</font>
+    <blockquote type="cite"
+cite="mid:CAHG22s++1oCnUZ0z3JrOw+P3tYCX1r+P8tRAx6v_EDGasw97aw@mail.gmail.com">
+      <div dir="ltr">
+        <div>
+          <p dir="ltr" style="color:rgb(0,0,0)">RODO ma na to osobny
+            obowiązek informacyjny (art. 14): trzeba poinformować osobę,
+            że jej dane są przetwarzane, przez kogo i po co.</p>
+        </div>
+      </div>
+    </blockquote>
+    <font color="#0000ff">Jak zrobimy tak jak wyżej to nie ma potrzeby ,
+      a generalny zapis ma być taki że dane są przetwarzane  na potrzeby
+      organizacji rejsu , oraz zapewnienia bezpieczeństwa na rejsie. </font>
+    <blockquote type="cite"
+cite="mid:CAHG22s++1oCnUZ0z3JrOw+P3tYCX1r+P8tRAx6v_EDGasw97aw@mail.gmail.com">
+      <div dir="ltr">
+        <div>
+          <p dir="ltr" style="color:rgb(0,0,0)">Dobra wiadomość:<span
+              class="gmail-Apple-converted-space"> </span><strong>miejsce
+              już istnieje</strong>.<span
+              class="gmail-Apple-converted-space"> </span> mail z
+            linkiem do potwierdzenia danych to dokładnie ten moment
+            kontaktu. Klauzula informacyjna wchodzi do treści tego
+            maila. Nic nowego nie trzeba budować — trzeba dopisać tekst.</p>
+        </div>
+      </div>
+    </blockquote>
+    <font color="#0000ff">Trzeba zrobić by przy zakupie 3 koi kupujący
+      podawał tylko swoje dane dla jednej koi i dostawał dwa linki do
+      rozesłania przez niego dla załogantów. Te linki muszą działać do 3
+      dni przed rejsem .  Dodatkowo optymalnie taki link powinien poza
+      opcją zalogowania się i podania danych i podpisu umowy , </font>
+    <blockquote type="cite"
+cite="mid:CAHG22s++1oCnUZ0z3JrOw+P3tYCX1r+P8tRAx6v_EDGasw97aw@mail.gmail.com">
+      <div dir="ltr">
+        <div>
+          <hr>
+          <h1 dir="ltr" style="color:rgb(0,0,0)">Pytania  — czego nie da
+            się wyprowadzić z kodu</h1>
+          <ol dir="ltr" start="1" style="color:rgb(0,0,0)">
+            <li><strong>Komu przekazujesz manifest załogi?</strong><span
+                class="gmail-Apple-converted-space"> </span>Kapitanat,
+              straż graniczna, ubezpieczyciel, czarterodawca jachtu?
+              Numery dokumentów zbieramy w jakimś celu, a ten cel to
+              lista odbiorców danych. W kodzie jej nie ma — tylko ty
+              wiesz.</li>
+          </ol>
+        </div>
+      </div>
+    </blockquote>
+    <p><font color="#0000ff">lista załogi zawiera : imię , nazwisko,
+        pesel, data i miejsce  urodzenia , nr. dokumentu podrży
+        (paszport/dowód) , telefon , mail , </font></p>
+    <p><font color="#0000ff">Ta lista jest wysyłana do firmy czarterowej
+        przez ich stronę a oni dalej wysyłają ja na jakiś serwer rządowy
+        gdzie rejestruje się załogi .</font></p>
+    <p><font color="#0000ff">Listę załogi wpisuję (ograniczoną - tylko
+        imię i nazwisko ) w dzienniku jachtowym = cała załoga ma do niej
+        dostęp. </font></p>
+    <p><font color="#0000ff">Wydrukowaną listę załogi zabieram w portach
+        wejścia i wyjścia (porty graniczne gdzie opuszcza się dany kraj
+        lib do niego wjeżdża i robi odprawę celno graniczną ) po wejściu
+        do portów  lub przed wejściem z niego , dostają ją do wglądu i
+        kopiują służby graniczne i celne oraz [policja portowa. </font></p>
+    <p><font color="#0000ff">Lista jest okazywana przy kontrolach
+        jachtu, policyjnych , wojskowych ,i przez inne  przez służby. 
+          </font></p>
+    <blockquote type="cite"
+cite="mid:CAHG22s++1oCnUZ0z3JrOw+P3tYCX1r+P8tRAx6v_EDGasw97aw@mail.gmail.com">
+      <div dir="ltr">
+        <div>
+          <ol dir="ltr" start="1" style="color:rgb(0,0,0)">
+            <li><strong>Jak długo dane mają zostać po rejsie?</strong><span
+                class="gmail-Apple-converted-space"> </span>Numer
+              paszportu przechowywany bezterminowo to ryzyko bez
+              korzyści. Potrzebny termin i powód (roszczenia,
+              księgowość).</li>
+          </ol>
+        </div>
+      </div>
+    </blockquote>
+    <p><font color="#0000ff">dla mnie mogą być trzymane to 30 dni od 
+        końca rejsu. Ale , jeden egzemplarz listy załogi zostaje w
+        dzienniku jachtowym , na zawsze. Ale tam  dane są ograniczone do
+        imienia i nazwiska załoganta</font></p>
+    <blockquote type="cite"
+cite="mid:CAHG22s++1oCnUZ0z3JrOw+P3tYCX1r+P8tRAx6v_EDGasw97aw@mail.gmail.com">
+      <div dir="ltr">
+        <div>
+          <ol dir="ltr" start="1" style="color:rgb(0,0,0)">
+            <li><strong>Zgoda marketingowa — zbierasz czy nie?</strong><span
+                class="gmail-Apple-converted-space"> </span>Dziś nie ma
+              newslettera. Jeśli ma być, to osobna zgoda i osobna
+              sekcja.</li>
+          </ol>
+        </div>
+      </div>
+    </blockquote>
+    <font color="#0000ff">Tak zbierajmy bo na pewno będę wysyłał
+      informacje o kolejnych rejsach. </font>
+    <blockquote type="cite"
+cite="mid:CAHG22s++1oCnUZ0z3JrOw+P3tYCX1r+P8tRAx6v_EDGasw97aw@mail.gmail.com">
+      <div dir="ltr">
+        <div>
+          <ol dir="ltr" start="1" style="color:rgb(0,0,0)">
+            <li><strong>Czy jesteś ubezpieczony i czy ubezpieczyciel
+                dostaje dane uczestników?</strong><span
+                class="gmail-Apple-converted-space"> </span>Kolejny
+              odbiorca poza kodem.</li>
+          </ol>
+        </div>
+      </div>
+    </blockquote>
+    <font color="#0000ff">Jestem ubezpieczony , ubezpieczyciel dostaje 
+      dane tylko w razie szkody na którejś osobie lub jej mieniu
+      spowodowanej przez moje działanie. </font>
+    <blockquote type="cite"
+cite="mid:CAHG22s++1oCnUZ0z3JrOw+P3tYCX1r+P8tRAx6v_EDGasw97aw@mail.gmail.com">
+      <div dir="ltr">
+        <div>
+          <ol dir="ltr" start="1" style="color:rgb(0,0,0)">
+            <li><strong>Adres administratora w polityce — e-mail, czy
+                pełny adres?</strong><span
+                class="gmail-Apple-converted-space"> </span>Do
+              rozstrzygnięcia z prawnikiem; ma bezpośredni skutek dla
+              twojej prywatności.</li>
+          </ol>
+        </div>
+      </div>
+    </blockquote>
+    <p><font color="#0000ff">Podajemy adres  e-mail, ale w sumie zamiast
+        adresu na Żegocinę, można by podawać adres na Kraków gdzie
+        wynajmuje mieszkanie:  Marii Konopnickiej 3/4a,  30-302 Kraków. </font></p>
+    <blockquote type="cite"
+cite="mid:CAHG22s++1oCnUZ0z3JrOw+P3tYCX1r+P8tRAx6v_EDGasw97aw@mail.gmail.com">
+      <div dir="ltr"><span class="gmail_signature_prefix">-- </span><br>
+        <div dir="ltr" class="gmail_signature"
+          data-smartmail="gmail_signature">
+          <div dir="ltr">
+            <p class="MsoNormal"><span
+style="font-family:&quot;Minion Pro&quot;,serif;color:rgb(31,73,125)">Pozostaję
+                z uszanowaniem</span><span
+style="font-family:&quot;Minion Pro&quot;,serif;color:rgb(31,73,125)"></span></p>
+            <p class="MsoNormal"><span
+style="font-family:&quot;Minion Pro&quot;,serif;color:rgb(31,73,125)">Tomasz
+                Sosiński</span></p>
+            <p class="MsoNormal"><span
+style="font-family:&quot;Minion Pro&quot;,serif;color:rgb(31,73,125)">697 333 249</span></p>
+            <div class="MsoNormal" align="center"
+              style="text-align:center"><span
+                style="color:rgb(31,73,125)">
+                <hr size="2" width="100%" align="center"></span></div>
+            <p class="MsoNormal"><span
+style="font-size:8pt;font-family:&quot;Minion Pro&quot;,serif;color:rgb(31,73,125)">Niniejsza
+                korespondencja zawiera informacje poufne objęte
+                tajemnicą zawodową i prawnie chronione przeznaczone
+                wyłącznie dla osób lub podmiotów, do których została
+                zaadresowana. Jeżeli nie są Państwo adresatami
+                niniejszego e-maila prosimy o zachowanie w poufności
+                jego treści, nie rozpowszechnianie ani nie podejmowanie
+                jakichkolwiek działań na podstawie informacji w nim
+                zawartych. Jakiekolwiek wykorzystywanie bez uprawnienia
+                informacji zawartych w przesyłanym dokumencie skutkować
+                może odpowiedzialnością karną lub cywilną.</span></p>
+          </div>
+        </div>
+      </div>
+    </blockquote>
+  </body>
+</html>
+
+--------------mXdLWA5FSbKsH1oJyJN3STxN--

@@ -1,0 +1,192 @@
+Delivered-To: tomek.sosinski@gmail.com
+Received: by 2002:a05:6674:6b84:b0:741:7ed4:b78d with SMTP id xg4csp1257410pxc;
+        Thu, 20 Aug 2026 03:03:31 -0700 (PDT)
+X-Received: by 2002:a05:6000:4a06:b0:47f:eb80:ff42 with SMTP id ffacd0b85a97d-482b1e875c4mr21212455f8f.4.1787220211378;
+        Thu, 20 Aug 2026 03:03:31 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1787220211; cv=none;
+        d=google.com; s=arc-20260327;
+        b=sxOV5hz1AZ9sOcMghJBj4BEjdmAxp5dOBp+N11e2FPTW4r5Xrszviwc33Sr2Qz4q/D
+         rh9gONLocvcKjasafn+S3xV7K8deV0Hv8pYELAwW6xYF17TH7gf24uB5XG70aL9OAII3
+         xYRaiJl5vJAWLMfu3j/5kuYIlCk5sLHNHJHJEcBzWe6GV2KJhbgHeG4/4beMgPOGSi/1
+         NYm0Fr7ZDQq1bCu6lZySlEooBYbg9nXzmSRgPLrB5yY2SlmXWx75fyBM76LjQSUQvhbp
+         IBmk2hqgvIbgpoqeQzgJbOlt1mAtIQQDCk735W0ucF1U9wpddT+CUqhP/qGwcskyZpMW
+         tdow==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=in-reply-to:from:content-language:references:to:subject:user-agent
+         :mime-version:date:message-id:dkim-signature;
+        bh=6PVCiiX0Wg0NUbMB7YJK5BxJBk9KvEHcgT8C0+8GleA=;
+        fh=xDRxjIjwstSXH0jcq2O5hyW4DkQr3SOw5ea51UPnzPc=;
+        b=qQCN16HUL6JvcMi3q39FbOI6or5/ikWgrjnSeOrBR9Z1xUo81BYKMkQG61x8jkcOYm
+         spWvFxV1P2GxP7UiYYSEHrSJVcjyk2HQNtZ2x/HMo5+JAX1p8yhZImg0b8IsrMpGrebV
+         eu50xOm/HW7zTS5bpe0JsfB4E2mszxzELK+83+uLGpSLPpETl/5WeXU9zC5BAePCDcCv
+         Eu3QtcuYUyqtEp08ZJ0383As6yGrTtS3B5cd8H8P1+ANOzZlwihqdszLl9nqpdCCsc0f
+         16i35t/vGyNrUymiwGH0KlaIXo29hluN1Z2if7FWzLHweOFU/ZprSsxMbXumKCk1qeQx
+         CuvA==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@jmsstudio.com header.s=1676395270.internal header.b=voRwjozd;
+       spf=pass (google.com: domain of msmolarski@jmsstudio.com designates 85.128.190.42 as permitted sender) smtp.mailfrom=msmolarski@jmsstudio.com;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=jmsstudio.com
+Return-Path: <msmolarski@jmsstudio.com>
+Received: from shared-amg42.rev.nazwa.pl (shared-amg42.rev.nazwa.pl. [85.128.190.42])
+        by mx.google.com with ESMTPS id ffacd0b85a97d-482b147841dsi9128162f8f.113.2026.08.20.03.03.30
+        for <tomek.sosinski@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 20 Aug 2026 03:03:31 -0700 (PDT)
+Received-SPF: pass (google.com: domain of msmolarski@jmsstudio.com designates 85.128.190.42 as permitted sender) client-ip=85.128.190.42;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@jmsstudio.com header.s=1676395270.internal header.b=voRwjozd;
+       spf=pass (google.com: domain of msmolarski@jmsstudio.com designates 85.128.190.42 as permitted sender) smtp.mailfrom=msmolarski@jmsstudio.com;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=jmsstudio.com
+X-Virus-Scanned: by amavisd-new using ClamAV (3)
+X-Spam-Flag: NO
+X-Spam-Score: -0.626
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.626 tagged_above=-10 tests=[ALL_TRUSTED=-1,
+	HTML_MESSAGE=0.001, PDS_RDNS_DYNAMIC_FP=0.01, RDNS_DYNAMIC=0.363]
+	autolearn=disabled
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=jmsstudio.com;
+	s=1676395270.internal; t=1787220210;
+	bh=6PVCiiX0Wg0NUbMB7YJK5BxJBk9KvEHcgT8C0+8GleA=;
+	h=Date:Subject:To:References:From:In-Reply-To;
+	b=voRwjozdPbKY9tawHhPF+obDlssXXpulOa659YaKB6Y73qXB2A08nwB1acRBHJqIE
+	 syrMM8bwYCW1xeIhCWwPQal7slUiEDN7gwDb0YbI6dWuV+rXL9zDZH38QCNOpCW2OM
+	 cB5YXLM46k5P8B6VEsbihj3dnjokoh119mGVFBzVHeWWpf2MlZbMECUhPOcm5iaorR
+	 sEd5+r52YMh5R3qT/wQzao8O4qPXWgUB5gpas46R9exqD6TNWPBidrn57xKgv7BGGH
+	 FG7Em1zUcgfmR2n2OGvYH3xFRsA8rc7c99vH0xosOGL2CYGP/q0VxRmycZ2qfoEkG4
+	 I1l04LYQKaRYQ==
+Received: from [192.168.1.12] (83.22.226.141.ipv4.supernova.orange.pl [83.22.226.141])
+	by jmsstudio.nazwa.pl (Postfix) with ESMTP id 49EE91BEF9E;
+	Thu, 20 Aug 2026 12:03:30 +0200 (CEST)
+Content-Type: multipart/alternative;
+ boundary="------------IWUOPTEHdZzq5Xw1wKGkR0D5"
+Message-ID: <27b3bea9-fe3a-47a3-92ad-a758ccb490e4@jmsstudio.com>
+Date: Thu, 20 Aug 2026 12:03:30 +0200
+MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: RODO na jachcie cd
+To: =?UTF-8?Q?Tomek_Sosi=C5=84ski?= <tomek.sosinski@gmail.com>
+References: <CAHG22sJpPE9LZJk0+jqsuEySNQ3pwz_hHJPsxLkB-4Eu-sM-kg@mail.gmail.com>
+Content-Language: pl, en-GB
+From: =?UTF-8?Q?Micha=C5=82_Smolarski_-_jmsSTUDIO_ARCHITEKCI?=
+ <msmolarski@jmsstudio.com>
+In-Reply-To: <CAHG22sJpPE9LZJk0+jqsuEySNQ3pwz_hHJPsxLkB-4Eu-sM-kg@mail.gmail.com>
+
+This is a multi-part message in MIME format.
+--------------IWUOPTEHdZzq5Xw1wKGkR0D5
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+
+Tomku trzeba dodać jakiś zapis że obowiązkiem uczestnika jadącego na 
+rejs jest uzyskanie zgody osoby do kontaktu alarmowego na podanie jej 
+danych w zakresie imię nazwisko i tel / mail do organizatora w celu 
+ewntualnego kontaktu w sytuacji kryzysowej. Myślę że mając taki zapis , 
+i kontaktująć się z matką czy siostrą gościa kóry leży nieprzytomny w 
+szpitalu nikt za łamanie rodo nas ścigał nie będzie :) /(a może sie 
+kiedyś zdiwię, ale mam nadzieje że nigdy tego nie sprawdzimy ) /
+
+W dniu 14.08.2026 o 14:30, Tomek Sosiński pisze:
+> *Kontakt alarmowy jako czwarta osoba trzecia.*to dane kogoś, kto o 
+> rejsie może nic nie wiedzieć i nigdy nie miał kontaktu z serwisem. Ta 
+> sama sytuacja co dane kolegów z załogi (art. 14), tylko jeszcze dalej 
+> od świadomej zgody.
+>
+> -- 
+>
+> Pozostaję z uszanowaniem
+>
+> Tomasz Sosiński
+>
+> 697 333 249
+>
+> ------------------------------------------------------------------------
+>
+> Niniejsza korespondencja zawiera informacje poufne objęte tajemnicą 
+> zawodową i prawnie chronione przeznaczone wyłącznie dla osób lub 
+> podmiotów, do których została zaadresowana. Jeżeli nie są Państwo 
+> adresatami niniejszego e-maila prosimy o zachowanie w poufności jego 
+> treści, nie rozpowszechnianie ani nie podejmowanie jakichkolwiek 
+> działań na podstawie informacji w nim zawartych. Jakiekolwiek 
+> wykorzystywanie bez uprawnienia informacji zawartych w przesyłanym 
+> dokumencie skutkować może odpowiedzialnością karną lub cywilną.
+>
+--------------IWUOPTEHdZzq5Xw1wKGkR0D5
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  </head>
+  <body text="#000000" bgcolor="#FFFFFF">
+    <div class="moz-signature">
+      <pre lang="zxx" class="western"><font color="#0000ff">Tomku trzeba dodać jakiś zapis że obowiązkiem uczestnika jadącego na rejs jest uzyskanie zgody osoby 
+do kontaktu alarmowego na podanie jej danych  w zakresie imię nazwisko i tel / mail  
+do organizatora w celu ewntualnego kontaktu w sytuacji kryzysowej. 
+
+Myślę że mając taki zapis , i kontaktująć się z matką czy siostrą gościa kóry leży nieprzytomny w szpitalu 
+nikt za łamanie rodo nas ścigał nie będzie :) 
+
+<i>(a może sie kiedyś zdiwię, ale mam nadzieje że nigdy tego nie sprawdzimy ) </i>
+</font>
+
+</pre>
+    </div>
+    <div class="moz-cite-prefix">W dniu 14.08.2026 o 14:30, Tomek
+      Sosiński pisze:<br>
+    </div>
+    <blockquote type="cite"
+cite="mid:CAHG22sJpPE9LZJk0+jqsuEySNQ3pwz_hHJPsxLkB-4Eu-sM-kg@mail.gmail.com">
+      <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+      <div dir="ltr">
+        <div><strong style="color:rgb(0,0,0)">Kontakt alarmowy jako
+            czwarta osoba trzecia.</strong><span
+style="color:rgb(0,0,0);font-family:-webkit-standard;font-size:medium"><span
+              class="gmail-Apple-converted-space"> </span></span><span
+style="color:rgb(0,0,0);font-family:-webkit-standard;font-size:medium"><span
+              class="gmail-Apple-converted-space"> </span>to dane kogoś,
+            kto o rejsie może nic nie wiedzieć i nigdy nie miał kontaktu
+            z serwisem. Ta sama sytuacja co dane kolegów z załogi (art.
+            14), tylko jeszcze dalej od świadomej zgody.</span><br
+            clear="all">
+        </div>
+        <div><br>
+        </div>
+        <span class="gmail_signature_prefix">-- </span><br>
+        <div dir="ltr" class="gmail_signature"
+          data-smartmail="gmail_signature">
+          <div dir="ltr">
+            <p class="MsoNormal"><span
+style="font-family:&quot;Minion Pro&quot;,serif;color:rgb(31,73,125)">Pozostaję
+                z uszanowaniem</span><span
+style="font-family:&quot;Minion Pro&quot;,serif;color:rgb(31,73,125)"></span></p>
+            <p class="MsoNormal"><span
+style="font-family:&quot;Minion Pro&quot;,serif;color:rgb(31,73,125)">Tomasz
+                Sosiński</span></p>
+            <p class="MsoNormal"><span
+style="font-family:&quot;Minion Pro&quot;,serif;color:rgb(31,73,125)">697 333 249</span></p>
+            <div class="MsoNormal" align="center"
+              style="text-align:center"><span
+                style="color:rgb(31,73,125)">
+                <hr size="2" width="100%" align="center"></span></div>
+            <p class="MsoNormal"><span
+style="font-size:8pt;font-family:&quot;Minion Pro&quot;,serif;color:rgb(31,73,125)">Niniejsza
+                korespondencja zawiera informacje poufne objęte
+                tajemnicą zawodową i prawnie chronione przeznaczone
+                wyłącznie dla osób lub podmiotów, do których została
+                zaadresowana. Jeżeli nie są Państwo adresatami
+                niniejszego e-maila prosimy o zachowanie w poufności
+                jego treści, nie rozpowszechnianie ani nie podejmowanie
+                jakichkolwiek działań na podstawie informacji w nim
+                zawartych. Jakiekolwiek wykorzystywanie bez uprawnienia
+                informacji zawartych w przesyłanym dokumencie skutkować
+                może odpowiedzialnością karną lub cywilną.</span></p>
+          </div>
+        </div>
+      </div>
+    </blockquote>
+  </body>
+</html>
+
+--------------IWUOPTEHdZzq5Xw1wKGkR0D5--
