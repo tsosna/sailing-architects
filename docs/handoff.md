@@ -4055,3 +4055,45 @@ Dokumenty: **ADR-025** (reguła BUG-11), `docs/backlog.md` — BUG-11 przepisany
 
 - Pozycje z sesji 2026-08-16 bez zmian: BUG-12 warstwy 1 i 3, BUG-11 (UI), BUG-13, UI-22, push UI-20, LEGAL-12 (b), wiadomość do Michała (dochodzą ADR-025 i ADR-026).
 - **FEAT-20** (token grupowy) — zderzyć z FEAT-19; gwarancja ceny kłóci się z drabinką czasową.
+
+## Sesja 2026-08-21 17:39 — BUG-11 warstwa UI, striaż dwóch maili RODO
+
+### Zmiany
+
+- **BUG-11 zamknięty** (`a008daad`, na `main`, **nie na produkcji**) — kasa poznała regułę, którą serwer egzekwuje od `6bbc120e`. W `book/+page.svelte`: `lastOverdueItem` (pozycja planu z największym `sortOrder` spośród przeterminowanych, przez `reduce`), `minimumSortOrder` wyprowadzone z niej, `isBelowMinimum(option)`, `firstAllowedOption`. Warianty poniżej minimum są `disabled` i wyszarzone (`:has(input:disabled)`), domyślnie zaznacza się pierwszy dopuszczalny, a nad nim stoi zdanie z nazwą i datą przeterminowanej pozycji.
+- **Backlog** — BUG-11 skreślony; nowe pozycje: **LEGAL-16..20** (odbiorcy listy załogi, retencja 30 dni, zgoda marketingowa, oświadczenie art. 9, kontakt alarmowy), **FEAT-21** (linki dla załogantów), **REFACTOR-9** (sześć kopii formatera daty → `src/lib/format.ts`), **I18N-3/4** (formaty locale i etykiety z bazy poza i18n), **INFRA-19** (`dev-data.zip` w katalogu repo).
+- **Feedback** — `RODO na jachcie.eml` i `RODO na jachcie cd.eml` zacommitowane z Mac mini i odhaczone.
+- **Wiki** — nowy artykuł `concepts/i18n-nie-obejmuje-formatow-i-tresci-z-bazy.md` (scope: universal) + rozdział „Guard dodany tylko na serwerze" dopisany do `three-layer-api-contract-symmetry.md`.
+
+### Decyzje
+
+- **Minimum liczone na kliencie z tych samych danych, nie przysyłane z serwera.** `activePaymentPlanBySlug` zwraca `items` razem z `dueAt`, więc przeglądarka ma czym policzyć to samo. Wariant „serwer zwraca `minimumSortOrder`" wymagałby nowego pola w odpowiedzi API dla reguły, która i tak musi być egzekwowana po stronie serwera.
+- **`Date.now()` w `$derived` zostaje statycznym zegarem.** Karta otwarta przez północ terminu raty pokaże stare minimum i skończy się `400`. Reaktywny zegar (wzorzec z BUG-4) kosztuje `setInterval` i `$effect` dla okna liczonego w minutach raz na kilka tygodni — nie zarabia na siebie.
+- **`reduce` zamiast `overdue[overdue.length - 1]`.** Zapytanie sortuje pozycje rosnąco, ale komponent tego nigdzie nie deklaruje. Ta sama pułapka co przy osi trasy 08-02: oparcie się na niezapisanej kolejności wyniku.
+- **Zdanie nie uzgadnia się gramatycznie z etykietą z bazy.** „Termin pozycji «X» minął" zamiast „X miała termin" — `label` wpisuje Michał w panelu i wystarczy rzeczownik innego rodzaju, żeby tekst przestał być poprawny.
+- **Refaktor formatera daty odłożony na osobny commit.** Wskazany przez Tomka w trakcie pracy; wejście w niego od razu wymieszałoby naprawę buga z przeprowadzką pięciu funkcji przez cztery pliki.
+
+### Wnioski
+
+- **Guard dodany tylko na serwerze to poprawność bez użyteczności.** Reguła stała w `validateSelection` od pięciu dni i przez ten czas jedyną drogą, żeby się o niej dowiedzieć, było kliknięcie i dostanie `400`. Każdy nowy warunek odmowy na serwerze rodzi zadanie w UI — policzyć to samo, odebrać wybór, powiedzieć dlaczego. → wiki.
+- **`pnpm check` przepuścił odwróconą regułę dwa razy w jednej sesji.** Najpierw `find((o) => isBelowMinimum(o))` bez `!` (domyślnym wyborem stawał się wariant, który przed chwilą wyłączyliśmy), potem `&&` zamiast `||` w `disabled`. Oba zwracają `boolean`, więc typ się zgadza, a zachowanie jest odwrotne od zamierzonego. Trzecia odsłona tego samego wzorca po 08-16.
+- **Próba kontrolna wykryłaby oba te błędy, a test głównej ścieżki nie.** `s4` (nic nieprzeterminowane) był jedynym scenariuszem, w którym brak `!` daje pusty wybór zamiast złego wyboru.
+- **Warunek opisujący klasę zamiast egzemplarza produkuje duplikaty w `{#each}`.** `isBelowMinimum(option)` jako warunek renderowania komunikatu dałby tyle akapitów, ile jest za krótkich wariantów. Dziś jeden, przy minimum równym 3 — dwa. Wykryte lekturą, nie przez interfejs, bo dane dev nie mają takiego planu.
+- **Znacznik ✅ w liście feedbacku znaczy „plik przejrzany", nie „plik wyczerpany".** Mail z 08-19 był odhaczony po dwóch pierwszych wątkach, a niżej leżały odpowiedzi na wszystkie pytania z `privacy-policy-inputs.md` — pięć pozycji backlogu, w tym korekta naszego założenia o tym, kto wpisuje dane załogi.
+- **`i18n` nie obejmuje dwóch klas tekstu widocznego dla użytkownika:** wartości z API formatujących (locale zaszyty w kodzie) i treści z bazy (etykiety wpisywane w panelu). Obie stoją w środku przetłumaczonego zdania i wyglądają na przetłumaczone. → wiki.
+
+### Następne kroki
+
+#### Next
+
+- **REFACTOR-9 + I18N-3 razem** — `src/lib/format.ts`, sześć kopii formatera daty, `convex/_brevo.ts` zostaje osobno. Przy okazji `month: 'short'` i locale z języka aplikacji.
+- **Push produkcyjny BUG-11** — dziś zmiana stoi tylko na `main`.
+- **LEGAL-2 odblokowana z dwóch stron** — LEGAL-14 zdjęło blokadę „czekamy na prawnika", a LEGAL-16..19 dostarczyły treść sekcji o odbiorcach, retencji, marketingu i danych o zdrowiu.
+- **INFRA-19** — skasować albo zignorować `dev-data.zip`.
+
+#### Blocked / Later / Open questions
+
+- **BUG-12 warstwa 1** (serwerowe zwolnienie własnego holdu) i **REFACTOR-8** — bez zmian.
+- **FEAT-21 vs FEAT-20 vs FEAT-17** — trzy zgłoszenia opisują ten sam mechanizm zapraszania załogi z różnych stron; przed implementacją trzeba je zderzyć.
+- **LEGAL-20** — czy oświadczenie uczestnika o zgodzie kontaktu alarmowego wystarcza wobec art. 14; ocena Michała nie jest ustaleniem prawnym.
+- **BUG-13**, **UI-22**, push UI-20, **LEGAL-12 (b)**, wiadomość do Michała (ADR-025, ADR-026) — bez zmian.
