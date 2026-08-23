@@ -18,15 +18,13 @@ jobs:
       # Pobiera kod repo do maszyny CI
       - uses: actions/checkout@v4
 
-      # Instaluje pnpm (wersja jak lokalnie; package.json nie ma pola packageManager)
+      # Instaluje pnpm w wersji z pola packageManager w package.json
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       # Node 24 + cache pnpm store — kolejne buildy nie pobierają paczek od zera
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies
