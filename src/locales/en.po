@@ -1830,6 +1830,7 @@ msgstr ""
 
 #: src/routes/[[lang=lang]]/admin/+page.svelte
 #: src/routes/[[lang=lang]]/admin/+page.svelte
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
 msgid "Dane"
 msgstr ""
 
@@ -3448,4 +3449,495 @@ msgstr ""
 #. 0: lastOverdueItem.label; 1: formatDate( lastOverdueItem.dueAt )
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Termin pozycji „{0}” minął {1}. Pierwsza płatność musi obejmować wszystkie raty po terminie."
+msgstr ""
+
+#~ msgid "Poityka prywatności"
+#~ msgstr ""
+
+#~ msgid "Polityka Prywatności"
+#~ msgstr ""
+
+#~ msgid "Polityka prywatkości — Sailing Architects"
+#~ msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Polityka prywatności dla uczestników rejsu Sailing Architects: kontakt do administratora."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Polityka prywatności — Sailing Architects"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Polityka prywatności"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Administrator danych"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Jakie dane zbieramy"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Cele i podstawy prawne"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Odbiorcy danych"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Przekazywanie poza EOG"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Okresy przechowywania"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Twoje prawa"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Pliki cookies"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Logi techniczne"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Bezpieczeństwo"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Zmiany polityki"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Data wejścia w życie"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Administratorem danych osobowych zbieranych za pośrednictwem tego serwisu jest <0>Michał Smolarski</0> — osoba fizyczna organizująca rejs Sailing Architects."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "E-mail"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "msmolarski@jmsstudio.com"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Adres do korespondencji"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Marii Konopnickiej 3/4a<0/>30-302 Kraków"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Nie wyznaczono inspektora ochrony danych. We wszystkich sprawach dotyczących przetwarzania danych osobowych możesz kontaktować się bezpośrednio pod powyższym adresem e-mail."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Zakres danych zależy od tego, na jakim etapie jesteś. Konto zakłada się samym adresem e-mail; dane uczestników rejsu zbieramy dopiero po rezerwacji."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Konto i rezerwacja"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "adres e-mail oraz identyfikator konta w systemie logowania"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "numer rezerwacji, wybrany etap rejsu i liczba miejsc"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "kwoty, harmonogram płatności i identyfikator transakcji"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Nie przechowujemy numeru karty płatniczej ani kodu CVC — dane karty trafiają bezpośrednio do operatora płatności i nigdy nie przechodzą przez nasz serwer."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Dane uczestników rejsu"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "imię i nazwisko"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "adres e-mail i numer telefonu"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "data i miejsce urodzenia"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "obywatelstwo"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "rodzaj i numer dokumentu tożsamości — paszportu albo dowodu osobistego"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "imię i numer telefonu osoby wskazanej do kontaktu w nagłych wypadkach"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "umiejętność pływania i doświadczenie żeglarskie"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Wymagania dietetyczne i informacje o zdrowiu"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Formularz uczestnika zawiera dwa pola opisowe: wymagania dietetyczne oraz uwagi medyczne. Oba są <0>dobrowolne</0> — pozostawione puste nie są nigdzie zapisywane."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Informacje o stanie zdrowia i sposobie odżywiania należą do szczególnej kategorii danych. Zasady ich przetwarzania opisuje sekcja „Cele i podstawy prawne\"."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Dane zbierane automatycznie"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Poza powyższym serwer zapisuje techniczne logi dostępu — opisuje je sekcja „Logi techniczne\". Nie korzystamy z narzędzi analitycznych ani pikseli marketingowych."
+msgstr ""
+
+#: src/lib/components/site-footer/site-footer.svelte
+msgid "Polityka prywatności →"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Każdy rodzaj danych przetwarzamy w konkretnym celu i na konkretnej podstawie. Poniżej wszystkie, jakie występują w tym serwisie."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Organizacja rejsu i rozliczenie składki"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Podstawa: wykonanie umowy uczestnictwa — art. 6 ust. 1 lit. b RODO."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "W tym celu przetwarzamy dane konta, rezerwacji i płatności oraz dane potrzebne do sporządzenia listy załogi przekazywanej armatorowi jachtu i służbom portowym: imię i nazwisko, datę i miejsce urodzenia, obywatelstwo oraz rodzaj i numer dokumentu tożsamości. Bez tych danych rejs nie może się odbyć — ich podanie jest warunkiem uczestnictwa."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Bezpieczeństwo na pokładzie"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Podstawa: prawnie uzasadniony interes — art. 6 ust. 1 lit. f RODO."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Umiejętność pływania i doświadczenie żeglarskie służą przydzieleniu zadań na wachtach i ocenie, jakiego wsparcia potrzebuje załoga. Dane osoby wskazanej do kontaktu w nagłych wypadkach służą wyłącznie zawiadomieniu jej w sytuacji zagrożenia zdrowia lub życia uczestnika."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Dochodzenie i obrona roszczeń"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Dane rezerwacji, płatności i zwrotów pozwalają wykazać, na jakich warunkach doszło do uczestnictwa, gdyby powstał spór."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Podstawa: wyraźna zgoda — art. 9 ust. 2 lit. a RODO."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Informacje o stanie zdrowia i sposobie odżywiania należą do szczególnej kategorii danych, których przetwarzanie jest co do zasady zakazane. Zbieramy je wyłącznie wtedy, gdy uczestnik wyrazi na to odrębną zgodę przy samym polu — akceptacja regulaminu ani dokonanie płatności nie są taką zgodą."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Zgodę można wycofać w każdej chwili, pisząc na adres administratora. Wycofanie nie wpływa na zgodność z prawem przetwarzania, które nastąpiło przed jego zgłoszeniem."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Dane osób, które same nie korzystają z serwisu"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Uczestnik podaje imię i numer telefonu osoby wskazanej do kontaktu w nagłych wypadkach. Osoba ta zwykle nie ma kontaktu z serwisem, a jej dane pozyskujemy nie od niej. Uczestnik jest zobowiązany uprzedzić ją o przekazaniu tych danych i uzyskać jej zgodę."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Osobie wskazanej jako kontakt alarmowy przysługują wszystkie prawa opisane w sekcji „Twoje prawa\", łącznie z prawem do żądania usunięcia jej danych."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Nie sprzedajemy danych i nie udostępniamy ich w celach marketingowych. Korzystamy natomiast z usług dostawców, którzy przetwarzają dane na nasze zlecenie i wyłącznie w zakresie potrzebnym do działania serwisu."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Dostawca"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Rola"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Miejsce przetwarzania"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Convex"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "baza danych aplikacji"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Unia Europejska (Irlandia)"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Brevo"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "wysyłka wiadomości e-mail"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Unia Europejska (Francja)"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Vercel"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "hosting aplikacji i logi serwera"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Stany Zjednoczone"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Clerk"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "obsługa kont i logowania"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Stripe"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "obsługa płatności"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Jeżeli logujesz się kontem Google lub Facebooka, dostawca tego konta potwierdza naszemu systemowi Twoją tożsamość. Nie przekazujemy mu przy tym żadnych danych dotyczących rejsu."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Lista uczestników rejsu — imiona, nazwiska, daty i miejsca urodzenia, obywatelstwa oraz numery dokumentów tożsamości — jest przekazywana armatorowi jachtu oraz służbom portowym w portach zawinięcia, jeżeli tego wymagają. Bez tego rejs nie może wypłynąć."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Powyższa lista dostawców odzwierciedla stan na dzień wskazany na końcu dokumentu."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Część danych jest przekazywana do Stanów Zjednoczonych. Dotyczy to obsługi kont i logowania, obsługi płatności oraz hostingu aplikacji wraz z logami serwera. Baza danych rejsu i wysyłka wiadomości e-mail pozostają na terenie Unii Europejskiej."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Przekazanie odbywa się na podstawie standardowych klauzul umownych zatwierdzonych przez Komisję Europejską, zawartych w umowach powierzenia przetwarzania z tymi dostawcami. Dostawcy certyfikowani w programie EU–U.S. Data Privacy Framework przekazują dane również na podstawie tej certyfikacji."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Serwis jest udostępniany przez sieć serwerów rozmieszczonych na całym świecie, więc adres IP Twojego urządzenia przechodzi przez infrastrukturę operatora hostingu także wtedy, gdy sama aplikacja liczy się w Europie."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Przekazywanie danych poza Europejski Obszar Gospodarczy oznacza, że podlegają one również prawu państwa docelowego, które może przewidywać dostęp organów publicznych na innych zasadach niż prawo Unii Europejskiej. Nie ogranicza to praw opisanych w sekcji „Twoje prawa\" — realizujemy je niezależnie od tego, gdzie dane są przetwarzane."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Dane przechowujemy tak długo, jak są potrzebne do celu, w którym je zebraliśmy. Ponieważ cele są różne, różne są też okresy."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Okres przechowywania"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Adres e-mail i konto w serwisie"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "do czasu usunięcia konta"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Rezerwacja, płatności i zwroty"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "przez okres przedawnienia roszczeń wynikających z uczestnictwa"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Dane do listy załogi: data i miejsce urodzenia, obywatelstwo, dokument tożsamości"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "nie dłużej niż 30 dni od zakończenia rejsu"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Dane osoby wskazanej do kontaktu w nagłych wypadkach"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "nie dłużej niż 30 dni od zakończenia rejsu, a w razie wycofania zgody — niezwłocznie po jej wycofaniu"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Imię i nazwisko uczestnika pozostają w dzienniku jachtowym prowadzonym przez kapitana. Dziennik jest dokumentem rejsu, przechowywanym poza tym serwisem i na zasadach właściwych dla dokumentacji żeglarskiej."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Dane związane z płatnością przechowuje również operator płatności, według własnych zasad wynikających z przepisów o usługach płatniczych. Ich usunięcie nie następuje na nasze polecenie."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "W związku z przetwarzaniem Twoich danych przysługują Ci następujące uprawnienia."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "<0>Dostęp do danych</0> — możesz dowiedzieć się, jakie dane na Twój temat przetwarzamy, i otrzymać ich kopię."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "<0>Sprostowanie</0> — możesz żądać poprawienia danych nieprawidłowych i uzupełnienia niekompletnych."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "<0>Usunięcie</0> — możesz żądać usunięcia danych, gdy nie są już potrzebne do celu, w którym je zebraliśmy, albo gdy cofniesz zgodę stanowiącą jedyną podstawę ich przetwarzania."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "<0>Ograniczenie przetwarzania</0> — możesz żądać, byśmy wstrzymali operacje na danych, na przykład na czas rozpatrywania Twojego sprzeciwu."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "<0>Przenoszenie danych</0> — możesz otrzymać dane, które nam podałeś, w formacie nadającym się do odczytu maszynowego i przekazać je innemu administratorowi."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "<0>Sprzeciw</0> — możesz sprzeciwić się przetwarzaniu danych opartemu na naszym prawnie uzasadnionym interesie, z przyczyn związanych z Twoją szczególną sytuacją."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "<0>Wycofanie zgody</0> — zgodę na przetwarzanie informacji o zdrowiu i wymaganiach dietetycznych możesz wycofać w każdej chwili. Wycofanie nie wpływa na zgodność z prawem przetwarzania sprzed jego zgłoszenia."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Jak z nich skorzystać"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Napisz na adres e-mail administratora podany na początku tego dokumentu. Odpowiadamy bez zbędnej zwłoki, najpóźniej w ciągu miesiąca od otrzymania żądania."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Część danych możesz poprawić samodzielnie w panelu uczestnika, bez kontaktowania się z nami — zmiany zapisują się od razu."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Skarga do organu nadzorczego"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Jeżeli uważasz, że przetwarzamy Twoje dane niezgodnie z prawem, możesz wnieść skargę do Prezesa Urzędu Ochrony Danych Osobowych, ul. Stawki 2, 00-193 Warszawa."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Serwis korzysta wyłącznie z ciasteczek niezbędnych do jego działania. Nie używamy narzędzi analitycznych, nie mierzymy ruchu, nie osadzamy pikseli reklamowych i nie profilujemy użytkowników."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Stosowane ciasteczka służą dwóm rzeczom:"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "<0>utrzymaniu sesji zalogowania</0> — dzięki nim nie musisz logować się przy każdym przejściu na kolejną stronę;"
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "<0>bezpieczeństwu płatności</0> — operator płatności używa ich do wykrywania nadużyć przy transakcjach kartą."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Ciasteczka niezbędne do świadczenia usługi nie wymagają zgody, dlatego serwis nie wyświetla okna z prośbą o jej wyrażenie. Możesz je zablokować w ustawieniach przeglądarki — logowanie i płatność przestaną wtedy działać."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Serwer automatycznie zapisuje dane techniczne każdego zapytania: adres IP, datę i godzinę, adres żądanej strony oraz informacje o przeglądarce i systemie."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Podstawą jest prawnie uzasadniony interes administratora — art. 6 ust. 1 lit. f RODO — polegający na ochronie serwisu przed nadużyciami i na utrzymaniu jego prawidłowego działania. Logów nie łączymy z danymi uczestników i nie wykorzystujemy do analizy zachowań."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Logi przechowuje dostawca hostingu przez okres wynikający z jego konfiguracji, nie dłużej niż 30 dni, po czym są usuwane automatycznie."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Dostęp do danych uczestnika wymaga zalogowania się na konto, na które rezerwacja została złożona. Połączenie między przeglądarką a serwerem jest szyfrowane. Dostęp administracyjny do danych rezerwacji ma wyłącznie organizator rejsu."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Dane są przechowywane u dostawców wymienionych w sekcji „Odbiorcy danych\", którzy odpowiadają za zabezpieczenie własnej infrastruktury."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Treść tego dokumentu może się zmienić — na przykład gdy zmieni się dostawca usługi albo zakres zbieranych danych. Aktualna wersja jest zawsze dostępna pod tym adresem, a data jej obowiązywania widnieje na końcu strony."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "O zmianach istotnie wpływających na przetwarzanie Twoich danych poinformujemy Cię wiadomością e-mail wysłaną na adres przypisany do konta."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Niniejsza polityka prywatności obowiązuje od 23 sierpnia 2026 roku."
+msgstr ""
+
+#: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
+msgid "Dokument sporządzono w języku polskim. Wersje w innych językach mają charakter informacyjny — w razie rozbieżności wiążąca jest wersja polska."
 msgstr ""

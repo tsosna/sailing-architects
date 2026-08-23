@@ -60,6 +60,9 @@
 					target="_blank"
 					rel="noopener">Regulamin →</a
 				>
+				<a class="footer__link" href={resolve('/polityka-prywatnosci')}
+					>Polityka prywatności →</a
+				>
 			</div>
 		</div>
 		<div class="footer__bottom">
