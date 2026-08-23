@@ -25,6 +25,7 @@
 	import { api } from '$convex/api'
 	import { bookingSelection } from '$lib/state/booking-selection.svelte'
 	import { browser } from '$app/environment'
+	import { formatDate } from '$lib/format'
 
 	const STEPS = [
 		{ id: 1, label: 'Koje' },
@@ -380,15 +381,6 @@
 		return (grosze / 100).toLocaleString('pl-PL', {
 			minimumFractionDigits: 2,
 			maximumFractionDigits: 2
-		})
-	}
-
-	function formatDueDate(timestamp: number | undefined): string {
-		if (!timestamp) return ''
-		return new Date(timestamp).toLocaleDateString('pl-PL', {
-			day: '2-digit',
-			month: '2-digit',
-			year: 'numeric'
 		})
 	}
 
@@ -1174,7 +1166,7 @@
 									{#each paymentOptions as option (option.id)}
 										{#if lastOverdueItem && option.id === firstAllowedOption?.id}
 											<p class="pay-options__notice">
-												Termin pozycji „{lastOverdueItem.label}” minął {formatDueDate(
+												Termin pozycji „{lastOverdueItem.label}” minął {formatDate(
 													lastOverdueItem.dueAt
 												)}. Pierwsza płatność musi obejmować wszystkie raty po
 												terminie.

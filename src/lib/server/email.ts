@@ -3,6 +3,7 @@ import {
 	BREVO_FROM_EMAIL,
 	CONTACT_EMAIL
 } from '$env/static/private'
+import { formatDate } from '$lib/format'
 
 const BREVO_TRANSACTIONAL_EMAIL_URL = 'https://api.brevo.com/v3/smtp/email'
 
@@ -321,15 +322,6 @@ function formatMoney(grosze: number, currency: string): string {
 	return `${value} ${currency.toUpperCase()}`
 }
 
-function formatDate(timestamp?: number): string {
-	if (!timestamp) return ''
-	return new Date(timestamp).toLocaleDateString('pl-PL', {
-		day: '2-digit',
-		month: '2-digit',
-		year: 'numeric'
-	})
-}
-
 function paymentEmailSubject(type: PaymentEmailType, bookingRef: string) {
 	switch (type) {
 		case 'deposit':
@@ -441,7 +433,7 @@ export async function sendPaymentConfirmationEmail(input: PaymentEmailInput) {
 						.map((item) => {
 							const due = item.dueAt
 								? ` <span style="color: #607089;">(termin ${escapeHtml(
-										formatDate(item.dueAt)
+									formatDate(item.dueAt)
 									)})</span>`
 								: ''
 							return `<li style="margin: 4px 0;">

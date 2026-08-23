@@ -9,6 +9,7 @@
 		adminParticipantSchema,
 		getCrewProfileErrors
 	} from '$lib/schemas/crew-profile'
+	import { formatDate } from '$lib/format'
 
 	type Props = {
 		bookingId: Id<'bookings'> | null
@@ -56,26 +57,6 @@
 			maximumFractionDigits: 2
 		})
 		return `${zlote} PLN`
-	}
-
-	function formatDateTime(timestamp?: number): string {
-		if (!timestamp) return '—'
-		return new Date(timestamp).toLocaleString('pl-PL', {
-			day: '2-digit',
-			month: '2-digit',
-			year: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit'
-		})
-	}
-
-	function formatDate(timestamp?: number): string {
-		if (!timestamp) return '—'
-		return new Date(timestamp).toLocaleDateString('pl-PL', {
-			day: '2-digit',
-			month: '2-digit',
-			year: 'numeric'
-		})
 	}
 
 	function paymentBadge(status: string): {
@@ -647,7 +628,7 @@
 													payment.dueAt
 												)}
 												{#if payment.lastReminderSentAt}
-													· monity: {payment.reminderCount ?? 0}, ostatnio {formatDateTime(
+													· monity: {payment.reminderCount ?? 0}, ostatnio {formatDate(
 														payment.lastReminderSentAt
 													)}
 												{/if}
@@ -739,22 +720,22 @@
 														participant.email ??
 														'brak adresu uczestnika'}
 													{#if participant.lastReminderSentAt}
-														· prośby: {participant.reminderCount ?? 0}, ostatnio {formatDateTime(
+														· prośby: {participant.reminderCount ?? 0}, ostatnio {formatDate(
 															participant.lastReminderSentAt
 														)}
 													{/if}
 													{#if participant.adminEditedAt}
-														· edycja admina: {formatDateTime(
+														· edycja admina: {formatDate(
 															participant.adminEditedAt
 														)}
 													{/if}
 													{#if participant.confirmationStatus === 'sent' && participant.confirmationExpiresAt}
-														· link aktywny do {formatDateTime(
+														· link aktywny do {formatDate(
 															participant.confirmationExpiresAt
 														)}
 													{/if}
 													{#if participant.confirmationStatus === 'confirmed' && participant.confirmedAt}
-														· potwierdzono {formatDateTime(
+														· potwierdzono {formatDate(
 															participant.confirmedAt
 														)}
 													{/if}
@@ -980,7 +961,7 @@
 								{#each contactHistory as entry (entry.key)}
 									<li>
 										<span class="history-date"
-											>{formatDateTime(entry.when)}</span
+											>{formatDate(entry.when)}</span
 										>
 										<span class="history-title">
 											{entry.title}

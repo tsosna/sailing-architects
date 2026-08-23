@@ -871,10 +871,8 @@ msgstr ""
 msgid "Razem"
 msgstr ""
 
-#. 0: formatGrosze(payment.amount)
-#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
-msgid "Zapłać {0} zł →"
-msgstr ""
+#~ msgid "Zapłać {0} zł →"
+#~ msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Rezerwacja potwierdzona"
@@ -1618,7 +1616,7 @@ msgstr ""
 msgid "Harmonogram płatności"
 msgstr ""
 
-#. 0: formatDueDate(payment.dueAt)
+#. 0: formatDate(payment.dueAt)
 #. 0: new Date(payment.dueAt).toLocaleDateString('pl-PL', { day\\: '2-digit', month\\: '2-digit', year\\: 'numeric' })
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
@@ -2003,7 +2001,7 @@ msgstr ""
 msgid "Brak harmonogramu."
 msgstr ""
 
-#. 0: payment.reminderCount ?? 0; 1: formatDateTime( payment.lastReminderSentAt )
+#. 0: payment.reminderCount ?? 0; 1: formatDate( payment.lastReminderSentAt )
 #: src/lib/components/admin/booking-drawer.svelte
 msgid "· monity: {0}, ostatnio {1}"
 msgstr ""
@@ -2049,7 +2047,7 @@ msgstr ""
 msgid "Koja {0} · {1}"
 msgstr ""
 
-#. 0: participant.reminderCount ?? 0; 1: formatDateTime( participant.lastReminderSentAt )
+#. 0: participant.reminderCount ?? 0; 1: formatDate( participant.lastReminderSentAt )
 #: src/lib/components/admin/booking-drawer.svelte
 msgid "· prośby: {0}, ostatnio {1}"
 msgstr ""
@@ -2119,7 +2117,7 @@ msgstr ""
 msgid "Nie udało się zapisać."
 msgstr ""
 
-#. 0: formatDateTime( participant.adminEditedAt )
+#. 0: formatDate( participant.adminEditedAt )
 #: src/lib/components/admin/booking-drawer.svelte
 msgid "· edycja admina: {0}"
 msgstr ""
@@ -2217,12 +2215,12 @@ msgstr ""
 msgid "Potwierdź ręcznie"
 msgstr ""
 
-#. 0: formatDateTime( participant.confirmationExpiresAt )
+#. 0: formatDate( participant.confirmationExpiresAt )
 #: src/lib/components/admin/booking-drawer.svelte
 msgid "· link aktywny do {0}"
 msgstr ""
 
-#. 0: formatDateTime( participant.confirmedAt )
+#. 0: formatDate( participant.confirmedAt )
 #: src/lib/components/admin/booking-drawer.svelte
 msgid "· potwierdzono {0}"
 msgstr ""
@@ -3419,7 +3417,9 @@ msgid "Opłać składkę →"
 msgstr ""
 
 #. 0: selectedPaymentOption?.amountFormatted ?? ''
+#. 0: formatGrosze(payment.amount)
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
 msgid "Opłać {0} zł →"
 msgstr ""
 
@@ -3445,7 +3445,7 @@ msgstr ""
 #~ msgid "Termin pozycji „{0}\" minął {1}. Pierwsza płatność musi obejmować wszystkie raty po terminie."
 #~ msgstr ""
 
-#. 0: lastOverdueItem.label; 1: formatDueDate( lastOverdueItem.dueAt )
+#. 0: lastOverdueItem.label; 1: formatDate( lastOverdueItem.dueAt )
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Termin pozycji „{0}” minął {1}. Pierwsza płatność musi obejmować wszystkie raty po terminie."
 msgstr ""

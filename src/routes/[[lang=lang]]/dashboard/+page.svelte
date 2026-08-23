@@ -5,6 +5,7 @@
 	import { useClerkContext, UserButton } from 'svelte-clerk'
 	import { api } from '$convex/api'
 	import type { Id } from '$convex/dataModel'
+	import { formatDate } from '$lib/format'
 
 	type Tab = 'booking' | 'profile' | 'docs'
 
@@ -80,15 +81,6 @@
 		return (grosze / 100).toLocaleString('pl-PL', {
 			minimumFractionDigits: 2,
 			maximumFractionDigits: 2
-		})
-	}
-
-	function formatDueDate(timestamp: number | undefined): string {
-		if (!timestamp) return ''
-		return new Date(timestamp).toLocaleDateString('pl-PL', {
-			day: '2-digit',
-			month: '2-digit',
-			year: 'numeric'
 		})
 	}
 
@@ -462,7 +454,7 @@
 										<p class="payments__row-label">{payment.label}</p>
 										{#if payment.dueAt}
 											<p class="payments__row-due">
-												Termin {formatDueDate(payment.dueAt)}
+												Termin {formatDate(payment.dueAt)}
 											</p>
 										{/if}
 									</div>

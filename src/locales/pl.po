@@ -871,10 +871,8 @@ msgstr "Podsumowanie"
 msgid "Razem"
 msgstr "Razem"
 
-#. 0: formatGrosze(payment.amount)
-#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
-msgid "Zapłać {0} zł →"
-msgstr "Zapłać {0} zł →"
+#~ msgid "Zapłać {0} zł →"
+#~ msgstr "Zapłać {0} zł →"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Rezerwacja potwierdzona"
@@ -1618,7 +1616,7 @@ msgstr "Oczekuje"
 msgid "Harmonogram płatności"
 msgstr "Harmonogram płatności"
 
-#. 0: formatDueDate(payment.dueAt)
+#. 0: formatDate(payment.dueAt)
 #. 0: new Date(payment.dueAt).toLocaleDateString('pl-PL', { day\\: '2-digit', month\\: '2-digit', year\\: 'numeric' })
 #: src/routes/[[lang=lang]]/dashboard/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
@@ -2003,7 +2001,7 @@ msgstr "Snapshot przepisany z planu segmentu przy tworzeniu bookingu."
 msgid "Brak harmonogramu."
 msgstr "Brak harmonogramu."
 
-#. 0: payment.reminderCount ?? 0; 1: formatDateTime( payment.lastReminderSentAt )
+#. 0: payment.reminderCount ?? 0; 1: formatDate( payment.lastReminderSentAt )
 #: src/lib/components/admin/booking-drawer.svelte
 msgid "· monity: {0}, ostatnio {1}"
 msgstr "· monity: {0}, ostatnio {1}"
@@ -2049,7 +2047,7 @@ msgstr "Brak uczestników w tej rezerwacji."
 msgid "Koja {0} · {1}"
 msgstr "Koja {0} · {1}"
 
-#. 0: participant.reminderCount ?? 0; 1: formatDateTime( participant.lastReminderSentAt )
+#. 0: participant.reminderCount ?? 0; 1: formatDate( participant.lastReminderSentAt )
 #: src/lib/components/admin/booking-drawer.svelte
 msgid "· prośby: {0}, ostatnio {1}"
 msgstr "· prośby: {0}, ostatnio {1}"
@@ -2119,7 +2117,7 @@ msgstr "Dane zapisane. Brak kompletu wymaganych pól — uczestnik nie zostanie 
 msgid "Nie udało się zapisać."
 msgstr "Nie udało się zapisać."
 
-#. 0: formatDateTime( participant.adminEditedAt )
+#. 0: formatDate( participant.adminEditedAt )
 #: src/lib/components/admin/booking-drawer.svelte
 msgid "· edycja admina: {0}"
 msgstr "· edycja admina: {0}"
@@ -2217,12 +2215,12 @@ msgstr "Wyślij link do potwierdzenia"
 msgid "Potwierdź ręcznie"
 msgstr "Potwierdź ręcznie"
 
-#. 0: formatDateTime( participant.confirmationExpiresAt )
+#. 0: formatDate( participant.confirmationExpiresAt )
 #: src/lib/components/admin/booking-drawer.svelte
 msgid "· link aktywny do {0}"
 msgstr "· link aktywny do {0}"
 
-#. 0: formatDateTime( participant.confirmedAt )
+#. 0: formatDate( participant.confirmedAt )
 #: src/lib/components/admin/booking-drawer.svelte
 msgid "· potwierdzono {0}"
 msgstr "· potwierdzono {0}"
@@ -3419,7 +3417,9 @@ msgid "Opłać składkę →"
 msgstr "Opłać składkę →"
 
 #. 0: selectedPaymentOption?.amountFormatted ?? ''
+#. 0: formatGrosze(payment.amount)
 #: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
 msgid "Opłać {0} zł →"
 msgstr "Opłać {0} zł →"
 
@@ -3445,7 +3445,7 @@ msgstr "Opłać"
 #~ msgid "Termin pozycji „{0}\" minął {1}. Pierwsza płatność musi obejmować wszystkie raty po terminie."
 #~ msgstr "Termin pozycji „{0}\" minął {1}. Pierwsza płatność musi obejmować wszystkie raty po terminie."
 
-#. 0: lastOverdueItem.label; 1: formatDueDate( lastOverdueItem.dueAt )
+#. 0: lastOverdueItem.label; 1: formatDate( lastOverdueItem.dueAt )
 #: src/routes/[[lang=lang]]/book/+page.svelte
 msgid "Termin pozycji „{0}” minął {1}. Pierwsza płatność musi obejmować wszystkie raty po terminie."
 msgstr "Termin pozycji „{0}” minął {1}. Pierwsza płatność musi obejmować wszystkie raty po terminie."

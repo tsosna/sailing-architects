@@ -3,6 +3,7 @@
 	import { api } from '$convex/api'
 	import { page } from '$app/state'
 	import { toastState } from '$lib/state/toast.svelte'
+	import { formatDate } from '$lib/format'
 
 	const convex = useConvexClient()
 	const token = $derived(page.params.token ?? '')
@@ -15,15 +16,6 @@
 	let correctionNote = $state('')
 	let busy = $state(false)
 	let finished = $state<'confirmed' | 'correction' | null>(null)
-
-	function formatDate(timestamp?: number): string {
-		if (!timestamp) return '—'
-		return new Date(timestamp).toLocaleDateString('pl-PL', {
-			day: '2-digit',
-			month: '2-digit',
-			year: 'numeric'
-		})
-	}
 
 	async function confirmData() {
 		if (!token) return
