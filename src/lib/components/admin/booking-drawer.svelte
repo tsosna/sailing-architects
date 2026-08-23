@@ -735,9 +735,7 @@
 														)}
 													{/if}
 													{#if participant.confirmationStatus === 'confirmed' && participant.confirmedAt}
-														· potwierdzono {formatDate(
-															participant.confirmedAt
-														)}
+														· potwierdzono {formatDate(participant.confirmedAt)}
 													{/if}
 												</span>
 												{#if participant.confirmationStatus === 'correction_requested' && participant.correctionNote}
@@ -960,9 +958,7 @@
 							<ul class="history">
 								{#each contactHistory as entry (entry.key)}
 									<li>
-										<span class="history-date"
-											>{formatDate(entry.when)}</span
-										>
+										<span class="history-date">{formatDate(entry.when)}</span>
 										<span class="history-title">
 											{entry.title}
 											{#if entry.count > 0}

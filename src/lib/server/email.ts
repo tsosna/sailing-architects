@@ -433,7 +433,7 @@ export async function sendPaymentConfirmationEmail(input: PaymentEmailInput) {
 						.map((item) => {
 							const due = item.dueAt
 								? ` <span style="color: #607089;">(termin ${escapeHtml(
-									formatDate(item.dueAt)
+										formatDate(item.dueAt)
 									)})</span>`
 								: ''
 							return `<li style="margin: 4px 0;">
