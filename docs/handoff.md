@@ -4097,3 +4097,54 @@ Dokumenty: **ADR-025** (reguła BUG-11), `docs/backlog.md` — BUG-11 przepisany
 - **FEAT-21 vs FEAT-20 vs FEAT-17** — trzy zgłoszenia opisują ten sam mechanizm zapraszania załogi z różnych stron; przed implementacją trzeba je zderzyć.
 - **LEGAL-20** — czy oświadczenie uczestnika o zgodzie kontaktu alarmowego wystarcza wobec art. 14; ocena Michała nie jest ustaleniem prawnym.
 - **BUG-13**, **UI-22**, push UI-20, **LEGAL-12 (b)**, wiadomość do Michała (ADR-025, ADR-026) — bez zmian.
+
+## Sesja 2026-08-23 12:55 — REFACTOR-9, odblokowanie CI, push produkcyjny
+
+### Zmiany
+
+- **REFACTOR-9 zamknięty** (`6f36436c`) — nowy [`src/lib/format.ts`](../src/lib/format.ts) z jedną funkcją `formatDate`; pięć lokalnych kopii usuniętych: `dashboard/+page.svelte`, `crew/confirm/[token]/+page.svelte`, `admin/booking-drawer.svelte`, `lib/server/email.ts`, `book/+page.svelte`. Katalogi `.po` przegenerowane (komentarze `#.` śledzą nazwy z kodu).
+- **`style(format)`** (`d45a4e69`) — trzy wywołania zwinięte do jednej linii; skrócenie nazwy `formatDueDate` → `formatDate` przestawiło łamanie linii prettiera.
+- **CI odblokowane po trzech dniach czerwieni** — dwie niezależne usterki z 08-20:
+  - `ci.yml` deklarował własne wersje pnpm (`version: 10`) i Node (`node-version: 24`) obok `packageManager` i `.nvmrc` dodanych w `26a6caab`; `pnpm/action-setup@v4` odmawia wyboru między dwiema wersjami. Teraz: brak `with:` przy pnpm, `node-version-file: .nvmrc` przy Node.
+  - `PUBLIC_CONVEX_URL` zniknął z `.env.example` w `fface39c` (INFRA-4), a CI kopiuje ten plik jako jedyne źródło zmiennych. Workflow dokłada własny placeholder po `cp`.
+- **Push produkcyjny** — `git push origin main:production`, `main` i `production` na `d45a4e69`, oba przebiegi CI zielone (44 s i 51 s, pełny pipeline). Na produkcję trafiły **BUG-11** (czekał od 08-21) i dzisiejszy refaktor. Tomek potwierdził działanie na żywej stronie.
+- **`.zshrc` — diagnoza dwóch menedżerów Node.** Wbrew założeniu wpis `fnm` nie był martwy: `node` przychodzi z `fnm_multishells`, bo linia 5 ładuje się po nvm i wygrywa `PATH`. Do usunięcia są linie 1–3 (nvm), nie 5.
+- **Backlog** — BUG-11 i REFACTOR-9 oznaczone jako obecne na produkcji; nowe **INFRA-20** (czerwone CI bez sygnału) i **I18N-5** (współrzędne mapy w jednej tablicy z tłumaczonymi etykietami); LEGAL-2 dostała zapis, że następna sesja składa tekst polityki, a nie zbiera pytania. Diff `docs/feedback/` zgodny — 17 plików, wszystkie odhaczone.
+
+### Decyzje
+
+- **Pusty przypadek formatera jest stały (`'—'`), nie parametrem** — wbrew planowi zapisanemu w pozycji REFACTOR-9. Uzasadnienie Tomka: pusty string znika bez śladu i czytający nie odróżni braku danych od błędu renderowania. Jedyne wywołanie, w którym myślnik stanąłby w środku zdania (`email.ts:265`), ma `settledAt` wymagane w typie wariantu `'completed'` — fallback jest tam nieosiągalny, osłona zbędna.
+- **Nazwa `formatDate`, nie `formatDueDate`.** W module wspólnym nazwa opisuje działanie, nie miejsce pochodzenia; funkcja obsługuje już `settledAt`, `expiresAt` i `confirmedAt`, z których żadne nie jest terminem.
+- **Kopia w `booking-confirmation-pdf.ts` nietknięta.** Formatuje bez opcji, więc dla dni jednocyfrowych daje `3.08.2026` zamiast `03.08.2026`. Zmiana wyglądu dokumentu, który klient archiwizuje, to osobna decyzja — zostaje jako reszta REFACTOR-9.
+- **Potrzebę CI deklaruje workflow, nie `.env.example`.** Odkomentowanie `PUBLIC_CONVEX_URL` w pliku przykładowym cofnęłoby INFRA-4, gdzie chodziło o to, żeby nikt nie wpisywał tam wartości różnej na każdej maszynie.
+- **`node-version-file: .nvmrc` zamiast literału `24`.** Node nie blokował builda, ale duplikat pochodzi z tego samego niedokończonego commita co pnpm — brany razem, nie jako osobny refaktor.
+- **Formatowanie i CI naprawiane osobnymi commitami** od zmiany funkcjonalnej, mimo że wszystkie trzy wynikły z jednej roboty.
+
+### Wnioski
+
+- **Zmiana zrobiona dla człowieka psuje maszynę czytającą ten sam plik.** `.env.example` jest jednocześnie dokumentacją dla nowej osoby i jedynym źródłem zmiennych dla CI. Zakomentowanie trzech linii było słuszne dla pierwszego czytelnika i zabójcze dla drugiego. Ta sama rodzina co komentarz w `ci.yml`, który opisywał **stan** („package.json nie ma pola packageManager") zamiast **reguły** — po trzech miesiącach kłamał.
+- **Konfiguracja zadeklarowana dwa razy nie kłóci się od razu.** `packageManager` i `version: 10` mówiły to samo do dnia, w którym przestały. `pnpm/action-setup` świadomie odmawia zgadywania — to dobra decyzja narzędzia, bo alternatywą jest build z inną wersją niż lokalna.
+- **Naprawa jednej usterki odsłania następną, a czas przebiegu jest miarą postępu.** 8 s (pnpm) → 30 s (brak zmiennej) → 51 s (zielone). Dwie usterki z tego samego dnia nakładały się i druga była niewidoczna, dopóki pierwsza zabijała przebieg przed instalacją.
+- **Formatowanie jest cechą końcowego tekstu pliku, nie edycji.** `pnpm format` uruchomiony przed zmianą nazwy nie ma wartości: krótsza o trzy znaki nazwa sprawiła, że trzy zawinięte wywołania mieszczą się w jednej linii i prettier zażądał ich zwinięcia.
+- **Numery linii w ostrzeżeniach Svelte wskazują źródło po preprocesorze.** `route-section.svelte:91` przy `const routePoints` leżącym w linii 85 — sześć linii różnicy to kod wstrzyknięty przez wuchale, który przy okazji uczynił tablicę `ports` reaktywną, bo `label` jest tłumaczony.
+- **Push nie wysyła plików, tylko commity.** Dwa razy w jednej sesji CI dostało starą wersję `ci.yml`, bo edycja siedziała w working tree. Za pierwszym razem kosztowało to jeden przebieg i minutę, ale ten sam odruch przy większej zmianie kosztuje diagnozę „przecież to poprawiłem".
+- **Czerwone CI nie doręcza się samo.** Sześć nieudanych przebiegów przez trzy dni, mechanizm zadziałał nazajutrz po powstaniu rozjazdu, tylko nikt nie patrzył w zakładkę Actions. → **INFRA-20**.
+
+### Następne kroki
+
+#### Next
+
+- **LEGAL-2 — złożyć spójny tekst polityki prywatności** z odpowiedzi Michała (LEGAL-14, 16, 17, 18, 19, 20) i zapisać stojące za nim rozstrzygnięcia jako **ADR**. Ustalone przez Tomka jako zadanie następnej sesji; materiał jest komplet, nie zbieramy dalszych pytań.
+- **Convex na produkcji — potwierdzić wdrożenie.** Reguła serwerowa BUG-11 (`6bbc120e`, `22664324`) mieszka w Convexie, który ma osobny deployment. `package.json` ma `build: vite build`, `vercel.json` tylko crona — jeśli `convex deploy` nie jest w build commandzie Vercela, to na prodzie stoi kasa znająca regułę nad serwerem, który jej nie egzekwuje.
+- **I18N-3** — locale z języka aplikacji zamiast `'pl-PL'`; warunek wstępny spełniony, to teraz jedna linia w `format.ts`.
+- **REFACTOR-9, reszta** — kopia w `booking-confirmation-pdf.ts`.
+- **INFRA-20** — powiadomienie o nieudanym przebiegu CI albo `gh run list` w rutynie startu sesji.
+- **`.zshrc`** — usunąć linie 1–3 (nvm), zweryfikować w nowym oknie terminala.
+- **BUG-12 warstwa 1**, **BUG-13**, **UI-22**, **LEGAL-12 (b)**, **wiadomość do Michała** (ADR-025, ADR-026) — bez zmian.
+
+#### Blocked / Later / Open questions
+
+- **REFACTOR-8**, **I18N-5**, **FEAT-19** — bez pilności.
+- **FEAT-21 vs FEAT-20 vs FEAT-17** — trzy zgłoszenia o tym samym mechanizmie zapraszania załogi, do zderzenia przed implementacją.
+- **LEGAL-20** — czy oświadczenie uczestnika wystarcza wobec art. 14; ocena Michała nie jest ustaleniem prawnym.
+- **INFRA-16/17/18**, **SEC-1/7**, **LEGAL-13**, **I18N-2**, **REFACTOR-2**, **DEP-1a/1b** i pozostałe — bez zmian.
