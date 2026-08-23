@@ -4184,7 +4184,8 @@ Dokumenty: **ADR-025** (reguła BUG-11), `docs/backlog.md` — BUG-11 przepisany
 
 #### Next
 
-- **LEGAL-9 (blokujące)** — pole zgody w `schema.ts`, checkbox odsłaniający pola w `book/+page.svelte:1064-1074` i w `dashboard/crew/[participantId]`, mechanizm wycofania. Opublikowana polityka twierdzi, że to działa.
+- **LEGAL-9 (blokujące) razem z FEAT-21** — sprawdzenie po zapisaniu ADR-029 wykazało, że `dashboard/crew/[participantId]` służy **kupującemu** do edycji danych pozostałych uczestników (`bookingByUser` z `userId`, `:66`), a `crew/confirm/[token]` pozwala tylko potwierdzić dane albo zgłosić poprawkę notatką. **Uczestnik nie ma miejsca, w którym sam wpisuje swoje dane medyczne**, więc zgody nie da się zebrać od właściwej osoby bez zbudowania takiego ekranu — FEAT-21 jest warunkiem, nie sąsiednim ulepszeniem. Zakres: strona uczestnika, pole z **momentem** zgody w schemacie, guard serwerowy, jeden checkbox odsłaniający pola, usunięcie pól z formularzy kupującego, akcja wycofania dla admina, rozstrzygnięcie losu rekordów sprzed wdrożenia. Sprostowanie dopisane do ADR-029 i do obu pozycji backlogu.
+- **Dane zdrowotne zostają w systemie** (Tomek, 08-23): *„nie możemy ograniczyć danych zdrowotnych tylko do notatek poza systemem, odpowiedzialność i tak zostaje"*. Otwarte pytanie z materiału (2.3) zamknięte — przeniesienie danych poza bazę nie przenosi roli administratora, odbiera tylko kontrolę dostępu, retencję i ślad.
 - **LEGAL-13 (blokujące)** — Vercel Pro albo inne rozwiązanie umowy powierzenia. Decyzja finansowa Michała; przy okazji zamyka INFRA-21 i odblokowuje INFRA-13.
 - **LEGAL-10** — klauzula językowa do regulaminu, czyli **nowy plik PDF** zgodnie z ADR-023; osobno decyzja o angielskiej wersji polityki (119 kluczy).
 - **INFRA-22** — `convex deploy` w pipeline albo świadoma rutyna ręcznego wdrożenia.
