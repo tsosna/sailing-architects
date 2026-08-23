@@ -2220,7 +2220,7 @@ msgstr ""
 msgid "· link aktywny do {0}"
 msgstr ""
 
-#. 0: formatDate( participant.confirmedAt )
+#. 0: formatDate(participant.confirmedAt)
 #: src/lib/components/admin/booking-drawer.svelte
 msgid "· potwierdzono {0}"
 msgstr ""
