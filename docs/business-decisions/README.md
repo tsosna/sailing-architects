@@ -30,3 +30,7 @@ Indeks decyzji biznesowych i produktowych dla `sailing-architects`.
 | [ADR-024](ADR-024-membership-fee-naming.md) | Dwie składki mają własne nazwy — rejsowa i pokładowa | treść produktu / komunikacja z uczestnikiem | przyjęta (nazwa „składka rejsowa" do potwierdzenia przez Michała) |
 | [ADR-025](ADR-025-late-buyer-covers-overdue-installments.md) | Kupujący po terminie raty płaci ją od razu, plan zostaje nietknięty | sprzedaż / harmonogram płatności / kasa | przyjęta (do zakomunikowania Michałowi) |
 | [ADR-026](ADR-026-privacy-policy-published-regardless-of-exemption.md) | Politykę prywatności publikujemy niezależnie od wyłączenia z RODO; administrator to osoba fizyczna | legal / compliance / dane osobowe | przyjęta |
+| [ADR-027](ADR-027-privacy-policy-as-route-not-versioned-file.md) | Polityka prywatności jako trasa aplikacji, nie wersjonowany plik PDF | legal / publikacja treści | przyjęta |
+| [ADR-028](ADR-028-polish-is-the-binding-language.md) | Wiążąca jest wersja polska; inne języki informacyjne, z adnotacją w dokumencie | legal / i18n | przyjęta |
+| [ADR-029](ADR-029-article-9-consent-sits-with-the-data.md) | Zgoda na dane o zdrowiu przy polach danych, nie przy płatności; zaznaczenie odsłania pola | legal / dane osobowe / UX formularzy | przyjęta |
+| [ADR-030](ADR-030-retention-per-data-type.md) | Okres przechowywania osobno dla każdego rodzaju danych, zapisany jako sufit | legal / dane osobowe / retencja | przyjęta |

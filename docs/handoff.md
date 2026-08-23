@@ -4148,3 +4148,51 @@ Dokumenty: **ADR-025** (reguła BUG-11), `docs/backlog.md` — BUG-11 przepisany
 - **FEAT-21 vs FEAT-20 vs FEAT-17** — trzy zgłoszenia o tym samym mechanizmie zapraszania załogi, do zderzenia przed implementacją.
 - **LEGAL-20** — czy oświadczenie uczestnika wystarcza wobec art. 14; ocena Michała nie jest ustaleniem prawnym.
 - **INFRA-16/17/18**, **SEC-1/7**, **LEGAL-13**, **I18N-2**, **REFACTOR-2**, **DEP-1a/1b** i pozostałe — bez zmian.
+
+## Sesja 2026-08-23 17:45 — LEGAL-2: polityka prywatności na produkcji, weryfikacja produkcyjnego Convexa
+
+### Zmiany
+
+- **LEGAL-2 zamknięte** (`b33630ae`, `8bb6e6b4`, na produkcji) — nowa trasa [`src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte`](../src/routes/%5B%5Blang=lang%5D%5D/polityka-prywatnosci/+page.svelte), 543 linie, dwanaście sekcji pokrywających art. 13 i 14. Odnośnik w stopce (`site-footer.svelte`), bez `target="_blank"` w odróżnieniu od regulaminu-PDF. `https://www.sailing-architect.com/polityka-prywatnosci` odpowiada — **licznik 404 biegnący od 2026-08-14 zatrzymany**.
+- **Weryfikacja produkcyjnego Convexa** — pozycja „potwierdzić wdrożenie" z poprzedniej sesji zamknięta bez wdrażania czegokolwiek. Reguła BUG-11 z `6bbc120e` mieszka w `src/routes/api/stripe/create-intent/+server.ts`, czyli w kodzie wdrażanym przez Vercela; w Convexie siedzi tylko guard `full` z `22664324`. Zmierzone zachowaniem: pusty plan zapisany w `/admin/automation` na produkcji zwrócił czyste polskie zdanie, czyli `ConvexError` — to datuje wdrożony kod na `544b7d8d` (16.08, 17:15) lub nowszy. Po tej dacie w `src/convex/` zmieniały się wyłącznie pliki generowane.
+- **Cztery ADR-y**: [ADR-027](business-decisions/ADR-027-privacy-policy-as-route-not-versioned-file.md) (trasa zamiast wersjonowanego pliku), [ADR-028](business-decisions/ADR-028-polish-is-the-binding-language.md) (polski wiążący), [ADR-029](business-decisions/ADR-029-article-9-consent-sits-with-the-data.md) (zgoda z art. 9 przy danych), [ADR-030](business-decisions/ADR-030-retention-per-data-type.md) (retencja per rodzaj danych).
+- **Backlog** — LEGAL-2 skreślone z zapisem, co przeszło dalej; nowa **INFRA-22** (nic nie wdraża funkcji Convex na produkcję); **LEGAL-9** i **LEGAL-13** podniesione do blokujących, bo opublikowana polityka twierdzi rzeczy, których system jeszcze nie robi; **SEC-1** i **LEGAL-10** rozszerzone.
+
+### Decyzje
+
+- **Polityka jako trasa, nie plik** (ADR-027). Kryterium z ADR-023 — „czy da się wykazać, na jaką treść klient się zgodził" — przy polityce nie występuje, bo polityki się nie akceptuje. Wszystkie pozostałe kryteria wskazywały na trasę. Uzasadnienie Tomka: *„czytelność i aktualność ważniejsze"*.
+- **Publikujemy przed domknięciem długów** (wariant B, decyzja Tomka, podtrzymana przy drugim takim wyborze). Dwa zdania polityki wyprzedzają stan systemu: zgoda z art. 9 i klauzule transferu. Alternatywą było trzymanie strony na `main` do czasu wdrożenia LEGAL-9 i wykupienia Vercel Pro.
+- **Zgoda z art. 9 przy danych, nie przy płatności** (ADR-029) — korekta wprowadzona przez Tomka w trakcie własnej propozycji. Kod ją potwierdza: kasa zbiera dane **kupującego**, a `dashboard/crew/[participantId]` dane **innego uczestnika**; checkbox przy płatności oznaczałby zgodę udzielaną za kolegów.
+- **Zaznaczenie zgody odsłania pola.** Przy zwykłym checkboxie da się wpisać dane i nie zaznaczyć zgody — rekord bez podstawy prawnej. Przy odsłanianiu ten stan jest nieosiągalny.
+- **Retencja per rodzaj danych** (ADR-030), a nie jeden okres. Rozstrzyga kolizję „30 dni Michała" z „okresem przedawnienia" z materiału: dane potrzebne **na rejs** znikają po rejsie, dane transakcyjne zostają na czas możliwego sporu.
+- **Zawiadomienie o usunięciu danych nie wchodzi do polityki teraz.** Pomysł Tomka, trafny, ale RODO go nie wymaga — więc obietnica czeka na działający cron. Zapisane w SEC-1.
+- **Bez podstawy „obowiązek prawny" (art. 6 ust. 1 lit. c)** w sekcji o podstawach. Rejs jest prywatny i składkowy, administrator to osoba fizyczna bez działalności — nie znaleziono przepisu, który by tę podstawę uzasadniał. Wpisanie „na wszelki wypadek" byłoby zmyśleniem.
+- **Kwestia 119 kluczy tłumaczeń zapisana w LEGAL-10, nie w nowej pozycji I18N.** „Czy EN wiąże prawnie" i „czy tłumaczymy" to jedna decyzja z dwóch stron; rozdzielone rozjechałyby się.
+
+### Wnioski
+
+- **Wersję wdrożonego kodu da się zmierzyć jego zachowaniem, jeśli znasz commit, który to zachowanie zmienił.** Dashboard Convexa nie pokazuje źródła funkcji, History wymaga planu Pro — a mimo to dało się datować produkcję z dokładnością do godziny, bo `544b7d8d` zamienił `throw new Error` na `ConvexError`, a Convex na produkcji wycina treść pierwszego. → wiki
+- **Warunek bezpieczeństwa takiego pomiaru: guard, w który celujesz, musi istnieć w każdej wersji kodu, jaka może tam stać.** Guard pustego planu pochodzi z 30 kwietnia, więc żadna wersja produkcji nie zapisałaby danych. Gdyby był świeży, ten sam test skasowałby plan Michała. → wiki
+- **Pierwszy pomiar trafił w złą warstwę.** Test „suma rat przekracza cenę" zatrzymał się na guardzie w formularzu i nigdy nie opuścił przeglądarki. Żeby zmierzyć serwer, trzeba przypadku, którego klient **nie** zna — tu: pusty plan, bo `.some()` na pustej tablicy zwraca `false`, a guard sumy patrzy wyłącznie na przekroczenie. → wiki
+- **Dokument prawny jest twierdzeniem o systemie i każde jego zdanie musi mieć pokrycie w kodzie.** Trzy razy w tej sesji materiał wejściowy proponował zdanie, które trzeba było sprawdzić w plikach: „dobrowolne" (sprawdzone — `book/+page.svelte:658` zapisuje `diet || undefined`), „zgoda marketingowa" (odrzucone — brak pola w schemacie), „usuwamy po rejsie" (odrzucone — pięć cronów, żaden nie kasuje). → wiki
+- **Nie obiecuj w dokumencie prawnym tego, czego prawo nie wymaga, dopóki mechanizm nie działa.** Przy zgodzie z art. 9 i klauzulach transferu wyboru nie było — brak informacji byłby brakiem wymaganego elementu. Przy zawiadomieniu o usunięciu danych wybór jest, więc zdanie czeka na crona. → wiki
+- **`convex deploy` wysyła zawartość katalogu, nie commit.** Dokładne odwrócenie wniosku z poprzedniej sesji („push nie wysyła plików, tylko commity") i dlatego groźne: stan produkcji nie jest nigdzie zapisany, a przy dwóch maszynach może tam stać kod, którego nie ma w gicie. → wiki
+- **`grep '<td>'` na renderze SSR daje zero przy działającej tabeli** — Svelte dopisuje klasę scoped do elementów objętych selektorem, więc wzorzec bez atrybutów przestaje pasować. Drobiazg, ale kosztował chwilę fałszywego alarmu.
+- **Materiał wejściowy sprzed dziewięciu dni zdążył się rozminąć z kodem w dwóch miejscach.** `privacy-policy-inputs.md` zakładał, że notatki medyczne podaje wyłącznie uczestnik pod linkiem z tokenem — a kasa zbiera je od 08-14; SEC-1 mówi o polu `documentNumber`, w schemacie jest `docNumber`.
+
+### Następne kroki
+
+#### Next
+
+- **LEGAL-9 (blokujące)** — pole zgody w `schema.ts`, checkbox odsłaniający pola w `book/+page.svelte:1064-1074` i w `dashboard/crew/[participantId]`, mechanizm wycofania. Opublikowana polityka twierdzi, że to działa.
+- **LEGAL-13 (blokujące)** — Vercel Pro albo inne rozwiązanie umowy powierzenia. Decyzja finansowa Michała; przy okazji zamyka INFRA-21 i odblokowuje INFRA-13.
+- **LEGAL-10** — klauzula językowa do regulaminu, czyli **nowy plik PDF** zgodnie z ADR-023; osobno decyzja o angielskiej wersji polityki (119 kluczy).
+- **INFRA-22** — `convex deploy` w pipeline albo świadoma rutyna ręcznego wdrożenia.
+- **SEC-1** — cron retencji z trzema dopisanymi pytaniami (zawiadomienie 7 dni przed, e-mail uczestnika bez konta, cykl backupów).
+- **Pytanie do Michała, wskazane w materiale:** czy notatki medyczne muszą być w bazie. Usunięcie pól znosi LEGAL-9 w części zdrowotnej.
+
+#### Blocked / Later / Open questions
+
+- **I18N-3** (locale z języka aplikacji), **REFACTOR-9 reszta** (`booking-confirmation-pdf.ts`), **INFRA-20**, **`.zshrc`** — bez zmian z poprzedniej sesji.
+- **BUG-12 warstwa 1**, **BUG-13**, **UI-22**, **LEGAL-12 (b)**, **REFACTOR-8**, **FEAT-19/20/21** — bez zmian.
+- **LEGAL-20** — czy oświadczenie uczestnika wystarcza wobec art. 14; ocena Michała nie jest ustaleniem prawnym.
