@@ -33,8 +33,12 @@ jobs:
       # Build-time env: SvelteKit ($env/static/*) wymaga zdefiniowanych zmiennych
       # przy `vite build`. Wartości z .env.example są placeholderami — CI nie
       # łączy się z Convex/Stripe/Brevo, tylko kompiluje.
+      # PUBLIC_CONVEX_URL świadomie NIE stoi w .env.example (INFRA-4: różna na
+      # każdej maszynie), więc CI dokłada własny placeholder.
       - name: Create placeholder .env
-        run: cp .env.example .env
+        run: |
+          cp .env.example .env
+          echo 'PUBLIC_CONVEX_URL=https://placeholder.convex.cloud' >> .env
 
       # Build PRZED check: vite build generuje src/locales/.wuchale/
       # (gitignored), bez którego svelte-check pada na main.loader.svelte.js
