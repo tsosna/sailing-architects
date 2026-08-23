@@ -4192,6 +4192,8 @@ Dokumenty: **ADR-025** (reguła BUG-11), `docs/backlog.md` — BUG-11 przepisany
 - **SEC-1** — cron retencji z trzema dopisanymi pytaniami (zawiadomienie 7 dni przed, e-mail uczestnika bez konta, cykl backupów).
 - **Pytanie do Michała, wskazane w materiale:** czy notatki medyczne muszą być w bazie. Usunięcie pól znosi LEGAL-9 w części zdrowotnej.
 
+- **Ustalone 08-23 jako zadanie następnej sesji: REFACTOR-8, a zaraz po nim BUG-12 warstwa 1.** Sprawdzenie przy pytaniu Tomka o „obrazek z łódką w dwóch miejscach" pokazało, że rysunek duplikatem nie jest — `BoatPlan` jest jednym komponentem w obu wywołaniach. Zdublowane są dane wchodzące: `berthStatuses` liczony osobno w każdym pliku **oraz** model wyboru koi (kasa: lokalne `selectedBerths`/`toggleBerth`; landing: `bookingSelection.*`). Druga warstwa duplikatu nie była dotąd zapisana. Kolejność: scalenie widoku przed naprawą serwerową, bo warstwa 1 zrobiona przy dwóch klientach zostawia landing kłamiący dalej.
+
 #### Blocked / Later / Open questions
 
 - **I18N-3** (locale z języka aplikacji), **REFACTOR-9 reszta** (`booking-confirmation-pdf.ts`), **INFRA-20**, **`.zshrc`** — bez zmian z poprzedniej sesji.
