@@ -12,7 +12,6 @@
 	import { PUBLIC_STRIPE_PUBLISHABLE_KEY } from '$env/static/public'
 	import { useQuery } from 'convex-svelte'
 	import { BookingInput } from '$components/booking-input'
-	import { BoatPlan } from '$components/boat-plan'
 	import { StepIndicator } from '$components/step-indicator'
 	import { findCabinByBerth } from '$lib/data/cabins'
 	import { voyageSegments } from '$lib/data/voyage-segments'
@@ -26,6 +25,7 @@
 	import { bookingSelection } from '$lib/state/booking-selection.svelte'
 	import { browser } from '$app/environment'
 	import { formatDate } from '$lib/format'
+	import { BerthPicker } from '$components/berth-picker'
 
 	const STEPS = [
 		{ id: 1, label: 'Koje' },
@@ -100,8 +100,7 @@
 				.filter(Boolean)
 		: []
 
-	let selectedSegment = $state(initialSegmentParam ?? voyageSegments[0].id)
-	let selectedBerths = $state(initialBerths)
+	const selectedSegment = $derived(bookingSelection.selectedSegment)
 
 	if (browser) {
 		bookingSelection.selectedSegment =
@@ -112,7 +111,7 @@
 	const segment = $derived(
 		voyageSegments.find((s) => s.id === selectedSegment) ?? voyageSegments[0]
 	)
-	const berths = $derived(selectedBerths)
+	const berths = $derived(bookingSelection.selectedBerths)
 	const panelLoginMode = $derived(berths.length === 0)
 	const berthDetails = $derived(
 		berths.map((id) => ({ id, cabin: findCabinByBerth(id) }))
@@ -120,38 +119,21 @@
 	const totalPrice = $derived(segment.price * berths.length)
 	const totalPriceFormatted = $derived(totalPrice.toLocaleString('pl-PL'))
 	const pricePerBerthFormatted = $derived(segment.price.toLocaleString('pl-PL'))
-	const selectedBerthsLabel = $derived(
-		selectedBerths.length === 1 ? 'koję' : 'koje'
-	)
+	const selectedBerthsLabel = $derived(berths.length === 1 ? 'koję' : 'koje')
 	const selectionEyebrow = $derived(
-		selectedBerths.length > 0
-			? ['Wybrano', selectedBerths.length, selectedBerthsLabel].join(' ')
+		berths.length > 0
+			? ['Wybrano', berths.length, selectedBerthsLabel].join(' ')
 			: 'Wybór koi'
 	)
 	const selectionSummary = $derived(
-		selectedBerths.length > 0
-			? `${selectedBerths.join(', ')} · ${segment.name} · ${totalPriceFormatted} zł`
+		berths.length > 0
+			? `${berths.join(', ')} · ${segment.name} · ${totalPriceFormatted} zł`
 			: 'Wybierz koję na planie lub z listy, aby kontynuować.'
 	)
 
-	const statusQuery = useQuery(api.queries.berthStatusesBySlug, () => ({
-		slug: selectedSegment
-	}))
 	const planQuery = useQuery(api.queries.activePaymentPlanBySlug, () => ({
 		slug: selectedSegment
 	}))
-	type BerthStatus = 'held' | 'taken' | 'captain' | 'complimentary'
-
-	const berthStatuses = $derived(
-		new Map<string, BerthStatus>(
-			(statusQuery.data ?? [])
-				.filter(({ heldByMe }: { heldByMe: boolean }) => !heldByMe)
-				.map(({ berthId, status }: { berthId: string; status: string }) => [
-					berthId,
-					status as BerthStatus
-				])
-		)
-	)
 
 	let step = $state(
 		initialAuthParam === 'signin' ||
@@ -187,8 +169,8 @@
 		params.set('segment', selectedSegment)
 		params.delete('auth')
 
-		if (selectedBerths.length > 0) {
-			params.set('berths', selectedBerths.join(','))
+		if (berths.length > 0) {
+			params.set('berths', berths.join(','))
 		} else {
 			params.delete('berths')
 		}
@@ -212,23 +194,8 @@
 		})
 	}
 
-	function selectSegment(id: string) {
-		selectedSegment = id
-		selectedBerths = []
-		bookingSelection.selectSegment(id)
-	}
-
-	function toggleBerth(id: string) {
-		if (selectedBerths.includes(id)) {
-			selectedBerths = selectedBerths.filter((b) => b !== id)
-		} else {
-			selectedBerths = [...selectedBerths, id]
-		}
-		bookingSelection.toggleBerth(id)
-	}
-
 	async function continueFromSelection() {
-		if (selectedBerths.length === 0) return
+		if (berths.length === 0) return
 		await syncBookingUrl()
 		step = isSignedIn ? 3 : 2
 	}
@@ -736,38 +703,11 @@
 					dopiero po kliknięciu „Kontynuuj rezerwację”.
 				</p>
 
-				<div
-					class="booking-segments"
-					role="tablist"
-					aria-label="Wybierz etap rejsu"
-				>
-					{#each voyageSegments as seg (seg.id)}
-						<button
-							type="button"
-							role="tab"
-							aria-selected={selectedSegment === seg.id}
-							class="booking-segments__btn"
-							class:booking-segments__btn--active={selectedSegment === seg.id}
-							onclick={() => selectSegment(seg.id)}
-						>
-							<span class="booking-segments__dates">{seg.dates}</span>
-							<span class="booking-segments__name">{seg.name}</span>
-							<span class="booking-segments__price"
-								>{seg.price.toLocaleString('pl-PL')} zł</span
-							>
-						</button>
-					{/each}
-				</div>
-
-				<BoatPlan
-					{selectedBerths}
-					{berthStatuses}
-					onToggleBerth={toggleBerth}
-				/>
+				<BerthPicker />
 
 				<div
 					class="selection-banner"
-					class:selection-banner--empty={selectedBerths.length === 0}
+					class:selection-banner--empty={berths.length === 0}
 					aria-live="polite"
 				>
 					<div class="selection-banner__copy">
@@ -777,12 +717,10 @@
 					<button
 						type="button"
 						class="selection-banner__cta"
-						disabled={selectedBerths.length === 0}
+						disabled={berths.length === 0}
 						onclick={continueFromSelection}
 					>
-						{selectedBerths.length > 0
-							? 'Kontynuuj rezerwację\u00A0→'
-							: 'Wybierz koję'}
+						{berths.length > 0 ? 'Kontynuuj rezerwację\u00A0→' : 'Wybierz koję'}
 					</button>
 				</div>
 			</section>
@@ -1419,69 +1357,6 @@
 	.lead--auth {
 		margin: -12px 0 28px;
 		color: rgba(245, 240, 232, 0.64);
-	}
-
-	.booking-segments {
-		display: flex;
-		gap: 1px;
-		margin-bottom: 48px;
-		background: rgba(196, 146, 58, 0.1);
-		flex-wrap: wrap;
-	}
-
-	.booking-segments__btn {
-		flex: 1;
-		min-width: 160px;
-		padding: 16px 20px;
-		background: var(--color-navy);
-		border: none;
-		border-bottom: 2px solid transparent;
-		cursor: pointer;
-		text-align: left;
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-		transition:
-			background-color 150ms ease,
-			border-color 150ms ease;
-	}
-
-	.booking-segments__btn--active {
-		background: rgba(196, 146, 58, 0.12);
-		border-bottom-color: var(--color-brass);
-	}
-
-	.booking-segments__dates {
-		font-family: var(--font-sans);
-		font-size: 10px;
-		letter-spacing: 1px;
-		text-transform: uppercase;
-		color: var(--color-brass-text-soft);
-	}
-
-	.booking-segments__btn--active .booking-segments__dates {
-		color: var(--color-brass-text);
-	}
-
-	.booking-segments__name {
-		font-family: var(--font-sans);
-		font-size: 13px;
-		font-weight: 500;
-		color: var(--color-on-surface-muted);
-	}
-
-	.booking-segments__btn--active .booking-segments__name {
-		color: var(--color-warm-white);
-	}
-
-	.booking-segments__price {
-		font-family: var(--font-serif);
-		font-size: 18px;
-		color: var(--color-brass-text-soft);
-	}
-
-	.booking-segments__btn--active .booking-segments__price {
-		color: var(--color-brass-text);
 	}
 
 	.selection-banner {

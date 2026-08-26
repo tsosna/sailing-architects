@@ -97,12 +97,10 @@ msgstr ""
 msgid "Kliknij koję na planie lub użyj listy. Szary oznacza zajęte, mosiądz — dostępne, złoty — wybrane."
 msgstr ""
 
-#: src/lib/components/cabins-section/cabins-section.svelte
-#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/lib/components/berth-picker/berth-picker.svelte
 msgid "Wybierz etap rejsu"
 msgstr ""
 
-#. 0: seg.price.toLocaleString('pl-PL')
 #. 0: seg.price.toLocaleString('pl-PL')
 #. 0: totalPriceFormatted
 #. 0: option.amountFormatted
@@ -111,8 +109,7 @@ msgstr ""
 #. 0: selectedPaymentOption.amountFormatted
 #. 0: formatGrosze(payment.amount)
 #. 0: formatGrosze(payment.amount)
-#: src/lib/components/cabins-section/cabins-section.svelte
-#: src/routes/[[lang=lang]]/book/+page.svelte
+#: src/lib/components/berth-picker/berth-picker.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/book/+page.svelte
