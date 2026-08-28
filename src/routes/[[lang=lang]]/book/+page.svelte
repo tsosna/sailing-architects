@@ -505,7 +505,6 @@
 				body: JSON.stringify({
 					segmentSlug: segment.id,
 					berthIds: berths,
-					userId: ctx.auth.userId,
 					buyerEmail: userEmail || undefined,
 					selectedSortOrders: option.sortOrders
 				})

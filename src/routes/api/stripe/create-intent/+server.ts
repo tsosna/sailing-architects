@@ -138,20 +138,21 @@ function validateSelection(
 	return { ok: true, amount }
 }
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, locals }) => {
+	const { userId } = locals.auth()
+	if (!userId) return apiError(401, 'Wymagane zalogowanie')
+
 	const body = await request.json().catch(() => null)
-	const { segmentSlug, berthIds, userId, buyerEmail, selectedSortOrders } =
+	const { segmentSlug, berthIds, buyerEmail, selectedSortOrders } =
 		(body ?? {}) as {
 			segmentSlug?: string
 			berthIds?: string[]
-			userId?: string
 			buyerEmail?: string
 			selectedSortOrders?: number[]
 		}
 
 	if (
 		!segmentSlug ||
-		!userId ||
 		!Array.isArray(berthIds) ||
 		berthIds.length === 0 ||
 		!Array.isArray(selectedSortOrders) ||
@@ -159,7 +160,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	) {
 		return apiError(
 			400,
-			'Brakujące pola: segmentSlug, berthIds, userId, selectedSortOrders'
+			'Brakujące pola: segmentSlug, berthIds, selectedSortOrders'
 		)
 	}
 
