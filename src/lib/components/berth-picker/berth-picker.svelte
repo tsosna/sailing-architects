@@ -38,6 +38,15 @@
 		)
 	)
 
+	$effect(() => {
+		const stillFree = bookingSelection.selectedBerths.filter(
+			(id) => !berthStatuses.has(id)
+		)
+		if (stillFree.length !== bookingSelection.selectedBerths.length) {
+			bookingSelection.selectedBerths = stillFree
+		}
+	})
+
 	// Free berth count per segment — empty map while loading
 	const availabilityQuery = useQuery(
 		api.queries.listBerthAvailability,
