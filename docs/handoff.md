@@ -4199,3 +4199,58 @@ Dokumenty: **ADR-025** (reguła BUG-11), `docs/backlog.md` — BUG-11 przepisany
 - **I18N-3** (locale z języka aplikacji), **REFACTOR-9 reszta** (`booking-confirmation-pdf.ts`), **INFRA-20**, **`.zshrc`** — bez zmian z poprzedniej sesji.
 - **BUG-12 warstwa 1**, **BUG-13**, **UI-22**, **LEGAL-12 (b)**, **REFACTOR-8**, **FEAT-19/20/21** — bez zmian.
 - **LEGAL-20** — czy oświadczenie uczestnika wystarcza wobec art. 14; ocena Michała nie jest ustaleniem prawnym.
+
+## Sesja 2026-08-26/28 — REFACTOR-8, BUG-12 domknięte, SEC-8, wdrożenie produkcyjne
+
+Sesja trzydniowa, dwa razy zamrażana (`save learning progress` 08-26, odmrożenie 08-27 i 08-28).
+
+### Zmiany
+
+- **REFACTOR-8 zamknięte** (`80e452e7`) — nowy `src/lib/components/berth-picker/` renderowany przez landing i kasę. Trzyma zakładki segmentów, badge dostępności i `BoatPlan`. Zakres poszerzony przez Tomka wobec backlogu: scalenie **całego bloku wyboru koi**, nie samych map statusów — wygląd z landingu, mechanika z kasy. Banner i nagłówek zostały przy stronach (różnią się), landing przekazuje notatkę o `?segment=` przez opcjonalny callback. `BoatPlan` ma dziś jednego konsumenta zamiast dwóch.
+- **Tytuł segmentu nad legendą** (`b6eee983`) — nowy opcjonalny props `segmentName` w `BoatPlan`. Zgłoszone przez Tomka: po przewinięciu do planu zakładki są poza ekranem i nic nie mówi, którego etapu dotyczy rysunek. Przy okazji poprawiony kontrast aktywnej zakładki (tło mosiądzu 0.12 → 0.18).
+- **SEC-8** (`053c8749`) — `create-intent` czytał `userId` z ciała żądania i nigdy nie dotykał sesji. Teraz `locals.auth()` i `401` przed parsowaniem ciała; kasa przestała wysyłać identyfikator. Ta sama rodzina co SEC-6, ta trasa została wtedy pominięta.
+- **BUG-12 warstwa 1** (`c331a33e`) — `internal.queries.ownLiveHoldsBySegment` + pętla w `create-intent`: anulowanie PaymentIntentów w Stripie, potem `cancelBooking`. Do tego dwa komunikaty, które kupujący może realnie zobaczyć: odmowa sprzedaży koi zmieniona na `ConvexError` (zwykły `Error` traci treść na produkcji) i polskie zdanie zamiast angielskiego „A processing error occurred." na porzuconej karcie.
+- **BUG-14** (`b94caad6`) — `$effect` w `berth-picker` usuwa z wyboru koje, które w międzyczasie zostały sprzedane. Znalezione przez Tomka przy testach: kliknął jedną wolną koję, panel pokazał dwie.
+- **Wdrożenie produkcyjne** — `pnpm exec convex deploy` na `qualified-crab-196`, potem `git push origin main` i `main:production`. Wszystkie trzy referencje na `b94caad6`.
+- **ADR-031** — reguła „ostatni wybór wygrywa" spisana z trzema ograniczeniami (tylko własne, tylko ten sam etap, tylko nieopłacone).
+
+### Decyzje
+
+- **Zakres scalenia po rolach kopii, nie po liniach kodu** (Tomek). Backlog mówił o dwóch mapach statusów; Tomek objął całą sekcję wyboru koi i wskazał, co brać z której strony.
+- **Przewijanie do planu należy do wyboru koi, nie do strony** (Tomek). Zaparkowałem je jako problem („landing mierzy element, który po scaleniu wchodzi do komponentu"); żądanie „też w `/book`" ten problem usunęło razem z założeniem.
+- **Banner i nagłówek zostają przy stronach.** Zasada nazwana przez Tomka: co się różni, zostaje u siebie. Landing linkuje do kasy, kasa przestawia krok — nie da się tego scalić bez udawania.
+- **Tożsamość przed funkcją niszczącą.** Warstwa 1 dokłada do `create-intent` anulowanie cudzych rezerwacji; na nieweryfikowanym `userId` zamieniłaby „zostaw komuś śmieci na koncie" w „skasuj komuś zakup w trakcie". Dlatego SEC-8 poszło pierwsze, osobnym commitem.
+- **Filtr statusów jako lista dozwolonych.** `status === 'pending'`, nie `!== 'confirmed'` — nowy status w przyszłości ma nie przechodzić.
+- **Convex przed frontem przy wdrożeniu.** Sam `git push` położyłby płatności: trasa woła funkcję, której produkcyjny deployment nie znał.
+- **Poprawki bezpieczeństwa commitowane osobno**, żeby nie ginęły w commicie z funkcją.
+
+### Wnioski
+
+- **Anulowanie w systemie zewnętrznym jest wykrywaczem wyścigu, nie sprzątaniem.** Odmowa Stripe'a to jedyna informacja o opłaceniu, której baza jeszcze nie ma — dlatego idzie przed zwolnieniem lokalnym i dlatego jej błędu nie wolno połykać. → wiki
+- **Filtruj po stanach dozwolonych, nie zakazanych.** `!==` przepuszcza po cichu każdą wartość dodaną później; przy operacjach na pieniądzach jedyny dopuszczalny kierunek to fail-closed. → wiki
+- **Linter sprawdza użycie, nie aktualność.** Po usunięciu handlerów `selectedBerths` i `selectedSegment` zachowały komplet czytelników i straciły wszystkich zapisujących. Cursor milczał, `pnpm check` był zielony, a druga z nich niosła cenę i slug do Stripe'a — koje z Cabo Verde szłyby do zapłaty po cenie Majorki. → wiki
+- **`$state(cudzeŹródło)` odcina się w chwili powstania.** Snapshot zamiast przepisu; dodatkowo łapie wartość sprzed bloku, który to źródło dopiero ustawia. → dopisane do istniejącego artykułu o `$state` vs `$derived`
+- **`$effect` piszący do własnej zależności potrzebuje warunku stopu.** Nowa tablica o tej samej treści też budzi effect — liczy się referencja. → wiki
+- **Scoped CSS nie jedzie za przeniesionym znacznikiem.** Ostrzeżenie „Unused CSS selector" znaczy „element został bez stylu", nie „drobiazg". → wiki
+- **Callback w propsie biegnie przeciwnie do importu** — i ta strzałka nie ma w kodzie żadnego zapisu. To źródło realnej trudności w czytaniu przepływów, nie brak wprawy. → wiki
+- **Nakładane pliki `.env` mieszają się per zmienna.** Adres z jednego, klucz z drugiego; front działał, padła dopiero ścieżka serwerowa — i dlatego usterka wisiała osiem dni. → wiki
+- **`convex deploy` celuje w produkcję niezależnie od `dev:` w `CONVEX_DEPLOYMENT`.** Podział jest po komendzie, nie po zmiennej. `--dry-run` pokazuje cel bez wysyłania. → wiki
+- **Skrót edytora potrafi połknąć znak diakrytyczny.** `Alt+Z` (zawijanie wiersza) zjadał „ż" — kolizja punktowa, wyglądająca jak literówka, powtarzalna tylko na jednej literze. → wiki
+- **Diagnostyka edytora znajduje nieużywane, nie znajduje nieaktualnych.** Cursor poprawnie wskazał trzy martwe nazwy z czterech; czwarta miała czytelników i była zamrożona.
+
+### Następne kroki
+
+#### Next
+
+- **Test pełnej ścieżki zakupu na produkcji** — nie wykonany, bo dojście do ekranu płatności tworzy prawdziwy hold na 15 minut na żywej koi. Do zrobienia świadomie, na segmencie sprzedającym się najwolniej, bez finalizacji płatności.
+- **I18N-6** — reszta komunikatów Stripe'a idzie do kupującego po angielsku (odrzucona karta, brak środków, zły CVC). Mapa `code`/`decline_code` → polskie zdania.
+- **INFRA-23** — uzgodnić `.env` i `.env.local`; dziś klucz do chmury dev stoi w `.env` obok adresu nieistniejącego lokalnego backendu i działa wyłącznie dzięki nadpisaniu przez drugi plik.
+- **Dane dev zużyte testami** — w etapie Gibraltar → Madera wolne są tylko C2, D1, D2. Przed kolejnym testem ścieżki zakupu warto zwolnić testowe rezerwacje.
+- **BUG-13** (data urodzenia), **LEGAL-9 + FEAT-21**, **LEGAL-13** — bez zmian.
+
+#### Blocked / Later / Open questions
+
+- **INFRA-22** dalej otwarte — dzisiejsze wdrożenie potwierdziło koszt: ręczny `convex deploy` przed każdym pushem dotykającym funkcji Convexa, bez żadnego zabezpieczenia przed pominięciem.
+- **INFRA-15** dalej otwarte — dokumentacja pisze `npx convex`, wdrożenie poszło `pnpm exec`.
+- **I18N-2** — przybyły dwa kolejne wpisy `#~`, mechanizm przyrostu opisany przy pozycji.
+- **REFACTOR-2 / FEAT-11** — pytanie Tomka „czemu segmenty z pliku, a nie z bazy" wróciło z nowej strony (walidacja zamiast ceny). Kierunek bez zmian: pełne przeniesienie do bazy razem z panelem edycji dla Michała.
