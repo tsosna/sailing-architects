@@ -20,6 +20,10 @@
 		}
 	}
 
+	const segmentName = $derived(
+		voyageSegments.find((s) => s.id === bookingSelection.selectedSegment)?.name
+	)
+
 	// Live berth statuses from Convex — falls back to empty map while loading
 	const statusQuery = useQuery(api.queries.berthStatusesBySlug, () => ({
 		slug: bookingSelection.selectedSegment
@@ -76,6 +80,7 @@
 		selectedBerths={bookingSelection.selectedBerths}
 		{berthStatuses}
 		onToggleBerth={bookingSelection.toggleBerth.bind(bookingSelection)}
+		{segmentName}
 	/>
 </div>
 
@@ -100,7 +105,6 @@
 		background: rgba(196, 146, 58, 0.18);
 		border-bottom-color: var(--color-brass);
 		box-shadow: inset 0 0 0 1px rgba(196, 146, 58, 0.35);
-		outline-offset: -1px;
 	}
 
 	.segments__dates {

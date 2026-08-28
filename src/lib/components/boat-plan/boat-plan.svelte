@@ -15,6 +15,7 @@
 		selectedBerths: ReadonlyArray<string>
 		onToggleBerth: (id: string) => void
 		berthStatuses?: ReadonlyMap<string, BerthStatus>
+		segmentName?: string
 	}
 
 	let {
@@ -24,7 +25,8 @@
 			['A2', 'taken'],
 			['C1', 'captain'],
 			['D2', 'taken']
-		])
+		]),
+		segmentName
 	}: Props = $props()
 
 	let hovered = $state<string | null>(null)
@@ -610,6 +612,9 @@
 	</div>
 
 	<aside class="boat__sidebar">
+		{#if segmentName}
+			<p class="boat__segment">{segmentName}</p>
+		{/if}
 		<section class="boat__legend">
 			<p class="boat__legend-title">Legenda</p>
 			<div class="boat__legend-list">
@@ -916,5 +921,14 @@
 		.boat__cabins-panel {
 			grid-template-columns: 1fr;
 		}
+	}
+
+	.boat__segment {
+		font-family: var(--font-serif);
+		font-size: 20px;
+		color: var(--color-warm-white);
+		margin: 0 0 20px;
+		padding-bottom: 12px;
+		border-bottom: 1px solid rgba(196, 146, 58, 0.25);
 	}
 </style>
