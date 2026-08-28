@@ -279,3 +279,33 @@ export const crewProfileByUser = query({
 			.first()
 	}
 })
+
+export const ownLiveHoldsBySegment = internalQuery({
+	args: { userId: v.string(), segmentSlug: v.string() },
+	handler: async (ctx, { userId, segmentSlug }) => {
+		const segment = await ctx.db
+			.query('voyageSegments')
+			.withIndex('by_slug', (q) => q.eq('slug', segmentSlug))
+			.first()
+
+		if (!segment) return []
+
+		const bookings = await ctx.db
+			.query('bookings')
+			.withIndex('by_user', (q) => q.eq('userId', userId))
+			.collect()
+
+		const now = Date.now()
+		return bookings
+			.filter(
+				(b) =>
+					b.segmentId === segment._id &&
+					b.status === 'pending' &&
+					typeof b.holdExpiresAt === 'number' &&
+					b.holdExpiresAt > now
+			)
+			.flatMap((b) =>
+				b.stripePaymentIntentId ? [b.stripePaymentIntentId] : []
+			)
+	}
+})

@@ -570,7 +570,10 @@
 			redirect: 'if_required'
 		})
 		if (stripeErr) {
-			paymentError = stripeErr.message ?? 'Płatność nie powiodła się'
+			paymentError =
+				stripeErr.code === 'payment_intent_unexpected_state'
+					? 'Ta płatność jest już nieaktualna. Odśwież stronę, aby zobaczyć aktualny stan rezerwacji.'
+					: (stripeErr.message ?? 'Płatność nie powiodła się')
 			paymentLoading = false
 		} else {
 			bookingSelection.reset()

@@ -500,7 +500,7 @@ export const createBooking = internalMutation({
 				.first()
 			if (!berth) throw new Error(`Berth not found: ${berthId}`)
 			if (!isBerthFree(berth, now))
-				throw new Error(`Koja ${berthId} jest już zajęta`)
+				throw new ConvexError(`Koja ${berthId} jest już zajęta`)
 			resolved.push(berth)
 		}
 

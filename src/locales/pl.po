@@ -3938,3 +3938,13 @@ msgstr "Niniejsza polityka prywatności obowiązuje od 23 sierpnia 2026 roku."
 #: src/routes/[[lang=lang]]/polityka-prywatnosci/+page.svelte
 msgid "Dokument sporządzono w języku polskim. Wersje w innych językach mają charakter informacyjny — w razie rozbieżności wiążąca jest wersja polska."
 msgstr "Dokument sporządzono w języku polskim. Wersje w innych językach mają charakter informacyjny — w razie rozbieżności wiążąca jest wersja polska."
+
+#~ msgid "Ta płatność jest już niaktualna. Odśwież stronę, aby zobaczyć aktualny stan rezerwacji"
+#~ msgstr "Ta płatność jest już niaktualna. Odśwież stronę, aby zobaczyć aktualny stan rezerwacji"
+
+#~ msgid "Ta płatność jest już nieaktualna. Odśwież stronę, aby zobaczyć aktualny stan rezerwacji"
+#~ msgstr "Ta płatność jest już nieaktualna. Odśwież stronę, aby zobaczyć aktualny stan rezerwacji"
+
+#: src/routes/[[lang=lang]]/book/+page.svelte
+msgid "Ta płatność jest już nieaktualna. Odśwież stronę, aby zobaczyć aktualny stan rezerwacji."
+msgstr "Ta płatność jest już nieaktualna. Odśwież stronę, aby zobaczyć aktualny stan rezerwacji."

@@ -143,13 +143,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!userId) return apiError(401, 'Wymagane zalogowanie')
 
 	const body = await request.json().catch(() => null)
-	const { segmentSlug, berthIds, buyerEmail, selectedSortOrders } =
-		(body ?? {}) as {
-			segmentSlug?: string
-			berthIds?: string[]
-			buyerEmail?: string
-			selectedSortOrders?: number[]
-		}
+	const { segmentSlug, berthIds, buyerEmail, selectedSortOrders } = (body ??
+		{}) as {
+		segmentSlug?: string
+		berthIds?: string[]
+		buyerEmail?: string
+		selectedSortOrders?: number[]
+	}
 
 	if (
 		!segmentSlug ||
@@ -192,6 +192,37 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	)
 	const validation = validateSelection(schedule, selectedSortOrders, Date.now())
 	if (!validation.ok) return apiError(400, validation.message)
+
+	const staleIntentIds = await withTimeout(
+		convex.query(internal.queries.ownLiveHoldsBySegment, {
+			userId,
+			segmentSlug
+		}),
+		'Convex ownLiveHoldsBySegment'
+	)
+
+	for (const staleIntentId of staleIntentIds) {
+		try {
+			await stripe.paymentIntents.cancel(staleIntentId)
+		} catch (cancelErr) {
+			console.error(
+				'Stripe cancel stale hold error: ',
+				staleIntentId,
+				cancelErr
+			)
+			return apiError(
+				409,
+				'Twoja poprzednia płatność jest w toku. Odśwież stronę i spróbuj ponownie.'
+			)
+		}
+
+		await withTimeout(
+			convex.mutation(internal.mutations.cancelBooking, {
+				stripePaymentIntentId: staleIntentId
+			}),
+			'Convex cancelBooking'
+		)
+	}
 
 	const bookingRef = `SA-2026-${String(Math.floor(Math.random() * 9000) + 1000)}`
 	const currency = plan?.currency ?? 'pln'
