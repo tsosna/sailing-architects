@@ -4254,3 +4254,46 @@ Sesja trzydniowa, dwa razy zamrażana (`save learning progress` 08-26, odmrożen
 - **INFRA-15** dalej otwarte — dokumentacja pisze `npx convex`, wdrożenie poszło `pnpm exec`.
 - **I18N-2** — przybyły dwa kolejne wpisy `#~`, mechanizm przyrostu opisany przy pozycji.
 - **REFACTOR-2 / FEAT-11** — pytanie Tomka „czemu segmenty z pliku, a nie z bazy" wróciło z nowej strony (walidacja zamiast ceny). Kierunek bez zmian: pełne przeniesienie do bazy razem z panelem edycji dla Michała.
+
+## Sesja 2026-08-28/29 — I18N-6 częściowo, UI-23
+
+Sesja nauki. Kod pisał Tomek, ja wskazywałem miejsca i sprawdzałem.
+
+### Zmiany
+
+- **I18N-6 zawężone, nie zamknięte** (`68a2b686`, na `main`, **niewypchnięte na produkcję**) — nowy [`src/lib/stripe-errors.ts`](../src/lib/stripe-errors.ts): mapa `code` → zdanie ogólne, mapa `decline_code` → szczegół odmowy, jedna funkcja składająca. Oba miejsca pokazujące błąd płatności czytają z niej: `book/+page.svelte:574` (miało jeden przypadek przechwycony ręcznie) **oraz** `dashboard/pay/[paymentId]/+page.svelte:137` (nie miało nic). Zakres: 6 kodów, 5 odmów, trzy odmowy celowo pominięte.
+- **Katalogi `.po` przegenerowane** (`pnpm exec wuchale`) — dwa dotychczasowe `msgid` przeszły w `#~`, bo zdania wyprowadziły się z `.svelte` do `.ts`.
+- **UI-23 zapisane** (`404c5612`) — krok 2 w `/book` (logowanie): lewy panel do wyrzucenia, tryb logowanie/rejestracja nieczytelny, szary przycisk „Przejdź do panelu" bez jasnego zadania. Zgłoszenie Tomka z pracy na żywo, rozbiór kodu mój.
+
+### Decyzje
+
+- **`lost_card`, `stolen_card`, `fraudulent` poza mapą odmów.** Wpadają w ogólne zdanie o odmowie banku. Precyzyjny komunikat mówi trzymającemu kartę, że jest zgłoszona — to jedyne miejsce w tej pozycji, gdzie mniej informacji jest lepsze.
+- **Szczegół doklejany do ogólnego, nie zamiast niego** (pomysł Tomka). „Twój bank odrzucił płatność. Brak środków na koncie." niesie i fakt, i przyczynę; sam szczegół zostawia kupującego bez kontekstu.
+- **Wyjście awaryjne należy do funkcji, nie do jej połówek.** Wersja pośrednia dawała fallback obu częściom i sklejała wyniki — angielskie zdanie Stripe'a lądowało wtedy przed polskim przy każdym kodzie bez odmowy banku.
+- **`feat`, nie `refactor`.** Płacący ratę zobaczy zdania, których wcześniej nie było.
+- **Komunikaty serwerowe poza zakresem** — trzy endpointy (`create-intent`, `pay-installment`, `refunds/initiate`) odpowiadają już po polsku, surowy błąd Stripe'a idzie wyłącznie do `console.error`. To ustalenie, nie odłożenie.
+- **Teksty płatnicze świadomie poza katalogami tłumaczeń.** Wuchale ekstrahuje tylko z `.svelte`; przeniesienie do `.ts` wyjmuje 11 zdań z `.po`. Precedens `berth-badge.ts`. Zapisane w I18N-6 na wypadek, gdyby EN miał kiedyś być realnym językiem interfejsu.
+
+### Wnioski
+
+- **`??` chroni tylko dopóki wartość jest `undefined`; sklejenie tekstem tę informację niszczy.** Po `${a} ${b}` masz string — nieprawdziwy, ale poprawny typu, więc żaden operator awaryjny go już nie złapie. Ta sama edycja zamienia brak wartości w widoczne dla klienta słowo „undefined". → wiki
+- **Wyjście awaryjne postawione przy każdej części z osobna wraca cudzym językiem.** Część, która nie ma nic do powiedzenia, musi milczeć — inaczej pożycza tekst przeznaczony dla całości. → wiki
+- **Przeniesienie tekstu z `.svelte` do `.ts` wyjmuje go z i18n bez żadnego sygnału.** Ani typecheck, ani lint, ani `wuchale` nie protestują — klucz po prostu przechodzi w `#~`. → wiki
+- **Stripe niesie dwa kody i tylko jeden z nich wolno pokazać w całości.** `code` mówi co, `decline_code` mówi dlaczego; przy karcie zgłoszonej jako skradziona precyzja jest wektorem, nie usługą. → wiki
+- **Zielony `pnpm check` przy złym sensie — dwa razy w jednej sesji.** Raz stała wpisana w miejsce zmiennej (każdy błąd dostawał to samo zdanie), raz sklejenie z `undefined`. Oba przeszły typ, oba zmieniały to, co widzi kupujący. Wzmocnienie wniosku z poprzedniej sesji o linterze, tym razem na argumentach i na kompozycji tekstu.
+- **Poprawka literówki zmieniła zawijanie linii** — `koonto` → `konto` skróciło wiersz o jeden znak i prettier zażądał zwinięcia. Potwierdzenie wniosku z 08-23: formatowanie jest cechą końcowego tekstu pliku, nie edycji.
+
+### Następne kroki
+
+#### Next
+
+- **Push produkcyjny `68a2b686`** — czeka na decyzję Tomka. Convex nietknięty, wystarczy `git push origin main` i `main:production`, bez `convex deploy`.
+- **I18N-6 (a)** — `locale` dla widgetu Stripe'a, wzięte z języka aplikacji (Wuchale), nie z przeglądarki.
+- **I18N-6 (b)** — reszta listy kodów Stripe'a, gdy pojawi się materiał z realnych odmów.
+- **UI-23** — przebudowa kroku 2 w `/book`; wchodzi z UI-11 (kontrast) i REFACTOR-7 (wspólny komponent zakładek).
+- **Test pełnej ścieżki zakupu na produkcji**, **INFRA-23**, **dane dev zużyte testami**, **BUG-13**, **LEGAL-9 + FEAT-21**, **LEGAL-13** — bez zmian z poprzedniej sesji.
+
+#### Blocked / Later / Open questions
+
+- **INFRA-22**, **INFRA-15**, **I18N-2**, **REFACTOR-2 / FEAT-11** — bez zmian.
+- **Nowa obserwacja do I18N-2:** komunikaty płatnicze dołączyły do zbioru tekstów poza katalogami tłumaczeń. Zbiór rośnie i nikt go nie mierzy.
