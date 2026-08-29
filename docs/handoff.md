@@ -4287,7 +4287,7 @@ Sesja nauki. Kod pisał Tomek, ja wskazywałem miejsca i sprawdzałem.
 
 #### Next
 
-- **Push produkcyjny `68a2b686`** — czeka na decyzję Tomka. Convex nietknięty, wystarczy `git push origin main` i `main:production`, bez `convex deploy`.
+- **Push produkcyjny `68a2b686` — świadomie odłożony** (decyzja Tomka 08-29: *„zrobimy więcej to wtedy produkcja"*). Zmiana leży na `main` i pojedzie razem z kolejną porcją pracy, nie osobno. Convex nietknięty, więc wtedy wystarczy `git push origin main` i `main:production`, bez `convex deploy` — chyba że następne zadanie ruszy `src/convex/`.
 - **I18N-6 (a)** — `locale` dla widgetu Stripe'a, wzięte z języka aplikacji (Wuchale), nie z przeglądarki.
 - **I18N-6 (b)** — reszta listy kodów Stripe'a, gdy pojawi się materiał z realnych odmów.
 - **UI-23** — przebudowa kroku 2 w `/book`; wchodzi z UI-11 (kontrast) i REFACTOR-7 (wspólny komponent zakładek).
