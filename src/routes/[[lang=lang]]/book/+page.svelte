@@ -26,6 +26,7 @@
 	import { browser } from '$app/environment'
 	import { formatDate } from '$lib/format'
 	import { BerthPicker } from '$components/berth-picker'
+	import { stripeErrorMessage } from '$lib/stripe-errors'
 
 	const STEPS = [
 		{ id: 1, label: 'Koje' },
@@ -570,10 +571,11 @@
 			redirect: 'if_required'
 		})
 		if (stripeErr) {
-			paymentError =
-				stripeErr.code === 'payment_intent_unexpected_state'
-					? 'Ta płatność jest już nieaktualna. Odśwież stronę, aby zobaczyć aktualny stan rezerwacji.'
-					: (stripeErr.message ?? 'Płatność nie powiodła się')
+			paymentError = stripeErrorMessage(
+				stripeErr.code,
+				stripeErr.decline_code,
+				stripeErr.message
+			)
 			paymentLoading = false
 		} else {
 			bookingSelection.reset()

@@ -917,10 +917,8 @@ msgstr ""
 msgid "Błąd inicjalizacji płatności"
 msgstr ""
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
-msgid "Płatność nie powiodła się"
-msgstr ""
+#~ msgid "Płatność nie powiodła się"
+#~ msgstr ""
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
@@ -3945,6 +3943,5 @@ msgstr ""
 #~ msgid "Ta płatność jest już nieaktualna. Odśwież stronę, aby zobaczyć aktualny stan rezerwacji"
 #~ msgstr ""
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Ta płatność jest już nieaktualna. Odśwież stronę, aby zobaczyć aktualny stan rezerwacji."
-msgstr ""
+#~ msgid "Ta płatność jest już nieaktualna. Odśwież stronę, aby zobaczyć aktualny stan rezerwacji."
+#~ msgstr ""

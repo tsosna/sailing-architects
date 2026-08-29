@@ -917,10 +917,8 @@ msgstr "DM Sans, system-ui, sans-serif"
 msgid "Błąd inicjalizacji płatności"
 msgstr "Błąd inicjalizacji płatności"
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-#: src/routes/[[lang=lang]]/dashboard/pay/[paymentId]/+page.svelte
-msgid "Płatność nie powiodła się"
-msgstr "Płatność nie powiodła się"
+#~ msgid "Płatność nie powiodła się"
+#~ msgstr "Płatność nie powiodła się"
 
 #: src/routes/[[lang=lang]]/book/+page.svelte
 #: src/routes/[[lang=lang]]/dashboard/crew/[participantId]/+page.svelte
@@ -3945,6 +3943,5 @@ msgstr "Dokument sporządzono w języku polskim. Wersje w innych językach mają
 #~ msgid "Ta płatność jest już nieaktualna. Odśwież stronę, aby zobaczyć aktualny stan rezerwacji"
 #~ msgstr "Ta płatność jest już nieaktualna. Odśwież stronę, aby zobaczyć aktualny stan rezerwacji"
 
-#: src/routes/[[lang=lang]]/book/+page.svelte
-msgid "Ta płatność jest już nieaktualna. Odśwież stronę, aby zobaczyć aktualny stan rezerwacji."
-msgstr "Ta płatność jest już nieaktualna. Odśwież stronę, aby zobaczyć aktualny stan rezerwacji."
+#~ msgid "Ta płatność jest już nieaktualna. Odśwież stronę, aby zobaczyć aktualny stan rezerwacji."
+#~ msgstr "Ta płatność jest już nieaktualna. Odśwież stronę, aby zobaczyć aktualny stan rezerwacji."

@@ -12,6 +12,7 @@
 	} from '@stripe/stripe-js'
 	import { PUBLIC_STRIPE_PUBLISHABLE_KEY } from '$env/static/public'
 	import { api } from '$convex/api'
+	import { stripeErrorMessage } from '$lib/stripe-errors'
 
 	const ctx = useClerkContext()
 	const userId = $derived(ctx.auth.userId ?? '')
@@ -133,7 +134,11 @@
 			redirect: 'if_required'
 		})
 		if (stripeErr) {
-			payError = stripeErr.message ?? 'Płatność nie powiodła się'
+			payError = stripeErrorMessage(
+				stripeErr.code,
+				stripeErr.decline_code,
+				stripeErr.message
+			)
 			payLoading = false
 		} else {
 			succeeded = true
