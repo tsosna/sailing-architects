@@ -4267,7 +4267,7 @@ Sesja nauki. Kod pisał Tomek, ja wskazywałem miejsca i sprawdzałem.
 
 ### Decyzje
 
-- **`lost_card`, `stolen_card`, `fraudulent` poza mapą odmów.** Wpadają w ogólne zdanie o odmowie banku. Precyzyjny komunikat mówi trzymającemu kartę, że jest zgłoszona — to jedyne miejsce w tej pozycji, gdzie mniej informacji jest lepsze.
+- **`lost_card`, `stolen_card`, `fraudulent` poza mapą odmów.** Wpadają w ogólne zdanie o odmowie banku. Precyzyjny komunikat mówi trzymającemu kartę, że jest zgłoszona — to jedyne miejsce w tej pozycji, gdzie mniej informacji jest lepsze. Spisane jako **[ADR-032](business-decisions/ADR-032-declined-card-reason-not-disclosed-to-buyer.md)**; brak trzech wpisów w mapie wygląda w kodzie jak przeoczenie i czeka na komentarz przy mapie (jednolinijkowe zadanie na następną sesję).
 - **Szczegół doklejany do ogólnego, nie zamiast niego** (pomysł Tomka). „Twój bank odrzucił płatność. Brak środków na koncie." niesie i fakt, i przyczynę; sam szczegół zostawia kupującego bez kontekstu.
 - **Wyjście awaryjne należy do funkcji, nie do jej połówek.** Wersja pośrednia dawała fallback obu częściom i sklejała wyniki — angielskie zdanie Stripe'a lądowało wtedy przed polskim przy każdym kodzie bez odmowy banku.
 - **`feat`, nie `refactor`.** Płacący ratę zobaczy zdania, których wcześniej nie było.

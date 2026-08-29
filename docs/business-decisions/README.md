@@ -35,3 +35,4 @@ Indeks decyzji biznesowych i produktowych dla `sailing-architects`.
 | [ADR-029](ADR-029-article-9-consent-sits-with-the-data.md) | Zgoda na dane o zdrowiu przy polach danych, nie przy płatności; zaznaczenie odsłania pola | legal / dane osobowe / UX formularzy | przyjęta |
 | [ADR-030](ADR-030-retention-per-data-type.md) | Okres przechowywania osobno dla każdego rodzaju danych, zapisany jako sufit | legal / dane osobowe / retencja | przyjęta |
 | [ADR-031](ADR-031-own-unpaid-hold-yields-to-a-newer-selection.md) | Nowszy wybór kupującego unieważnia jego własne nieopłacone blokady w tym samym etapie; Stripe anulowany przed zwolnieniem koi | sprzedaż / dostępność / płatności | przyjęta |
+| [ADR-032](ADR-032-declined-card-reason-not-disclosed-to-buyer.md) | Powód odmowy `lost_card` / `stolen_card` / `fraudulent` nie jest ujawniany kupującemu — widzi ogólne zdanie o odmowie banku | płatności / komunikacja z klientem / bezpieczeństwo | przyjęta |
