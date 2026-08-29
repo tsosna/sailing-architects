@@ -12,6 +12,11 @@ const messages: Record<string, string> = {
 		'Dwuetapowe potwierdzenie Twojego banku nie powiodło się. Spróbuj jeszcze raz za chwilę.'
 }
 
+/**
+ * Powody odmowy banku. `lost_card`, `stolen_card` i `fraudulent` NIE mają tu
+ * wpisu celowo — wpadają w ogólne zdanie z `card_declined`, bo precyzyjny
+ * komunikat mówi trzymającemu kartę, że jest zgłoszona. Patrz ADR-032.
+ */
 const declineMessage: Record<string, string> = {
 	insufficient_funds: 'Brak środków na koncie. Zasil konto i spróbuj ponownie.',
 	do_not_honor:
