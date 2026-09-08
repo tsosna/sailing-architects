@@ -1,5 +1,14 @@
 # AI Handoff — sailing-architects
 
+## Sesja 2026-09-08 — zlecenie napraw sprzedaży
+
+- **BUG-15 — P1, otwarte:** payment_failed anuluje pierwszą rezerwację; naprawa cyklu płatności z testami retry/expiry/rat. [Zlecenie 01](./zlecenia/01-payment-failed-nie-jest-koncem.md). Wystawione 2026-09-08; kod niezmieniony.
+
+Odczyt statyczny; brak implementacji/testów aplikacji i deploymentu. Dokumentacja przygotowana do publikacji na origin/main na prośbę Tomka. Następny krok: wykonać powiązane zlecenie na aktualnym kodzie.
+
+Sprostowanie do starszych opisów amarra: transakcyjne zaplanowanie anulowania nie gwarantuje jego wykonania w Stripe; nie traktować go jako atomowej fiskalnej/finansowej operacji.
+
+
 > Ostatnia aktualizacja: 2026-07-15
 
 ---
