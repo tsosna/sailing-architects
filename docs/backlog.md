@@ -1,5 +1,10 @@
 # Backlog — sailing-architects
 
+## Zlecenia audytu — 2026-09-08
+
+- **BUG-15 — P1, otwarte:** payment_failed anuluje pierwszą rezerwację; naprawa cyklu płatności z testami retry/expiry/rat. [Zlecenie 01](./zlecenia/01-payment-failed-nie-jest-koncem.md). Wystawione 2026-09-08; kod niezmieniony.
+
+
 > **Jedyne źródło prawdy dla OTWARTYCH pozycji.** Ostatni reconcile: 2026-08-14.
 >
 > Zasady:
