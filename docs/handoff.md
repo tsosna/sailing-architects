@@ -4306,3 +4306,41 @@ Sesja nauki. Kod pisał Tomek, ja wskazywałem miejsca i sprawdzałem.
 
 - **INFRA-22**, **INFRA-15**, **I18N-2**, **REFACTOR-2 / FEAT-11** — bez zmian.
 - **Nowa obserwacja do I18N-2:** komunikaty płatnicze dołączyły do zbioru tekstów poza katalogami tłumaczeń. Zbiór rośnie i nikt go nie mierzy.
+
+## Sesja 2026-09-18 — Audyt kodu (Fable), SEC-9 naprawione, zlecenie 02
+
+### Zmiany
+
+- **Otwarcie:** lokalny `main` `3feac51d` był 7 commitów przed origin (28–29.08: I18N-6, UI-23, ADR-032 — niewypchnięte) i 1 za (`d3c700ae`, zlecenie 01 z 08.09). Merge bez konfliktów → `6e017080`. Nieśledzona wersja zlecenia 01 z 03.09 dopisana jako załącznik do pliku z 08.09.
+- **SEC-9 naprawione** (`e139a660`): `pay-installment` bierze `userId` z `locals.auth()`, 401 bez sesji; `dashboard/pay` nie wysyła identyfikatora. Ta sama rodzina co SEC-6/SEC-8. `pnpm test` 35/35, `check` 0, `lint` 23 ostrzeżenia (INFRA-2). **Na `main`, nie na produkcji.**
+- [Audyt](./audits/2026-09-18-audyt-kodu.md): **SEC-10** (P1) — 4 publiczne zapytania Convexa z tożsamością w argumencie = odczyt cudzych danych załogi bez sesji; **BUG-15** potwierdzony bez zmian; **BUG-16** `bookingRef` bez kontroli kolizji; **INFRA-24** webhook bez dedup, PDF/e-mail synchronicznie; **INFRA-25** worktree/gałęzie. Guardy admina, podpis webhooka, refundy — bez uwag.
+- [Zlecenie 02](./zlecenia/02-tozsamosc-z-sesji-w-zapytaniach-convex.md): A (SEC-10), B (BUG-16), C (INFRA-24), D (drobne). Backlog uzupełniony, diff feedbacku zgodny (17/17).
+- Push `origin main` wykonany w tej sesji (8 commitów). Produkcja nadal `b94caad6`.
+
+### Decyzje
+
+- **Poprawka SEC-9 wykonana na sesji audytowej mimo podziału Fable/Opus** — pięć linii, wzorzec identyczny z SEC-8, luka na produkcji. Reszta (SEC-10 wymaga zmiany sygnatur i `convex deploy`) idzie zleceniem.
+- **Push produkcyjny to decyzja Tomka**, jak 29.08. Zawartość: I18N-6 + SEC-9, bez zmian w `src/convex/` → samo `git push origin main:production`, bez `convex deploy`.
+- Brudne worktree i gałęzie nie ruszane — cudza niezacommitowana praca; INFRA-25 do przejrzenia.
+
+### Wnioski
+
+- **„Naprawiliśmy rodzinę” trzeba sprawdzić greppem, nie pamięcią.** SEC-6 i SEC-8 poprawiły dwie trasy z trzech wymienionych w handoffie; trzecia przeżyła dwie sesje. `grep -rn "userId" src/routes/api` + `grep -n "userId: v.string()" src/convex` daje pełną listę w minutę. → vault: dopisek do [[idor-adminuserid-from-args]].
+- **`booking.userId === args.userId` to test spójności pary, nie autoryzacja** — klient kontroluje obie strony równania. Wzorzec z [[pair-consistency-check-is-not-authorization]] wystąpił tu czwarty raz.
+- **„Push odłożony” musi mówić, który ref.** Odłożenie `main:production` nie oznacza odłożenia `origin/main`; przez 3 tygodnie druga maszyna nie widziała pracy.
+- Kolizja 4-cyfrowego numeru to nie „mało prawdopodobne”: paradoks urodzin daje 42 % przy 100 rezerwacjach.
+
+### Następne kroki
+
+#### Next
+
+1. **Tomek: `git push origin main:production`** (I18N-6 + SEC-9; Convex nietknięty) — po tym SEC-9 jest zamknięte na produkcji.
+2. **Zlecenie 02 część A (SEC-10)** dla Opusa — z `convex deploy` przed pushem frontu; ocena art. 33 jak LEGAL-12.
+3. **Zlecenie 01 (BUG-15)** — przed testem ścieżki zakupu na produkcji (test odmowy karty dziś zwalnia żywą koję).
+4. Reszta zlecenia 02 (B, C, D), potem plan z 29.08: I18N-6 (a), UI-23, INFRA-23, dane dev.
+
+#### Blocked / Later / Open questions
+
+- INFRA-25 (worktree/gałęzie) — po przejrzeniu diffów przez Tomka.
+- Format `bookingRef` (4 cyfry z kontrolą vs 5 znaków) — decyzja Tomka w zleceniu 02 B.
+- INFRA-22, INFRA-15, I18N-2, REFACTOR-2/FEAT-11 — bez zmian.
