@@ -72,7 +72,6 @@
 				headers: { 'Content-Type': 'application/json' },
 				signal: controller.signal,
 				body: JSON.stringify({
-					userId,
 					bookingId,
 					paymentIds: [payment._id],
 					buyerEmail: userEmail || undefined

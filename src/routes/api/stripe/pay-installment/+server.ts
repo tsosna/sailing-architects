@@ -24,22 +24,21 @@ function apiError(status: number, message: string) {
 	return json({ message }, { status })
 }
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, locals }) => {
+	// Tożsamość płacącego z sesji Clerka, nigdy z ciała żądania (SEC-6/SEC-8/SEC-9):
+	// identyfikator z body pozwalał oznaczyć cudze raty jako „przetwarzane”.
+	const { userId } = locals.auth()
+	if (!userId) return apiError(401, 'Wymagane zalogowanie')
+
 	const body = await request.json().catch(() => null)
-	const { userId, bookingId, paymentIds, buyerEmail } = (body ?? {}) as {
-		userId?: string
+	const { bookingId, paymentIds, buyerEmail } = (body ?? {}) as {
 		bookingId?: string
 		paymentIds?: string[]
 		buyerEmail?: string
 	}
 
-	if (
-		!userId ||
-		!bookingId ||
-		!Array.isArray(paymentIds) ||
-		paymentIds.length === 0
-	) {
-		return apiError(400, 'Brakujące pola: userId, bookingId, paymentIds')
+	if (!bookingId || !Array.isArray(paymentIds) || paymentIds.length === 0) {
+		return apiError(400, 'Brakujące pola: bookingId, paymentIds')
 	}
 
 	const payments = await withTimeout(
