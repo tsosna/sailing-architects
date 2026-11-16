@@ -4438,3 +4438,9 @@ Prompt zbiera w jedno cztery pozycje backlogu, które opisywały ten sam landing
 - Pozostałe ekrany prototypu są tylko w ciemnym motywie — jasne wersje dopiero po wyborze w UI-24.
 - Pasek etapów w archiwum podświetla po kliknięciu; śledzenie przewijania (scroll-spy) dopiero w implementacji.
 - Esc i strzałki klawiatury w lightboxie prototypu nie działają (runtime nie pozwala na globalne skróty); w produkcji obowiązkowe, jak dziś w `vessel-section.svelte`.
+
+### Zapis wiedzy (close session, odbiór Tomka: „Tak, zapisz”)
+
+- **Vault:** nowy artykuł `concepts/claude-design-prototype-verification` (universal) — kontrola kodu Design canvas jest konieczna, ale wyglądu nie sprawdza; `onSubmit` na `<form>` nie odpala w runtime canvasu. Nawigacja w `wiki/index.md` i wpis w `wiki/log.md` dodane. Zapis **lokalny** — w vaulcie nie commitowano ani nie wypychano.
+- **Już obecne, bez nowego wpisu:** tokeny akcentu per rola przy zmianie motywu (`brand-theme-derived-with-contrast-gates`), tekst na zdjęciu i alfa (`text-over-photo-has-a-ceiling`, `contrast-is-a-property-of-the-pair`).
+- **ADR:** brak kandydatów — wybór motywu (UI-24) i odpowiedzi Michała (FEAT-22) jeszcze nie zapadły.
