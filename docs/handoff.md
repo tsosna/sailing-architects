@@ -4393,3 +4393,48 @@ Prompt zbiera w jedno cztery pozycje backlogu, które opisywały ten sam landing
 - **Vault:** nowe artykuły `concepts/sold-out-is-not-finished` (universal) i `concepts/archive-outgrows-the-offer` (universal); dopisek o konsekwencjach dla UI w `concepts/cloudinary-signed-upload-and-api-keys` (stack). Nawigacja w `wiki/index.md` i wpis w `wiki/log.md` dodane. Zapis **lokalny** — w vaulcie nie commitowano ani nie wypychano.
 - **ADR:** ADR-033 (rejs z kompletem załogi jest stanem osobnym od archiwum), ADR-034 (lista rezerwowa bez numeru w kolejce), ADR-035 (archiwum publiczne z wyjątkiem na pojedynczy materiał — przyjęta **warunkowo**, blokuje LEGAL-21). Indeks w `docs/business-decisions/README.md` uzupełniony.
 - **Czego nie zapisano:** rozdzielenia encji REJS i JACHT — to decyzja techniczna, nie biznesowa; notatka zostaje przy REFACTOR-6.
+
+## Sesja 2026-11-16 16:39 — Prototyp landingu: archiwum rejsów + sprzedaż kolejnych (FEAT-5 / FEAT-14)
+
+### Zmiany
+
+- **Design canvas (prywatny artefakt): https://claude.ai/artifact/4JnrbWE7jSHNBsFiStmiUE** — prototyp z promptu `docs/design/landing-archive-and-multi-voyage-design-prompt.md`. 8 stron canvasu, 19 artboardów:
+  - `00 System i stany` — skala typograficzna, kontrast po zmieszaniu warstw, badge pięciu stanów, mapa sekcja → stan;
+  - `01–07` — strona główna (dwa pasy), Seszele w sprzedaży (plan koi Lagoon 40), komplet załogi + lista rezerwowa (z wariantem „koja wróciła do puli” i minimalnym widokiem Michała), archiwum Sail Adventure 2026 (4 etapy jako sekcje), pełna galeria etapu (lightbox, kafle „tylko dla załogi”, przełącznik 4/12/64/200), archiwum puste i mieszane, `/admin` dodawania relacji i mediów — każdy ekran desktop + mobile;
+  - na stronie `01` dodatkowo **dwa warianty jasnego motywu** strony głównej (jasny; jasny z ciemnym hero).
+- **Nowy plik `docs/design/landing-archive-design-decisions.md`** — decyzje (punkt 10.2 briefu), mapa sekcja → stan (10.3), konflikty w briefie, 12 pytań do Michała (10.4).
+- **`docs/backlog.md`** — dopiski przy FEAT-5, UI-6, UI-11, UI-16 (rozwiązanie zaprojektowane); nowe **FEAT-22** (odpowiedzi Michała na 12 pytań) i **UI-24** (wybór motywu); diff feedbacku 11-16.
+- Kodu aplikacji nie ruszano. Źródła artboardów są tylko w artefakcie (robocza kopia w scratchpadzie sesji, nietrwała).
+
+### Decyzje
+
+- **Kontrast hero:** scrim pod kolumną tekstu + ciemny pasek nawigacji (94%) od pierwszego piksela — zgodnie z UI-16 od strony koloru tekstu nie da się tego naprawić.
+- **Skala typograficzna:** minimum 13 px dla tekstu niosącego informację; badge zwykłą wielkością liter, wersaliki tylko w eyebrowach do 3 słów; długie czytanie DM Sans 18/1.75 w kolumnie 640 px.
+- **Alfa tekstu:** `--muted` 0.45 daje 3.8–4.1:1 na każdym tle navy → minimum 0.62 dla tekstu informacyjnego, 0.45 tylko dekoracja.
+- **Filmy:** własny pas „Filmy etapu” pod zdjęciami (nie mieszane z siatką), kafel mówi źródło i skutek kliknięcia; YouTube jako fasada wczytywana po kliknięciu (`youtube-nocookie`), oba kanały odtwarzają się w miejscu.
+- **Nawigacja po etapach:** przyklejony pasek 01–04 w kolejności trasy + link „następny etap” na końcu sekcji.
+- **Stan „Odbyty”** zamiast słowa „Archiwum” na badge'u — „Archiwum” to dział w menu.
+- **Widok listy rezerwowej dla Michała** pokazany jako jedna tabela mimo zakazu panelu w punkcie 11 briefu — konflikt nazwany w dokumencie decyzji.
+- **Jasny motyw (do zastanowienia, UI-24):** tła piaskowe, nie białe; mosiądz rozdzielony na role — tło przycisku `#c4923a`, tekst `#74500f`, obrys `#9c6d22` — bo jasny mosiądz jako tekst ma na piasku tylko ~2.4:1.
+
+### Wnioski
+
+- **Runtime Design canvas nie odpala `onSubmit` na `<form>`.** Formularze „wysyłały się” bez efektu; działa przycisk `type="button"` z `onClick`. Wykryte dopiero w przeglądzie w przeglądarce — testy `renderVals` i handlerów w Node tego nie łapią.
+- **Statyczna kontrola (tagi, JSON, `renderVals`, 443 kliknięcia) przeszła, a przegląd wizualny znalazł 10 błędów** (proporcje filmów, przelewające się tła separatora, zdublowany salon, za szeroka tabela, ucięta ramka). Dla prototypu wizualnego kontrola kodu to warunek konieczny, nie wystarczający.
+- **Kolor akcentu w zmianie motywu potrzebuje osobnych tokenów per rola** (tło CTA / tekst / obrys): ten sam mosiądz jest dobrym tłem przycisku w obu motywach, ale jako tekst na jasnym tle spada do ~2.4:1.
+- **Jasny scrim na ciemnym zdjęciu daje „mgłę”** — przy jasnym motywie rozsądniejsze może być ciemne hero jako okładka.
+- **Artefakty Design wymagają zalogowania w panelu przeglądarki** — pierwsze otwarcie pokazuje ekran logowania claude.ai.
+
+### Następne kroki
+
+#### Next
+
+- **Przegląd prototypu z Michałem** → odpowiedzi na 12 pytań (**FEAT-22**) i wybór motywu (**UI-24**).
+- Po decyzjach: rozbić FEAT-5/FEAT-14 na zlecenia implementacyjne (SvelteKit), zaczynając od rozdzielenia encji REJS i JACHT (REFACTOR-6) i tokenów typografii/kontrastu (UI-6/11/16).
+- Bez zmian: **LEGAL-21** do Michała i prawnika; sprawdzić limity wideo w Cloudinary; zlecenie 02 A (SEC-10), zlecenie 01 (BUG-15), push `main:production`.
+
+#### Blocked / Later / Open questions
+
+- Pozostałe ekrany prototypu są tylko w ciemnym motywie — jasne wersje dopiero po wyborze w UI-24.
+- Pasek etapów w archiwum podświetla po kliknięciu; śledzenie przewijania (scroll-spy) dopiero w implementacji.
+- Esc i strzałki klawiatury w lightboxie prototypu nie działają (runtime nie pozwala na globalne skróty); w produkcji obowiązkowe, jak dziś w `vessel-section.svelte`.
