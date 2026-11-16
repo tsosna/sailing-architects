@@ -4344,3 +4344,52 @@ Sesja nauki. Kod pisał Tomek, ja wskazywałem miejsca i sprawdzałem.
 - INFRA-25 (worktree/gałęzie) — po przejrzeniu diffów przez Tomka.
 - Format `bookingRef` (4 cyfry z kontrolą vs 5 znaków) — decyzja Tomka w zleceniu 02 B.
 - INFRA-22, INFRA-15, I18N-2, REFACTOR-2/FEAT-11 — bez zmian.
+
+## Sesja 2026-11-16 13:44 — Prompt projektowy: archiwum rejsów + sprzedaż kolejnych (FEAT-5 / FEAT-14)
+
+### Zmiany
+
+- **Nowy plik `docs/design/landing-archive-and-multi-voyage-design-prompt.md`** (207 linii, nieśledzony przez git) — prompt dla Claude Design. Zadanie: przebudowa landingu na serwis, w którym rejs ma cykl życia, a rejs odbyty staje się archiwum z relacją, zdjęciami i filmami. Wynikiem ma być **hi-fi prototyp HTML** w konwencji `design_handoff_sailing_architects/Sailing Architects.html`, nie kod SvelteKit.
+- **`docs/backlog.md`** — nowa pozycja **LEGAL-21** (brak klauzuli zgody na wizerunek) + dopiski z decyzjami i linkiem do promptu przy **FEAT-5** i **FEAT-14**.
+- Kodu nie ruszano. `main` = `3f31855`, czysty poza dwoma powyższymi plikami.
+
+Prompt zbiera w jedno cztery pozycje backlogu, które opisywały ten sam landing z czterech stron — **FEAT-5** (multi-rejs + belka powiadomień), **FEAT-13** (lightbox), **FEAT-14** (dział „po rejsach”), **FEAT-15** (Program rejsu) — i dokłada **UI-6 / UI-11 / UI-16** jako warunek, nie dodatek, bo przy każdej z nich stała decyzja „wziąć przy FEAT-5”.
+
+### Decyzje
+
+- **Komplet załogi to stan osobny od archiwum** (Tomek). Pytanie przyszło jako „zakończony **lub** wyprzedany → archiwalny”; rozdzieliłem, bo połączenie psuje cztery rzeczy: rejs sprzedany nie ma relacji (jeszcze nie popłynął), uczestnicy nadal płacą raty i wchodzą po trasę i poradnik, **koja potrafi wrócić do puli** (zwrot, rezygnacja, wygasła blokada — powrót do sprzedaży wyglądałby jak błąd), a „Brak miejsc + lista rezerwowa” to sygnał popytu, którego „archiwalny” nie niesie. Stanów jest pięć: zapowiedź / w sprzedaży / komplet załogi / w trakcie / archiwum.
+- **Relacja per etap, nie jedna na rejs** (Tomek). Cztery etapy Atlantyku = cztery relacje, ale w układzie **sekcji jednej strony rejsu**, nie czterech podstron: relacja czyta się jak podróż, a podział na adresy rozbija narrację i tworzy puste strony w stanie mieszanym. Ciężar zdjęć rozwiązuje selekcja (kilkanaście kadrów w sekcji + osobno otwierana pełna galeria etapu), nie podział strony.
+- **Filmy w dwóch niezależnych kanałach** (Tomek): Cloudinary dla krótkich wpisanych w relację, YouTube dla dłuższych. Osadzony odtwarzacz niesie obcą markę i własne UI — projekt musi to znieść, nie udawać, że tego nie ma.
+- **Lista rezerwowa jako realny mechanizm, bez numeru w kolejce** (Tomek + rekomendacja). Numer byłby obietnicą sztywnej kolejności, a zwolnioną koję przydziela Michał, patrząc na skład załogi i podział kajut. Zamiast numeru zbiorczy sygnał „czeka N osób”.
+- **Archiwum publiczne, z furtką na pojedynczy materiał** (Tomek + rekomendacja). Publiczne, bo to główny argument wiarygodności przy sprzedaży kolejnych rejsów; furtka „tylko dla załogi” na pojedyncze zdjęcie lub film, bo przy pierwszej prośbie o zdjęcie mniej alternatywą jest usunięcie materiału albo przebudowa mechanizmu po fakcie.
+- **Strona główna w dwóch rozdzielonych pasach**, nie w jednym strumieniu chronologicznym (Tomek + rekomendacja). Dziś oba warianty wyglądają podobnie (1 rejs odbyty, 3 zapowiadane); za trzy lata będzie 10 odbytych i 2 w sprzedaży i wspólna lista zepchnie sprzedaż pod zagięcie strony.
+- **Mechanizm wgrywania przeniesiony z `domy-modulowe`**, nie projektowany od nowa (Tomek).
+
+### Wnioski
+
+- **„Wyprzedane” i „zakończone” to dwa różne stany, choć oba znaczą „nie da się kupić”.** Zlanie ich w jeden kasuje cztery rzeczy naraz: żywe zobowiązania wobec tych, którzy już kupili; możliwość powrotu pojemności do sprzedaży; brak materiału „po fakcie”, który stan końcowy musiałby pokazać; i sygnał popytu, który działa na korzyść kolejnej edycji. Test rozdzielający jest jednozdaniowy: **czy pojemność może wrócić i czy ktoś wciąż ma wobec nas zobowiązanie?** → vault, scope `universal`.
+- **Archiwum rośnie szybciej niż oferta, więc nie może dzielić z nią strumienia.** Jeden ciąg chronologiczny wygląda dobrze przy pierwszej pozycji i źle przy dziesiątej — a projekt ocenia się w stanie, do którego dojdzie, nie w stanie startowym. → vault, scope `universal`.
+- **Podpisany upload do Cloudinary ma konsekwencje dla UI, nie tylko dla serwera.** Podpis ważny godzinę → stan „sesja wygasła” przy dużej partii; pliki lecą kolejno → postęp całej partii, nie tylko bieżącego pliku; rejestracja w bazie jest osobnym krokiem → istnieje stan „plik jest w Cloudinary, ale nie ma go w relacji”, który UI musi umieć pokazać i naprawić. → vault, dopisek do `cloudinary-signed-upload-and-api-keys` (scope `stack`).
+- **Zgody na publikację wizerunku nie da się odziedziczyć po fakcie.** Uczestnicy Sail Adventure 2026 podpisywali umowę bez takiej klauzuli, więc pierwsza relacja wymaga zebrania zgód osobno, od każdego z osobna. To nie jest przeszkoda w projekcie, tylko w publikacji — i wychodzi dopiero wtedy, gdy materiał już jest. → LEGAL-21 + ADR-035.
+- **Vault i projektowy `CLAUDE.md` wskazują różne ścieżki do bazy wiedzy.** `CLAUDE.md` tego repo podaje `/Volumes/HomeX-MacMini/tomeksosinskiminiEx/Workspace/knowledge-vault/` — ten wolumin nie istnieje na tej maszynie; działa `/Volumes/EXT-Disk1-SSD/Workspace/knowledge-vault`. Ta sama nieaktualna ścieżka siedzi w `docs/design/nav-faq-guide-mobile-implementation-prompt.md` jako odnośnik do repo `domy-modulowe` (faktycznie: `/Volumes/EXT-Disk1-SSD/Workspace/domy-modulowe`). Nie ruszane — kandydat na osobną poprawkę.
+
+### Następne kroki
+
+#### Next
+
+- **Wkleić prompt do Claude Design** razem z `Sailing Architects.html` i zrzutami aktualnej strony; wynikiem ma być prototyp + opis decyzji + mapa „sekcja → stan rejsu” + lista pytań.
+- **LEGAL-21 do Michała i prawnika** — klauzula na przyszłość, zgody dla rejsu już odbytego, ścieżka wycofania. Blokuje publikację archiwum ze zdjęciami ludzi, nie samo zaprojektowanie go.
+- **Sprawdzić limity wgrywania wideo do Cloudinary** przed wdrożeniem — w `domy-modulowe` panel przyjmuje wyłącznie obrazy i PDF-y, filmy trafiły tam inną drogą.
+- Bez zmian z 18.09: **zlecenie 02 A (SEC-10)**, **zlecenie 01 (BUG-15)**, push produkcyjny `main:production`.
+
+#### Blocked / Later / Open questions
+
+- **Rozdzielenie encji REJS i JACHT** — prompt wymusza je wizualnie, ale ADR z notatki przy REFACTOR-6 nadal nie istnieje. Seszele (Lagoon 40, 8 koi wobec 10) rozerwą ten szew przy implementacji, nie przy projekcie.
+- Nieaktualne ścieżki do vaulta i do `domy-modulowe` w `CLAUDE.md` i w starym prompcie — do poprawienia przy okazji.
+- INFRA-25, INFRA-22, INFRA-15, I18N-2, REFACTOR-2 / FEAT-11 — bez zmian.
+
+### Zapis wiedzy (close session, odbiór Tomka: „Tak, zapisz”)
+
+- **Vault:** nowe artykuły `concepts/sold-out-is-not-finished` (universal) i `concepts/archive-outgrows-the-offer` (universal); dopisek o konsekwencjach dla UI w `concepts/cloudinary-signed-upload-and-api-keys` (stack). Nawigacja w `wiki/index.md` i wpis w `wiki/log.md` dodane. Zapis **lokalny** — w vaulcie nie commitowano ani nie wypychano.
+- **ADR:** ADR-033 (rejs z kompletem załogi jest stanem osobnym od archiwum), ADR-034 (lista rezerwowa bez numeru w kolejce), ADR-035 (archiwum publiczne z wyjątkiem na pojedynczy materiał — przyjęta **warunkowo**, blokuje LEGAL-21). Indeks w `docs/business-decisions/README.md` uzupełniony.
+- **Czego nie zapisano:** rozdzielenia encji REJS i JACHT — to decyzja techniczna, nie biznesowa; notatka zostaje przy REFACTOR-6.
